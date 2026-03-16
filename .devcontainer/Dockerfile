@@ -56,6 +56,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Shell quality-of-life
     less \
     bash-completion \
+    # GitHub CLI
+    gh \
+    # Audio support (for Claude Code voice)
+    sox \
+    pulseaudio-utils \
+    # Build essentials (for Rust compilation)
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    # Python
+    python3 \
+    python3-pip \
+    python3-venv \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
     && locale-gen \
     && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
@@ -72,6 +85,18 @@ ENV LANG=en_US.UTF-8 \
 
 # Copy Zellij binary from builder stage
 COPY --from=builder /usr/local/bin/zellij /usr/local/bin/zellij
+
+# ── uv — fast Python package manager ─────────────────────────────────────────
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uvx /usr/local/bin/uvx
+
+# MkDocs Material (installed via uv into a global tool environment)
+RUN uv tool install mkdocs-material
+
+# ── Rust toolchain via rustup ─────────────────────────────────────────────────
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    --default-toolchain stable \
+    --component clippy rustfmt
 
 # ── Bake default configs into the image ───────────────────────────────────────
 # These act as fallback defaults when no host directory is mounted.
@@ -93,7 +118,7 @@ RUN mkdir -p /root/.config/git
 COPY config/gitconfig /root/.config/git/config
 
 # Install code assistants
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
