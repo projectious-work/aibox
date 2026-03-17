@@ -115,7 +115,7 @@ main() {
 
   # Download
   tmpdir=$(mktemp -d)
-  trap 'rm -rf "${tmpdir}"' EXIT
+  trap 'rm -rf "${tmpdir:-}"' EXIT
 
   info "Downloading ${tarball_name}..."
   if ! curl -fsSL -o "${tmpdir}/${tarball_name}" "${download_url}"; then
