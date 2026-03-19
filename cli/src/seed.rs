@@ -180,15 +180,23 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
     let root_display = root.display();
     output::info(&format!("Seeding {} directory...", root_display));
 
-    // Create directory structure
-    let dirs = [
+    // Create directory structure — base dirs always needed
+    let mut dirs = vec![
         root.join(".ssh"),
         root.join(".vim").join("undo"),
         root.join(".config").join("zellij").join("themes"),
         root.join(".config").join("zellij").join("layouts"),
         root.join(".config").join("git"),
-        root.join(".claude"),
     ];
+
+    // AI provider directories — only create what's configured
+    for provider in &config.ai.providers {
+        match provider {
+            crate::config::AiProvider::Claude => {
+                dirs.push(root.join(".claude"));
+            }
+        }
+    }
 
     for dir in &dirs {
         fs::create_dir_all(dir)

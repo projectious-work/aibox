@@ -90,6 +90,9 @@ pub fn cmd_doctor(config_path: &Option<String>) -> Result<()> {
         // Check expected subdirectories
         check_root_subdirs(&root, &root_label, &mut diag);
 
+        // Check mount source paths match config (AI providers, audio)
+        check_mount_sources(&root, &root_label, &config, &mut diag);
+
         // Suggest migration from .root/ to .dev-box-home/
         if root_label == ".root" && !std::path::Path::new(".dev-box-home").exists() {
             output::warn(
@@ -134,6 +137,45 @@ pub fn cmd_doctor(config_path: &Option<String>) -> Result<()> {
 
     print_summary(&diag);
     Ok(())
+}
+
+/// Check that mount source directories exist for configured features.
+fn check_mount_sources(
+    root: &Path,
+    root_label: &str,
+    config: &DevBoxConfig,
+    diag: &mut DiagResult,
+) {
+    // AI providers
+    for provider in &config.ai.providers {
+        let dir_name = match provider {
+            crate::config::AiProvider::Claude => ".claude",
+        };
+        let path = root.join(dir_name);
+        if path.exists() {
+            output::ok(&format!("{}/{} exists ({})", root_label, dir_name, provider));
+        } else {
+            output::warn(&format!(
+                "{}/{} missing — run 'dev-box generate' to create it",
+                root_label, dir_name
+            ));
+            diag.warnings += 1;
+        }
+    }
+
+    // Audio
+    if config.audio.enabled {
+        let asoundrc = root.join(".asoundrc");
+        if asoundrc.exists() {
+            output::ok(&format!("{}/.asoundrc exists", root_label));
+        } else {
+            output::warn(&format!(
+                "{}/.asoundrc missing — run 'dev-box generate' to create it",
+                root_label
+            ));
+            diag.warnings += 1;
+        }
+    }
 }
 
 /// Check home directory subdirectories.
