@@ -404,6 +404,11 @@ pub fn cmd_init(
 /// Generate command.
 pub fn cmd_generate(config_path: &Option<String>) -> Result<()> {
     let config = DevBoxConfig::from_cli_option(config_path)?;
+
+    // Re-seed .dev-box-home/ in case config changed (e.g., new AI provider,
+    // audio toggled). seed_root_dir is idempotent — never overwrites.
+    seed::seed_root_dir(&config)?;
+
     generate::generate_all(&config)?;
     output::ok("Generation complete");
     Ok(())
