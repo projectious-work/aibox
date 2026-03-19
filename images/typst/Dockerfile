@@ -1,7 +1,7 @@
 FROM ghcr.io/projectious-work/dev-box:base-latest AS runtime
 # For local builds, use: FROM dev-box-base:latest
 
-ARG TYPST_VERSION=0.13.1
+ARG TYPST_VERSION=0.14.2
 
 # Install Typst from GitHub release (static musl binary)
 RUN apt-get update && apt-get install -y --no-install-recommends xz-utils \
