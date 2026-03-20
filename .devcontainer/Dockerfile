@@ -12,13 +12,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ARG ZELLIJ_VERSION=0.43.1
+ARG YAZI_VERSION=25.4.8
 
 # Use uname -m for arch detection — works reliably across Docker, Podman, Buildah
 RUN ARCH=$(uname -m) && \
     curl -fsSL \
       "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-${ARCH}-unknown-linux-musl.tar.gz" \
       | tar -xz -C /usr/local/bin && \
-    chmod +x /usr/local/bin/zellij
+    chmod +x /usr/local/bin/zellij && \
+    curl -fsSL \
+      "https://github.com/sxyazi/yazi/releases/download/v${YAZI_VERSION}/yazi-${ARCH}-unknown-linux-musl.zip" \
+      -o /tmp/yazi.zip && \
+    unzip -q /tmp/yazi.zip -d /tmp/yazi && \
+    mv /tmp/yazi/yazi-${ARCH}-unknown-linux-musl/yazi /usr/local/bin/yazi && \
+    chmod +x /usr/local/bin/yazi && \
+    rm -rf /tmp/yazi /tmp/yazi.zip
 
 # =============================================================================
 # Stage 2: Runtime — minimal dev-container
@@ -87,8 +95,9 @@ ENV LANG=en_US.UTF-8 \
     TERM=xterm-256color \
     COLORTERM=truecolor
 
-# Copy Zellij binary from builder stage
+# Copy binaries from builder stage
 COPY --from=builder /usr/local/bin/zellij /usr/local/bin/zellij
+COPY --from=builder /usr/local/bin/yazi /usr/local/bin/yazi
 
 # ── uv — fast Python package manager ─────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
@@ -118,6 +127,21 @@ RUN mkdir -p /root/.config/zellij/themes /root/.config/zellij/layouts
 COPY config/zellij/config.kdl          /root/.config/zellij/config.kdl
 COPY config/zellij/themes/gruvbox.kdl  /root/.config/zellij/themes/gruvbox.kdl
 COPY config/zellij/layouts/dev.kdl     /root/.config/zellij/layouts/dev.kdl
+COPY config/zellij/layouts/assist.kdl  /root/.config/zellij/layouts/assist.kdl
+COPY config/zellij/layouts/focus.kdl   /root/.config/zellij/layouts/focus.kdl
+
+# Yazi
+RUN mkdir -p /root/.config/yazi
+COPY config/yazi/yazi.toml             /root/.config/yazi/yazi.toml
+COPY config/yazi/keymap.toml           /root/.config/yazi/keymap.toml
+COPY config/yazi/theme.toml            /root/.config/yazi/theme.toml
+
+# Helper scripts
+COPY config/bin/open-in-editor.sh      /usr/local/bin/open-in-editor
+RUN chmod +x /usr/local/bin/open-in-editor
+
+# Quick reference cheatsheet
+COPY config/cheatsheet.txt             /root/.config/cheatsheet.txt
 
 # Git — use XDG path so the mount target is a directory, not a single file
 RUN mkdir -p /root/.config/git

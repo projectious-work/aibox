@@ -1,0 +1,77 @@
+// =============================================================================
+// "focus" layout — single-task focus, minimal distraction
+//
+// Select with: zellij --layout focus
+//
+// Structure:
+//   ┌──────────┬───────────────────────────────┐
+//   │          │                               │
+//   │  yazi    │  ┊bash┊claude┊vim┊            │
+//   │  (20%)   │  stacked (one visible)        │
+//   │          │                               │
+//   │          │                               │
+//   ├──────────┴───────────────────────────────┤
+//   │  status-bar                              │
+//   └──────────────────────────────────────────┘
+//
+// All main tools are stacked — only one visible at a time.
+// Use Alt+j/k or click the stacked headers to switch.
+// =============================================================================
+
+layout {
+
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    tab name="focus" focus=true {
+        pane split_direction="vertical" {
+
+            // Left: Yazi file manager
+            pane size="20%" name="files" {
+                command "yazi"
+                cwd "/workspace"
+            }
+
+            // Right: stacked main panes (one visible at a time)
+            pane stacked=true {
+                pane name="terminal" focus=true {
+                    command "bash"
+                    cwd "/workspace"
+                }
+                pane name="claude" {
+                    command "claude"
+                    cwd "/workspace"
+                }
+                pane name="editor" {
+                    command "vim"
+                    cwd "/workspace"
+                }
+            }
+        }
+    }
+
+    tab name="git" {
+        pane name="lazygit" {
+            command "lazygit"
+            cwd "/workspace"
+        }
+    }
+
+    tab name="shell" {
+        pane name="bash" {
+            command "bash"
+            cwd "/workspace"
+        }
+    }
+
+    tab name="help" {
+        pane name="cheatsheet" {
+            command "less"
+            args "-R" "/root/.config/cheatsheet.txt"
+        }
+    }
+}

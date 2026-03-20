@@ -21,6 +21,8 @@ services:
       - {{ host_root }}/.vim:{{ container_home }}/.vim
       # Zellij terminal multiplexer config
       - {{ host_root }}/.config/zellij:{{ container_home }}/.config/zellij
+      # Yazi file manager config
+      - {{ host_root }}/.config/yazi:{{ container_home }}/.config/yazi
       # Git configuration
       - {{ host_root }}/.config/git:{{ container_home }}/.config/git
 {% for provider in ai_providers %}

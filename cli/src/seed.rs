@@ -132,35 +132,144 @@ const DEFAULT_ZELLIJ_THEME: &str = r##"themes {
 }
 "##;
 
-/// Default zellij dev layout.
+/// Default zellij dev layout — VS Code-like.
 const DEFAULT_ZELLIJ_LAYOUT: &str = r#"layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
     tab name="dev" focus=true {
-        pane split_direction="horizontal" {
-            pane command="bash" size="15%" {
-                args "--login"
+        pane split_direction="vertical" {
+            pane size="20%" name="files" {
+                command "yazi"
+                cwd "/workspace"
             }
-            pane split_direction="vertical" {
-                pane command="vim" size="80%"
-                pane split_direction="horizontal" size="20%" {
-                    pane command="bash" {
-                        args "--login"
-                    }
-                    pane command="bash" {
-                        args "--login"
-                    }
+            pane split_direction="horizontal" {
+                pane size="60%" name="editor" focus=true {
+                    command "vim"
+                    cwd "/workspace"
+                }
+                pane stacked=true size="40%" {
+                    pane name="terminal" { command "bash"; cwd "/workspace" }
+                    pane name="claude" { command "claude"; cwd "/workspace" }
                 }
             }
         }
     }
-    tab name="git" {
-        pane command="lazygit"
-    }
-    tab name="shell" {
-        pane command="bash" {
-            args "--login"
+    tab name="git" { pane command="lazygit" { cwd "/workspace" } }
+    tab name="shell" { pane command="bash" { cwd "/workspace" } }
+    tab name="help" { pane command="less" { args "-R" "/root/.config/cheatsheet.txt" } }
+}
+"#;
+
+/// Zellij assist layout — Claude-focused.
+const DEFAULT_ZELLIJ_ASSIST_LAYOUT: &str = r#"layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
         }
     }
+    tab name="assist" focus=true {
+        pane split_direction="vertical" {
+            pane size="20%" name="files" {
+                command "yazi"
+                cwd "/workspace"
+            }
+            pane stacked=true size="40%" {
+                pane name="claude" focus=true { command "claude"; cwd "/workspace" }
+                pane name="terminal" { command "bash"; cwd "/workspace" }
+            }
+            pane name="editor" {
+                command "vim"
+                cwd "/workspace"
+            }
+        }
+    }
+    tab name="git" { pane command="lazygit" { cwd "/workspace" } }
+    tab name="shell" { pane command="bash" { cwd "/workspace" } }
+    tab name="help" { pane command="less" { args "-R" "/root/.config/cheatsheet.txt" } }
 }
+"#;
+
+/// Zellij focus layout — minimal, stacked main panes.
+const DEFAULT_ZELLIJ_FOCUS_LAYOUT: &str = r#"layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+    tab name="focus" focus=true {
+        pane split_direction="vertical" {
+            pane size="20%" name="files" {
+                command "yazi"
+                cwd "/workspace"
+            }
+            pane stacked=true {
+                pane name="terminal" focus=true { command "bash"; cwd "/workspace" }
+                pane name="claude" { command "claude"; cwd "/workspace" }
+                pane name="editor" { command "vim"; cwd "/workspace" }
+            }
+        }
+    }
+    tab name="git" { pane command="lazygit" { cwd "/workspace" } }
+    tab name="shell" { pane command="bash" { cwd "/workspace" } }
+    tab name="help" { pane command="less" { args "-R" "/root/.config/cheatsheet.txt" } }
+}
+"#;
+
+/// Default yazi config.
+const DEFAULT_YAZI_CONFIG: &str = r#"[manager]
+ratio = [1, 3, 4]
+sort_by = "natural"
+sort_sensitive = false
+sort_dir_first = true
+show_hidden = true
+show_symlink = true
+
+[preview]
+max_width = 600
+max_height = 900
+
+[opener]
+edit = [
+    { run = 'open-in-editor "$1"', desc = "Open in editor pane", block = false },
+]
+edit-here = [
+    { run = '${EDITOR:-vim} "$@"', desc = "Edit in-place", block = true },
+]
+
+[open]
+rules = [
+    { mime = "text/*", use = "edit" },
+    { name = "*", use = "edit" },
+]
+"#;
+
+/// Default yazi keymap.
+const DEFAULT_YAZI_KEYMAP: &str = r#"[manager]
+prepend_keymap = [
+    { on = "<Enter>", run = "open", desc = "Open in editor pane" },
+    { on = "O", run = "open --interactive", desc = "Open interactively" },
+]
+"#;
+
+/// Quick reference cheatsheet.
+const DEFAULT_CHEATSHEET: &str = r#"  dev-box Quick Reference
+  ───────────────────────────────────────────────
+  ZELLIJ                     YAZI (file manager)
+  Alt+h/j/k/l  Move panes   h/j/k/l  Navigate
+  Alt+[/]       Prev/next    Enter    Open in vim
+  Alt+1-5       Jump tab     q        Quit yazi
+  Alt+f         Fullscreen   /        Search
+  Alt+x         Close pane   .        Hidden files
+  Ctrl+q        QUIT ALL     Space    Select
+
+  LAYOUTS: zellij --layout dev|assist|focus
+  TABS: Alt+1 dev  Alt+2 git  Alt+3 shell  Alt+4 help
 "#;
 
 /// Default .asoundrc for PulseAudio over TCP.
@@ -186,6 +295,7 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
         root.join(".vim").join("undo"),
         root.join(".config").join("zellij").join("themes"),
         root.join(".config").join("zellij").join("layouts"),
+        root.join(".config").join("yazi"),
         root.join(".config").join("git"),
     ];
 
@@ -228,6 +338,38 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
             .join("layouts")
             .join("dev.kdl"),
         DEFAULT_ZELLIJ_LAYOUT,
+    )?;
+    seed_file(
+        &root
+            .join(".config")
+            .join("zellij")
+            .join("layouts")
+            .join("assist.kdl"),
+        DEFAULT_ZELLIJ_ASSIST_LAYOUT,
+    )?;
+    seed_file(
+        &root
+            .join(".config")
+            .join("zellij")
+            .join("layouts")
+            .join("focus.kdl"),
+        DEFAULT_ZELLIJ_FOCUS_LAYOUT,
+    )?;
+
+    // Yazi config
+    seed_file(
+        &root.join(".config").join("yazi").join("yazi.toml"),
+        DEFAULT_YAZI_CONFIG,
+    )?;
+    seed_file(
+        &root.join(".config").join("yazi").join("keymap.toml"),
+        DEFAULT_YAZI_KEYMAP,
+    )?;
+
+    // Cheatsheet
+    seed_file(
+        &root.join(".config").join("cheatsheet.txt"),
+        DEFAULT_CHEATSHEET,
     )?;
 
     // Audio config
@@ -308,6 +450,7 @@ mod tests {
         assert!(root.join(".vim").join("undo").is_dir());
         assert!(root.join(".config").join("zellij").join("themes").is_dir());
         assert!(root.join(".config").join("zellij").join("layouts").is_dir());
+        assert!(root.join(".config").join("yazi").is_dir());
         assert!(root.join(".config").join("git").is_dir());
         assert!(root.join(".claude").is_dir());
 
@@ -346,6 +489,28 @@ mod tests {
                 .join("dev.kdl")
                 .exists()
         );
+        assert!(
+            root.join(".config")
+                .join("zellij")
+                .join("layouts")
+                .join("assist.kdl")
+                .exists()
+        );
+        assert!(
+            root.join(".config")
+                .join("zellij")
+                .join("layouts")
+                .join("focus.kdl")
+                .exists()
+        );
+        assert!(root.join(".config").join("yazi").join("yazi.toml").exists());
+        assert!(
+            root.join(".config")
+                .join("yazi")
+                .join("keymap.toml")
+                .exists()
+        );
+        assert!(root.join(".config").join("cheatsheet.txt").exists());
 
         unsafe {
             std::env::remove_var("DEV_BOX_HOST_ROOT");

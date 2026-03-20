@@ -142,13 +142,18 @@ seed_file() {
 
 ensure_host_dirs() {
   info "Checking host directories..."
-  mkdir -p "${HOST_ROOT}"/{.ssh,.vim/undo,.config/zellij/{themes,layouts},.config/git,.claude}
+  mkdir -p "${HOST_ROOT}"/{.ssh,.vim/undo,.config/zellij/{themes,layouts},.config/yazi,.config/git,.claude}
 
-  seed_file "${DEVCONTAINER_DIR}/config/vimrc"                      "${HOST_ROOT}/.vim/vimrc"
-  seed_file "${DEVCONTAINER_DIR}/config/gitconfig"                   "${HOST_ROOT}/.config/git/config"
-  seed_file "${DEVCONTAINER_DIR}/config/zellij/config.kdl"           "${HOST_ROOT}/.config/zellij/config.kdl"
-  seed_file "${DEVCONTAINER_DIR}/config/zellij/themes/gruvbox.kdl"   "${HOST_ROOT}/.config/zellij/themes/gruvbox.kdl"
-  seed_file "${DEVCONTAINER_DIR}/config/zellij/layouts/dev.kdl"      "${HOST_ROOT}/.config/zellij/layouts/dev.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/vimrc"                        "${HOST_ROOT}/.vim/vimrc"
+  seed_file "${DEVCONTAINER_DIR}/config/gitconfig"                     "${HOST_ROOT}/.config/git/config"
+  seed_file "${DEVCONTAINER_DIR}/config/zellij/config.kdl"             "${HOST_ROOT}/.config/zellij/config.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/zellij/themes/gruvbox.kdl"     "${HOST_ROOT}/.config/zellij/themes/gruvbox.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/zellij/layouts/dev.kdl"        "${HOST_ROOT}/.config/zellij/layouts/dev.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/zellij/layouts/assist.kdl"     "${HOST_ROOT}/.config/zellij/layouts/assist.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/zellij/layouts/focus.kdl"      "${HOST_ROOT}/.config/zellij/layouts/focus.kdl"
+  seed_file "${DEVCONTAINER_DIR}/config/yazi/yazi.toml"                "${HOST_ROOT}/.config/yazi/yazi.toml"
+  seed_file "${DEVCONTAINER_DIR}/config/yazi/keymap.toml"              "${HOST_ROOT}/.config/yazi/keymap.toml"
+  seed_file "${DEVCONTAINER_DIR}/config/yazi/theme.toml"               "${HOST_ROOT}/.config/yazi/theme.toml"
 
   if [[ -z "$(ls -A "${HOST_ROOT}/.ssh" 2>/dev/null)" ]]; then
     warn "No SSH keys in ${HOST_ROOT}/.ssh"
