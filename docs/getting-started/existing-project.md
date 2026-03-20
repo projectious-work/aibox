@@ -30,8 +30,10 @@ extra_packages = []
 environment = {}
 
 [context]
-owner = "~/.config/dev-box/OWNER.md"
 schema_version = "1.0.0"
+
+[ai]
+providers = ["claude"]
 
 [audio]
 enabled = false
@@ -101,6 +103,19 @@ Example output:
  ✓ .devcontainer/ directory exists
  ✓ Diagnostics complete
 ```
+
+## Migrating from `.root/` to `.dev-box-home/`
+
+If you are upgrading from dev-box ≤ v0.3.4, the persisted config directory was renamed from `.root/` to `.dev-box-home/`. This directory is **gitignored and not tracked**, so use a plain filesystem rename:
+
+```bash
+mv .root .dev-box-home
+```
+
+!!! warning "Do not use `git mv`"
+    `git mv .root .dev-box-home` will fail because `.root/` is listed in `.gitignore` and was never committed. Use a regular `mv` command.
+
+dev-box will fall back to `.root/` automatically if `.dev-box-home/` does not exist, so this migration is optional but recommended.
 
 ## Migrating Context Structure
 
