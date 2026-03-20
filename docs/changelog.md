@@ -37,7 +37,7 @@ All notable changes to dev-box are documented here.
 - TeX Live images: added `algorithms`, `algorithmicx`, `algorithm2e`, `tikzfill` packages (fixes #7, fixes #8)
 
 ### Changed
-- Renamed `.root/` to `.dev-box-home/` — backward compatible (falls back to `.root/` if it exists)
+- Renamed `.root/` to `.dev-box-home/` — backward compatible (falls back to `.root/` if it exists). If upgrading, use a plain filesystem rename: `mv .root .dev-box-home` (not `git mv` — the directory is gitignored and not tracked)
 - `dev-box init` now creates `.dev-box-home/` directory (previously only done on `start`)
 - OWNER.md created locally in `context/` — removed `~/.config/dev-box/` symlink pattern
 - Removed `owner` field from `[context]` config section
