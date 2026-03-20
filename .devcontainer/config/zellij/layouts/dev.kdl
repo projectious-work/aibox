@@ -1,16 +1,23 @@
 // =============================================================================
-// "dev" layout — default layout for the dev-container
+// "dev" layout — VS Code-like IDE layout (default)
+//
+// Select with: zellij --layout dev
 //
 // Structure:
-//   ┌──────────────────────────────────────────┐
-//   │  tab-bar                                 │
-//   ├──────────┬───────────────────────────────┤
-//   │          │  editor / main pane           │
-//   │ strider  ├────────────────┬──────────────┤
-//   │  (15%)   │  terminal (20%)│  claude (20%)│
-//   └──────────┴────────────────┴──────────────┘
+//   ┌──────────┬───────────────────────────────┐
+//   │          │         vim editor (60%)       │
+//   │  yazi    │                               │
+//   │  (20%)   ├───────────────────────────────┤
+//   │          │  ┊bash┊claude┊  stacked (40%) │
+//   ├──────────┴───────────────────────────────┤
 //   │  status-bar                              │
 //   └──────────────────────────────────────────┘
+//
+// Navigation:
+//   Alt+h/j/k/l  — move between panes
+//   Alt+[/]       — previous/next tab
+//   Alt+1-5       — jump to tab
+//   Ctrl+q        — quit zellij
 // =============================================================================
 
 layout {
@@ -27,26 +34,23 @@ layout {
     tab name="dev" focus=true {
         pane split_direction="vertical" {
 
-            // Left column: Strider file picker (15% width)
-            pane size="15%" {
-                plugin location="zellij:strider" {
-                    cwd "/workspace"
-                    show_hidden_files true
-                }
+            // Left column: Yazi file manager (20% width, full height)
+            pane size="20%" name="files" {
+                command "yazi"
+                cwd "/workspace"
             }
 
-            // Right column: editor on top, tools row below
+            // Right column: editor on top, stacked terminals below
             pane split_direction="horizontal" {
 
-                // Main editor pane (80% of right column height) — no args so
-                // vim opens a blank buffer instead of triggering netrw
-                pane size="80%" name="editor" focus=true {
+                // Main editor pane (60% of height)
+                pane size="60%" name="editor" focus=true {
                     command "vim"
                     cwd "/workspace"
                 }
 
-                // Bottom tool row: terminal | claude (each 50% of row width)
-                pane split_direction="vertical" {
+                // Bottom panel: stacked (tabbed) terminals (40% of height)
+                pane stacked=true size="40%" {
                     pane name="terminal" {
                         command "bash"
                         cwd "/workspace"
@@ -73,6 +77,14 @@ layout {
         pane name="bash" {
             command "bash"
             cwd "/workspace"
+        }
+    }
+
+    // ── Tab: Help — quick reference ───────────────────────────────────────────
+    tab name="help" {
+        pane name="cheatsheet" {
+            command "less"
+            args "-R" "/root/.config/cheatsheet.txt"
         }
     }
 }

@@ -35,6 +35,11 @@ services:
         source: ${HOST_ROOT:-../.root}/.config/zellij
         target: /root/.config/zellij
 
+      # Yazi: file manager config
+      - type: bind
+        source: ${HOST_ROOT:-../.root}/.config/yazi
+        target: /root/.config/yazi
+
       # Git: global config + credentials helper store
       - type: bind
         source: ${HOST_ROOT:-../.root}/.config/git

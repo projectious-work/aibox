@@ -1,0 +1,14 @@
+# =============================================================================
+# Yazi keymap — dev-box defaults
+# Docs: https://yazi-rs.github.io/docs/configuration/keymap
+# =============================================================================
+
+[manager]
+prepend_keymap = [
+    # Open file in the adjacent vim pane (default Enter behavior)
+    { on = "<Enter>", run = "open",          desc = "Open in editor pane" },
+    # Open file in yazi's own pane (fallback)
+    { on = "O",       run = "open --interactive", desc = "Open interactively" },
+    # Quick preview toggle
+    { on = "T",       run = "plugin --sync hide-preview", desc = "Toggle preview" },
+]
