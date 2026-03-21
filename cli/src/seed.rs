@@ -190,7 +190,7 @@ const DEFAULT_ZELLIJ_LAYOUT: &str = r#"layout {
                 cwd "/workspace"
             }
             pane size="60%" name="editor" focus=true {
-                command "vim"
+                command "vim-loop"
                 cwd "/workspace"
             }
         }
@@ -233,7 +233,7 @@ const DEFAULT_ZELLIJ_FOCUS_LAYOUT: &str = r#"layout {
     }
     tab name="editor" {
         pane name="vim" {
-            command "vim"
+            command "vim-loop"
             cwd "/workspace"
         }
     }
@@ -275,7 +275,7 @@ const DEFAULT_ZELLIJ_COWORK_LAYOUT: &str = r#"layout {
                     cwd "/workspace"
                 }
                 pane size="60%" name="editor" {
-                    command "vim"
+                    command "vim-loop"
                     cwd "/workspace"
                 }
             }

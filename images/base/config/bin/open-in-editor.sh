@@ -15,27 +15,25 @@ file="$(realpath "$file" 2>/dev/null || echo "$file")"
 
 dir="${DEVBOX_EDITOR_DIR:-right}"
 
+send_to_vim() {
+    zellij action write 27
+    sleep 0.05
+    zellij action write-chars ":e ${file}"
+    zellij action write 13
+}
+
 case "$dir" in
     tab)
         zellij action go-to-tab-name "editor"
         sleep 0.1
-        zellij action write 27
-        sleep 0.05
-        zellij action write-chars ":e ${file}"
-        zellij action write 13
+        send_to_vim
         ;;
     down)
         zellij action move-focus down
-        zellij action write 27
-        sleep 0.05
-        zellij action write-chars ":e ${file}"
-        zellij action write 13
+        send_to_vim
         ;;
     *)
         zellij action move-focus right
-        zellij action write 27
-        sleep 0.05
-        zellij action write-chars ":e ${file}"
-        zellij action write 13
+        send_to_vim
         ;;
 esac

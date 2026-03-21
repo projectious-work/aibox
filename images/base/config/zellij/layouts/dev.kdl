@@ -33,7 +33,7 @@ layout {
                 cwd "/workspace"
             }
             pane size="60%" name="editor" focus=true {
-                command "vim"
+                command "vim-loop"
                 cwd "/workspace"
             }
         }
