@@ -117,7 +117,8 @@ COPY config/yazi/theme.toml            /root/.config/yazi/theme.toml
 
 # Helper scripts
 COPY config/bin/open-in-editor.sh      /usr/local/bin/open-in-editor
-RUN chmod +x /usr/local/bin/open-in-editor
+COPY config/bin/vim-loop.sh            /usr/local/bin/vim-loop
+RUN chmod +x /usr/local/bin/open-in-editor /usr/local/bin/vim-loop
 
 # Quick reference cheatsheet
 COPY config/cheatsheet.txt             /root/.config/cheatsheet.txt

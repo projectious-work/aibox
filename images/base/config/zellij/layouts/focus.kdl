@@ -27,7 +27,7 @@ layout {
 
     tab name="editor" {
         pane name="vim" {
-            command "vim"
+            command "vim-loop"
             cwd "/workspace"
         }
     }
