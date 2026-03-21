@@ -164,6 +164,25 @@ pub fn cmd_stop(config_path: &Option<String>) -> Result<()> {
     Ok(())
 }
 
+/// Down command: stop and remove the container.
+pub fn cmd_down(config_path: &Option<String>) -> Result<()> {
+    let config = DevBoxConfig::from_cli_option(config_path)?;
+    let runtime = Runtime::detect()?;
+    let name = &config.container.name;
+
+    let state = runtime.container_status(name)?;
+    if state == ContainerState::Missing {
+        output::info("No container found");
+        return Ok(());
+    }
+
+    output::info("Stopping and removing container...");
+    runtime.compose_down(compose_file())?;
+    output::ok(&format!("Container '{}' removed", name));
+
+    Ok(())
+}
+
 /// Attach command.
 pub fn cmd_attach(config_path: &Option<String>, layout: &str) -> Result<()> {
     let config = DevBoxConfig::from_cli_option(config_path)?;

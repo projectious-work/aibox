@@ -120,6 +120,16 @@ impl Runtime {
         Ok(())
     }
 
+    /// Run compose down for a service (stop + remove container and network).
+    pub fn compose_down(&self, compose_file: &str) -> Result<()> {
+        let args = vec!["-f", compose_file, "down"];
+        let status = self.run_compose(&args)?;
+        if !status.success() {
+            bail!("Compose down failed");
+        }
+        Ok(())
+    }
+
     /// Exec interactively into a container (passes terminal through).
     pub fn exec_interactive(&self, container: &str, cmd: &[&str]) -> Result<()> {
         let mut args = vec!["exec", "-it", container];
