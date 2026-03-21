@@ -21,4 +21,4 @@ zellij action write 27
 sleep 0.05
 zellij action write-chars ":e ${file}"
 zellij action write 13
-zellij action move-focus "$back"
+# Stay focused on the vim pane so the user can start editing
