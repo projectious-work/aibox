@@ -2,6 +2,26 @@
 
 All notable changes to dev-box are documented here.
 
+## v0.4.2 — 2026-03-22
+
+### Added
+- **Complete theming** across all 4 tools: Zellij, Vim, Yazi, lazygit
+  - 6 themes: gruvbox-dark (default), catppuccin-mocha, catppuccin-latte, dracula, tokyo-night, nord
+  - `[appearance]` section in dev-box.toml with `theme` field
+  - `--theme` flag on `dev-box init`
+  - Vim colorschemes downloaded and bundled in base image (gruvbox, catppuccin, dracula, tokyo-night, nord)
+  - Yazi theme.toml files for all 6 themes
+  - lazygit config.yml themed for all 6 themes
+  - Zellij KDL theme files for all 6 themes
+- **Themes documentation page** with descriptions and color palettes
+- `dev-box remove` command (alias `rm`) — stop and remove container
+
+### Fixed
+- Yazi parent column restored (`ratio = [1, 3, 4]`)
+- vim-loop focus return to yazi on `:q`
+- Dev layout starts focused on yazi
+- Dockerfile updated: assist→cowork layout, Vim colorscheme downloads, Yazi themes bundled
+
 ## v0.4.1 — 2026-03-22
 
 ### Added
