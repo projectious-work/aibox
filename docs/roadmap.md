@@ -2,7 +2,7 @@
 
 This page outlines planned features and improvements for dev-box.
 
-## Current — v0.4.1
+## Current — v0.4.2
 
 The current release includes:
 
