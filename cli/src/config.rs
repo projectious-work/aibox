@@ -248,6 +248,57 @@ impl Default for AudioSection {
     }
 }
 
+/// Color themes available across all tools (Zellij, Vim, Yazi, lazygit).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, clap::ValueEnum)]
+#[serde(rename_all = "kebab-case")]
+#[clap(rename_all = "kebab-case")]
+pub enum Theme {
+    GruvboxDark,
+    CatppuccinMocha,
+    CatppuccinLatte,
+    Dracula,
+    TokyoNight,
+    Nord,
+}
+
+impl std::fmt::Display for Theme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Theme::GruvboxDark => write!(f, "gruvbox-dark"),
+            Theme::CatppuccinMocha => write!(f, "catppuccin-mocha"),
+            Theme::CatppuccinLatte => write!(f, "catppuccin-latte"),
+            Theme::Dracula => write!(f, "dracula"),
+            Theme::TokyoNight => write!(f, "tokyo-night"),
+            Theme::Nord => write!(f, "nord"),
+        }
+    }
+}
+
+impl Default for Theme {
+    fn default() -> Self {
+        Theme::GruvboxDark
+    }
+}
+
+fn default_theme() -> Theme {
+    Theme::default()
+}
+
+/// [appearance] section — color theme configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AppearanceSection {
+    #[serde(default = "default_theme")]
+    pub theme: Theme,
+}
+
+impl Default for AppearanceSection {
+    fn default() -> Self {
+        Self {
+            theme: default_theme(),
+        }
+    }
+}
+
 /// Check that a string is a safe container/hostname identifier.
 /// Must start with alphanumeric and contain only [a-zA-Z0-9._-].
 fn is_safe_identifier(s: &str) -> bool {
@@ -283,6 +334,8 @@ pub struct DevBoxConfig {
     pub context: ContextSection,
     #[serde(default)]
     pub ai: AiSection,
+    #[serde(default)]
+    pub appearance: AppearanceSection,
     #[serde(default)]
     pub audio: AudioSection,
 }

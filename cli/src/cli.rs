@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand, ValueEnum};
 
-use crate::config::{AiProvider, ImageFlavor, ProcessFlavor};
+use crate::config::{AiProvider, ImageFlavor, ProcessFlavor, Theme};
 
 /// Available Zellij IDE layouts.
 #[derive(Clone, Debug, ValueEnum)]
@@ -88,6 +88,10 @@ pub enum Commands {
         /// Container user (default: root)
         #[arg(long)]
         user: Option<String>,
+
+        /// Color theme for all tools (default: gruvbox-dark)
+        #[arg(long, value_enum)]
+        theme: Option<Theme>,
     },
     /// Re-generate devcontainer files from dev-box.toml
     ///

@@ -10,6 +10,7 @@ mod output;
 mod reset;
 mod runtime;
 mod seed;
+mod themes;
 mod update;
 
 use clap::{CommandFactory, Parser};
@@ -44,7 +45,8 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             process,
             ai,
             user,
-        } => container::cmd_init(config_path, name, image, process, ai, user),
+            theme,
+        } => container::cmd_init(config_path, name, image, process, ai, user, theme),
         cli::Commands::Generate => container::cmd_generate(config_path),
         cli::Commands::Build { no_cache } => container::cmd_build(config_path, no_cache),
         cli::Commands::Start { layout } => container::cmd_start(config_path, &layout.to_string()),

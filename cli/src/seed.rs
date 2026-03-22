@@ -52,9 +52,9 @@ const DEFAULT_GITCONFIG: &str = r#"[core]
     rebase = true
 "#;
 
-/// Default zellij config.kdl content.
+/// Default zellij config.kdl content. Theme name is replaced at seed time.
 const DEFAULT_ZELLIJ_CONFIG: &str = r#"// dev-box zellij configuration
-theme "gruvbox"
+theme "DEVBOX_THEME"
 default_layout "dev"
 default_shell "bash"
 mouse_mode true
@@ -156,24 +156,6 @@ keybinds clear-defaults=true {
     }
 }
 "#;
-
-/// Default zellij gruvbox theme.
-const DEFAULT_ZELLIJ_THEME: &str = r##"themes {
-    gruvbox-dark {
-        fg "#D5C4A1"
-        bg "#282828"
-        black "#3C3836"
-        red "#CC241D"
-        green "#98971A"
-        yellow "#D79921"
-        blue "#458588"
-        magenta "#B16286"
-        cyan "#689D6A"
-        white "#FBF1C7"
-        orange "#D65D0E"
-    }
-}
-"##;
 
 /// Default zellij dev layout — file browser + editor.
 const DEFAULT_ZELLIJ_LAYOUT: &str = r#"layout {
@@ -383,6 +365,7 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
         root.join(".config").join("zellij").join("layouts"),
         root.join(".config").join("yazi"),
         root.join(".config").join("git"),
+        root.join(".config").join("lazygit"),
     ];
 
     // AI provider directories — only create what's configured
@@ -405,17 +388,25 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
         &root.join(".config").join("git").join("config"),
         DEFAULT_GITCONFIG,
     )?;
+
+    // Zellij config — apply selected theme
+    let theme = &config.appearance.theme;
+    let zellij_config = DEFAULT_ZELLIJ_CONFIG
+        .replace("DEVBOX_THEME", crate::themes::zellij_theme_name(theme));
     seed_file(
         &root.join(".config").join("zellij").join("config.kdl"),
-        DEFAULT_ZELLIJ_CONFIG,
+        &zellij_config,
     )?;
+
+    // Zellij theme file — seed the selected theme
+    let theme_filename = format!("{}.kdl", crate::themes::zellij_theme_name(theme));
     seed_file(
         &root
             .join(".config")
             .join("zellij")
             .join("themes")
-            .join("gruvbox.kdl"),
-        DEFAULT_ZELLIJ_THEME,
+            .join(&theme_filename),
+        crate::themes::zellij_theme(theme),
     )?;
     seed_file(
         &root
@@ -456,6 +447,15 @@ pub fn seed_root_dir(config: &DevBoxConfig) -> Result<()> {
     seed_file(
         &root.join(".config").join("cheatsheet.txt"),
         DEFAULT_CHEATSHEET,
+    )?;
+
+    // lazygit theme config
+    seed_file(
+        &root
+            .join(".config")
+            .join("lazygit")
+            .join("config.yml"),
+        crate::themes::lazygit_theme(theme),
     )?;
 
     // Audio config
@@ -517,6 +517,7 @@ mod tests {
             },
             context: ContextSection::default(),
             ai: crate::config::AiSection::default(),
+            appearance: crate::config::AppearanceSection::default(),
             audio: AudioSection {
                 enabled: audio_enabled,
                 pulse_server: "tcp:localhost:4714".to_string(),
@@ -565,7 +566,7 @@ mod tests {
             root.join(".config")
                 .join("zellij")
                 .join("themes")
-                .join("gruvbox.kdl")
+                .join("gruvbox-dark.kdl")
                 .exists()
         );
         assert!(
