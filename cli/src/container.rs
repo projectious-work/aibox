@@ -449,6 +449,27 @@ pub fn cmd_generate(config_path: &Option<String>) -> Result<()> {
     Ok(())
 }
 
+/// Sync command: force-seed theme-dependent files, then regenerate .devcontainer/.
+pub fn cmd_sync(config_path: &Option<String>) -> Result<()> {
+    let config = DevBoxConfig::from_cli_option(config_path)?;
+
+    output::info("Syncing config files...");
+    let updated = seed::sync_theme_files(&config)?;
+
+    if updated.is_empty() {
+        output::ok("All config files already up to date");
+    } else {
+        for file in &updated {
+            output::ok(&format!("Updated {}", file));
+        }
+    }
+
+    generate::generate_all(&config)?;
+    output::ok("Sync complete");
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
