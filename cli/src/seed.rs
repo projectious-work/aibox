@@ -495,6 +495,81 @@ fn seed_file(path: &Path, content: &str) -> Result<()> {
     crate::context::write_if_missing(path, content)
 }
 
+/// Seed a file, overwriting if it exists. Used by sync to apply config changes.
+/// Returns true if the file changed, false if content was already identical.
+pub fn force_seed_file(path: &Path, content: &str) -> Result<bool> {
+    if path.exists() {
+        let existing = fs::read_to_string(path)
+            .with_context(|| format!("Failed to read {}", path.display()))?;
+        if existing == content {
+            return Ok(false);
+        }
+    }
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
+    }
+    fs::write(path, content).with_context(|| format!("Failed to write {}", path.display()))?;
+    Ok(true)
+}
+
+/// Force-seed all theme-dependent config files from the current config.
+/// Overwrites existing files when content has changed. Used by `dev-box sync`.
+pub fn sync_theme_files(config: &DevBoxConfig) -> Result<Vec<String>> {
+    let root = config.host_root_dir();
+    let theme = &config.appearance.theme;
+    let mut updated = Vec::new();
+
+    // vimrc — colorscheme and background
+    let vimrc = DEFAULT_VIMRC
+        .replace("DEVBOX_VIM_COLORSCHEME", crate::themes::vim_colorscheme(theme))
+        .replace("DEVBOX_VIM_BG", crate::themes::vim_background(theme));
+    if force_seed_file(&root.join(".vim").join("vimrc"), &vimrc)? {
+        updated.push(".vim/vimrc".to_string());
+    }
+
+    // Zellij config — theme name
+    let zellij_config = DEFAULT_ZELLIJ_CONFIG
+        .replace("DEVBOX_THEME", crate::themes::zellij_theme_name(theme));
+    if force_seed_file(
+        &root.join(".config").join("zellij").join("config.kdl"),
+        &zellij_config,
+    )? {
+        updated.push(".config/zellij/config.kdl".to_string());
+    }
+
+    // Zellij theme file
+    let theme_filename = format!("{}.kdl", crate::themes::zellij_theme_name(theme));
+    if force_seed_file(
+        &root
+            .join(".config")
+            .join("zellij")
+            .join("themes")
+            .join(&theme_filename),
+        crate::themes::zellij_theme(theme),
+    )? {
+        updated.push(format!(".config/zellij/themes/{}", theme_filename));
+    }
+
+    // lazygit config
+    if force_seed_file(
+        &root.join(".config").join("lazygit").join("config.yml"),
+        crate::themes::lazygit_theme(theme),
+    )? {
+        updated.push(".config/lazygit/config.yml".to_string());
+    }
+
+    // Yazi theme
+    if force_seed_file(
+        &root.join(".config").join("yazi").join("theme.toml"),
+        crate::themes::yazi_theme(theme),
+    )? {
+        updated.push(".config/yazi/theme.toml".to_string());
+    }
+
+    Ok(updated)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
