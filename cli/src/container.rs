@@ -327,6 +327,12 @@ fn serialize_config_with_comments(config: &DevBoxConfig) -> String {
             .join(", ")
     ));
 
+    // [appearance] section
+    out.push_str("\n# Color theme applied across Zellij, Vim, Yazi, and lazygit.\n");
+    out.push_str("# Options: gruvbox-dark, catppuccin-mocha, catppuccin-latte, dracula, tokyo-night, nord\n");
+    out.push_str("[appearance]\n");
+    out.push_str(&format!("theme = \"{}\"\n", config.appearance.theme));
+
     // [audio] section
     out.push_str("\n# Audio support for PulseAudio bridging (e.g., Claude Code voice).\n");
     out.push_str("# Requires host-side PulseAudio setup: run `dev-box audio setup`\n");
@@ -352,9 +358,11 @@ pub fn cmd_init(
     process: Option<ProcessFlavor>,
     ai: Option<Vec<AiProvider>>,
     user: Option<String>,
+    theme: Option<crate::config::Theme>,
 ) -> Result<()> {
     use crate::config::{
-        AiSection, AudioSection, ContainerSection, ContextSection, DevBoxConfig, DevBoxSection,
+        AiSection, AppearanceSection, AudioSection, ContainerSection, ContextSection, DevBoxConfig,
+        DevBoxSection,
     };
 
     let toml_path = config_path
@@ -398,6 +406,9 @@ pub fn cmd_init(
         context: ContextSection::default(),
         ai: AiSection {
             providers: ai_providers,
+        },
+        appearance: AppearanceSection {
+            theme: theme.unwrap_or_default(),
         },
         audio: AudioSection::default(),
     };

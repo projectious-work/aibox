@@ -386,6 +386,7 @@ mod tests {
             },
             context: ContextSection::default(),
             ai: crate::config::AiSection::default(),
+            appearance: crate::config::AppearanceSection::default(),
             audio: AudioSection {
                 enabled: audio_enabled,
                 pulse_server: "tcp:localhost:4714".to_string(),
