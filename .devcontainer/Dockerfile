@@ -63,6 +63,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     lazygit \
     # Shell quality-of-life
+    unzip \
     less \
     bash-completion \
     # GitHub CLI
@@ -152,9 +153,10 @@ COPY config/gitconfig /root/.config/git/config
 # Audio — PulseAudio config for Claude Code voice support
 COPY config/asoundrc /root/.asoundrc
 
-# Install code assistants
-ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+# Install code assistants and runtimes
+ENV PATH="/root/.cargo/bin:/root/.local/bin:/root/.bun/bin:${PATH}"
 RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN curl -fsSL https://bun.sh/install | bash
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 WORKDIR /workspace
