@@ -23,14 +23,14 @@
 - Nav restructured: Reference tab (CLI + Themes + Skills), Cheatsheet→Getting Started, Maintenance→Contributing
 - Skills Library: 15 category pages documenting all 83 skills
 - Installation page simplified: 3 clear parallel methods
-- New-project page: actual scaffolded directory tree and full dev-box.toml with comments
+- New-project page: actual scaffolded directory tree and full aibox.toml with comments
 - Search features: suggest, highlight, share
 - Removed mkdocs.yml (fully Zensical now)
 
 ### Recording Infrastructure
 - Docker socket mounted in dev-container for sibling container access
 - docker.io CLI + VHS + ffmpeg + chromium + ttyd added to Dockerfile
-- record-screenshots.sh: launches real dev-box container, runs VHS tape scripts, copies output
+- record-screenshots.sh: launches real aibox container, runs VHS tape scripts, copies output
 - 5 tape scripts: dev/focus/cowork layouts, init demo, theme template
 
 ### Release v0.8.0
@@ -59,7 +59,7 @@
 - **CLI simplification** — merge build into start, merge attach into start (user request)
 - **Theming screenshots** (#14) — blocked on recording infra, now unblocked
 - **Security review** (#23) — input validation, container security
-- **`dev-box skill install`** — install skills from external sources
+- **`aibox skill install`** — install skills from external sources
 - **Skill eval framework** — test/benchmark per Anthropic's skill-creator pattern
 
 ## Key Context

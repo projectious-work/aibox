@@ -6,7 +6,7 @@ services:
       target: runtime
     image: localhost/devcontainer:latest
     container_name: devcontainer
-    hostname: devbox
+    hostname: aibox
     stdin_open: true
     tty: true
     volumes:

@@ -44,21 +44,21 @@ Before every release, check ALL upstream dependencies for updates.
    cd cli
    CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=x86_64-linux-gnu-gcc \
      cargo build --release --target x86_64-unknown-linux-gnu
-   cp target/x86_64-unknown-linux-gnu/release/dev-box ../dist/dev-box-vX.Y.Z-x86_64-unknown-linux-gnu
-   cd ../dist && tar -czf dev-box-vX.Y.Z-x86_64-unknown-linux-gnu.tar.gz dev-box-vX.Y.Z-x86_64-unknown-linux-gnu
-   rm dev-box-vX.Y.Z-x86_64-unknown-linux-gnu
+   cp target/x86_64-unknown-linux-gnu/release/aibox ../dist/aibox-vX.Y.Z-x86_64-unknown-linux-gnu
+   cd ../dist && tar -czf aibox-vX.Y.Z-x86_64-unknown-linux-gnu.tar.gz aibox-vX.Y.Z-x86_64-unknown-linux-gnu
+   rm aibox-vX.Y.Z-x86_64-unknown-linux-gnu
    ```
 6. **Push tag**: `git push origin main && git push origin vX.Y.Z`
-7. **GitHub release**: `gh release create vX.Y.Z --repo projectious-work/dev-box --title "dev-box vX.Y.Z" --notes-file dist/RELEASE-NOTES.md dist/dev-box-vX.Y.Z-*.tar.gz`
+7. **GitHub release**: `gh release create vX.Y.Z --repo projectious-work/aibox --title "aibox vX.Y.Z" --notes-file dist/RELEASE-NOTES.md dist/aibox-vX.Y.Z-*.tar.gz`
    Note: Always use `--notes-file`, never `--generate-notes`.
 8. **Deploy docs**: `./scripts/maintain.sh docs-deploy`
 
 ## Phase 2 — Host commands (user runs on macOS)
 
 ```bash
-cd /path/to/dev-box
+cd /path/to/aibox
 ./scripts/build-macos.sh X.Y.Z
-gh release upload vX.Y.Z dist/dev-box-vX.Y.Z-*-apple-darwin.tar.gz
+gh release upload vX.Y.Z dist/aibox-vX.Y.Z-*-apple-darwin.tar.gz
 ./scripts/maintain.sh push-images X.Y.Z
 ```
 

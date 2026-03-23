@@ -2,7 +2,7 @@
 
 ## Market Structure
 
-The market splits into four non-overlapping categories. dev-box is the only tool at the intersection.
+The market splits into four non-overlapping categories. aibox is the only tool at the intersection.
 
 ### Dev Container / Cloud Dev Environment Tools
 | Tool | Terminal-first | AI integration | Skills/context | Status |
@@ -36,7 +36,7 @@ The market splits into four non-overlapping categories. dev-box is the only tool
 - SKILL.md (Anthropic / agentskills.io) — adopted by 16+ tools
 - Community hubs: 97K+ skills indexed, 46% duplicates, 341 malicious found
 
-## dev-box's Unique Position
+## aibox's Unique Position
 
 No competitor combines all five:
 1. Container environment management
@@ -45,12 +45,12 @@ No competitor combines all five:
 4. Terminal-first toolchain integration (Zellij + Yazi + Vim + lazygit)
 5. Single config file generating devcontainer files
 
-## Where dev-box Is Complementary (not competing)
+## Where aibox Is Complementary (not competing)
 
-- **VS Code Dev Containers / Codespaces**: dev-box generates devcontainer.json — it's upstream
-- **Cursor / Windsurf**: different paradigm (GUI IDE); Cursor users could use dev-box containers
-- **Coder / Codespaces**: enterprise platform play; dev-box could run on their infrastructure
-- **Daytona**: AI agent runtime infrastructure; dev-box is developer environment, not agent sandbox
+- **VS Code Dev Containers / Codespaces**: aibox generates devcontainer.json — it's upstream
+- **Cursor / Windsurf**: different paradigm (GUI IDE); Cursor users could use aibox containers
+- **Coder / Codespaces**: enterprise platform play; aibox could run on their infrastructure
+- **Daytona**: AI agent runtime infrastructure; aibox is developer environment, not agent sandbox
 
 ## Primary Audience
 

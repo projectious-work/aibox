@@ -1,6 +1,6 @@
 # Competitive Landscape & Ecosystem Research — March 2026
 
-Research into four parallel developments affecting kaits' positioning: the Claude Skills ecosystem maturing into an open standard, the vibe-coding platform convergence, the emergence of the first AI agent security standard (AIUC-1), and the strategic implications for kaits as an enterprise agent orchestrator. Conducted 2026-03-21 as a four-stream parallel analysis. Covers: Agent Skills open specification, ClawHub marketplace, Skill Creator eval framework, Replit Agent v4, Google Antigravity (full-stack vibe coding), Lovable's business ops pivot, OpenAI Super App convergence, and AIUC-1 compliance domains. Each stream includes specific actionable recommendations for kaits and the dev-box project.
+Research into four parallel developments affecting kaits' positioning: the Claude Skills ecosystem maturing into an open standard, the vibe-coding platform convergence, the emergence of the first AI agent security standard (AIUC-1), and the strategic implications for kaits as an enterprise agent orchestrator. Conducted 2026-03-21 as a four-stream parallel analysis. Covers: Agent Skills open specification, ClawHub marketplace, Skill Creator eval framework, Replit Agent v4, Google Antigravity (full-stack vibe coding), Lovable's business ops pivot, OpenAI Super App convergence, and AIUC-1 compliance domains. Each stream includes specific actionable recommendations for kaits and the aibox project.
 
 ---
 
@@ -198,33 +198,33 @@ Kaits is **meta** to vibe-coding platforms — it could orchestrate agents that 
 4. **"Good enough" wins** — vibe coding produces mediocre but instant results; kaits' governance may seem heavyweight
 5. **Google's scale** — free prototyping with Antigravity pulls casual users
 
-### 4.4 kaits + dev-box Relationship {#kaits-devbox}
+### 4.4 kaits + aibox Relationship {#kaits-aibox}
 
-The SKILL.md open standard, agent team templates, and marketplace features create overlap between kaits (PROJ-001) and dev-box (PROJ-004). Analysis:
+The SKILL.md open standard, agent team templates, and marketplace features create overlap between kaits (PROJ-001) and aibox (PROJ-004). Analysis:
 
-- **dev-box** provides the development container environment, context schema (`product` process), and tooling setup. It is the **infrastructure layer** — what environment you work in.
+- **aibox** provides the development container environment, context schema (`product` process), and tooling setup. It is the **infrastructure layer** — what environment you work in.
 - **kaits** provides the agent orchestration, governance, and company simulation. It is the **application layer** — how agents work together.
-- **Overlap zone:** Both projects need skill/plugin management, process definitions, and team configuration. The SKILL.md standard affects both: dev-box should support skill installation/management in containers, while kaits should consume skills as agent capabilities.
-- **Resolution:** dev-box owns the container-level skill infrastructure (installation, discovery, security scanning). kaits owns the agent-level skill semantics (XP, progression, capability mapping). The SKILL.md spec is the shared contract.
+- **Overlap zone:** Both projects need skill/plugin management, process definitions, and team configuration. The SKILL.md standard affects both: aibox should support skill installation/management in containers, while kaits should consume skills as agent capabilities.
+- **Resolution:** aibox owns the container-level skill infrastructure (installation, discovery, security scanning). kaits owns the agent-level skill semantics (XP, progression, capability mapping). The SKILL.md spec is the shared contract.
 
-#### 4.4.1 dev-box v0.4.0 Features Confirming the Model {#devbox-v040}
+#### 4.4.1 aibox v0.4.0 Features Confirming the Model {#aibox-v040}
 
-dev-box (as of v0.4.0, 2026-03-21) already implements mechanisms that address content ownership concerns:
+aibox (as of v0.4.0, 2026-03-21) already implements mechanisms that address content ownership concerns:
 
 **Migration system (v0.3.0+):**
-- `dev-box doctor` detects schema version mismatches between `dev-box.toml` and `.dev-box-version`
-- Generates 3 artifacts in `.dev-box/migration/`: `schema-diff.md` (structural changes), `migration-prompt.md` (AI-ready prompt for Claude Code), `checklist.md` (human-readable)
+- `aibox doctor` detects schema version mismatches between `aibox.toml` and `.aibox-version`
+- Generates 3 artifacts in `.aibox/migration/`: `schema-diff.md` (structural changes), `migration-prompt.md` (AI-ready prompt for Claude Code), `checklist.md` (human-readable)
 - Critical design principle: *"Migration artifacts describe structural changes. They do not migrate content."*
 - kaits integration: Coach/PM agent reads migration-prompt.md, compares with current processes, proposes changes, human approves
 
 **Backup (v0.3.9):**
-- `dev-box backup` creates timestamped snapshots of all managed files (dev-box.toml, .devcontainer/, .dev-box-home/, context/, CLAUDE.md)
-- `dev-box reset` with safety flags (--no-backup, --dry-run)
+- `aibox backup` creates timestamped snapshots of all managed files (aibox.toml, .devcontainer/, .aibox-home/, context/, CLAUDE.md)
+- `aibox reset` with safety flags (--no-backup, --dry-run)
 - Nothing is ever lost during upgrades or changes
 
 **Environment management (v0.4.0):**
-- `dev-box env create/switch/list/delete/status` — named environments
-- Snapshots `dev-box.toml`, `CLAUDE.md`, and `context/` (excluding shared) to `.dev-box-env/<name>/`
+- `aibox env create/switch/list/delete/status` — named environments
+- Snapshots `aibox.toml`, `CLAUDE.md`, and `context/` (excluding shared) to `.aibox-env/<name>/`
 - Switch stops container, saves current state, restores target, regenerates .devcontainer/
 - kaits integration: environment switching maps to kaits multi-project model
 
@@ -233,7 +233,7 @@ dev-box (as of v0.4.0, 2026-03-21) already implements mechanisms that address co
 - kaits integration: cross-project config, shared process definitions, company-level context
 
 **File ownership model:**
-- dev-box owns infrastructure: `.devcontainer/` files — regenerated on `generate`, "do not hand-edit"
+- aibox owns infrastructure: `.devcontainer/` files — regenerated on `generate`, "do not hand-edit"
 - User owns content: `context/` files — never overwritten, only structural migration via migration-prompt.md
 - Flavor changes are additive — files never auto-deleted when switching process flavors
 
@@ -243,13 +243,13 @@ dev-box (as of v0.4.0, 2026-03-21) already implements mechanisms that address co
 
 #### 4.4.2 Standalone vs. Combined Use {#standalone-combined}
 
-| Scope | dev-box alone | dev-box + kaits |
+| Scope | aibox alone | aibox + kaits |
 |---|---|---|
 | Process scaffolding | `--process` flag (minimal/managed/research/product) | Same foundation |
 | Process execution | Human follows conventions manually with Claude Code | AI agents run processes (PM=backlog, Coach=standups) |
 | Process customization | User edits `context/processes/*.md` directly | User designs processes in kaits company simulator |
 | Schema upgrades | migration-prompt.md → human/Claude Code applies | migration-prompt.md → kaits agent evaluates + proposes |
-| Environment switching | `dev-box env switch` copies files | Maps to kaits multi-project model |
+| Environment switching | `aibox env switch` copies files | Maps to kaits multi-project model |
 | Skills | SKILL.md installed in container, used by Claude Code | + XP tracking, proficiency, capability mapping |
 | Team | Solo developer + Claude Code | AI agent teams with RPG progression |
 | Governance | Implicit (developer discipline) | Explicit (sandbox, audit, autonomy boundaries, AIUC-1) |
@@ -267,10 +267,10 @@ All major platforms converge on consumption-based pricing: Lovable ($25/mo for ~
 | # | Recommendation | Impact | Effort |
 |---|---|---|---|
 | R1 | Adopt SKILL.md open standard in company-plugins | Cross-tool portability, ecosystem alignment | Low |
-| R2 | File dev-box issues for SKILL.md support | Container-level skill management | Low |
+| R2 | File aibox issues for SKILL.md support | Container-level skill management | Low |
 | R3 | Skill creation as RPG gameplay mechanic | Unique retention loop, extends skill tree | Medium |
 | R4 | Agent team templates | Fast onboarding, addresses "cold start" problem | Medium |
-| R5 | Analyze kaits↔dev-box responsibility boundary | Prevent overlap, clarify ownership | Low |
+| R5 | Analyze kaits↔aibox responsibility boundary | Prevent overlap, clarify ownership | Low |
 
 ### Priority 2 — Medium
 

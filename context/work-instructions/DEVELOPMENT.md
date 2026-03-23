@@ -3,18 +3,18 @@
 ## Project Structure
 
 ```
-cli/                    Rust CLI source (the dev-box binary)
+cli/                    Rust CLI source (the aibox binary)
   src/
     main.rs             Entry point, tracing setup, dispatch
     cli.rs              clap derive-based arg parsing
-    config.rs           dev-box.toml deserialization (serde + toml)
+    config.rs           aibox.toml deserialization (serde + toml)
     generate.rs         Dockerfile / compose / devcontainer.json generation
     runtime.rs          podman / docker abstraction
     container.rs        build / start / stop / attach / status / init
     context.rs          context scaffolding + gitignore + doctor helpers
     doctor.rs           diagnostic checks + migration artifacts
     update.rs           registry version checking (GHCR + GitHub releases)
-    seed.rs             .dev-box-home/ directory seeding
+    seed.rs             .aibox-home/ directory seeding
     audio.rs            host-side PulseAudio diagnostics and setup
     output.rs           ANSI-colored terminal output
     templates/          embedded Jinja2 templates (Dockerfile.j2, docker-compose.yml.j2)
@@ -40,12 +40,12 @@ cd cli && cargo clippy -- -D warnings         # Lint check
 cd cli && cargo fmt -- --check                # Format check
 ```
 
-## Config Spec — dev-box.toml
+## Config Spec — aibox.toml
 
-`dev-box.toml` is the single source of truth. All generated files derive from it.
+`aibox.toml` is the single source of truth. All generated files derive from it.
 
 Key sections:
-- `[dev-box]` — version, image flavor, process flavor
+- `[aibox]` — version, image flavor, process flavor
 - `[container]` — name, hostname, user, ports, extra_packages, extra_volumes, environment
 - `[context]` — schema_version
 - `[ai]` — providers (claude, etc.)

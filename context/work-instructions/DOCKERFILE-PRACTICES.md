@@ -1,6 +1,6 @@
 # Dockerfile Best Practices
 
-Reference for reviewing dev-box image Dockerfiles. Apply during every image change.
+Reference for reviewing aibox image Dockerfiles. Apply during every image change.
 
 ## Layer Optimization
 
@@ -47,12 +47,12 @@ With cache mounts, do NOT use `rm -rf /var/lib/apt/lists/*`.
 Run these checks periodically:
 ```bash
 # Scan image for CVEs
-trivy image ghcr.io/projectious-work/dev-box:base-latest
+trivy image ghcr.io/projectious-work/aibox:base-latest
 
 # Check Rust deps
 cargo audit
 cargo deny check
 
 # Generate SBOM
-syft ghcr.io/projectious-work/dev-box:base-latest -o cyclonedx-json
+syft ghcr.io/projectious-work/aibox:base-latest -o cyclonedx-json
 ```

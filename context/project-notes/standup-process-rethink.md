@@ -30,7 +30,7 @@ Long-running remote sessions: with Telegram/Signal access, sessions may span day
 
 ## Decision (for now)
 
-Skip STANDUPS.md in dev-box's own process (DEC-015). The current solo workflow doesn't need the file. But don't redesign the standup skill or template — the concept is sound for the mixed-team future. When that use case becomes real, the right shape will be clear from lived friction.
+Skip STANDUPS.md in aibox's own process (DEC-015). The current solo workflow doesn't need the file. But don't redesign the standup skill or template — the concept is sound for the mixed-team future. When that use case becomes real, the right shape will be clear from lived friction.
 
 ## Future Consideration
 

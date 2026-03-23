@@ -43,6 +43,6 @@ Awesome GitHub Copilot now has: 175+ agents, 208+ skills, 176+ instructions, 48+
 
 All major platforms converge on consumption-based pricing: Lovable ($25/mo ~150 credits), Replit (compute-minute), Google (token-based via Gemini API). Credit/token model is the market expectation.
 
-## Relevance to dev-box
+## Relevance to aibox
 
-dev-box sits at the "Developer Augmentation" layer — providing the container infrastructure, context schema, and curated skills. It is infrastructure, not a vibe-coding platform. The SKILL.md open standard is the shared contract between dev-box and the broader ecosystem.
+aibox sits at the "Developer Augmentation" layer — providing the container infrastructure, context schema, and curated skills. It is infrastructure, not a vibe-coding platform. The SKILL.md open standard is the shared contract between aibox and the broader ecosystem.

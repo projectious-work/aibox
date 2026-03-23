@@ -11,7 +11,7 @@ Note: uv (v0.10.x), Ruff (v0.15.x), and Zellij (v0.41.x) are all successful, wid
 ## Checklist Before v1.0.0
 
 ### API Stability
-- [ ] `dev-box.toml` schema is stable and documented
+- [ ] `aibox.toml` schema is stable and documented
 - [ ] CLI commands, flags, and exit codes are stable
 - [ ] Published a versioning policy (what's breaking vs non-breaking)
 - [ ] Preview mode for experimental features (e.g., `--preview` flag)
@@ -38,7 +38,7 @@ Note: uv (v0.10.x), Ruff (v0.15.x), and Zellij (v0.41.x) are all successful, wid
 - [ ] Architecture overview
 
 ### Real-World Usage
-- [ ] Multiple derived projects using dev-box in production
+- [ ] Multiple derived projects using aibox in production
 - [ ] Feedback incorporated from external users
 - [ ] Known issues documented and prioritized
 
@@ -52,7 +52,7 @@ Note: uv (v0.10.x), Ruff (v0.15.x), and Zellij (v0.41.x) are all successful, wid
 
 | Tool | Purpose | Integration point |
 |------|---------|-------------------|
-| cargo audit | Rust CVE checking | CI + dev-box doctor |
+| cargo audit | Rust CVE checking | CI + aibox doctor |
 | cargo deny | License + security policy | CI |
 | Trivy | Container image scanning | Image build script |
 | Syft | SBOM generation | Image release |
@@ -60,4 +60,4 @@ Note: uv (v0.10.x), Ruff (v0.15.x), and Zellij (v0.41.x) are all successful, wid
 
 ## Timeline Estimate
 
-v1.0.0 should happen when the addon system, AI flexibility, and dev-box sync are stable and battle-tested. Realistic target: after v0.6 or v0.7, once the core UX has been validated by multiple derived projects.
+v1.0.0 should happen when the addon system, AI flexibility, and aibox sync are stable and battle-tested. Realistic target: after v0.6 or v0.7, once the core UX has been validated by multiple derived projects.

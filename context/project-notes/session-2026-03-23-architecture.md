@@ -7,7 +7,7 @@ Major architecture revision implemented in 5 phases:
 1. **Phase 1**: Addon registry (17 addons with per-tool version selection), process registry (13 composable packages + 4 presets), config.rs rewrite (new TOML structure)
 2. **Phase 2**: Retired 9 image Dockerfiles, kept only `images/base-debian/`. Dockerfile template now supports multi-stage builder stages for add-ons.
 3. **Phase 3**: Process-driven scaffolding — context files and skills are deployed based on which packages the user selects. Selective skill deployment (not all 83).
-4. **Phase 4**: Sync expansion — skill reconciliation (deploy missing, warn orphans), DEVBOX.md generation (universal baseline doc), agent entry point checks.
+4. **Phase 4**: Sync expansion — skill reconciliation (deploy missing, warn orphans), AIBOX.md generation (universal baseline doc), agent entry point checks.
 5. **Phase 5**: Migration system — version detection on sync, standardized migration document generation with safety headers and verification checklists.
 
 ### BACK-021: Zensical to Docusaurus Migration
@@ -37,7 +37,7 @@ Major architecture revision implemented in 5 phases:
 ## What needs attention next
 
 ### Immediate (must)
-- **BACK-028**: Complete CLI/UX overhaul (kubectl reference, `dev-box skill/addon` subcommands)
+- **BACK-028**: Complete CLI/UX overhaul (kubectl reference, `aibox skill/addon` subcommands)
 - **BACK-002, 014, 015, 016**: Security items (sequenced after CLI overhaul)
 - **BACK-036/037**: Yazi fixes are in the Dockerfile but need a container rebuild + image push to verify
 
@@ -49,7 +49,7 @@ Major architecture revision implemented in 5 phases:
 
 ### Content updates needed
 - Container docs: still reference 10 image flavors (need update for 1 base + add-ons)
-- Configuration docs: need update for new dev-box.toml structure
+- Configuration docs: need update for new aibox.toml structure
 - Context docs: need update for 13 composable packages replacing 4 levels
 
 ## Key files changed

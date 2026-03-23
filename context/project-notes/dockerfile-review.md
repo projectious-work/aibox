@@ -94,7 +94,7 @@ The entire TeX Live builder stage (lines 1-95) is copy-pasted identically across
 Recommended fix: Extract the TeX Live builder into a shared base image that all three can reference:
 ```dockerfile
 # Build a shared texlive-builder image, then in each consumer:
-COPY --from=ghcr.io/projectious-work/dev-box:texlive-builder /usr/local/texlive /usr/local/texlive
+COPY --from=ghcr.io/projectious-work/aibox:texlive-builder /usr/local/texlive /usr/local/texlive
 ```
 
 **b) Missing fontconfig registration in latex/Dockerfile (Medium)**
@@ -182,7 +182,7 @@ The practices doc explicitly says "With cache mounts, do NOT use `rm -rf /var/li
 `latex/Dockerfile`, `python-latex/Dockerfile`, and `rust-latex/Dockerfile` share an identical ~90-line TeX Live builder stage. A change to the LaTeX package list must be applied in 3 places. Consider publishing a `texlive-builder` intermediate image or using a shared Dockerfile with build args.
 
 ### 4. No base image digest pinning (Low)
-`debian:trixie-slim` is used by tag in 4 Dockerfiles. The GHCR base images (`ghcr.io/projectious-work/dev-box:base-latest`, etc.) are also referenced by floating `latest` tags. For full reproducibility, pin by digest.
+`debian:trixie-slim` is used by tag in 4 Dockerfiles. The GHCR base images (`ghcr.io/projectious-work/aibox:base-latest`, etc.) are also referenced by floating `latest` tags. For full reproducibility, pin by digest.
 
 ### 5. No checksum verification for any downloaded binary (Medium)
 Affects: base (10 tools), typst, python-typst, rust (rustup). The practices doc requires "Always verify checksums for downloaded binaries."

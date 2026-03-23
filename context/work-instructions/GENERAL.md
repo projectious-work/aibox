@@ -1,6 +1,6 @@
 # General Work Instructions
 
-Machine-managed by dev-box. These rules apply to all AI agents working in this repo.
+Machine-managed by aibox. These rules apply to all AI agents working in this repo.
 
 ## Critical Architectural Distinction
 
@@ -35,9 +35,9 @@ Never confuse these two. Changes to `.devcontainer/` affect our development. Cha
 
 - **Podman compose** output format varies by version; always use `inspect`
 - **Stale image cache**: rebuild with `--no-cache` if container exits immediately
-- **`.dev-box-home/` must be in `.gitignore`** — contains SSH keys and personal config
+- **`.aibox-home/` must be in `.gitignore`** — contains SSH keys and personal config
 - **Zellij pinned to 0.43.1**: change `ARG ZELLIJ_VERSION` to upgrade
 - **`host.docker.internal`**: works on Docker Desktop and Podman pasta; bare Linux Docker may need `--add-host`
 - **OrbStack virtiofs**: files mounted from macOS may lose execute permissions. Workaround: `chmod +x` inside container.
 - **Claude Code OAuth in containers**: use `claude setup-token` or authenticate on host (credentials shared via `.claude` mount). See [anthropics/claude-code#14528](https://github.com/anthropics/claude-code/issues/14528). Do NOT use `network_mode: host`.
-- **OrbStack network dropout**: After ~20 minutes of idle, OrbStack's VM NAT can drop connections — breaking Telegram plugins and other long-lived network features. Fix: set `keepalive = true` in `[container]` of `dev-box.toml`. This adds a lightweight DNS lookup every 2 minutes via `postStartCommand`.
+- **OrbStack network dropout**: After ~20 minutes of idle, OrbStack's VM NAT can drop connections — breaking Telegram plugins and other long-lived network features. Fix: set `keepalive = true` in `[container]` of `aibox.toml`. This adds a lightweight DNS lookup every 2 minutes via `postStartCommand`.
