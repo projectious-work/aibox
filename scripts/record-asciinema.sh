@@ -23,7 +23,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-OUTPUT_DIR="${PROJECT_ROOT}/docs/assets/screencasts"
+OUTPUT_DIR="${PROJECT_ROOT}/docs-site/static/screencasts"
 
 # Terminal dimensions for recordings
 LAYOUT_COLS=160
@@ -316,7 +316,7 @@ mkdir -p my-project && cd my-project
 sleep 0.3
 echo -ne '\033[32m❯\033[0m '
 sleep 0.3
-for c in d e v - b o x ' ' i n i t ' ' - - n a m e ' ' m y - p r o j e c t ' ' - - i m a g e ' ' p y t h o n ' ' - - p r o c e s s ' ' m a n a g e d; do
+for c in a i b o x ' ' i n i t ' ' - - n a m e ' ' m y - p r o j e c t ' ' - - i m a g e ' ' p y t h o n ' ' - - p r o c e s s ' ' m a n a g e d; do
   printf '%s' "\$c"
   sleep 0.06
 done
@@ -326,7 +326,7 @@ aibox init --name my-project --image python --process managed 2>&1 || true
 sleep 1
 echo -ne '\033[32m❯\033[0m '
 sleep 0.3
-for c in c a t ' ' d e v - b o x . t o m l; do
+for c in c a t ' ' a i b o x . t o m l; do
   printf '%s' "\$c"
   sleep 0.06
 done
@@ -372,7 +372,7 @@ generate_gifs() {
 
 generate_readme_gif() {
   local cast="${OUTPUT_DIR}/layout-dev.cast"
-  local gif="${PROJECT_ROOT}/docs/assets/readme-dev-layout.gif"
+  local gif="${PROJECT_ROOT}/docs-site/static/screencasts/readme-dev-layout.gif"
 
   if ! command -v agg &>/dev/null; then
     warn "agg not found — skipping README GIF"
