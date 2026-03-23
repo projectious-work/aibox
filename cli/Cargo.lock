@@ -34,6 +34,7 @@ dependencies = [
  "serial_test",
  "tempfile",
  "toml",
+ "toml_edit",
  "tracing",
  "tracing-subscriber",
  "ureq",
