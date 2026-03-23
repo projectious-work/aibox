@@ -283,7 +283,7 @@ DRIVER
 }
 
 # ─── CLI demo recording ──────────────────────────────────────────────────────
-# Records a scripted CLI demo (e.g., dev-box init) with simulated typing.
+# Records a scripted CLI demo (e.g., aibox init) with simulated typing.
 
 record_init_demo() {
   local output="${OUTPUT_DIR}/init-demo.cast"
@@ -321,7 +321,7 @@ for c in d e v - b o x ' ' i n i t ' ' - - n a m e ' ' m y - p r o j e c t ' ' -
   sleep 0.06
 done
 echo
-dev-box init --name my-project --image python --process managed 2>&1 || true
+aibox init --name my-project --image python --process managed 2>&1 || true
 
 sleep 1
 echo -ne '\033[32m❯\033[0m '
@@ -331,7 +331,7 @@ for c in c a t ' ' d e v - b o x . t o m l; do
   sleep 0.06
 done
 echo
-cat dev-box.toml 2>/dev/null || echo "(dev-box.toml would appear here)"
+cat aibox.toml 2>/dev/null || echo "(aibox.toml would appear here)"
 
 sleep 2
 DRIVER

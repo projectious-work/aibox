@@ -18,4 +18,4 @@ definition of done. Processes are intentionally thin. The executable details
 - Edit any process file to match your team's workflow.
 - Add new process files for project-specific workflows.
 - Remove processes you don't use.
-- Install matching skills with `dev-box skill install <skill-name>` (coming soon).
+- Install matching skills with `aibox skill install <skill-name>` (coming soon).

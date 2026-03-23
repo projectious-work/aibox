@@ -1,9 +1,9 @@
 ---
 schema_version: "1.0.0"
-dev_box_version: "0.1.0"
+aibox_version: "0.1.0"
 ---
 
-# Dev-Box Context Schema v1.0.0
+# Aibox Context Schema v1.0.0
 
 ## AI Migration Agent Instructions
 
@@ -44,8 +44,8 @@ The lightest process. Suitable for scripts, experiments, and throwaway projects.
 
 **Required files:**
 - `CLAUDE.md` (project root)
-- `.dev-box-version`
-- `.gitignore` (with dev-box entries)
+- `.aibox-version`
+- `.gitignore` (with aibox entries)
 
 **No context/ directory is created.**
 
@@ -61,8 +61,8 @@ decision tracking and a task backlog.
 - `context/BACKLOG.md`
 - `context/STANDUPS.md`
 - `context/work-instructions/GENERAL.md`
-- `.dev-box-version`
-- `.gitignore` (with dev-box entries)
+- `.aibox-version`
+- `.gitignore` (with aibox entries)
 
 ### research
 
@@ -75,8 +75,8 @@ books, reports). Tracks progress across sections rather than a task backlog.
 - `context/PROGRESS.md`
 - `context/research/.gitkeep`
 - `context/analysis/.gitkeep`
-- `.dev-box-version`
-- `.gitignore` (with dev-box entries)
+- `.aibox-version`
+- `.gitignore` (with aibox entries)
 
 **Required directories:**
 - `context/research/` — research notes and source material
@@ -101,8 +101,8 @@ project tracking, PRD, and team collaboration rules.
 - `context/work-instructions/TEAM.md`
 - `context/project-notes/.gitkeep`
 - `context/ideas/.gitkeep`
-- `.dev-box-version`
-- `.gitignore` (with dev-box entries)
+- `.aibox-version`
+- `.gitignore` (with aibox entries)
 
 **Required directories:**
 - `context/project-notes/` — deep research on specific topics
@@ -129,7 +129,7 @@ Claude reads when starting work on a project.
 | Context Files | managed, research, product | Lists context/ directory contents |
 
 **Template variable:** `{{project_name}}` is replaced with the project name
-from dev-box.toml during scaffolding.
+from aibox.toml during scaffolding.
 
 **Example (managed):**
 ```markdown
@@ -168,9 +168,9 @@ The `context/` directory contains structured project management files:
 ### context/OWNER.md
 
 **Purpose:** Profile of the project owner. Shared across projects via
-symlink to `~/.config/dev-box/OWNER.md`.
+symlink to `~/.config/aibox/OWNER.md`.
 
-**Setup:** If `~/.config/dev-box/OWNER.md` exists at init time, a symlink
+**Setup:** If `~/.config/aibox/OWNER.md` exists at init time, a symlink
 is created. Otherwise a placeholder is written with instructions.
 
 **Required sections:**
@@ -358,8 +358,8 @@ requirements, non-goals, and success metrics.
 
 ### context/work-instructions/GENERAL.md
 
-**Purpose:** General rules for all AI agents. Managed by dev-box and
-updated via `dev-box doctor` and `dev-box update`.
+**Purpose:** General rules for all AI agents. Managed by aibox and
+updated via `aibox doctor` and `aibox update`.
 
 **Used by:** managed, product
 
@@ -391,10 +391,10 @@ code conventions, branching strategy.
 
 ---
 
-## .dev-box-version
+## .aibox-version
 
-**Purpose:** Records the dev-box CLI version that created or last updated
-the context structure. Used by `dev-box doctor` to detect schema drift.
+**Purpose:** Records the aibox CLI version that created or last updated
+the context structure. Used by `aibox doctor` to detect schema drift.
 
 **Format:** Plain text, single line, semver string. Example: `0.1.0`
 
@@ -405,12 +405,12 @@ the context structure. Used by `dev-box doctor` to detect schema drift.
 The following entries must be present in `.gitignore`:
 
 ```
-# dev-box generated
+# aibox generated
 .devcontainer/Dockerfile
 .devcontainer/docker-compose.yml
 .devcontainer/devcontainer.json
 .root/
-.dev-box-version
+.aibox-version
 ```
 
 ---

@@ -5,7 +5,7 @@ title: "New Project"
 
 # New Project
 
-This guide walks through creating a new project from scratch with dev-box.
+This guide walks through creating a new project from scratch with aibox.
 
 ## Initialize the Project
 
@@ -13,7 +13,7 @@ This guide walks through creating a new project from scratch with dev-box.
 mkdir my-app && cd my-app
 git init
 
-dev-box init --name my-app --image python --process product
+aibox init --name my-app --image python --process product
 ```
 
 The `init` command accepts these options:
@@ -24,7 +24,7 @@ The `init` command accepts these options:
 | `--image` | `base` | Image flavor (`base`, `python`, `latex`, `typst`, `rust`, `node`, `go`, `python-latex`, `python-typst`, `rust-latex`) |
 | `--process` | `product` | Work process flavor (`minimal`, `managed`, `research`, `product`) |
 
-If you omit options, `dev-box init` runs interactively and prompts for each value.
+If you omit options, `aibox init` runs interactively and prompts for each value.
 
 <div class="asciinema" data-cast="/screencasts/init-demo.cast" data-poster="npt:0" data-fit="width"></div>
 
@@ -34,13 +34,13 @@ After running `init` with `--process product`, your project looks like this:
 
 ```
 my-app/
-├── dev-box.toml                  # Single source of truth
+├── aibox.toml                  # Single source of truth
 ├── CLAUDE.md                     # AI agent entry point
 ├── .gitignore                    # Generated with language-specific blocks
-├── .dev-box-version              # Tracks schema version
-├── .dev-box-home/                # Persistent config (git-ignored)
+├── .aibox-version              # Tracks schema version
+├── .aibox-home/                # Persistent config (git-ignored)
 ├── .devcontainer/
-│   ├── Dockerfile                # Generated from dev-box.toml
+│   ├── Dockerfile                # Generated from aibox.toml
 │   ├── docker-compose.yml        # Generated — volume mounts, env vars
 │   └── devcontainer.json         # Generated — VS Code integration
 ├── .claude/
@@ -80,7 +80,7 @@ my-app/
 
 The example above shows the `product` process (fullest). Other flavors scaffold less:
 
-- **minimal** — only `CLAUDE.md` and `.dev-box-version`
+- **minimal** — only `CLAUDE.md` and `.aibox-version`
 - **managed** — adds `BACKLOG.md`, `DECISIONS.md`, work-instructions
 - **research** — adds progress tracking, notes, research directory
 
@@ -88,18 +88,18 @@ See [Process Packages](../context/process-packages.md) for details.
 
 :::
 
-## The Generated dev-box.toml
+## The Generated aibox.toml
 
 The scaffolded config file comes with commented documentation for every option:
 
 ```toml
-# dev-box.toml — project configuration for dev-box.
+# aibox.toml — project configuration for aibox.
 # All generated files (.devcontainer/) derive from this file.
-# Run `dev-box sync` after editing to regenerate.
+# Run `aibox sync` after editing to regenerate.
 #
-# Full documentation: https://projectious-work.github.io/dev-box/cli/configuration/
+# Full documentation: https://projectious-work.github.io/aibox/cli/configuration/
 
-[dev-box]
+[aibox]
 version = "0.8.0"
 # Container image flavor. Options: base, python, latex, typst, rust, node, go,
 # python-latex, python-typst, rust-latex
@@ -151,7 +151,7 @@ theme = "gruvbox-dark"
 prompt = "default"
 
 # Audio support for PulseAudio bridging (e.g., Claude Code voice).
-# Requires host-side PulseAudio setup: run `dev-box audio setup`
+# Requires host-side PulseAudio setup: run `aibox audio setup`
 [audio]
 enabled = false
 # pulse_server = "tcp:host.docker.internal:4714"
@@ -160,21 +160,21 @@ enabled = false
 After editing, regenerate devcontainer files:
 
 ```bash
-dev-box sync
+aibox sync
 ```
 
 ## Build and Start
 
 ```bash
-dev-box build    # Build the container image
-dev-box start    # Start the container and attach via Zellij
+aibox build    # Build the container image
+aibox start    # Start the container and attach via Zellij
 ```
 
 You land in a Zellij session with the **dev** layout: Yazi file browser (40%) and Vim editor (60%) side by side, plus tabs for Claude Code, lazygit, and shell.
 
 Two additional layouts are available: **focus** (one tool per tab, fullscreen) and **cowork** (Yazi+Vim left, Claude right). See [Layouts](../container/base-image.md#layouts).
 
-The project root is mounted at `/workspace`. Persistent configuration lives in `.dev-box-home/` on the host, mounted into the container automatically.
+The project root is mounted at `/workspace`. Persistent configuration lives in `.aibox-home/` on the host, mounted into the container automatically.
 
 ## VS Code Integration
 
@@ -184,7 +184,7 @@ The generated `devcontainer.json` works with VS Code's Dev Containers extension:
 2. When prompted, click "Reopen in Container"
 3. VS Code builds and starts the container automatically
 
-Both `dev-box start` (terminal) and VS Code can use the same container simultaneously.
+Both `aibox start` (terminal) and VS Code can use the same container simultaneously.
 
 ## Next Steps
 

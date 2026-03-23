@@ -1,4 +1,4 @@
-# ~/.bashrc — dev-box base image shell configuration
+# ~/.bashrc — aibox base image shell configuration
 
 # If not running interactively, don't do anything
 case $- in

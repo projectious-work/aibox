@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# build-macos.sh — build dev-box CLI binaries for macOS
+# build-macos.sh — build aibox CLI binaries for macOS
 #
 # Run this on a macOS host (not inside the dev-container).
 # Produces release binaries for both Apple Silicon and Intel Macs.
@@ -13,8 +13,8 @@
 #   ./scripts/build-macos.sh 0.2.0     # build with version in artifact names
 #
 # Output:
-#   dist/dev-box-[vVERSION-]aarch64-apple-darwin.tar.gz
-#   dist/dev-box-[vVERSION-]x86_64-apple-darwin.tar.gz
+#   dist/aibox-[vVERSION-]aarch64-apple-darwin.tar.gz
+#   dist/aibox-[vVERSION-]x86_64-apple-darwin.tar.gz
 #
 # Prerequisites:
 #   - macOS (any version with Xcode command line tools)
@@ -81,8 +81,8 @@ for target in "${TARGETS[@]}"; do
   info "Building for ${target}..."
   (cd "${CLI_DIR}" && cargo build --release --target "${target}")
 
-  local_name="dev-box-${VERSION_TAG}${target}"
-  cp "${CLI_DIR}/target/${target}/release/dev-box" "${DIST_DIR}/${local_name}"
+  local_name="aibox-${VERSION_TAG}${target}"
+  cp "${CLI_DIR}/target/${target}/release/aibox" "${DIST_DIR}/${local_name}"
   tar -czf "${DIST_DIR}/${local_name}.tar.gz" -C "${DIST_DIR}" "${local_name}"
   rm "${DIST_DIR}/${local_name}"
   ok "Built ${local_name}.tar.gz"
@@ -93,7 +93,7 @@ echo ""
 echo "${bold}macOS binaries built:${reset}"
 echo ""
 for target in "${TARGETS[@]}"; do
-  local_name="dev-box-${VERSION_TAG}${target}"
+  local_name="aibox-${VERSION_TAG}${target}"
   echo "  ${DIST_DIR}/${local_name}.tar.gz"
 done
 echo ""
@@ -101,6 +101,6 @@ echo ""
 if [[ -n "${VERSION}" ]]; then
   echo "To attach to an existing GitHub release:"
   echo ""
-  echo "  gh release upload v${VERSION} dist/dev-box-v${VERSION}-*-apple-darwin.tar.gz"
+  echo "  gh release upload v${VERSION} dist/aibox-v${VERSION}-*-apple-darwin.tar.gz"
   echo ""
 fi

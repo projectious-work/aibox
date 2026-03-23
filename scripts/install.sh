@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-# install.sh — install dev-box CLI from GitHub releases
+# install.sh — install aibox CLI from GitHub releases
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/projectious-work/dev-box/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash
 #
 # Options (via environment variables):
 #   VERSION=0.2.0    Install a specific version (default: latest)
@@ -21,8 +21,8 @@
 # =============================================================================
 set -euo pipefail
 
-REPO="projectious-work/dev-box"
-BINARY_NAME="dev-box"
+REPO="projectious-work/aibox"
+BINARY_NAME="aibox"
 DEFAULT_INSTALL_DIR="${HOME}/.local/bin"
 
 # ── Colours (disabled if not a terminal) ─────────────────────────────────────
@@ -91,10 +91,10 @@ check_existing() {
     local current
     current=$("${install_dir}/${BINARY_NAME}" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
     if [[ "${current}" == "${version}" ]]; then
-      ok "dev-box v${version} is already installed at ${install_dir}/${BINARY_NAME}"
+      ok "aibox v${version} is already installed at ${install_dir}/${BINARY_NAME}"
       exit 0
     fi
-    warn "Upgrading dev-box from v${current} to v${version}"
+    warn "Upgrading aibox from v${current} to v${version}"
   fi
 }
 
@@ -106,7 +106,7 @@ main() {
   version=$(resolve_version)
   install_dir="${INSTALL_DIR:-${DEFAULT_INSTALL_DIR}}"
 
-  info "Installing dev-box v${version} for ${platform}"
+  info "Installing aibox v${version} for ${platform}"
 
   check_existing "${install_dir}" "${version}"
 
@@ -139,7 +139,7 @@ main() {
 
   # Verify
   if "${install_dir}/${BINARY_NAME}" --help &>/dev/null; then
-    ok "dev-box v${version} is ready"
+    ok "aibox v${version} is ready"
   else
     warn "Binary installed but failed to execute — check your system compatibility"
   fi

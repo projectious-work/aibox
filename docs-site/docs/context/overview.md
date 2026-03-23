@@ -5,7 +5,7 @@ title: "Context Overview"
 
 # Context System Overview
 
-The dev-box context system provides structured files that give AI agents the information they need to work effectively on your project.
+The aibox context system provides structured files that give AI agents the information they need to work effectively on your project.
 
 ## The Problem
 
@@ -15,7 +15,7 @@ AI coding agents like Claude operate best when they understand not just the code
 
 ## How Context Files Work
 
-dev-box scaffolds a `context/` directory based on your chosen work process flavor. Each file has a defined purpose:
+aibox scaffolds a `context/` directory based on your chosen work process flavor. Each file has a defined purpose:
 
 | File | Purpose |
 |------|---------|
@@ -35,7 +35,7 @@ The `context/` directory contains structured project knowledge: what has been de
 
 ## OWNER.md -- Developer Identity
 
-`OWNER.md` captures the developer's identity and preferences. It is created as a local file in `context/OWNER.md` during `dev-box init`, with fields that help AI agents understand who they are working with:
+`OWNER.md` captures the developer's identity and preferences. It is created as a local file in `context/OWNER.md` during `aibox init`, with fields that help AI agents understand who they are working with:
 
 - **Name** -- how the developer prefers to be addressed
 - **Domain expertise** -- areas of knowledge and experience
@@ -50,7 +50,7 @@ Each project gets its own `OWNER.md`, allowing you to tailor the developer conte
 
 ## Work Process Flavors
 
-dev-box provides four process flavors that scale from simple to comprehensive:
+aibox provides four process flavors that scale from simple to comprehensive:
 
 | Flavor | Files | Best For |
 |--------|-------|----------|
@@ -63,31 +63,31 @@ See [Process Packages](process-packages.md) for detailed documentation of each f
 
 ## Version Tracking
 
-The context schema is versioned via `dev-box.toml`:
+The context schema is versioned via `aibox.toml`:
 
 ```toml
 [context]
 schema_version = "1.0.0"
 ```
 
-A `.dev-box-version` file in the project root tracks the version that was last applied. When the schema evolves, `dev-box doctor` can detect version mismatches and generate migration artifacts.
+A `.aibox-version` file in the project root tracks the version that was last applied. When the schema evolves, `aibox doctor` can detect version mismatches and generate migration artifacts.
 
 See [Migration](migration.md) for details on how upgrades work.
 
-## Relationship to dev-box.toml
+## Relationship to aibox.toml
 
-The `process` field in `[dev-box]` determines which context files are scaffolded during `dev-box init`:
+The `process` field in `[aibox]` determines which context files are scaffolded during `aibox init`:
 
 ```toml
-[dev-box]
+[aibox]
 process = "product"
 ```
 
-Changing this field after initialization does not automatically add or remove files. Use `dev-box doctor` to identify gaps and `dev-box sync` to reconcile.
+Changing this field after initialization does not automatically add or remove files. Use `aibox doctor` to identify gaps and `aibox sync` to reconcile.
 
 ## Process Templates
 
-dev-box ships four process templates in `context/processes/` that define standard workflows for common development activities:
+aibox ships four process templates in `context/processes/` that define standard workflows for common development activities:
 
 | Template | Purpose |
 |----------|---------|
@@ -106,7 +106,7 @@ You can customize process templates freely: edit them, add new ones, or remove o
 
 Skills complement processes by providing the **HOW** -- executable instructions for AI agents. A skill is a `SKILL.md` file installed at `.claude/skills/<name>/SKILL.md` that tells the AI agent how to perform a specific task.
 
-dev-box bundles three example skills:
+aibox bundles three example skills:
 
 | Skill | Description |
 |-------|-------------|
@@ -126,4 +126,4 @@ See [Skills](../skills/index.md) for full documentation on installing and using 
 
 **Progressive complexity.** Start with `minimal` and upgrade to `managed` or `product` as the project grows.
 
-**No lock-in.** Context files are plain Markdown in a `context/` directory. Stop using dev-box and the files remain useful.
+**No lock-in.** Context files are plain Markdown in a `context/` directory. Stop using aibox and the files remain useful.

@@ -3,7 +3,7 @@ import Layout from '@theme/Layout';
 
 export default function Features() {
   return (
-    <Layout title="Features" description="dev-box features overview">
+    <Layout title="Features" description="aibox features overview">
       <div className="container margin-vert--lg">
         <h1>Features</h1>
 
@@ -20,10 +20,10 @@ export default function Features() {
         <p>Gruvbox Dark, Catppuccin Mocha, Catppuccin Latte, Dracula, Tokyo Night, and Nord — applied consistently across Zellij, Vim, Yazi, lazygit, and Starship.</p>
 
         <h2>Declarative Configuration</h2>
-        <p>One dev-box.toml controls everything: base image, add-ons with versions, process packages, skill selection, themes, and AI providers. Run dev-box sync to reconcile.</p>
+        <p>One aibox.toml controls everything: base image, add-ons with versions, process packages, skill selection, themes, and AI providers. Run aibox sync to reconcile.</p>
 
         <h2>Migration System</h2>
-        <p>When dev-box updates, migration documents are auto-generated with safety headers, action items, and verification checklists. Your AI agent picks them up at session start.</p>
+        <p>When aibox updates, migration documents are auto-generated with safety headers, action items, and verification checklists. Your AI agent picks them up at session start.</p>
       </div>
     </Layout>
   );

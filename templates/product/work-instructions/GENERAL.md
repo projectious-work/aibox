@@ -1,8 +1,8 @@
 # General Work Instructions
 
 Rules and guidelines that apply to all AI agents working in this project.
-This file is managed by dev-box and should not be edited directly.
-Updates come via `dev-box doctor` and `dev-box update`.
+This file is managed by aibox and should not be edited directly.
+Updates come via `aibox doctor` and `aibox update`.
 
 ## Communication
 
@@ -25,11 +25,11 @@ Updates come via `dev-box doctor` and `dev-box update`.
 
 ## Upstream Contributions
 
-- When making changes that could benefit other dev-box projects, consider
-  contributing them back to the dev-box project
+- When making changes that could benefit other aibox projects, consider
+  contributing them back to the aibox project
 - Generalizable improvements to templates, work-instructions, or tooling
   should be submitted as pull requests to
-  https://github.com/projectious-work/dev-box
+  https://github.com/projectious-work/aibox
 - Bug reports, feature requests, and discussions are welcome via GitHub Issues
 - Follow standard open source contribution practices: fork, branch, PR with
   clear description of the change and its motivation

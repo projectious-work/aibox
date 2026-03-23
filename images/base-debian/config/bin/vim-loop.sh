@@ -11,7 +11,7 @@ while true; do
         break
     fi
     # Normal :q — return focus to yazi pane, then restart vim
-    dir="${DEVBOX_EDITOR_DIR:-right}"
+    dir="${AIBOX_EDITOR_DIR:-right}"
     case "$dir" in
         down) zellij action move-focus up 2>/dev/null ;;
         tab)  zellij action go-to-tab-name "files" 2>/dev/null ;;

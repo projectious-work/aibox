@@ -5,7 +5,7 @@ title: "Process Packages"
 
 # Process Packages
 
-dev-box provides four work process flavors that determine which context files are scaffolded for your project. Choose the one that matches your project's complexity and workflow.
+aibox provides four work process flavors that determine which context files are scaffolded for your project. Choose the one that matches your project's complexity and workflow.
 
 ## Decision Matrix
 
@@ -275,7 +275,7 @@ A CLI tool that manages AI-ready development containers.
 
 ## Requirements
 ### Must Have
-- Single config file (dev-box.toml)
+- Single config file (aibox.toml)
 - Container lifecycle management
 - Context scaffolding
 
@@ -296,18 +296,18 @@ A CLI tool that manages AI-ready development containers.
 
 ## Changing Process Flavor
 
-You can change the process flavor in `dev-box.toml` at any time:
+You can change the process flavor in `aibox.toml` at any time:
 
 ```toml
-[dev-box]
+[aibox]
 process = "product"  # was "managed"
 ```
 
 However, changing the flavor does not automatically create or remove files. To reconcile:
 
-1. Update the `process` field in `dev-box.toml`
-2. Run `dev-box doctor` to see what files are missing or extra
-3. Create missing files manually or re-run `dev-box init` in a temporary directory and copy the templates
+1. Update the `process` field in `aibox.toml`
+2. Run `aibox doctor` to see what files are missing or extra
+3. Create missing files manually or re-run `aibox init` in a temporary directory and copy the templates
 
 :::warning Upgrading is additive
 

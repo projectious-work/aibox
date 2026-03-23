@@ -1,7 +1,7 @@
 // =============================================================================
 // "dev" layout — file browser + editor (default)
 //
-// Select with: dev-box start --layout dev
+// Select with: aibox start --layout dev
 //
 // Structure:
 //   ┌──────────────────┬────────────────────────────┐

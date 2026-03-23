@@ -159,13 +159,13 @@ test_cli() {
   info "Testing CLI..."
 
   local devbox=""
-  if [ -x "${PROJECT_ROOT}/cli/target/release/dev-box" ]; then
-    devbox="${PROJECT_ROOT}/cli/target/release/dev-box"
-  elif [ -x "${PROJECT_ROOT}/cli/target/debug/dev-box" ]; then
-    devbox="${PROJECT_ROOT}/cli/target/debug/dev-box"
+  if [ -x "${PROJECT_ROOT}/cli/target/release/aibox" ]; then
+    devbox="${PROJECT_ROOT}/cli/target/release/aibox"
+  elif [ -x "${PROJECT_ROOT}/cli/target/debug/aibox" ]; then
+    devbox="${PROJECT_ROOT}/cli/target/debug/aibox"
   else
-    skip "cli:init (dev-box binary not found)"
-    skip "cli:doctor (dev-box binary not found)"
+    skip "cli:init (aibox binary not found)"
+    skip "cli:doctor (aibox binary not found)"
     return
   fi
 
@@ -176,10 +176,10 @@ test_cli() {
   asciinema rec --cols 100 --rows 20 --overwrite \
     -c "cd ${workdir} && ${devbox} init --name test --image base --process minimal 2>&1" \
     "${cast}" 2>/dev/null || true
-  if [ -f "${workdir}/dev-box.toml" ]; then
-    pass "cli:init (dev-box.toml created)"
+  if [ -f "${workdir}/aibox.toml" ]; then
+    pass "cli:init (aibox.toml created)"
   else
-    fail "cli:init (dev-box.toml not found)"
+    fail "cli:init (aibox.toml not found)"
   fi
   rm -rf "${workdir}"
 }

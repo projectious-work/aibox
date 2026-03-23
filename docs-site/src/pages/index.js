@@ -29,7 +29,7 @@ function Hero() {
 const features = [
   {
     title: 'One Command Setup',
-    description: 'From zero to a fully configured dev environment with dev-box init. Container, AI context, skills, and theming — all scaffolded.',
+    description: 'From zero to a fully configured dev environment with aibox init. Container, AI context, skills, and theming — all scaffolded.',
   },
   {
     title: '13 Process Packages',
@@ -73,9 +73,9 @@ function QuickStart() {
     <section className={styles.quickstart}>
       <div className="container">
         <h2>Quick Start</h2>
-        <pre><code>{`curl -fsSL https://raw.githubusercontent.com/projectious-work/dev-box/main/install.sh | sh
-dev-box init --name my-project --base debian
-dev-box build && dev-box start`}</code></pre>
+        <pre><code>{`curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/install.sh | sh
+aibox init --name my-project --base debian
+aibox build && aibox start`}</code></pre>
       </div>
     </section>
   );
