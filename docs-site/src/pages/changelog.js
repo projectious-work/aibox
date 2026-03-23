@@ -6,7 +6,7 @@ export default function Changelog() {
     <Layout title="Changelog">
       <div className="container margin-vert--lg">
         <h1>Changelog</h1>
-        <p>See <a href="https://github.com/projectious-work/dev-box/releases">GitHub Releases</a> for the full changelog.</p>
+        <p>See <a href="https://github.com/projectious-work/aibox/releases">GitHub Releases</a> for the full changelog.</p>
       </div>
     </Layout>
   );

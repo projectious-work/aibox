@@ -5,15 +5,15 @@ title: Contributing
 
 # Contributing
 
-Thank you for your interest in contributing to dev-box!
+Thank you for your interest in contributing to aibox!
 
 ## Getting Started
 
 1. Fork and clone the repository:
 
     ```bash
-    git clone https://github.com/projectious-work/dev-box.git
-    cd dev-box
+    git clone https://github.com/projectious-work/aibox.git
+    cd aibox
     ```
 
 2. Start the development container:
@@ -21,7 +21,7 @@ Thank you for your interest in contributing to dev-box!
     ```bash
     cd .devcontainer
     docker compose up -d
-    docker compose exec dev-box bash
+    docker compose exec aibox bash
     ```
 
     Or open in VS Code with the Dev Containers extension.
@@ -50,7 +50,7 @@ Thank you for your interest in contributing to dev-box!
 - **`docs/`** — MkDocs documentation source
 - **`.devcontainer/`** — This project's own dev environment
 
-See [CLAUDE.md](https://github.com/projectious-work/dev-box/blob/main/CLAUDE.md) for detailed architecture notes.
+See [CLAUDE.md](https://github.com/projectious-work/aibox/blob/main/CLAUDE.md) for detailed architecture notes.
 
 ## Development Workflow
 
@@ -64,7 +64,7 @@ See [CLAUDE.md](https://github.com/projectious-work/dev-box/blob/main/CLAUDE.md)
 ### Image Changes
 
 1. Edit the relevant Dockerfile in `images/`
-2. Build locally to verify: `docker build -t dev-box-test images/<flavor>/`
+2. Build locally to verify: `docker build -t aibox-test images/<flavor>/`
 3. Test that derived images still build if you changed the base
 
 ### Documentation Changes
@@ -82,11 +82,11 @@ See [CLAUDE.md](https://github.com/projectious-work/dev-box/blob/main/CLAUDE.md)
 
 ## Reporting Issues
 
-File issues at [github.com/projectious-work/dev-box/issues](https://github.com/projectious-work/dev-box/issues).
+File issues at [github.com/projectious-work/aibox/issues](https://github.com/projectious-work/aibox/issues).
 
 When filing an issue, please:
 
 - Use a descriptive title
 - Label it: `bug` for broken behavior, `enhancement` for feature requests, `documentation` for doc gaps
 - Include steps to reproduce (for bugs) or a use case description (for enhancements)
-- Mention the dev-box version (`dev-box --version`) and container image flavor if relevant
+- Mention the aibox version (`aibox --version`) and container image flavor if relevant

@@ -4,7 +4,7 @@ title: Color Themes
 
 # Themes
 
-dev-box supports consistent color theming across all terminal tools. Set a theme in `dev-box.toml`:
+aibox supports consistent color theming across all terminal tools. Set a theme in `aibox.toml`:
 
 ```toml
 [appearance]
@@ -14,7 +14,7 @@ theme = "gruvbox-dark"
 Or during project initialization:
 
 ```bash
-dev-box init --theme catppuccin-mocha
+aibox init --theme catppuccin-mocha
 ```
 
 The selected theme is applied to **Zellij**, **Vim**, **Yazi**, and **lazygit** simultaneously.
@@ -98,7 +98,7 @@ Claude Code inherits terminal colors automatically — no separate theme needed.
 
 To switch themes in an existing project:
 
-1. Edit `dev-box.toml`:
+1. Edit `aibox.toml`:
    ```toml
    [appearance]
    theme = "tokyo-night"
@@ -106,14 +106,14 @@ To switch themes in an existing project:
 
 2. Run sync to apply the change:
    ```bash
-   dev-box sync
+   aibox sync
    ```
 
 3. Rebuild and restart:
    ```bash
-   dev-box build --no-cache
-   dev-box start
+   aibox build --no-cache
+   aibox start
    ```
 
 !!! note "Theme files are force-updated by sync"
-    `dev-box sync` automatically overwrites theme-dependent config files (vimrc, zellij config, zellij themes, lazygit config, yazi theme) to match the selected theme. You do not need to manually delete them before switching.
+    `aibox sync` automatically overwrites theme-dependent config files (vimrc, zellij config, zellij themes, lazygit config, yazi theme) to match the selected theme. You do not need to manually delete them before switching.

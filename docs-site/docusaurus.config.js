@@ -2,13 +2,13 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'dev-box',
+  title: 'aibox',
   tagline: 'AI-ready development environments, containerized',
   favicon: 'img/favicon.ico',
   url: 'https://projectious-work.github.io',
-  baseUrl: '/dev-box/',
+  baseUrl: '/aibox/',
   organizationName: 'projectious-work',
-  projectName: 'dev-box',
+  projectName: 'aibox',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   i18n: { defaultLocale: 'en', locales: ['en'] },
@@ -18,7 +18,7 @@ const config = {
   presets: [['classic', {
     docs: {
       sidebarPath: './sidebars.js',
-      editUrl: 'https://github.com/projectious-work/dev-box/tree/main/docs-site/',
+      editUrl: 'https://github.com/projectious-work/aibox/tree/main/docs-site/',
     },
     blog: false,
     theme: { customCss: './src/css/custom.css' },
@@ -26,12 +26,12 @@ const config = {
   themeConfig: {
     colorMode: { defaultMode: 'dark', respectPrefersColorScheme: true },
     navbar: {
-      title: 'dev-box',
+      title: 'aibox',
       items: [
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
         { to: '/features', label: 'Features', position: 'left' },
         { to: '/changelog', label: 'Changelog', position: 'left' },
-        { href: 'https://github.com/projectious-work/dev-box', label: 'GitHub', position: 'right' },
+        { href: 'https://github.com/projectious-work/aibox', label: 'GitHub', position: 'right' },
       ],
     },
     footer: {
@@ -43,7 +43,7 @@ const config = {
           { label: 'Skills Library', to: '/docs/skills/' },
         ]},
         { title: 'Project', items: [
-          { label: 'GitHub', href: 'https://github.com/projectious-work/dev-box' },
+          { label: 'GitHub', href: 'https://github.com/projectious-work/aibox' },
           { label: 'Changelog', to: '/changelog' },
         ]},
       ],

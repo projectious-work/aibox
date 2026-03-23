@@ -6,14 +6,14 @@
 # - cowork layout: vim is in same tab, below → move-focus down
 # - focus layout: vim is in a separate tab → go-to-tab-name "editor"
 #
-# Set DEVBOX_EDITOR_DIR to: right (default), down, or tab
+# Set AIBOX_EDITOR_DIR to: right (default), down, or tab
 
 file="$1"
 [ -z "$file" ] && exit 1
 
 file="$(realpath "$file" 2>/dev/null || echo "$file")"
 
-dir="${DEVBOX_EDITOR_DIR:-right}"
+dir="${AIBOX_EDITOR_DIR:-right}"
 
 send_to_vim() {
     zellij action write 27

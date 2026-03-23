@@ -5,11 +5,11 @@ title: "Audio Support"
 
 # Audio Support
 
-The dev-box base image includes audio support for Claude Code's voice features. Audio is bridged from the container to the host via PulseAudio over TCP.
+The aibox base image includes audio support for Claude Code's voice features. Audio is bridged from the container to the host via PulseAudio over TCP.
 
 ## Why Audio Matters
 
-Claude Code supports voice interaction. For this to work inside a container, audio output (and optionally input) must be forwarded to the host's sound system. dev-box handles this by installing PulseAudio client utilities in the container and connecting them to a PulseAudio server running on the host.
+Claude Code supports voice interaction. For this to work inside a container, audio output (and optionally input) must be forwarded to the host's sound system. aibox handles this by installing PulseAudio client utilities in the container and connecting them to a PulseAudio server running on the host.
 
 ## Architecture
 
@@ -26,7 +26,7 @@ Container                          Host
 
 The container sets `PULSE_SERVER` to point at the host's PulseAudio TCP module. Audio data flows over the network socket.
 
-## Configuration in dev-box.toml
+## Configuration in aibox.toml
 
 ```toml
 [audio]
@@ -47,20 +47,20 @@ The fastest way to set up audio on your host is the built-in CLI command:
 
 ```bash
 # Check if your host is ready
-dev-box audio check
+aibox audio check
 
 # Automatic setup (macOS: installs PulseAudio, configures TCP, creates launchd agent)
-dev-box audio setup
+aibox audio setup
 ```
 
-`dev-box audio setup` handles:
+`aibox audio setup` handles:
 
 - Installing PulseAudio via Homebrew (macOS) if not present
 - Configuring `~/.config/pulse/default.pa` with the TCP module on port 4714
 - Creating a launchd agent with `KeepAlive` so PulseAudio auto-starts and restarts on crash (macOS)
 - Loading the TCP module immediately
 
-`dev-box audio check` diagnoses: PulseAudio installation, daemon status, TCP module, persistence config, port listening, launchd agent (macOS), and connectivity.
+`aibox audio check` diagnoses: PulseAudio installation, daemon status, TCP module, persistence config, port listening, launchd agent (macOS), and connectivity.
 
 Both commands accept `--port` to override the default port (4714).
 
@@ -180,7 +180,7 @@ This is usually a network or resource issue. PulseAudio over TCP adds latency. E
 
 ### Disabling audio
 
-If you do not need audio, set `enabled = false` in `dev-box.toml`:
+If you do not need audio, set `enabled = false` in `aibox.toml`:
 
 ```toml
 [audio]

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-# maintain.sh — maintenance script for the dev-box project itself
+# maintain.sh — maintenance script for the aibox project itself
 #
 # This manages the dev-container we develop IN (not the containers we publish).
-# For downstream project container management, use the dev-box CLI.
+# For downstream project container management, use the aibox CLI.
 #
 # Usage:
 #   ./scripts/maintain.sh <command> [options]
@@ -32,7 +32,7 @@ HOST_ROOT="${HOST_ROOT:-${PROJECT_ROOT}/.root}"
 WORKSPACE_DIR="${WORKSPACE_DIR:-${PROJECT_ROOT}}"
 CLI_DIR="${PROJECT_ROOT}/cli"
 DIST_DIR="${PROJECT_ROOT}/dist"
-IMAGE_REGISTRY="ghcr.io/projectious-work/dev-box"
+IMAGE_REGISTRY="ghcr.io/projectious-work/aibox"
 
 # ── Read container name from docker-compose.yml ─────────────────────────────
 _init_names() {
@@ -75,7 +75,7 @@ fi
 # ── Help ─────────────────────────────────────────────────────────────────────
 usage() {
   cat <<HELP
-${bold}maintain.sh${reset} — dev-box project maintenance
+${bold}maintain.sh${reset} — aibox project maintenance
 
 ${bold}Usage:${reset}
   ./scripts/maintain.sh <command> [options]
@@ -367,8 +367,8 @@ cmd_release() {
   esac
 
   (cd "${CLI_DIR}" && cargo build --release)
-  binary_name="dev-box-v${version}-${target}"
-  cp "${CLI_DIR}/target/release/dev-box" "${DIST_DIR}/${binary_name}"
+  binary_name="aibox-v${version}-${target}"
+  cp "${CLI_DIR}/target/release/aibox" "${DIST_DIR}/${binary_name}"
   tar -czf "${DIST_DIR}/${binary_name}.tar.gz" -C "${DIST_DIR}" "${binary_name}"
   rm "${DIST_DIR}/${binary_name}"
   ok "Built ${binary_name}.tar.gz"
@@ -401,7 +401,7 @@ cmd_release() {
   notes_file="${DIST_DIR}/RELEASE-NOTES.md"
 
   {
-    echo "# dev-box ${tag}"
+    echo "# aibox ${tag}"
     echo ""
     if [[ -n "${prev_tag}" ]]; then
       echo "## Changes since ${prev_tag}"
@@ -423,7 +423,7 @@ cmd_release() {
     echo ""
     echo "## CLI Binaries"
     echo ""
-    for f in "${DIST_DIR}"/dev-box-v${version}-*.tar.gz; do
+    for f in "${DIST_DIR}"/aibox-v${version}-*.tar.gz; do
       [[ -f "$f" ]] && echo "- $(basename "$f")"
     done
   } > "${notes_file}"
@@ -438,13 +438,13 @@ cmd_release() {
   repo_slug=$(echo "${remote_url}" | sed -E 's|.*[:/]([^/]+/[^/]+)(\.git)?$|\1|' | sed 's/\.git$//')
 
   {
-    echo "# Release Prompt for dev-box ${tag}"
+    echo "# Release Prompt for aibox ${tag}"
     echo ""
     echo "Give this prompt to an AI agent or execute the commands manually."
     echo ""
     echo "---"
     echo ""
-    echo "## Task: Create GitHub Release for dev-box ${tag}"
+    echo "## Task: Create GitHub Release for aibox ${tag}"
     echo ""
     echo "### Step 1: Push the tag"
     echo ""
@@ -465,10 +465,10 @@ cmd_release() {
     echo "\`\`\`bash"
     echo "gh release create ${tag} \\"
     echo "  --repo ${repo_slug} \\"
-    echo "  --title \"dev-box ${tag}\" \\"
+    echo "  --title \"aibox ${tag}\" \\"
     echo "  --notes-file dist/RELEASE-NOTES.md \\"
     # List all artifacts
-    for f in "${DIST_DIR}"/dev-box-v${version}-*.tar.gz; do
+    for f in "${DIST_DIR}"/aibox-v${version}-*.tar.gz; do
       [[ -f "$f" ]] && echo "  \"$f\" \\"
     done
     echo ""
@@ -489,13 +489,13 @@ cmd_release() {
     local built_target="${target}"
     for t in x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu x86_64-apple-darwin aarch64-apple-darwin; do
       if [[ "${t}" != "${built_target}" ]]; then
-        echo "- \`dev-box-v${version}-${t}.tar.gz\` — build with:"
+        echo "- \`aibox-v${version}-${t}.tar.gz\` — build with:"
         echo "  \`\`\`"
         echo "  rustup target add ${t}"
         echo "  cargo build --release --target ${t}"
-        echo "  cp target/${t}/release/dev-box dist/dev-box-v${version}-${t}"
-        echo "  tar -czf dist/dev-box-v${version}-${t}.tar.gz -C dist dev-box-v${version}-${t}"
-        echo "  gh release upload ${tag} dist/dev-box-v${version}-${t}.tar.gz"
+        echo "  cp target/${t}/release/aibox dist/aibox-v${version}-${t}"
+        echo "  tar -czf dist/aibox-v${version}-${t}.tar.gz -C dist aibox-v${version}-${t}"
+        echo "  gh release upload ${tag} dist/aibox-v${version}-${t}.tar.gz"
         echo "  \`\`\`"
       fi
     done
@@ -508,7 +508,7 @@ cmd_release() {
   echo "${bold}Release ${tag} prepared.${reset}"
   echo ""
   echo "  Artifacts:     ${DIST_DIR}/"
-  for f in "${DIST_DIR}"/dev-box-v${version}-*.tar.gz; do
+  for f in "${DIST_DIR}"/aibox-v${version}-*.tar.gz; do
     [[ -f "$f" ]] && echo "                 $(basename "$f")"
   done
   echo "  Release notes: dist/RELEASE-NOTES.md"

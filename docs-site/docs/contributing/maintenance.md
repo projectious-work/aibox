@@ -5,7 +5,7 @@ title: Maintenance
 
 # Maintenance
 
-Internal procedures for building, releasing, and deploying dev-box.
+Internal procedures for building, releasing, and deploying aibox.
 All builds and deploys are run locally — there are no GitHub Actions.
 
 ## The `maintain.sh` Script
@@ -68,7 +68,7 @@ For macOS builds there's a helper script:
 Attach additional binaries to the release after creation:
 
 ```bash
-gh release upload v0.8.0 dist/dev-box-v0.8.0-x86_64-apple-darwin.tar.gz
+gh release upload v0.8.0 dist/aibox-v0.8.0-x86_64-apple-darwin.tar.gz
 ```
 
 ### 3. Push the tag and create the GitHub release
@@ -77,9 +77,9 @@ gh release upload v0.8.0 dist/dev-box-v0.8.0-x86_64-apple-darwin.tar.gz
 git push origin v0.8.0
 
 gh release create v0.8.0 \
-  --title "dev-box v0.8.0" \
+  --title "aibox v0.8.0" \
   --notes-file dist/RELEASE-NOTES.md \
-  dist/dev-box-v0.8.0-*.tar.gz
+  dist/aibox-v0.8.0-*.tar.gz
 ```
 
 !!! warning "Always use `--notes-file`, never `--generate-notes`"
@@ -121,20 +121,20 @@ for each flavor.
 
 This builds the MkDocs site and force-pushes to the `gh-pages` branch.
 GitHub Pages serves the site at
-[projectious-work.github.io/dev-box](https://projectious-work.github.io/dev-box/).
+[projectious-work.github.io/aibox](https://projectious-work.github.io/aibox/).
 
 ### 6. Verify
 
 After a release, verify:
 
 - [ ] `curl -fsSL .../install.sh | bash` installs the new version
-- [ ] `dev-box --version` shows the correct version
-- [ ] `podman pull ghcr.io/projectious-work/dev-box:base-v0.8.0` succeeds
+- [ ] `aibox --version` shows the correct version
+- [ ] `podman pull ghcr.io/projectious-work/aibox:base-v0.8.0` succeeds
 - [ ] Documentation site reflects changes
 
 ## Container Images
 
-Ten images are published to `ghcr.io/projectious-work/dev-box`:
+Ten images are published to `ghcr.io/projectious-work/aibox`:
 
 | Image | Tag pattern | Depends on |
 |-------|------------|------------|
@@ -158,7 +158,7 @@ Build all locally:
 Build a single image manually:
 
 ```bash
-podman build -t ghcr.io/projectious-work/dev-box:python-v0.8.0 images/python/
+podman build -t ghcr.io/projectious-work/aibox:python-v0.8.0 images/python/
 ```
 
 ## Documentation
@@ -190,4 +190,4 @@ cargo test
 ```
 
 The test suite includes 135 unit tests and 16 integration tests (151 total).
-Integration tests run the `dev-box` binary as a subprocess.
+Integration tests run the `aibox` binary as a subprocess.

@@ -1,5 +1,5 @@
 {
-    "name": "dev-box-base",
+    "name": "aibox-base",
     "dockerComposeFile": "docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspace",

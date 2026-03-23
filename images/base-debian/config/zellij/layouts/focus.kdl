@@ -1,7 +1,7 @@
 // =============================================================================
 // "focus" layout — one tool per tab, fullscreen, zero distraction
 //
-// Select with: dev-box start --layout focus
+// Select with: aibox start --layout focus
 //
 // Each tool gets the entire screen. Switch with Ctrl+b [/] or Ctrl+b 1-5.
 //
@@ -20,7 +20,7 @@ layout {
     tab name="files" focus=true {
         pane name="yazi" {
             command "bash"
-            args "-c" "DEVBOX_EDITOR_DIR=tab exec yazi"
+            args "-c" "AIBOX_EDITOR_DIR=tab exec yazi"
             cwd "/workspace"
         }
     }
@@ -28,7 +28,7 @@ layout {
     tab name="editor" {
         pane name="vim" {
             command "bash"
-            args "-c" "DEVBOX_EDITOR_DIR=tab exec vim-loop"
+            args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }
     }

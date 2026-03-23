@@ -5,7 +5,7 @@ title: "Base Image"
 
 # Base Image
 
-The base image is the foundation for all dev-box container flavors. It provides a complete, opinionated development environment built on **Debian Trixie Slim**.
+The base image is the foundation for all aibox container flavors. It provides a complete, opinionated development environment built on **Debian Trixie Slim**.
 
 ## Installed Tools
 
@@ -83,7 +83,7 @@ Press `Escape` or `Ctrl+b` again to cancel the leader and return to normal mode.
 
 ### Layouts
 
-dev-box ships three IDE layouts. Select one with `dev-box start --layout <name>` (the default is `dev`). All layouts include shared tabs for **git** (lazygit) and **shell** (extra bash).
+aibox ships three IDE layouts. Select one with `aibox start --layout <name>` (the default is `dev`). All layouts include shared tabs for **git** (lazygit) and **shell** (extra bash).
 
 #### dev (default) -- file browser + editor
 
@@ -150,19 +150,19 @@ The base image includes `sox` and `pulseaudio-utils` for audio bridging, enablin
 
 ## Configuration Persistence
 
-All user configuration is persisted on the host under `.dev-box-home/` and bind-mounted into the container:
+All user configuration is persisted on the host under `.aibox-home/` and bind-mounted into the container:
 
 | Host Path | Container Path | Contents |
 |-----------|---------------|----------|
-| `.dev-box-home/.ssh/` | `/root/.ssh` (read-only) | SSH keys |
-| `.dev-box-home/.vim/` | `/root/.vim` | Vim config, undo history, plugins |
-| `.dev-box-home/.config/git/` | `/root/.config/git` | Git config and credentials |
-| `.dev-box-home/.config/zellij/` | `/root/.config/zellij` | Zellij config, themes, layouts, plugin cache |
-| `.dev-box-home/.config/yazi/` | `/root/.config/yazi` | Yazi file manager config and keymap |
+| `.aibox-home/.ssh/` | `/root/.ssh` (read-only) | SSH keys |
+| `.aibox-home/.vim/` | `/root/.vim` | Vim config, undo history, plugins |
+| `.aibox-home/.config/git/` | `/root/.config/git` | Git config and credentials |
+| `.aibox-home/.config/zellij/` | `/root/.config/zellij` | Zellij config, themes, layouts, plugin cache |
+| `.aibox-home/.config/yazi/` | `/root/.config/yazi` | Yazi file manager config and keymap |
 
 The Dockerfile bakes identical defaults into the image as a fallback. If no mounts are present, the container still works out of the box.
 
-On first `dev-box init` or `dev-box start`, the `.dev-box-home/` directory is auto-seeded from built-in templates. Existing files are never overwritten.
+On first `aibox init` or `aibox start`, the `.aibox-home/` directory is auto-seeded from built-in templates. Existing files are never overwritten.
 
 ## Container Entrypoint
 
@@ -170,4 +170,4 @@ On first `dev-box init` or `dev-box start`, the `.dev-box-home/` directory is au
 CMD ["sleep", "infinity"]
 ```
 
-The container stays alive and idle. Both VS Code and `dev-box start` exec into it. Zellij is never the container entrypoint -- it is launched on attach.
+The container stays alive and idle. Both VS Code and `aibox start` exec into it. Zellij is never the container entrypoint -- it is launched on attach.

@@ -1,7 +1,7 @@
 // =============================================================================
 // "cowork" layout — side-by-side coding with AI
 //
-// Select with: dev-box start --layout cowork
+// Select with: aibox start --layout cowork
 //
 // Structure:
 //   ┌──────────────────────┬────────────────────────┐
@@ -31,12 +31,12 @@ layout {
             pane size="50%" split_direction="horizontal" {
                 pane size="40%" name="files" focus=true {
                     command "bash"
-                    args "-c" "DEVBOX_EDITOR_DIR=down exec yazi"
+                    args "-c" "AIBOX_EDITOR_DIR=down exec yazi"
                     cwd "/workspace"
                 }
                 pane size="60%" name="editor" {
                     command "bash"
-                    args "-c" "DEVBOX_EDITOR_DIR=down exec vim-loop"
+                    args "-c" "AIBOX_EDITOR_DIR=down exec vim-loop"
                     cwd "/workspace"
                 }
             }

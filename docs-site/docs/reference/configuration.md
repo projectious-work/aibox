@@ -5,12 +5,12 @@ title: Configuration
 
 # Configuration
 
-`dev-box.toml` is the single source of truth for a dev-box project. All generated files derive from it.
+`aibox.toml` is the single source of truth for a aibox project. All generated files derive from it.
 
 ## Full Specification
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.8.0"                    # Project version (semver)
 image = "python"                      # Image flavor
 process = "product"                   # Work process flavor
@@ -53,7 +53,7 @@ pulse_server = "tcp:host.docker.internal:4714"  # PulseAudio server address
 
 ## Section Reference
 
-### [dev-box]
+### [aibox]
 
 Top-level project metadata.
 
@@ -70,7 +70,7 @@ Container configuration. Controls the generated `docker-compose.yml` and `Docker
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `name` | String | Yes | -- | Container name (used by compose and runtime inspect) |
-| `hostname` | String | No | `"dev-box"` | Container hostname |
+| `hostname` | String | No | `"aibox"` | Container hostname |
 | `user` | String | No | `"root"` | Container user |
 | `ports` | Array of strings | No | `[]` | Port mappings in `host:container` format |
 | `extra_packages` | Array of strings | No | `[]` | Additional apt packages to install |
@@ -160,26 +160,26 @@ Some settings can be overridden via environment variables:
 
 | Variable | Overrides | Description |
 |----------|-----------|-------------|
-| `DEV_BOX_HOST_ROOT` | `.dev-box-home/` path | Host directory for persistent config (default: `.dev-box-home/`) |
-| `DEV_BOX_WORKSPACE_DIR` | Workspace mount source | Host directory mounted as `/workspace` |
-| `DEV_BOX_LOG_LEVEL` | `--log-level` | Log verbosity (`trace`, `debug`, `info`, `warn`, `error`) |
+| `AIBOX_HOST_ROOT` | `.aibox-home/` path | Host directory for persistent config (default: `.aibox-home/`) |
+| `AIBOX_WORKSPACE_DIR` | Workspace mount source | Host directory mounted as `/workspace` |
+| `AIBOX_LOG_LEVEL` | `--log-level` | Log verbosity (`trace`, `debug`, `info`, `warn`, `error`) |
 
 Example:
 
 ```bash
-DEV_BOX_HOST_ROOT=/tmp/dev-root dev-box start
+AIBOX_HOST_ROOT=/tmp/dev-root aibox start
 ```
 
 !!! note "Backward compatibility with `.root/`"
-    If your project uses the legacy `.root/` directory name, dev-box will continue to work with it. `dev-box doctor` will suggest renaming it to `.dev-box-home/` for consistency with the current convention.
+    If your project uses the legacy `.root/` directory name, aibox will continue to work with it. `aibox doctor` will suggest renaming it to `.aibox-home/` for consistency with the current convention.
 
 ## Default Values Summary
 
-When a field is omitted from `dev-box.toml`, these defaults apply:
+When a field is omitted from `aibox.toml`, these defaults apply:
 
 | Field | Default |
 |-------|---------|
-| `container.hostname` | `"dev-box"` |
+| `container.hostname` | `"aibox"` |
 | `container.user` | `"root"` |
 | `container.ports` | `[]` |
 | `container.extra_packages` | `[]` |
@@ -197,9 +197,9 @@ When a field is omitted from `dev-box.toml`, these defaults apply:
 
 ## Custom Dockerfile Layers (Dockerfile.local)
 
-For project-specific build steps that go beyond `extra_packages`, create `.devcontainer/Dockerfile.local`. This file is appended to the generated Dockerfile by `dev-box sync` and is never overwritten.
+For project-specific build steps that go beyond `extra_packages`, create `.devcontainer/Dockerfile.local`. This file is appended to the generated Dockerfile by `aibox sync` and is never overwritten.
 
-`dev-box init` creates a placeholder with usage examples. The generated base image is aliased as the `dev-box` stage, which you can reference in multi-stage builds.
+`aibox init` creates a placeholder with usage examples. The generated base image is aliased as the `aibox` stage, which you can reference in multi-stage builds.
 
 ### Simple usage — append layers
 
@@ -218,16 +218,16 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci && npm run build
 
-FROM dev-box
+FROM aibox
 COPY --from=node-builder /app/dist /workspace/dist
 ```
 
-The `FROM dev-box` line references the generated base stage. This lets you bring in artifacts from other build stages while keeping the final image based on your dev-box configuration.
+The `FROM aibox` line references the generated base stage. This lets you bring in artifacts from other build stages while keeping the final image based on your aibox configuration.
 
 !!! note
-    `Dockerfile.local` is your file — `dev-box sync` never modifies it. If the file doesn't exist or is empty, no extra layers are added.
+    `Dockerfile.local` is your file — `aibox sync` never modifies it. If the file doesn't exist or is empty, no extra layers are added.
 
-## The .dev-box-version File
+## The .aibox-version File
 
 A plain text file at the project root containing the context schema version that was last applied:
 
@@ -235,14 +235,14 @@ A plain text file at the project root containing the context schema version that
 1.0.0
 ```
 
-This is created by `dev-box init` and compared against `context.schema_version` by `dev-box doctor` to detect when migration is needed. Keep this file in version control.
+This is created by `aibox init` and compared against `context.schema_version` by `aibox doctor` to detect when migration is needed. Keep this file in version control.
 
 ## Example Configurations
 
 ### Python web application
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.8.0"
 image = "python"
 process = "product"
@@ -267,7 +267,7 @@ enabled = false
 ### Rust CLI tool
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.8.0"
 image = "rust"
 process = "managed"
@@ -290,7 +290,7 @@ enabled = false
 ### LaTeX thesis
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.8.0"
 image = "latex"
 process = "research"
@@ -312,7 +312,7 @@ enabled = false
 ### Data science with voice
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.8.0"
 image = "python-latex"
 process = "research"

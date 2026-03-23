@@ -7,7 +7,7 @@ title: "Addons"
 
 # Image Flavors
 
-dev-box provides ten container image flavors. All build on top of the [base image](base-image.md).
+aibox provides ten container image flavors. All build on top of the [base image](base-image.md).
 
 ## Overview
 
@@ -33,7 +33,7 @@ The foundation image. Everything else builds on this.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "base"
 ```
 
@@ -56,7 +56,7 @@ Adds Python 3.13 with modern tooling on top of base.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "python"
 ```
 
@@ -81,7 +81,7 @@ Adds TeX Live for document compilation.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "latex"
 ```
 
@@ -89,7 +89,7 @@ image = "latex"
 
 - Compile with `latexmk -pdf document.tex`
 - Add missing packages with `tlmgr install <package-name>` (persists until container rebuild)
-- For persistent package additions, use `extra_packages` in `dev-box.toml` or extend the image
+- For persistent package additions, use `extra_packages` in `aibox.toml` or extend the image
 
 ### TeX Live Multi-Stage Build
 
@@ -116,7 +116,7 @@ Adds the Rust toolchain for systems programming.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "rust"
 ```
 
@@ -140,7 +140,7 @@ Adds Node.js LTS for JavaScript and TypeScript development.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "node"
 ```
 
@@ -162,7 +162,7 @@ Adds the Go toolchain for Go development.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "go"
 ```
 
@@ -184,7 +184,7 @@ Adds [Typst](https://typst.app/), a modern typesetting system that is simpler an
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "typst"
 ```
 
@@ -193,7 +193,7 @@ image = "typst"
 - Compile with `typst compile document.typ`
 - Watch mode: `typst watch document.typ` (recompiles on save)
 - Packages are downloaded automatically on first use from [Typst Universe](https://typst.app/universe/) — no manual install step
-- Package cache lives at `~/.cache/typst/packages/` — persist it via `.dev-box-home/.cache/typst` in compose mounts
+- Package cache lives at `~/.cache/typst/packages/` — persist it via `.aibox-home/.cache/typst` in compose mounts
 - Import packages in your `.typ` files: `#import "@preview/package-name:1.0.0"`
 
 ## python-typst
@@ -207,7 +207,7 @@ Combines Python and Typst in a single image.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "python-typst"
 ```
 
@@ -222,7 +222,7 @@ Combines Python and TeX Live in a single image.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "python-latex"
 ```
 
@@ -237,20 +237,20 @@ Combines Rust and TeX Live in a single image.
 **Select it with:**
 
 ```toml
-[dev-box]
+[aibox]
 image = "rust-latex"
 ```
 
 ## Adding Project-Specific Packages
 
-Any image can be extended with additional apt packages via `dev-box.toml`:
+Any image can be extended with additional apt packages via `aibox.toml`:
 
 ```toml
 [container]
 extra_packages = ["universal-ctags", "graphviz", "postgresql-client"]
 ```
 
-These packages are installed during `dev-box build` via the generated Dockerfile. They persist across container restarts but are reinstalled on image rebuild.
+These packages are installed during `aibox build` via the generated Dockerfile. They persist across container restarts but are reinstalled on image rebuild.
 
 :::tip When to use a different flavor vs extra_packages
 

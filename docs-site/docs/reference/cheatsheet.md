@@ -5,7 +5,7 @@ title: Cheatsheet
 
 # Keyboard Shortcuts
 
-Quick reference for all tools in the dev-box environment. Press the tab for the tool you need.
+Quick reference for all tools in the aibox environment. Press the tab for the tool you need.
 
 !!! tip "In-app help"
     - **Zellij:** The status bar always shows available keys for the current mode
@@ -106,7 +106,7 @@ Quick reference for all tools in the dev-box environment. Press the tab for the 
 
     ## Yazi (File Manager)
 
-    Yazi uses Vim-style navigation. The dev-box config adds a few custom bindings on top of the defaults.
+    Yazi uses Vim-style navigation. The aibox config adds a few custom bindings on top of the defaults.
 
     ### Navigation
 
@@ -120,7 +120,7 @@ Quick reference for all tools in the dev-box environment. Press the tab for the 
     | `G` | Go to last item |
     | `~` | Go to home directory |
 
-    ### Opening Files (dev-box custom)
+    ### Opening Files (aibox custom)
 
     | Key | Action |
     |-----|--------|
@@ -334,4 +334,4 @@ Quick reference for all tools in the dev-box environment. Press the tab for the 
     | `q` | Quit lazygit |
 
     !!! tip "Accessing lazygit"
-        In the default dev-box layout, lazygit runs in **Tab 2** (`Ctrl+b` `2`).
+        In the default aibox layout, lazygit runs in **Tab 2** (`Ctrl+b` `2`).
