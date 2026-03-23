@@ -1,3 +1,4 @@
+mod addon_cmd;
 #[allow(dead_code)]
 mod addon_registry;
 mod addons;
@@ -67,12 +68,10 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
                 addons,
             },
         ),
-        cli::Commands::Sync => container::cmd_sync(config_path),
-        cli::Commands::Build { no_cache } => container::cmd_build(config_path, no_cache),
+        cli::Commands::Sync { no_cache } => container::cmd_sync(config_path, no_cache),
         cli::Commands::Start { layout } => container::cmd_start(config_path, &layout.to_string()),
         cli::Commands::Stop => container::cmd_stop(config_path),
         cli::Commands::Remove => container::cmd_remove(config_path),
-        cli::Commands::Attach { layout } => container::cmd_attach(config_path, &layout.to_string()),
         cli::Commands::Status => container::cmd_status(config_path),
         cli::Commands::Doctor => doctor::cmd_doctor(config_path),
         cli::Commands::Completions { shell } => {
@@ -104,6 +103,12 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
         cli::Commands::Audio { action } => match action {
             cli::AudioAction::Check { port } => audio::cmd_audio_check(port),
             cli::AudioAction::Setup { port } => audio::cmd_audio_setup(port),
+        },
+        cli::Commands::Addon { action } => match action {
+            cli::AddonAction::List => addon_cmd::cmd_addon_list(config_path),
+            cli::AddonAction::Add { name } => addon_cmd::cmd_addon_add(config_path, &name),
+            cli::AddonAction::Remove { name } => addon_cmd::cmd_addon_remove(config_path, &name),
+            cli::AddonAction::Info { name } => addon_cmd::cmd_addon_info(&name),
         },
     }
 }

@@ -102,19 +102,6 @@ pub fn resolve_init_values(
 }
 
 /// Build command: load config, generate files, run compose build.
-pub fn cmd_build(config_path: &Option<String>, no_cache: bool) -> Result<()> {
-    let config = AiboxConfig::from_cli_option(config_path)?;
-    let runtime = Runtime::detect()?;
-
-    generate::generate_all(&config)?;
-
-    output::info("Building container image...");
-    runtime.compose_build(crate::config::COMPOSE_FILE, no_cache)?;
-    output::ok("Build complete");
-
-    Ok(())
-}
-
 /// Start command: seed, generate, ensure running, attach.
 pub fn cmd_start(config_path: &Option<String>, layout: &str) -> Result<()> {
     let config = AiboxConfig::from_cli_option(config_path)?;
@@ -185,25 +172,6 @@ pub fn cmd_remove(config_path: &Option<String>) -> Result<()> {
     output::info("Stopping and removing container...");
     runtime.compose_down(crate::config::COMPOSE_FILE)?;
     output::ok(&format!("Container '{}' removed", name));
-
-    Ok(())
-}
-
-pub fn cmd_attach(config_path: &Option<String>, layout: &str) -> Result<()> {
-    let config = AiboxConfig::from_cli_option(config_path)?;
-    let runtime = Runtime::detect()?;
-    let name = &config.container.name;
-
-    let state = runtime.container_status(name)?;
-    if state != ContainerState::Running {
-        bail!(
-            "Container '{}' is not running. Run 'aibox start' first.",
-            name
-        );
-    }
-
-    output::info(&format!("Attaching via zellij (layout: {})...", layout));
-    runtime.exec_interactive(name, &["zellij", "--layout", layout])?;
 
     Ok(())
 }
@@ -466,7 +434,7 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
 }
 
 /// Sync command: force-seed theme-dependent files, seed missing configs, regenerate .devcontainer/.
-pub fn cmd_sync(config_path: &Option<String>) -> Result<()> {
+pub fn cmd_sync(config_path: &Option<String>, no_cache: bool) -> Result<()> {
     // Check for version migration before any other sync steps
     crate::migration::check_and_generate_migration()?;
 
@@ -495,7 +463,18 @@ pub fn cmd_sync(config_path: &Option<String>) -> Result<()> {
     // Check agent entry points
     context::check_agent_entry_points(&config)?;
 
-    output::ok("Sync complete");
+    // Build container image (if a container runtime is available)
+    match Runtime::detect() {
+        Ok(runtime) => {
+            output::info("Building container image...");
+            runtime.compose_build(crate::config::COMPOSE_FILE, no_cache)?;
+            output::ok("Sync complete — image built");
+        }
+        Err(_) => {
+            output::warn("No container runtime found — skipping image build");
+            output::ok("Sync complete (config files only)");
+        }
+    }
 
     Ok(())
 }

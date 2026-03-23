@@ -37,8 +37,8 @@ Examples:
   aibox init                                 Interactive project setup
   aibox init --name my-app --image python --process product
   aibox init --image rust --process minimal  Rust project, minimal context
-  aibox sync                                 Apply config changes (theme, etc.)
-  aibox build                                Build the container image
+  aibox sync                                 Reconcile config + build image
+  aibox sync --no-cache                      Force full rebuild
   aibox start                                Start and attach (dev layout)
   aibox start --layout focus                 Start with focus layout
   aibox doctor                               Validate project structure
@@ -103,14 +103,12 @@ pub enum Commands {
     },
     /// Reconcile project state with aibox.toml configuration
     ///
-    /// Re-seeds config files that depend on settings (theme, AI providers),
-    /// regenerates .devcontainer/ files, and updates .aibox-home/ configs.
-    /// The primary command for applying config changes.
+    /// Seeds config files, regenerates .devcontainer/ files, reconciles
+    /// skills, and builds the container image. The primary command for
+    /// applying any config change.
     #[command(alias = "generate")]
-    Sync,
-    /// Build the container image
-    Build {
-        /// Build without cache
+    Sync {
+        /// Build without cache (force full rebuild)
         #[arg(long)]
         no_cache: bool,
     },
@@ -118,6 +116,7 @@ pub enum Commands {
     ///
     /// Seeds .aibox-home/ if needed, generates devcontainer files,
     /// creates/starts the container, then attaches via zellij.
+    /// If already running, just attaches.
     ///
     /// Available layouts: dev (default), focus, cowork.
     Start {
@@ -134,14 +133,6 @@ pub enum Commands {
     /// want a clean slate.
     #[command(alias = "rm")]
     Remove,
-    /// Attach to running container
-    ///
-    /// Available layouts: dev (default), focus, cowork.
-    Attach {
-        /// Zellij layout to use (dev, focus, cowork)
-        #[arg(long, value_enum, default_value = "dev")]
-        layout: Layout,
-    },
     /// Show container status
     Status,
     /// Validate context structure and produce migration artifacts
@@ -224,6 +215,41 @@ pub enum Commands {
     Audio {
         #[command(subcommand)]
         action: AudioAction,
+    },
+    /// Manage add-ons (language runtimes, tools, AI agents)
+    ///
+    /// Browse, add, or remove add-ons that install tool sets into
+    /// the container. Changes are written to aibox.toml and applied
+    /// via sync.
+    Addon {
+        #[command(subcommand)]
+        action: AddonAction,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum AddonAction {
+    /// List all available add-ons and their install status
+    List,
+    /// Add an add-on to aibox.toml and sync
+    ///
+    /// Inserts the add-on with default-enabled tools into aibox.toml,
+    /// then runs a full sync to regenerate container files.
+    Add {
+        /// Add-on name (e.g., python, rust, node, ai-claude)
+        name: String,
+    },
+    /// Remove an add-on from aibox.toml and sync
+    Remove {
+        /// Add-on name to remove
+        name: String,
+    },
+    /// Show detailed info about an add-on
+    ///
+    /// Displays available tools, supported versions, and defaults.
+    Info {
+        /// Add-on name
+        name: String,
     },
 }
 
