@@ -28,7 +28,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # ── Paths ────────────────────────────────────────────────────────────────────
 DEVCONTAINER_DIR="${PROJECT_ROOT}/.devcontainer"
 COMPOSE_FILE="${DEVCONTAINER_DIR}/docker-compose.yml"
-HOST_ROOT="${HOST_ROOT:-${PROJECT_ROOT}/.root}"
+HOST_ROOT="${HOST_ROOT:-${PROJECT_ROOT}/.aibox-home}"
 WORKSPACE_DIR="${WORKSPACE_DIR:-${PROJECT_ROOT}}"
 CLI_DIR="${PROJECT_ROOT}/cli"
 DIST_DIR="${PROJECT_ROOT}/dist"

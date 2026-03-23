@@ -2,6 +2,7 @@
 # Project Specific
 # =============================================================================
 
+.aibox-home/
 .root/
 scratch.txt
 scratch.md

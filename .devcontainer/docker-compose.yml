@@ -15,44 +15,44 @@ services:
         source: ${WORKSPACE_DIR:-..}
         target: /workspace
 
-      # ── Persisted configuration (all live under .root/ on the host) ───────
+      # ── Persisted configuration (all live under .aibox-home/ on the host) ──
       # Paths are relative to the docker-compose.yml location (.devcontainer/),
-      # so the default ../.root resolves to .root/ in the project root — matching
-      # how WORKSPACE_DIR already uses .. as its default.
+      # so the default ../.aibox-home resolves to .aibox-home/ in the project root —
+      # matching how WORKSPACE_DIR already uses .. as its default.
       # SSH keys — read-only; manage keys only on the host
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.ssh
+        source: ${HOST_ROOT:-../.aibox-home}/.ssh
         target: /root/.ssh
         read_only: true
 
       # Vim: config file + undo history + netrw bookmarks
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.vim
+        source: ${HOST_ROOT:-../.aibox-home}/.vim
         target: /root/.vim
 
       # Zellij: config.kdl, themes/, layouts/, plugins cache
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.config/zellij
+        source: ${HOST_ROOT:-../.aibox-home}/.config/zellij
         target: /root/.config/zellij
 
       # Yazi: file manager config
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.config/yazi
+        source: ${HOST_ROOT:-../.aibox-home}/.config/yazi
         target: /root/.config/yazi
 
       # Git: global config + credentials helper store
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.config/git
+        source: ${HOST_ROOT:-../.aibox-home}/.config/git
         target: /root/.config/git
 
       # Claude: global config + memory
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.claude
+        source: ${HOST_ROOT:-../.aibox-home}/.claude
         target: /root/.claude
 
       # Audio: PulseAudio config for Claude Code voice
       - type: bind
-        source: ${HOST_ROOT:-../.root}/.asoundrc
+        source: ${HOST_ROOT:-../.aibox-home}/.asoundrc
         target: /root/.asoundrc
 
     environment:
