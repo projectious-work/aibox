@@ -74,14 +74,14 @@ Skills come in flavors that implement the same process differently:
 | Release | release-semver (git tags) | release-github (GitHub Releases) |
 | Code review | review-context (REVIEWS.md) | review-pr (GitHub PRs) |
 
-User chooses flavors. dev-box ensures consistency between declared processes and installed skills.
+User chooses flavors. aibox ensures consistency between declared processes and installed skills.
 
-## dev-box Responsibilities
+## aibox Responsibilities
 
 1. **Scaffold process declarations** — thin context files saying "these processes exist"
 2. **Provide curated skill library** — vetted, secure, tested skills
-3. **Install skills** — `dev-box skill install backlog-context`
-4. **Consistency checking** — `dev-box doctor` verifies declared processes have matching skills
+3. **Install skills** — `aibox skill install backlog-context`
+4. **Consistency checking** — `aibox doctor` verifies declared processes have matching skills
 5. **Migration support** — when switching skill flavors, generate migration artifacts
 
 ## What Stays in Context
@@ -100,17 +100,17 @@ User chooses flavors. dev-box ensures consistency between declared processes and
 
 ## Consistency Model
 
-dev-box CLI ensures consistency:
+aibox CLI ensures consistency:
 1. Process preset declares required processes
 2. Each process maps to one or more skill categories
-3. `dev-box doctor` checks that required skills are installed
-4. If missing, suggests: `dev-box skill install <skill-name>`
+3. `aibox doctor` checks that required skills are installed
+4. If missing, suggests: `aibox skill install <skill-name>`
 5. Migration: switching from backlog-context to backlog-github generates migration artifacts for the project's AI agent
 
-## Implications for dev-box.toml
+## Implications for aibox.toml
 
 ```toml
-[dev-box]
+[aibox]
 version = "0.5.0"
 image = "python"
 process = "product"
@@ -128,14 +128,14 @@ additional = ["python-best-practices", "docker-review"]
 
 ## Relationship to kaits
 
-- dev-box: provides infrastructure + curated skills + meta-processes
+- aibox: provides infrastructure + curated skills + meta-processes
 - kaits: provides agent orchestration + XP tracking + governance
 - SKILL.md is the shared contract
-- dev-box skills work standalone with Claude Code; kaits adds team coordination
+- aibox skills work standalone with Claude Code; kaits adds team coordination
 
 ## Security
 
-- Only skills from trusted sources (dev-box curated library, or user-verified)
+- Only skills from trusted sources (aibox curated library, or user-verified)
 - Each skill has a SKILL.md with declared tool permissions (allowed-tools field)
-- External marketplaces (ClawHub) are user responsibility — dev-box does not manage them
-- `dev-box doctor` could check skill integrity (hash verification)
+- External marketplaces (ClawHub) are user responsibility — aibox does not manage them
+- `aibox doctor` could check skill integrity (hash verification)

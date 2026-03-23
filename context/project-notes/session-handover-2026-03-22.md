@@ -55,7 +55,7 @@ refactoring (GoF), infographics, logo-design, excalidraw, tailwind, frontend-des
 ### Architecture items
 - Session handover format — DEFINE THIS as a process template
 - Skill library expansion phases 3-5 (to reach 75 skills)
-- `dev-box skill install` command
+- `aibox skill install` command
 - SKILL.md security vetting process
 
 ## Key Technical Context

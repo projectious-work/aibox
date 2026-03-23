@@ -66,7 +66,7 @@ HuggingFace analysis of 40K+ skills found:
 - Copy-pasted documentation
 - No testing or validation
 
-## Implications for dev-box
+## Implications for aibox
 
 Our curated library addresses the quality gap. Key differentiators:
 1. Progressive disclosure with reference files

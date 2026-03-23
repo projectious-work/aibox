@@ -1,6 +1,6 @@
-# CLAUDE.md — dev-box
+# CLAUDE.md — aibox
 
-**dev-box** is a CLI tool analogous to **uv for AI work environments**. It unifies
+**aibox** is a CLI tool analogous to **uv for AI work environments**. It unifies
 reproducible containerized development environments with built-in AI context structure.
 
 **Key facts:** Rust CLI (`cli/`), 10 container image flavors (`images/`),
@@ -42,6 +42,6 @@ The `context/` directory follows the **product** process template:
 
 ## GitHub Organization
 
-- **Repo:** `projectious-work/dev-box`
-- **GHCR:** `ghcr.io/projectious-work/dev-box`
-- **Docs:** `https://projectious-work.github.io/dev-box/`
+- **Repo:** `projectious-work/aibox`
+- **GHCR:** `ghcr.io/projectious-work/aibox`
+- **Docs:** `https://projectious-work.github.io/aibox/`

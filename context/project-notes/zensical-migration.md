@@ -33,9 +33,9 @@ Our current `mkdocs.yml` needs to be converted. Key mappings:
 ```toml
 # zensical.toml
 [project]
-site_name = "dev-box v0.4.2"
-site_url = "https://projectious-work.github.io/dev-box/"
-site_description = "dev-box — manage AI-ready development container environments"
+site_name = "aibox v0.4.2"
+site_url = "https://projectious-work.github.io/aibox/"
+site_description = "aibox — manage AI-ready development container environments"
 
 # Theme, nav, extensions — need to check Zensical equivalents
 ```

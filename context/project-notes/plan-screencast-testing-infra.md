@@ -37,8 +37,8 @@ This plan covers three goals:
 
 ### Current state
 
-This project has `dev-box.toml` with `process = "product"` but `.devcontainer/` is hand-maintained
-(DEC comment in dev-box.toml: "avoiding circular deps"). The config files in `.devcontainer/config/`
+This project has `aibox.toml` with `process = "product"` but `.devcontainer/` is hand-maintained
+(DEC comment in aibox.toml: "avoiding circular deps"). The config files in `.devcontainer/config/`
 are ~85% identical to `images/base/config/`, with specific gaps:
 
 | Component | .devcontainer/ | images/base/ | Gap |
@@ -66,7 +66,7 @@ are ~85% identical to `images/base/config/`, with specific gaps:
 **Do later (tracked in backlog):**
 
 4. Copy `bashrc` and `vim-loop.sh` from base image config
-5. Evaluate whether `dev-box sync` should have a `--self` mode for this project
+5. Evaluate whether `aibox sync` should have a `--self` mode for this project
 
 ### What stays hand-maintained
 
@@ -118,8 +118,8 @@ Note: tools not present in the dev-container are skipped (tested in base image b
 
 #### D. CLI demo tests (2 tests, ~3s each)
 
-- `dev-box init` with all flag combinations → verify exit code 0 and files created
-- `dev-box doctor` → verify exit code 0
+- `aibox init` with all flag combinations → verify exit code 0 and files created
+- `aibox doctor` → verify exit code 0
 
 ### Speed
 
@@ -149,7 +149,7 @@ Sequential with 2s duration is ~37s total — fast enough for release-time testi
 ### Validation script
 
 `scripts/test-screencasts.sh`:
-1. Records all casts in test mode (2s, no typing simulation) to `/tmp/devbox-test-casts/`
+1. Records all casts in test mode (2s, no typing simulation) to `/tmp/aibox-test-casts/`
 2. Validates each cast: header JSON, dimensions, event count >10, file size >10KB
 3. Exits 0/1 for CI compatibility
 4. Does NOT overwrite docs recordings

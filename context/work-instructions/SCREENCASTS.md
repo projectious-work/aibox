@@ -80,7 +80,7 @@ Simple — just captures the static layout.
 5. Background process kills Zellij after 10s total
 
 **CLI demos:** Scripted typing simulation (printf + sleep per character) running
-the actual `dev-box` binary. PATH is set to find the binary in `cli/target/`.
+the actual `aibox` binary. PATH is set to find the binary in `cli/target/`.
 
 ### test-screencasts.sh
 
@@ -133,7 +133,7 @@ provides the `@font-face` that loads the vendored `NerdFontsSymbols.ttf`.
 
 **GitHub README:** Does not support custom JS. Use the animated GIF instead:
 ```markdown
-![dev-box dev layout](docs/assets/readme-dev-layout.gif)
+![aibox dev layout](docs/assets/readme-dev-layout.gif)
 ```
 
 ## Adding a New Recording

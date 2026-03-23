@@ -20,4 +20,4 @@
 ## Working Context
 
 - **Timezone:** Europe/Berlin
-- **Current focus:** dev-box CLI evolution, migrating existing projects to dev-box
+- **Current focus:** aibox CLI evolution, migrating existing projects to aibox
