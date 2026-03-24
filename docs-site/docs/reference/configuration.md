@@ -139,7 +139,7 @@ bundles = ["infrastructure", "kubernetes", "cloud-aws"]
 
 ### [appearance]
 
-Color theme configuration. See [Themes](../themes.md) for details and previews.
+Color theme configuration. See [Themes](../customization/themes.md) for details and previews.
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
