@@ -297,7 +297,7 @@ cmd_docs_deploy() {
   tmpdir=$(mktemp -d)
   trap 'rm -rf "${tmpdir}"' EXIT
 
-  cp -r docs-site/build/* "${tmpdir}/"
+  cp -r build/* "${tmpdir}/"
   touch "${tmpdir}/.nojekyll"
 
   info "Pushing to gh-pages branch..."
