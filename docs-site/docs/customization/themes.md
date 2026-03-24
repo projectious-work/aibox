@@ -81,6 +81,11 @@ Arctic, north-bluish color palette. Minimalist and calm.
 
 <div class="asciinema" data-cast="assets/screencasts/theme-nord.cast" data-poster="npt:2" data-loop="true" data-theme="nord" data-fit="width"></div>
 
+### projectious
+
+- **Palette:** Midnight navy (#1d3352), accent orange (#E05232), slate (#546a82)
+- **Style:** Dark, professional — the projectious.work brand theme
+
 ## How It Works
 
 Each theme is a coordinated set of config files applied to all tools:

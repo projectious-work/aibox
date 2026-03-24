@@ -241,6 +241,7 @@ RUN mkdir -p /home/aibox/.vim/undo
 COPY --from=fetch-vim-colors /vim-colors/colors/                                 /home/aibox/.vim/colors/
 COPY --from=fetch-vim-colors /vim-colors/pack/themes/start/dracula/colors/       /home/aibox/.vim/pack/themes/start/dracula/colors/
 COPY --from=fetch-vim-colors /vim-colors/pack/themes/start/dracula/autoload/     /home/aibox/.vim/pack/themes/start/dracula/autoload/
+COPY config/vim-colors/projectious.vim                                           /home/aibox/.vim/colors/projectious.vim
 COPY config/vimrc /home/aibox/.vim/vimrc
 
 # Create config directories in a single layer

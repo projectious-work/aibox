@@ -36,7 +36,7 @@ aibox init [OPTIONS]
 | `--base <BASE>` | `debian` | Base image: `debian` |
 | `--process <PACKAGES>` | `core` | Process packages (space-separated): package names or presets |
 | `--ai <PROVIDER>` | `claude` | AI provider(s): `claude`, `aider`, `gemini`, `mistral` (can be repeated) |
-| `--theme <THEME>` | `gruvbox-dark` | Color theme: `gruvbox-dark`, `catppuccin-mocha`, `catppuccin-latte`, `dracula`, `tokyo-night`, `nord` |
+| `--theme <THEME>` | `gruvbox-dark` | Color theme: `gruvbox-dark`, `catppuccin-mocha`, `catppuccin-latte`, `dracula`, `tokyo-night`, `nord`, `projectious` |
 | `--user <USER>` | `aibox` | Container user |
 | `--addons <NAME>` | -- | Addon names (can be repeated): `python`, `rust`, `node`, `go`, `latex`, `typst`, `infrastructure`, `kubernetes`, `cloud-aws`, etc. |
 

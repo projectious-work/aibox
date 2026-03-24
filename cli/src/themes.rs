@@ -103,6 +103,22 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
     }
 }
 "##,
+        Theme::Projectious => r##"themes {
+    projectious {
+        fg "#C5DAF0"
+        bg "#0E1720"
+        black "#131E2B"
+        red "#A32D2D"
+        green "#2D6A4F"
+        yellow "#8B6508"
+        blue "#2B4D78"
+        magenta "#546A82"
+        cyan "#8AACC8"
+        white "#E2E9F2"
+        orange "#E05232"
+    }
+}
+"##,
     }
 }
 
@@ -116,6 +132,7 @@ pub fn vim_colorscheme(theme: &Theme) -> &'static str {
         Theme::Dracula => "dracula",
         Theme::TokyoNight => "tokyonight",
         Theme::Nord => "nord",
+        Theme::Projectious => "projectious",
     }
 }
 
@@ -143,6 +160,9 @@ pub fn yazi_theme(theme: &Theme) -> &'static str {
             include_str!("../../images/base-debian/config/yazi/themes/tokyo-night.toml")
         }
         Theme::Nord => include_str!("../../images/base-debian/config/yazi/themes/nord.toml"),
+        Theme::Projectious => {
+            include_str!("../../images/base-debian/config/yazi/themes/projectious.toml")
+        }
     }
 }
 
@@ -282,6 +302,28 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
     searchingActiveBorderColor:
       - '#EBCB8B'
 "#,
+        Theme::Projectious => r#"gui:
+  theme:
+    activeBorderColor:
+      - '#E05232'
+      - bold
+    inactiveBorderColor:
+      - '#546A82'
+    optionsTextColor:
+      - '#8AACC8'
+    selectedLineBgColor:
+      - '#1d3352'
+    cherryPickedCommitBgColor:
+      - '#2B4D78'
+    cherryPickedCommitFgColor:
+      - '#E05232'
+    unstagedChangesColor:
+      - '#A32D2D'
+    defaultFgColor:
+      - '#C5DAF0'
+    searchingActiveBorderColor:
+      - '#8B6508'
+"#,
     }
 }
 
@@ -295,6 +337,7 @@ fn theme_palette(theme: &Theme) -> (&str, &str, &str, &str, &str) {
         Theme::Dracula => ("#282A36", "#F8F8F2", "#BD93F9", "#50FA7B", "#FF5555"),
         Theme::TokyoNight => ("#1A1B26", "#C0CAF5", "#7AA2F7", "#9ECE6A", "#F7768E"),
         Theme::Nord => ("#2E3440", "#D8DEE9", "#88C0D0", "#A3BE8C", "#BF616A"),
+        Theme::Projectious => ("#0E1720", "#C5DAF0", "#E05232", "#2D6A4F", "#A32D2D"),
     }
 }
 

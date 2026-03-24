@@ -325,6 +325,7 @@ pub enum Theme {
     Dracula,
     TokyoNight,
     Nord,
+    Projectious,
 }
 
 impl std::fmt::Display for Theme {
@@ -336,6 +337,7 @@ impl std::fmt::Display for Theme {
             Theme::Dracula => write!(f, "dracula"),
             Theme::TokyoNight => write!(f, "tokyo-night"),
             Theme::Nord => write!(f, "nord"),
+            Theme::Projectious => write!(f, "projectious"),
         }
     }
 }
