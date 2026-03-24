@@ -3,8 +3,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'aibox',
-  tagline: 'AI-ready development environments, containerized',
-  favicon: 'img/favicon.ico',
+  tagline: 'AI-ready development environments, containerized — a projectious.work project',
+  favicon: 'img/favicon.png',
   url: 'https://projectious-work.github.io',
   baseUrl: '/aibox/',
   organizationName: 'projectious-work',

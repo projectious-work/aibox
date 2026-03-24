@@ -1,0 +1,87 @@
+# projectious.work theme for Yazi
+# Brand palette: Midnight #1d3352, Accent #E05232, Slate #546a82
+
+[manager]
+cwd = { fg = "#8AACC8" }
+
+hovered = { fg = "#C5DAF0", bg = "#1d3352" }
+preview_hovered = { underline = true }
+
+find_keyword = { fg = "#E05232", bold = true }
+find_position = { fg = "#8B6508", italic = true }
+
+marker_selected = { fg = "#2D6A4F", bg = "#2D6A4F" }
+marker_copied   = { fg = "#8B6508", bg = "#8B6508" }
+marker_cut      = { fg = "#A32D2D", bg = "#A32D2D" }
+
+tab_active   = { fg = "#0E1720", bg = "#8AACC8" }
+tab_inactive = { fg = "#C5DAF0", bg = "#131E2B" }
+tab_width    = 1
+
+border_symbol = "│"
+border_style  = { fg = "#546A82" }
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { fg = "#131E2B", bg = "#131E2B" }
+
+mode_normal = { fg = "#0E1720", bg = "#8AACC8", bold = true }
+mode_select = { fg = "#0E1720", bg = "#2D6A4F", bold = true }
+mode_unset  = { fg = "#0E1720", bg = "#A32D2D", bold = true }
+
+progress_label  = { fg = "#C5DAF0", bold = true }
+progress_normal = { fg = "#546A82", bg = "#131E2B" }
+progress_error  = { fg = "#A32D2D", bg = "#131E2B" }
+
+permissions_t = { fg = "#8AACC8" }
+permissions_r = { fg = "#8B6508" }
+permissions_w = { fg = "#A32D2D" }
+permissions_x = { fg = "#2D6A4F" }
+permissions_s = { fg = "#546A82" }
+
+[input]
+border   = { fg = "#8AACC8" }
+title    = {}
+value    = {}
+selected = { reversed = true }
+
+[select]
+border   = { fg = "#8AACC8" }
+active   = { fg = "#E05232" }
+inactive = {}
+
+[tasks]
+border  = { fg = "#8AACC8" }
+title   = {}
+hovered = { underline = true }
+
+[which]
+mask            = { bg = "#131E2B" }
+cand            = { fg = "#8AACC8" }
+rest            = { fg = "#546A82" }
+desc            = { fg = "#C5DAF0" }
+separator       = "  "
+separator_style = { fg = "#546A82" }
+
+[help]
+on      = { fg = "#E05232" }
+exec    = { fg = "#8AACC8" }
+desc    = { fg = "#C5DAF0" }
+hovered = { bg = "#1d3352", bold = true }
+footer  = { fg = "#C5DAF0", bg = "#131E2B" }
+
+[filetype]
+
+rules = [
+	{ mime = "image/*", fg = "#8AACC8" },
+	{ mime = "video/*", fg = "#8B6508" },
+	{ mime = "audio/*", fg = "#8B6508" },
+	{ mime = "application/zip",  fg = "#E05232" },
+	{ mime = "application/gzip", fg = "#E05232" },
+	{ mime = "application/x-tar", fg = "#E05232" },
+	{ mime = "application/x-bzip2", fg = "#E05232" },
+	{ mime = "application/x-7z-compressed", fg = "#E05232" },
+	{ mime = "application/x-rar", fg = "#E05232" },
+	{ name = "*/", fg = "#8AACC8", bold = true },
+]
