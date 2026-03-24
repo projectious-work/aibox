@@ -255,7 +255,7 @@ cmd_push_images() {
   done
 
   echo ""
-  ok "All 10 images pushed to ${IMAGE_REGISTRY}"
+  ok "All ${#flavors[@]} image(s) pushed to ${IMAGE_REGISTRY}"
   info "Verify at: https://github.com/orgs/projectious-work/packages"
 }
 
