@@ -92,7 +92,7 @@ ${bold}Development:${reset}
 ${bold}Release:${reset}
   release <version>        Tag, build CLI, generate release prompt (in container)
   release-host <version>   Build macOS binaries, upload to GH release,
-                           build + push images, deploy docs (on macOS host)
+                           build + push images (on macOS host)
 
 ${bold}Container (this project's dev-container):${reset}
   start                    Ensure running, then attach via zellij
@@ -550,17 +550,15 @@ cmd_release_host() {
   info "Pushing container images..."
   cmd_push_images "${version}"
 
-  # ── Step 4: Deploy documentation ──────────────────────────────────────────
-  info "Deploying documentation..."
-  cmd_docs_deploy
-
   # ── Done ──────────────────────────────────────────────────────────────────
   echo ""
   ok "Release ${tag} host-side steps complete."
   echo ""
   echo "  macOS binaries: uploaded to GitHub release"
   echo "  Container images: pushed to GHCR"
-  echo "  Documentation: deployed to gh-pages"
+  echo ""
+  echo "  Note: docs deployment runs inside the dev-container"
+  echo "  (requires Node.js/Docusaurus): ./scripts/maintain.sh docs-deploy"
 }
 
 # ── Container commands ───────────────────────────────────────────────────────

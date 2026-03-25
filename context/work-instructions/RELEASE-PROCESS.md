@@ -73,6 +73,10 @@ Before every release, check ALL upstream dependencies for updates.
      dist/aibox-vX.Y.Z-*.tar.gz
    ```
    Note: Always use `--notes-file`, never `--generate-notes`.
+9. **Deploy documentation** (requires Node.js/Docusaurus — runs in container):
+   ```bash
+   ./scripts/maintain.sh docs-deploy
+   ```
 
 ## Phase 2 — On macOS host (user runs one command)
 
@@ -81,12 +85,11 @@ cd /path/to/aibox
 ./scripts/maintain.sh release-host X.Y.Z
 ```
 
-This single command does everything:
+This single command does:
 1. Builds macOS binaries (arm64 + x86_64) via `build-macos.sh`
 2. Uploads macOS binaries to the existing GitHub release
 3. Builds container images
 4. Pushes container images to GHCR
-5. Deploys documentation to gh-pages
 
 **Prerequisites:** Rust toolchain on macOS, `gh` authenticated with `write:packages` scope, Docker/OrbStack running.
 
