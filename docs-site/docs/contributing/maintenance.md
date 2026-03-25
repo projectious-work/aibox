@@ -19,7 +19,7 @@ All maintenance tasks are driven by `scripts/maintain.sh`:
 | Command | Purpose |
 |---------|---------|
 | `test` | Run `cargo fmt --check`, `clippy -D warnings`, and all tests |
-| `build-images [--no-cache]` | Build all 10 published container images locally |
+| `build-images [--no-cache]` | Build published container images locally |
 | `push-images <version>` | Push images to GHCR (requires login) |
 | `docs-serve` | Preview documentation at `http://localhost:8000` |
 | `docs-deploy [--dry-run]` | Build and push docs to `gh-pages` branch |
@@ -99,7 +99,7 @@ echo $GITHUB_TOKEN | podman login ghcr.io -u <username> --password-stdin
 The token needs the `write:packages` scope. Create one at
 [github.com/settings/tokens](https://github.com/settings/tokens).
 
-Then push all 10 images:
+Then push images:
 
 ```bash
 ./scripts/maintain.sh push-images 0.8.0

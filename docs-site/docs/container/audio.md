@@ -137,7 +137,7 @@ This is tracked at [anthropics/claude-code#14528](https://github.com/anthropics/
 
 ## The .asoundrc File
 
-The base image includes an `.asoundrc` file at `/root/.asoundrc`. This configures ALSA to route through PulseAudio, so applications that use ALSA (rather than PulseAudio directly) also get audio output.
+The base image includes an `.asoundrc` file at `/home/aibox/.asoundrc`. This configures ALSA to route through PulseAudio, so applications that use ALSA (rather than PulseAudio directly) also get audio output.
 
 ## Troubleshooting
 

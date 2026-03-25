@@ -13,7 +13,7 @@ This guide walks through creating a new project from scratch with aibox.
 mkdir my-app && cd my-app
 git init
 
-aibox init --name my-app --image python --process product
+aibox init --name my-app --process managed
 ```
 
 The `init` command accepts these options:
@@ -21,8 +21,11 @@ The `init` command accepts these options:
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--name` | Current directory name | Container and hostname |
-| `--image` | `base` | Image flavor (`base`, `python`, `latex`, `typst`, `rust`, `node`, `go`, `python-latex`, `python-typst`, `rust-latex`) |
-| `--process` | `product` | Work process flavor (`minimal`, `managed`, `research`, `product`) |
+| `--base` | `debian` | Base image |
+| `--process` | `core` | Process packages (space-separated): package names or presets (`managed`, `software`, `research-project`, `full-product`) |
+| `--ai` | `claude` | AI providers (can be repeated): `claude`, `aider`, `gemini`, `mistral` |
+| `--addons` | — | Addon names (can be repeated): `python`, `rust`, `node`, `go`, `latex`, etc. |
+| `--theme` | `gruvbox-dark` | Color theme |
 
 If you omit options, `aibox init` runs interactively and prompts for each value.
 
@@ -44,7 +47,7 @@ my-app/
 │   ├── docker-compose.yml        # Generated — volume mounts, env vars
 │   └── devcontainer.json         # Generated — VS Code integration
 ├── .claude/
-│   └── skills/                   # 83 curated agent skills
+│   └── skills/                   # 84 curated agent skills
 │       ├── code-review/SKILL.md
 │       ├── kubernetes-basics/
 │       │   ├── SKILL.md
@@ -97,57 +100,39 @@ The scaffolded config file comes with commented documentation for every option:
 # All generated files (.devcontainer/) derive from this file.
 # Run `aibox sync` after editing to regenerate.
 #
-# Full documentation: https://projectious-work.github.io/aibox/cli/configuration/
+# Full documentation: https://projectious-work.github.io/aibox/docs/reference/configuration
 
 [aibox]
-version = "0.8.0"
-# Container image flavor. Options: base, python, latex, typst, rust, node, go,
-# python-latex, python-typst, rust-latex
-image = "python"
-# Work process flavor. Controls which context files are scaffolded.
-# Options: minimal (CLAUDE.md only), managed (backlog + decisions),
-#          research (progress + notes), product (full: PRD + backlog + standups)
-process = "product"
+version = "0.10.1"
+base = "debian"
 
 [container]
 name = "my-app"
 hostname = "my-app"
-# user = "root"  # Container user (default: root). Change to run as non-root.
-# ports = ["8080:80"]  # Host:container port forwarding
-# extra_packages = ["ripgrep", "fd-find"]  # Additional apt packages
-# vscode_extensions = ["eamodio.gitlens"]  # Additional VS Code extensions
-# post_create_command = "npm install"  # Run after container creation
-#
-# Extra volumes: [[container.extra_volumes]]
-# source = "/host/path"
-# target = "/container/path"
-# read_only = false
-#
-# Extra environment: [container.environment]
-# MY_VAR = "value"
+# user = "aibox"  # Container user (default: aibox)
+# ports = ["8080:80"]
+# extra_packages = ["ripgrep", "fd-find"]
 
-# Addon bundles install additional tool sets into the container.
-# Options: infrastructure, kubernetes, cloud-aws, cloud-gcp, cloud-azure,
-#          docs-mkdocs, docs-zensical, docs-docusaurus, docs-starlight,
-#          docs-mdbook, docs-hugo
-[addons]
-# bundles = ["infrastructure", "kubernetes"]
+[process]
+packages = ["managed"]
+
+# Addons install tool sets into the container.
+# Run `aibox addon list` to see all available addons.
+# [addons.python.tools]
+# python = { version = "3.13" }
+# uv = { version = "0.7" }
 
 [context]
 schema_version = "1.0.0"
 
-# AI tool providers. Controls which AI CLI tools are installed and configured.
-# Options: claude, aider, gemini
+# AI providers — controls which AI CLI tools are installed.
+# Options: claude, aider, gemini, mistral
 [ai]
 providers = ["claude"]
 
-# Color theme applied across Zellij, Vim, Yazi, and lazygit.
-# Options: gruvbox-dark, catppuccin-mocha, catppuccin-latte, dracula,
-#          tokyo-night, nord
+# Color theme (7 options). Run `aibox init --help` for the full list.
 [appearance]
 theme = "gruvbox-dark"
-# Starship prompt preset.
-# Options: default, plain, minimal, nerd-font, pastel, bracketed
 prompt = "default"
 
 # Audio support for PulseAudio bridging (e.g., Claude Code voice).
@@ -189,7 +174,7 @@ Both `aibox start` (terminal) and VS Code can use the same container simultaneou
 ## Next Steps
 
 - [Explore the base image](../container/base-image.md)
-- [Choose the right image addon](../container/addons.md)
+- [Choose the right image addon](../addons/overview.md)
 - [Understand process packages](../context/process-packages.md)
 - [Browse the Skills Library](../skills/index.md)
 - [Full CLI reference](../reference/cli-commands.md)

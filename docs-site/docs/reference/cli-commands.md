@@ -51,29 +51,20 @@ aibox init [OPTIONS]
 ### Examples
 
 ```bash
-# Basic initialization (uses directory name, base image, product process)
+# Basic initialization (uses directory name, defaults)
 aibox init
 
-# Specify all options
-aibox init --name my-api --image python --process managed
+# Specify project name and process
+aibox init --name my-api --process managed
 
-# Rust project with minimal context
-aibox init --image rust --process minimal
-
-# Specify a non-root user
-aibox init --name my-api --image python --user devuser
+# With addons
+aibox init --name my-app --addons python --addons infrastructure
 
 # Configure multiple AI providers
 aibox init --ai claude --ai aider
 
-# All three providers
-aibox init --ai claude --ai aider --ai gemini
-
 # Choose a color theme
-aibox init --name my-app --image python --theme catppuccin-mocha
-
-# Include addon bundles
-aibox init --name my-app --image python --addons infrastructure --addons kubernetes
+aibox init --name my-app --theme catppuccin-mocha
 ```
 
 ### Exit Codes
@@ -85,9 +76,9 @@ aibox init --name my-app --image python --addons infrastructure --addons kuberne
 
 ### Interactive Mode
 
-When `--name`, `--image`, or `--process` flags are omitted and the terminal is interactive, `aibox init` prompts for each missing value. This lets you explore the available options without memorizing flag values.
+When `--name` or `--process` flags are omitted and the terminal is interactive, `aibox init` prompts for each missing value. This lets you explore the available options without memorizing flag values.
 
-In non-interactive environments (scripts, CI pipelines), omitted flags silently use defaults: the current directory name for `--name`, `base` for `--image`, and `product` for `--process`.
+In non-interactive environments (scripts, CI pipelines), omitted flags silently use defaults: the current directory name for `--name`, `debian` for `--base`, and `core` for `--process`.
 
 !!! warning "Will not overwrite"
     If `aibox.toml` already exists, `init` exits with an error. Delete the file first or edit it directly.

@@ -127,7 +127,7 @@ Notable settings baked into the image:
 - **Leader key:** Space
 - **Line numbers:** Relative + absolute (hybrid)
 - **Indentation:** 4 spaces default, 2 spaces for YAML, JSON, KDL, HTML, CSS, JavaScript
-- **Undo:** Persistent undo files stored in `/root/.vim/undo`
+- **Undo:** Persistent undo files stored in `/home/aibox/.vim/undo`
 - **No swap files** -- clean container environment
 - **Color column** at 88 (Black/PEP8 default)
 - **Grep program:** ripgrep if available (`rg --vimgrep --smart-case`)
@@ -136,13 +136,13 @@ Notable settings baked into the image:
 
 ## Git Configuration
 
-Git config lives at `/root/.config/git/config` (XDG path, not `~/.gitconfig`). The environment variable `GIT_CONFIG_GLOBAL` is set in the generated `docker-compose.yml` to point to this location.
+Git config lives at `/home/aibox/.config/git/config` (XDG path, not `~/.gitconfig`). The environment variable `GIT_CONFIG_GLOBAL` is set in the generated `docker-compose.yml` to point to this location.
 
 Using a directory mount (rather than a single-file mount) allows a `credentials` file to coexist alongside `config`.
 
-## Claude CLI
+## AI Coding Agents
 
-The Claude CLI is installed via the official install script during image build. It is available at `/root/.local/bin/claude` and added to `PATH`.
+AI coding agents (Claude, Aider, Gemini, Mistral) are **not** pre-installed in the base image. They are installed per-project via the [addons system](../addons/overview.md) when you set `[ai] providers = ["claude"]` in `aibox.toml`.
 
 ## Audio Support
 
@@ -154,11 +154,11 @@ All user configuration is persisted on the host under `.aibox-home/` and bind-mo
 
 | Host Path | Container Path | Contents |
 |-----------|---------------|----------|
-| `.aibox-home/.ssh/` | `/root/.ssh` (read-only) | SSH keys |
-| `.aibox-home/.vim/` | `/root/.vim` | Vim config, undo history, plugins |
-| `.aibox-home/.config/git/` | `/root/.config/git` | Git config and credentials |
-| `.aibox-home/.config/zellij/` | `/root/.config/zellij` | Zellij config, themes, layouts, plugin cache |
-| `.aibox-home/.config/yazi/` | `/root/.config/yazi` | Yazi file manager config and keymap |
+| `.aibox-home/.ssh/` | `/home/aibox/.ssh` (read-only) | SSH keys |
+| `.aibox-home/.vim/` | `/home/aibox/.vim` | Vim config, undo history, plugins |
+| `.aibox-home/.config/git/` | `/home/aibox/.config/git` | Git config and credentials |
+| `.aibox-home/.config/zellij/` | `/home/aibox/.config/zellij` | Zellij config, themes, layouts, plugin cache |
+| `.aibox-home/.config/yazi/` | `/home/aibox/.config/yazi` | Yazi file manager config and keymap |
 
 The Dockerfile bakes identical defaults into the image as a fallback. If no mounts are present, the container still works out of the box.
 
