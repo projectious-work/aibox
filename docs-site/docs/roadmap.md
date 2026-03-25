@@ -13,17 +13,17 @@ this page is the public-facing summary.
 The current release includes:
 
 - Rust CLI with 16 commands (init, sync, build, start, stop, remove, attach, status, doctor, completions, update, env, backup, reset, audit, audio)
-- 10 container image flavors (base, python, latex, typst, rust, node, go, python-latex, python-typst, rust-latex)
+- Single base-debian image with 21 composable addons (python, rust, node, go, latex, typst, infrastructure, kubernetes, cloud providers, docs frameworks, AI agents)
 - `aibox.toml` configuration system with 7 sections (aibox, container, context, ai, addons, appearance, audio)
 - 4 work process flavors (minimal, managed, research, product)
 - Context scaffolding with `context/shared/` for cross-environment files
 - Named environment management (`aibox env create/switch/list/delete/status`)
 - `aibox sync` — reconcile config changes (themes, AI, etc.) without manual file deletion
-- Color theming across Zellij, Vim, Yazi, and lazygit (6 themes) with 6 starship prompt presets
+- Color theming across Zellij, Vim, Yazi, and lazygit (7 themes) with 6 starship prompt presets
 - Three IDE layouts: dev, focus, cowork (Ctrl+b leader keybindings)
 - AI provider flexibility: Claude, Aider, Gemini — optional, stackable, dynamic layouts
 - Process templates (release, code-review, feature-dev, bug-fix) with SKILL.md support
-- 83 curated skills across 14 categories with 57 reference files
+- 84 curated skills across 14 categories with reference files
 - Addon bundles (11 total): infrastructure, kubernetes, cloud-aws/gcp/azure, docs-mkdocs/zensical/docusaurus/starlight/mdbook/hugo
 - `aibox audit` — security scanning (cargo audit, pip-audit, trivy)
 - Shell tools: ripgrep, fd, bat, eza, zoxide, fzf, delta, starship + aliases
@@ -36,7 +36,7 @@ The current release includes:
 
 ### Theming Screenshots (BACK-001)
 
-Interactive asciinema recordings and screenshot gallery showing all 6 themes across all tools in docs.
+Interactive asciinema recordings and screenshot gallery showing all 7 themes across all tools in docs.
 
 ### Security Review (BACK-002)
 

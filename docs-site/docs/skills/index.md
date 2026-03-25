@@ -5,7 +5,7 @@ title: "Skills Library"
 
 # Skills Library
 
-aibox ships **83 curated skills** across 14 categories. Every skill follows the open [SKILL.md standard](https://agentskills.io/specification) and is automatically scaffolded into `.claude/skills/` when you run `aibox init`.
+aibox ships **84 curated skills** across 14 categories. Every skill follows the open [SKILL.md standard](https://agentskills.io/specification) and is automatically scaffolded into `.claude/skills/` when you run `aibox init`.
 
 ## What Are Skills?
 
@@ -51,10 +51,10 @@ A skill is a directory containing a `SKILL.md` file (and optional `references/` 
 
 ### Automatic Scaffolding
 
-All 83 skills are scaffolded automatically when you create a new project:
+All 84 skills are scaffolded automatically when you create a new project:
 
 ```bash
-aibox init --image python --process managed
+aibox init --process managed
 # Skills appear in .claude/skills/
 ```
 
@@ -128,5 +128,5 @@ Skills contain instructions that AI agents execute. A malicious skill could inst
 
 - **Review before installing** -- read the SKILL.md file before adding third-party skills
 - **Version control** -- commit `.claude/skills/` to git so changes are tracked
-- **Prefer bundled** -- the 83 skills shipped with aibox are curated and maintained
+- **Prefer bundled** -- the 84 skills shipped with aibox are curated and maintained
 - **Audit external skills** -- treat them like any dependency

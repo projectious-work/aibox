@@ -13,7 +13,7 @@ If your project does not yet have a `aibox.toml`, create one manually or use `in
 
 ```bash
 cd my-existing-project
-aibox init --name my-existing-project --image python --process managed
+aibox init --name my-existing-project --process managed
 ```
 
 :::warning init will not overwrite
@@ -26,12 +26,14 @@ If you prefer to write it by hand:
 
 ```toml
 [aibox]
-version = "0.8.0"
-image = "python"
-process = "managed"
+version = "0.10.1"
+base = "debian"
 
 [container]
 name = "my-existing-project"
+
+[process]
+packages = ["managed"]
 hostname = "my-existing-project"
 ports = []
 extra_packages = []

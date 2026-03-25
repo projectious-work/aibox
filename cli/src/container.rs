@@ -207,7 +207,7 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("# Run `aibox sync` after editing to regenerate.\n");
     out.push_str("#\n");
     out.push_str(
-        "# Full documentation: https://projectious-work.github.io/aibox/cli/configuration/\n\n",
+        "# Full documentation: https://projectious-work.github.io/aibox/docs/reference/configuration\n\n",
     );
     out.push_str("[aibox]\n");
     out.push_str(&format!("version = \"{}\"\n", config.aibox.version));
