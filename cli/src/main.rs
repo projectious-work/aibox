@@ -86,7 +86,7 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
                 addons,
             },
         ),
-        cli::Commands::Sync { no_cache } => container::cmd_sync(config_path, no_cache),
+        cli::Commands::Sync { no_cache, no_build } => container::cmd_sync(config_path, no_cache, no_build),
         cli::Commands::Start { layout } => container::cmd_start(config_path, &layout.to_string()),
         cli::Commands::Stop => container::cmd_stop(config_path),
         cli::Commands::Remove => container::cmd_remove(config_path),
@@ -129,8 +129,8 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
         },
         cli::Commands::Addon { action } => match action {
             cli::AddonAction::List => addon_cmd::cmd_addon_list(config_path),
-            cli::AddonAction::Add { name } => addon_cmd::cmd_addon_add(config_path, &name),
-            cli::AddonAction::Remove { name } => addon_cmd::cmd_addon_remove(config_path, &name),
+            cli::AddonAction::Add { name, no_build } => addon_cmd::cmd_addon_add(config_path, &name, no_build),
+            cli::AddonAction::Remove { name, no_build } => addon_cmd::cmd_addon_remove(config_path, &name, no_build),
             cli::AddonAction::Info { name } => addon_cmd::cmd_addon_info(&name),
         },
         cli::Commands::Skill { action } => match action {

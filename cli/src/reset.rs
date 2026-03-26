@@ -560,7 +560,7 @@ name = "test-project"
         setup_project(dir.path());
 
         let items = discover_items(None, true);
-        let gitignore = items.iter().find(|i| i.path == PathBuf::from(".gitignore"));
+        let gitignore = items.iter().find(|i| i.path == Path::new(".gitignore"));
         assert!(gitignore.is_some());
         assert!(!gitignore.unwrap().will_delete);
 
