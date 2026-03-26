@@ -7,16 +7,16 @@ use serial_test::serial;
 
 use super::runner::E2eRunner;
 
-/// Verify that `aibox update` runs in a freshly init'd project without crashing.
+/// Verify that `aibox update --check` successfully fetches version info from GHCR.
 ///
-/// Covers BACK-058: `aibox update` was exiting with `ERR http status: 401`
-/// (hard failure) when GHCR returned 401 for anonymous pulls. Fixed to warn
-/// and exit cleanly instead.
+/// The GHCR packages are public, so anonymous token exchange should succeed and
+/// the CLI should find published tags matching the `base-debian-v*` pattern.
+/// This test catches tag-prefix mismatches between the CLI and the registry.
 #[test]
 #[serial]
-fn update_runs_without_crashing_in_derived_project() {
+fn update_check_fetches_from_registry() {
     let runner = E2eRunner::new();
-    let test = "update-graceful";
+    let test = "update-registry-fetch";
     runner.cleanup(test);
 
     // Init a derived project
@@ -38,47 +38,51 @@ fn update_runs_without_crashing_in_derived_project() {
         String::from_utf8_lossy(&init_out.stderr)
     );
 
-    // Run update — must exit 0 regardless of registry availability.
-    // Before the BACK-058 fix, a 401 from GHCR caused a hard failure (`ERR http status: 401`).
-    // Now it warns and returns Ok(()).
-    let output = runner.aibox(test, &["update"]);
+    // Run update --check — should fetch real version info from GHCR.
+    let output = runner.aibox(test, &["update", "--check"]);
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
     let combined = format!("{}{}", stdout, stderr);
 
     assert!(
         output.status.success(),
-        "aibox update should exit 0 even when GHCR returns 401.\nOutput:\n{}",
+        "aibox update --check should exit 0.\nOutput:\n{}",
         combined
     );
 
-    // Verify command produced expected preamble output
+    // Verify the registry fetch succeeded — output should show the image is
+    // up to date or that a new version is available, NOT a "Could not" warning.
     assert!(
-        combined.contains("Current image version:"),
-        "expected 'Current image version:' in output, got:\n{}",
+        !combined.contains("Could not fetch latest image version"),
+        "expected successful registry fetch, but got a warning.\nOutput:\n{}",
+        combined
+    );
+    assert!(
+        !combined.contains("No published tags found"),
+        "tag prefix mismatch: no tags matched the expected pattern.\nOutput:\n{}",
         combined
     );
 
-    // Verify it did not hard-fail with the bare "ERR http status: 401" message
-    let stderr_str = stderr.to_string();
+    // Should report image status (either up-to-date or upgrade available)
     assert!(
-        !stderr_str.contains("ERR http status: 401"),
-        "expected 401 to be handled as a warning, not a hard error.\nstderr:\n{}",
-        stderr_str
+        combined.contains("is up to date") || combined.contains("New image version available"),
+        "expected image version status in output, got:\n{}",
+        combined
     );
 
     runner.cleanup(test);
 }
 
-/// Verify `aibox update --check` exits cleanly in a derived project.
+/// Verify `aibox update --dry-run` fetches the latest version from GHCR without
+/// applying changes.
 ///
-/// `--check` is a read-only mode (no writes). It should not crash even if
-/// the network is unavailable.
+/// This exercises the full `do_upgrade` code path including the tag-prefix
+/// matching, but stops before writing to aibox.toml thanks to `--dry-run`.
 #[test]
 #[serial]
-fn update_check_exits_cleanly() {
+fn update_dry_run_fetches_from_registry() {
     let runner = E2eRunner::new();
-    let test = "update-check";
+    let test = "update-dry-run";
     runner.cleanup(test);
 
     runner.aibox(
@@ -94,21 +98,33 @@ fn update_check_exits_cleanly() {
         ],
     );
 
-    let output = runner.aibox(test, &["update", "--check"]);
-    let combined = format!(
-        "{}{}",
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    );
+    let output = runner.aibox(test, &["update", "--dry-run"]);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let combined = format!("{}{}", stdout, stderr);
 
     assert!(
         output.status.success(),
-        "aibox update --check should exit 0.\nOutput:\n{}",
+        "aibox update --dry-run should exit 0.\nOutput:\n{}",
+        combined
+    );
+
+    // Verify the registry fetch succeeded (not a warning/fallback)
+    assert!(
+        !combined.contains("Could not fetch latest image version"),
+        "expected successful registry fetch, but got a warning.\nOutput:\n{}",
+        combined
+    );
+
+    // Should show current version and either "already at the latest" or "[dry-run]"
+    assert!(
+        combined.contains("Current image version:"),
+        "expected 'Current image version:' in output, got:\n{}",
         combined
     );
     assert!(
-        combined.contains("Current CLI version:") || combined.contains("Checking for updates"),
-        "expected check output, got:\n{}",
+        combined.contains("is already at the latest") || combined.contains("[dry-run]"),
+        "expected dry-run or up-to-date output, got:\n{}",
         combined
     );
 
