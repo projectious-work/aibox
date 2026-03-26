@@ -1,7 +1,7 @@
 {
     "name": "aibox-base",
     "dockerComposeFile": "docker-compose.yml",
-    "service": "devcontainer",
+    "service": "aibox-devcontainer",
     "workspaceFolder": "/workspace",
 
     // Override CMD — VS Code needs the container to idle so it can exec into it.

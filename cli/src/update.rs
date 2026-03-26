@@ -68,7 +68,7 @@ fn fetch_latest_image_version(flavor: &str) -> Result<semver::Version> {
     let url = "https://ghcr.io/v2/projectious-work/aibox/tags/list";
     let tags_list: TagsList = ghcr_get_json(url)?;
 
-    let prefix = format!("{}-v", flavor);
+    let prefix = format!("base-{}-v", flavor);
     let mut versions: Vec<semver::Version> = tags_list
         .tags
         .iter()
