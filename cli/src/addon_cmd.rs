@@ -50,7 +50,7 @@ pub fn cmd_addon_list(config_path: &Option<String>) -> Result<()> {
 }
 
 /// Add an add-on to aibox.toml with default-enabled tools, then sync.
-pub fn cmd_addon_add(config_path: &Option<String>, name: &str) -> Result<()> {
+pub fn cmd_addon_add(config_path: &Option<String>, name: &str, no_build: bool) -> Result<()> {
     let addon_def = addon_registry::get_addon(name)
         .ok_or_else(|| anyhow::anyhow!("Unknown add-on '{}'. Run 'aibox addon list' to see available add-ons.", name))?;
 
@@ -105,13 +105,13 @@ pub fn cmd_addon_add(config_path: &Option<String>, name: &str) -> Result<()> {
     output::ok(&format!("Added add-on '{}' to aibox.toml", name));
 
     // Run sync to apply changes
-    crate::container::cmd_sync(config_path, false)?;
+    crate::container::cmd_sync(config_path, false, no_build)?;
 
     Ok(())
 }
 
 /// Remove an add-on from aibox.toml, then sync.
-pub fn cmd_addon_remove(config_path: &Option<String>, name: &str) -> Result<()> {
+pub fn cmd_addon_remove(config_path: &Option<String>, name: &str, no_build: bool) -> Result<()> {
     let path = toml_path(config_path);
     if !path.exists() {
         bail!("No aibox.toml found. Run 'aibox init' first.");
@@ -141,7 +141,7 @@ pub fn cmd_addon_remove(config_path: &Option<String>, name: &str) -> Result<()> 
     output::ok(&format!("Removed add-on '{}' from aibox.toml", name));
 
     // Run sync to apply changes
-    crate::container::cmd_sync(config_path, false)?;
+    crate::container::cmd_sync(config_path, false, no_build)?;
 
     Ok(())
 }

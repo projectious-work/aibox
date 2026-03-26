@@ -86,9 +86,21 @@ impl Runtime {
         }
     }
 
+    /// Resolve a compose file path to absolute.
+    ///
+    /// `podman compose` delegates to external providers (e.g. `podman-compose`)
+    /// which may not inherit the working directory, so relative paths break.
+    fn resolve_compose_path(compose_file: &str) -> Result<String> {
+        let path = std::env::current_dir()
+            .context("Failed to get current directory")?
+            .join(compose_file);
+        Ok(path.to_string_lossy().to_string())
+    }
+
     /// Run compose build.
     pub fn compose_build(&self, compose_file: &str, no_cache: bool) -> Result<()> {
-        let mut args: Vec<&str> = vec!["-f", compose_file, "build"];
+        let abs = Self::resolve_compose_path(compose_file)?;
+        let mut args: Vec<&str> = vec!["-f", &abs, "build"];
         if no_cache {
             args.push("--no-cache");
         }
@@ -102,7 +114,8 @@ impl Runtime {
 
     /// Run compose up -d for a service.
     pub fn compose_up(&self, compose_file: &str, service: &str) -> Result<()> {
-        let args = vec!["-f", compose_file, "up", "-d", service];
+        let abs = Self::resolve_compose_path(compose_file)?;
+        let args = vec!["-f", &abs, "up", "-d", service];
         let status = self.run_compose(&args)?;
         if !status.success() {
             bail!("Compose up failed");
@@ -112,7 +125,8 @@ impl Runtime {
 
     /// Run compose stop for a service.
     pub fn compose_stop(&self, compose_file: &str, service: &str) -> Result<()> {
-        let args = vec!["-f", compose_file, "stop", service];
+        let abs = Self::resolve_compose_path(compose_file)?;
+        let args = vec!["-f", &abs, "stop", service];
         let status = self.run_compose(&args)?;
         if !status.success() {
             bail!("Compose stop failed");
@@ -122,7 +136,8 @@ impl Runtime {
 
     /// Run compose down for a service (stop + remove container and network).
     pub fn compose_down(&self, compose_file: &str) -> Result<()> {
-        let args = vec!["-f", compose_file, "down"];
+        let abs = Self::resolve_compose_path(compose_file)?;
+        let args = vec!["-f", &abs, "down"];
         let status = self.run_compose(&args)?;
         if !status.success() {
             bail!("Compose down failed");

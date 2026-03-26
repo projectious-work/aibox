@@ -115,6 +115,10 @@ pub enum Commands {
         /// Build without cache (force full rebuild)
         #[arg(long)]
         no_cache: bool,
+
+        /// Skip the container image build step (config-only sync)
+        #[arg(long)]
+        no_build: bool,
     },
     /// Start container and attach via zellij
     ///
@@ -264,11 +268,19 @@ pub enum AddonAction {
     Add {
         /// Add-on name (e.g., python, rust, node, ai-claude)
         name: String,
+
+        /// Skip the container image build step after sync
+        #[arg(long)]
+        no_build: bool,
     },
     /// Remove an add-on from aibox.toml and sync
     Remove {
         /// Add-on name to remove
         name: String,
+
+        /// Skip the container image build step after sync
+        #[arg(long)]
+        no_build: bool,
     },
     /// Show detailed info about an add-on
     ///
