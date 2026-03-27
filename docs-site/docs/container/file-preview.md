@@ -33,13 +33,17 @@ When you open Yazi (`Ctrl+b s` from the file manager pane, or via the layout sid
 | WebP | `.webp` | `image` (built-in) | `chafa` |
 | BMP | `.bmp` | `image` (built-in) | `chafa` |
 | TIFF | `.tiff` `.tif` | `image` (built-in) | `chafa` |
-| SVG | `.svg` | `svg.yazi` plugin | `resvg` (bundled binary) |
-| EPS | `.eps` | `eps.yazi` plugin | `ghostscript` |
+| SVG | `.svg` | `svg.yazi` plugin | `resvg` or `rsvg-convert` |
+| EPS | `.eps` | `eps.yazi` plugin | `ghostscript` (addon) |
 | PDF | `.pdf` | `pdf` (built-in) | `poppler-utils` |
-| Video | `.mp4` `.mkv` `.webm` `.avi` | `video` (built-in) | `ffmpeg` |
+| Video | `.mp4` `.mkv` `.webm` `.avi` | `video` (built-in) | `ffmpeg` (addon) |
 | Text / code | most text formats | `code` (built-in) | — |
 
-All required tools are pre-installed in the base image. No configuration is needed.
+Most tools are pre-installed in the base image. EPS, video thumbnails, and advanced image conversion require the **preview-enhanced** addon:
+
+```bash
+aibox addon add preview-enhanced   # adds ffmpeg, imagemagick, ghostscript
+```
 
 ### How previewer dispatch works
 

@@ -535,25 +535,21 @@ rules = [
 
 /// EPS previewer plugin — converts EPS to PNG via ghostscript.
 const DEFAULT_YAZI_PLUGIN_EPS: &str = r#"-- eps.yazi — EPS previewer for yazi
--- Converts EPS to PNG using ghostscript, then renders via the built-in image previewer.
--- Requires: ghostscript (gs) in PATH.
-
-local function fail(msg)
-	return Err(msg)
-end
+-- Converts EPS to PNG using ghostscript (gs).
+-- Requires: ghostscript in PATH (install via preview-enhanced addon or apt).
 
 return {
 	entry = function(self, job)
 		local cache = ya.file_cache(job)
 		if not cache then
-			return fail("No cache path")
+			return Err("No cache path")
 		end
 
 		if cache:exists() then
 			return Image:new(job, cache):show()
 		end
 
-		local ok, err, code = Command("gs")
+		local ok = Command("gs")
 			:args({
 				"-q",
 				"-dNOPAUSE",
@@ -569,11 +565,11 @@ return {
 			:stderr(Command.NULL)
 			:status()
 
-		if not ok then
-			return fail("gs not found or failed (code " .. tostring(code) .. "): " .. tostring(err))
+		if ok then
+			return Image:new(job, cache):show()
 		end
 
-		return Image:new(job, cache):show()
+		return Err("EPS preview requires ghostscript: aibox addon add preview-enhanced")
 	end,
 }
 "#;

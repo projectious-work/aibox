@@ -211,13 +211,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash-completion \
     # ── GitHub CLI (~15 MB) ──
     gh \
-    # ── Yazi preview dependencies (~150 MB — heaviest group) ──
+    # ── Yazi preview dependencies (~30 MB — slim set) ──
+    # Heavy tools (ffmpeg, imagemagick, ghostscript) moved to preview-enhanced addon
     chafa \
     librsvg2-bin \
     poppler-utils \
-    ffmpeg \
-    imagemagick \
-    ghostscript \
     timg \
     mupdf-tools \
     entr \
