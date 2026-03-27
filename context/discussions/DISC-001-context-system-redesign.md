@@ -150,12 +150,47 @@ a local sequential counter — same coordination problem in distributed setting.
 
 This is the next step in the discussion.
 
+### 2.7 Scaling resolution
+
+Research (`file-per-entity-scaling-2026-03.md`) resolved the scaling concern:
+
+**Git handles 50K files comfortably** with three mitigations:
+1. Directory sharding (`items/2026/03/BACK-xxx.md`) — keeps each dir under 1K files
+2. Git fsmonitor + `feature.manyFiles` — daemon tracks changes, avoids stat-ing all files
+3. Sparse checkout — all files in git, only "hot" ones on disk
+
+**Three-tier architecture:**
+- Hot (filesystem, git-tracked): individual .md files for active items
+- Warm (SQLite, gitignored): derived index for queries + RAG embeddings
+- Cold (compressed archives, git-lfs): completed items older than threshold
+
+**kaits boundary:** Repo-per-project. Each simulated company project = own git repo
+with own aibox context (max ~50K active files). kaits orchestrates across repos and
+maintains a cross-project database for analytics. aibox markdown = interchange format.
+
+**Decision (tentative):** File-per-entity with sharding + sparse checkout + hot/cold
+archiving. Scales to 100K+ items per project. kaits scales beyond via repo-per-project.
+
+### 2.8 Discussion as a primitive
+
+A Discussion IS a process primitive (this document is proof). It has: ID, title,
+participants, status (active/concluded), related items, research references, and
+produces decisions. Added as 16th primitive alongside the 15 from the ontology research.
+
+### 2.9 UUID for identifiers
+
+**Decision (tentative):** Use short UUIDs (first 8 hex chars of UUID4) for all entity IDs.
+Format: `BACK-a7f3b2c1`, `DEC-f290e4b3`, `DISC-001` (discussions keep sequential for now
+since they're rare and human-authored).
+
+Rationale: no coordination needed for multi-collaborator, collision probability negligible
+at 100K items (~0.0002%), human-readable enough. Lock files and prefixes rejected as brittle.
+
 ## 3. Open Questions (for continued discussion)
 
-1. **Scaling**: How far can file-per-entity + hot/cold really go? Does kaits need a
-   fundamentally different approach, or can we make the file approach work to 100K+?
-2. **Primitive mapping**: Map each of the 15 primitives to concrete storage decisions.
-3. **Directory structure**: Design the new `context/` layout.
+1. ~~**Scaling**: resolved — see §2.7~~
+2. **Primitive mapping**: Map each of the 16 primitives to concrete storage decisions.
+3. **Directory structure**: Design the new `context/` layout with sharding.
 4. **Migration**: How do we migrate from current BACKLOG.md table format to file-per-entity?
 5. **Event log**: JSONL append-only vs individual event files?
 6. **Narrative vs structured**: Where exactly is the boundary? (Some primitives like
@@ -163,17 +198,25 @@ This is the next step in the discussion.
    mostly structured with light narrative.)
 7. **Process templates**: How do the 4 presets (minimal/managed/research/product) map
    to the new primitive-based system?
-8. **discussions/ as a primitive**: Is a Discussion itself a process primitive? (It has
-   an ID, participants, status, related items, produces decisions...)
+8. **Git repo as a primitive**: Owner noted that taking a git repository as granted is
+   itself a precondition/primitive. Accepted for now to keep things simple.
 
-## 4. Decisions Made
+## 4. Decisions Made (tentative, pending formal DEC-NNN)
 
-*(None yet — discussion in progress)*
+1. **Storage**: Markdown+frontmatter as single source of truth. SQLite as derived
+   runtime index (gitignored). No dual-master.
+2. **Scaling**: Three-tier hot/warm/cold. Directory sharding. Sparse checkout for large repos.
+3. **kaits boundary**: Repo-per-project. aibox handles per-project context (up to 100K items).
+   kaits orchestrates across repos with its own database.
+4. **IDs**: Short UUID (8 hex chars). No coordination needed.
+5. **Discussions**: Are a primitive. Stored in `context/discussions/`.
 
 ## 5. Next Steps
 
-- [ ] Research: scaling limits of file-per-entity in git repos (large monorepo patterns)
-- [ ] Map 15 primitives to storage structure
-- [ ] Design new `context/` directory layout
+- [x] Research: scaling limits of file-per-entity in git repos — **done**
+- [ ] Map 16 primitives to storage structure
+- [ ] Design new `context/` directory layout with sharding
+- [ ] Design YAML frontmatter schemas per primitive type
 - [ ] Prototype: convert BACKLOG.md to file-per-entity format
 - [ ] Record formal decisions in DECISIONS.md
+- [ ] Session handover: capture full context for next session
