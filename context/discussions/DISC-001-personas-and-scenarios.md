@@ -726,40 +726,70 @@ that developers can't accidentally change release processes.
 
 **Human identity resolution:**
 
-The agent needs to know WHO is currently speaking. Identity is resolved in this order:
+The agent needs to know WHO is currently speaking. Research
+(`ai-provider-identity-scheduling-2026-03.md`) shows that identity mechanisms vary
+dramatically across providers: Claude Code uses OAuth to an Anthropic account, Gemini
+uses Google accounts, Copilot uses GitHub accounts, Aider has NO identity at all, and
+self-hosted LLMs (Ollama, vast.ai) have no authentication by default.
 
-1. **Environment variable** (most explicit): `AIBOX_USER=bob@company.com`
-2. **AI provider identity** (if available):
-   - Claude Code: reads from Anthropic account authentication
-   - GitHub Copilot: reads GitHub user identity
-   - Self-hosted LLMs: no identity — falls back to other methods
-3. **Git config**: `git config user.email` → matches against Actor entities
-4. **Explicit command**: `aibox whoami` sets identity for the session
-5. **Agent asks**: If no identity resolved, agent asks: *"Who am I working with today?"*
+**Solution: Kubernetes-inspired layered identity**
 
-The resolved identity maps to an Actor entity via the `spec.email` field.
+Following the kubeconfig pattern, identity lives in a LOCAL file that is never committed:
+
+**`~/.aibox/identity.toml`** (per-user, per-machine, never in git):
+```toml
+[identity]
+name = "Bob Smith"
+email = "bob@company.com"
+handle = "bob"     # short handle for matching to Actor entities
+
+[preferences]
+# Personal preferences that don't belong in shared repo
+communication_style = "Direct, prefers code examples"
+working_hours = "CET 09:00-17:00"
+```
+
+**Identity resolution cascade** (inspired by kubectl auth whoami):
+
+1. **`~/.aibox/identity.toml`** (most reliable — works with ANY provider, any setup)
+2. **Environment variable**: `AIBOX_USER=bob@company.com` (for CI/CD, scripting)
+3. **AI provider identity** (if extractable):
+   - GitHub Copilot: `gh api user` → GitHub username
+   - Gemini CLI: Google account email
+   - Claude Code: Anthropic account (locked down, not easily extractable)
+   - Self-hosted: no identity available
+4. **Git config**: `git config user.email` (fallback)
+5. **`aibox auth whoami`**: Displays resolved identity + active provider
+6. **Agent asks**: Last resort if nothing resolves
+
+The resolved identity maps to an Actor entity via `spec.email` or `spec.handle`.
+
+**`aibox auth whoami` command** (inspired by `kubectl auth whoami`):
+```
+$ aibox auth whoami
+Identity: Bob Smith <bob@company.com>
+Handle: bob
+Actor: ACTOR-bob-smith (context/actor/ACTOR-bob-smith.md)
+Roles: Developer (ROLE-developer)
+Provider: Claude Code (Anthropic account: bob@company.com)
+```
 
 **Multi-human repos:**
 
-Each human has their OWN Actor file in the shared repo. Actor files contain:
-- Name, expertise, communication preferences (non-sensitive)
-- Role assignments
+Actor files in the shared repo contain NON-SENSITIVE shared info only:
+- Name, expertise, role assignments (needed for RBAC, team coordination)
 
-Actor files do NOT contain:
-- Passwords, tokens, or secrets
-- Private personal information (address, phone)
-- Anything covered by data protection regulations
+Personal preferences, communication style, working hours live in:
+- `~/.aibox/identity.toml` (per-user, never committed)
 
-For sensitive personal preferences, each human can have a local-only file:
-`~/.aibox/personal-profile.yaml` (never committed to git). The agent reads this
-in addition to the shared Actor file.
+This follows the Kubernetes pattern: kubeconfig (personal, local) vs RBAC bindings
+(shared, in-cluster). No privacy concerns because personal data never enters git.
 
 **Forking vs shared repo:**
 - Small teams (2-5): shared repo, everyone commits to main or feature branches.
-  Actor files for all team members are in the repo. RBAC is probabilistic — the
-  agent checks permissions but doesn't mechanically enforce.
-- Larger teams: fork + PR workflow. Each developer's fork has their own actor file
-  as the primary. PRs bring changes into the main repo.
+  Actor files for all team members are in the repo. RBAC is probabilistic.
+- Larger teams: fork + PR workflow. Each fork has the shared Actor files.
+  PRs bring changes into the main repo. Branch protection enforces review.
 
 **Flow — Bob tries to modify a process:**
 
@@ -980,9 +1010,13 @@ Every Friday afternoon, review progress on experiments, papers, and grant milest
 
 **Provider-native scheduling integration:**
 
-Some AI providers offer native scheduling:
-- **Claude Code:** Has remote agents / triggers that can run on a cron schedule
-- **Other providers:** May have similar features
+Research (`ai-provider-identity-scheduling-2026-03.md`) shows scheduling varies widely:
+- **Claude Code:** Most mature — `/loop` command for recurring tasks, desktop scheduled
+  tasks (persistent across restarts), cloud execution for remote cron
+- **Gemini CLI:** Supports headless mode — can be invoked by system cron jobs
+- **Codex App:** Has "Automations" for recurring tasks (web UI only)
+- **Copilot:** No scheduling (event-driven only: issue assignment → Actions)
+- **Aider, self-hosted:** No scheduling at all
 
 When available, aibox can optionally hook into the provider's scheduling:
 ```toml
@@ -991,12 +1025,14 @@ provider_native = true   # use provider's cron if available
 fallback = "session-check"  # always check schedules at session start too
 ```
 
-If `provider_native = true` and Claude Code is the provider, aibox configures a remote
-trigger that starts a session on Friday and runs the weekly review. If the provider
-doesn't support native scheduling, the fallback is the session-start check.
+If `provider_native = true` and Claude Code is the provider, aibox configures a `/loop`
+or scheduled task that starts a session on Friday and runs the weekly review. For Gemini,
+it could generate a cron entry. For providers without scheduling, the fallback is the
+session-start check.
 
 **This is opt-in and provider-aware** — the core mechanism (session-start schedule check)
-is always active and provider-independent. Native scheduling is a bonus.
+is always active and provider-independent. Native scheduling is a bonus that adds
+deterministic triggers on top of the probabilistic session-start checks.
 
 **What if Priya misses Friday?**
 - Saturday: *"Your weekly review is 1 day overdue."*
