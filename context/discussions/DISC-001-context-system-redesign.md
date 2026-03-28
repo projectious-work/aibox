@@ -18,6 +18,9 @@ research:
   - context/research/competitive-tools-2026-03.md
   - context/research/primitive-mapping-exercise-2026-03.md
   - context/research/primitive-skills-mapping-2026-03.md
+  - context/research/personas-and-scenarios-2026-03.md
+  - context/research/sector-process-structures-2026-03.md
+  - context/research/scientific-research-pm-analysis.md
 ---
 
 # DISC-001: Context System Redesign
@@ -856,7 +859,61 @@ could be installed: `aibox process install scrum-basic`.
 - User story = Work Item (subtype: story) — "As X, I want Y, to achieve Z"
 - These practices are universal (XP, Design Thinking), not SAFe-specific
 
-### 2.39 Validation scenarios identified
+### 2.40 Sector analysis and process package completeness
+
+Research completed: 15 sectors analyzed (`sector-process-structures-2026-03.md`), deep
+dive on scientific research (`scientific-research-pm-analysis.md`).
+
+**Key finding:** 17 primitives cover 70-80% of every sector. Sector differences are
+primarily: constraints (regulatory), work item subtypes, and cadences.
+
+**Revised aibox core packages (Tier 1):**
+- minimal, managed, software (unchanged)
+- **research** — MAJOR expansion needed (current template critically incomplete for
+  real scientific work: missing publication pipeline, IRB gates, literature management,
+  protocol versioning, grant tracking, data management plans)
+- **editorial** — NEW: content pipeline (draft→review→approve→publish), content calendar
+- **consulting** — NEW: engagement tracking, deliverable management, handoff packages
+- full-product (unchanged — all primitives active)
+
+**Community/sector packs (Tier 2-3):** healthcare-pharma, financial-services,
+legal-practice, construction-eng, nonprofit-grants, government-procurement,
+manufacturing-quality, data-science-ml. Installable via `aibox process install`.
+
+### 2.41 Community process package interface
+
+Process packages are git repos with a standard structure:
+
+```
+package.yaml        # apiVersion/kind metadata, requirements, provides
+context/            # files to merge into project context/
+skills/             # optional custom skills
+README.md
+```
+
+Commands:
+- `aibox process install <git-url>` — install a package
+- `aibox process check <path>` — validate conformance
+- `aibox process list` — list installed packages
+- `aibox process export` — package project's process for sharing
+
+Company-to-open-source flow: company customizes process with kaits agents → agents
+iteratively improve → company exports and publishes → others install and adapt.
+Like Anthropic Claude marketplace — community-driven, git-based.
+
+### 2.42 Personas defined
+
+6 personas created (`personas-and-scenarios-2026-03.md`):
+1. **Alex** — Solo developer, freelance, managed package
+2. **Dr. Priya** — Research scientist, lab lead, research package
+3. **Maria** — Small team lead, startup, software/full-product package
+4. **Sam** — Consultant/contractor, engagement-focused, managed package
+5. **kaits** — Company simulator, programmatic usage, full-product
+6. **Jordan** — Content producer, editorial workflow, editorial package
+
+Personas ARE Actor entities (subtype: persona) — dogfooding the primitive system.
+
+### 2.43 Validation scenarios identified
 
 10 scenarios to walk through and validate the design:
 1. Solo dev starts new project (`aibox init`)
@@ -952,6 +1009,12 @@ could be installed: `aibox process install scrum-basic`.
     full-product activate progressively more primitives. They are NOT framework choices.
 31. **Personas and user stories**: Fit existing primitives. Persona = Actor (subtype: persona).
     User story = Work Item (subtype: story). No new primitives needed.
+32. **Revised core packages**: minimal, managed, software, research (expanded), editorial
+    (new), consulting (new), full-product. Seven packages total.
+33. **Community process packages**: Git repos with package.yaml + context/ + skills/.
+    Installed via `aibox process install <url>`. Validated via `aibox process check`.
+34. **6 personas defined**: Alex (solo dev), Priya (scientist), Maria (team lead),
+    Sam (consultant), kaits (orchestrator), Jordan (content producer).
 11. **Three-level rule**: All entity .md files follow Level 1 (intro) → Level 2 (overview) →
     Level 3 (details). Directory INDEX.md files provide Level 0.
 12. **Filename conventions**: Inverse date prefix for temporal files + content slug for human
