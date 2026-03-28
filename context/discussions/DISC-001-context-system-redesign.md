@@ -1028,6 +1028,20 @@ Multi-human repos: Actor files contain non-sensitive shared info only.
 Personal preferences in `~/.aibox/identity.toml` (never committed).
 Follows Kubernetes pattern: kubeconfig (local) vs RBAC bindings (shared).
 
+**Full RBAC flow (3-layer model):**
+1. Machine layer: `~/.aibox/identity.toml` → "I am Bob" (never committed)
+2. Repository layer: `context/actor/ACTOR-bob-smith.md` → "Bob is on this project,
+   fills Developer role" + `context/role/ROLE-developer.md` → permissions/restrictions
+3. Runtime: Agent resolves identity → Actor → Roles → holds permissions in memory.
+   On every modifying action: check permissions, if denied → explain + escalation path.
+
+Actor types: human (identity.toml), ai-agent (env var / kaits), service (CI/CD env var).
+Permission model: additive (any role granting permission wins). Restrictions checked
+across all roles. Multi-role actors get union of permissions.
+
+Detailed elaboration with diagrams and multi-actor scenarios in
+`DISC-001-personas-and-scenarios.md` Scenario 5 and following sections.
+
 ### 2.49 Validation scenarios walked through (full detail)
 
 Complete walkthroughs in `DISC-001-personas-and-scenarios.md` (appendix).
@@ -1170,6 +1184,21 @@ Issues found across scenarios:
     start check is always the fallback. Provider scheduling is a bonus.
 46. **kaits agents use skills**: kaits orchestrates agents, agents use aibox skills.
     Same skills as human agents — no separate kaits-specific file writing.
+47. **Identity model: 3 layers**: (1) ~/.aibox/identity.toml (local, never committed),
+    (2) Actor registry in context/actor/ (shared, non-sensitive), (3) Role definitions
+    in context/role/ (shared, permissions/restrictions in plain English).
+48. **RBAC flow**: identity.toml → match to Actor via handle/email → read Actor's roles
+    → load Role permissions/restrictions → check on every modifying action. Additive
+    model: any role granting permission wins. Event log provides attribution/audit.
+49. **Actor types**: human (identity.toml), ai-agent (env var or kaits-assigned),
+    service (CI/CD via env var). All types follow same RBAC model.
+50. **`aibox auth whoami`**: Displays resolved identity, matched Actor, roles,
+    permissions, restrictions, active provider. Inspired by kubectl auth whoami.
+
+**NOTE (pending revisit):** The current RBAC model is purely probabilistic — agents
+interpret permissions but nothing mechanically prevents unauthorized actions. This needs
+revisiting for enterprise/security-conscious users. See session handover 2026-03-28 for
+the aiadm/aictl proposal inspired by Kubernetes certificate-based auth.
 11. **Three-level rule**: All entity .md files follow Level 1 (intro) → Level 2 (overview) →
     Level 3 (details). Directory INDEX.md files provide Level 0.
 12. **Filename conventions**: Inverse date prefix for temporal files + content slug for human
