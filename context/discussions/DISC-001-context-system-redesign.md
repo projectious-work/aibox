@@ -1416,6 +1416,154 @@ no concept of "this commit was approved by N people." Two options:
 For practical purposes, teams will use PR-based approvals. The authorization policy
 documents the requirement, the git platform enforces it, `aibox lint --audit` verifies.
 
+### 2.59 RoleBinding indirection — identity ≠ roles (session 2026-04-04)
+
+Owner identified that embedding roles in certificates (Kubernetes-style `O=` field) is
+too rigid. Adding/removing a role would require reissuing the certificate. Kubernetes
+itself suffers from this — no certificate revocation means old certs with old roles
+remain valid until expiry.
+
+**Resolution: certificates carry identity only. Roles are bound via RoleBinding entities.**
+
+Certificate contains only identity:
+```
+Certificate:
+  Subject: CN=alice                    ← identity only, no roles
+  Issuer:  CN=aibox-project-ca
+```
+
+Role assignments are separate entities:
+```yaml
+# context/rolebindings/BIND-calm-fox.md
+---
+apiVersion: aibox/v1
+kind: RoleBinding
+metadata:
+  id: BIND-calm-fox
+spec:
+  actor: ACTOR-alice
+  role: ROLE-process-architect
+  scope: "*"
+---
+```
+
+**Authorization flow:**
+```
+Commit signature
+  → verify against CA → extract CN=alice
+  → look up Actor by CN → ACTOR-alice
+  → find all RoleBindings where actor = ACTOR-alice
+  → collect roles: [developer, process-architect]
+  → check against authorization policy for modified files
+```
+
+Adding a role = creating a RoleBinding file. Removing = deleting it. No certificate
+reissue. Certificate is long-lived (identity stable); role assignments are dynamic
+(permissions change frequently). RoleBinding files themselves are protected by
+authorization-policy.toml (requires `role-admin` or `governance-board` to modify).
+
+**New primitive:** RoleBinding becomes the 18th primitive. It is a governance entity
+(low-volume, Pattern A naming: `BIND-alice-process-architect.md`).
+
+### 2.60 Verification manifests — provider-agnostic enforcement (session 2026-04-04)
+
+Owner identified that server-side pre-receive hooks are not universally available across
+git providers (GitHub Enterprise only, GitLab Premium+, etc.). The enforcement mechanism
+must work with bare git.
+
+**Resolution: signed verification manifests embedded in commits.**
+
+Every commit created through `aibox commit` includes a verification manifest entry:
+
+```jsonl
+# .aibox/verification-log.jsonl (append-only, in the commit)
+{"commit":"def456","files":["context/processes/release-process.md"],"actor":"alice","fingerprint":"ABCD1234","roles_claimed":["process-architect"],"rolebindings":["BIND-calm-fox"],"policy_rule":"context/processes/*.md → process-architect","policy_hash":"sha256:abc...","timestamp":"2026-04-04T10:00:00Z","signature":"base64:..."}
+```
+
+Each entry is signed by the committer's key. The entry proves: "I, alice, claim I hold
+these roles, and I'm modifying these files under this policy rule."
+
+**Verification happens on read, not on write:**
+
+```
+aibox lint --audit
+  → For each commit in history:
+    1. Read verification manifest entry
+    2. Verify entry signature (was this written by the claimed actor?)
+    3. Look up actor's RoleBindings AT THAT POINT IN TIME (git history)
+    4. Check: did claimed roles match actual RoleBindings at that commit?
+    5. Check: do claimed roles satisfy authorization policy for modified files?
+    6. Flag any mismatches as violations
+```
+
+RoleBinding files are also in git, also signed. Verification can reconstruct exact
+authorization state at any historical point. If alice claims `process-architect` but
+the RoleBinding didn't exist at that commit, the audit catches it.
+
+**Enforcement spectrum (weakest to strongest):**
+
+| Layer | Mechanism | Bypass risk | Provider requirement |
+|-------|-----------|-------------|---------------------|
+| Client pre-commit hook | Local check, skippable with `--no-verify` | High | None (git standard) |
+| Verification manifest | Tamper-evident, signed, in commit | Medium (delayed detection) | None (git standard) |
+| CI audit pipeline | `aibox lint --audit` in CI, blocks merge | Low | CI + branch protection |
+| External audit from governance repo | Audit runs from trusted repo developer can't modify | Very low | CI + separate repo |
+| Server pre-receive hook | Rejects push mechanically | Very low | Enterprise git tier |
+
+Every team gets layers 1-3 regardless of provider. Layers 4-5 are available for
+higher-security environments.
+
+### 2.61 CI pipeline protection — governance repo as trust anchor (session 2026-04-04)
+
+Owner identified that if the CI pipeline definition lives in the product repo, a
+developer can modify the audit pipeline to be a no-op, then commit unauthorized changes.
+The tampered CI "passes," branch protection is satisfied.
+
+**Fundamental principle: there must be at least one enforcement point outside the
+developer's control.** This is not an aibox limitation — it's a universal security
+principle. Even Kubernetes depends on the API server binary being something the user
+can't rewrite at runtime.
+
+**Resolution: the governance repo is the external trust anchor.**
+
+The audit pipeline runs from the governance repo, not the product repo. The developer
+cannot modify it because they have no push access to the governance repo.
+
+```yaml
+# governance-repo/.github/workflows/audit-product-repos.yml
+# Triggered by product repo push events (webhook)
+audit:
+  steps:
+    - checkout: governance-repo        # trusted policy source
+    - checkout: product-repo           # untrusted, being audited
+    - run: aibox lint --audit
+           --policy governance-repo/.aibox/authorization-policy.toml
+           --rolebindings governance-repo/context/rolebindings/
+           --repo product-repo/
+```
+
+**Platform-specific alternatives:**
+- GitHub: "Required workflows" at org level (defined in separate repo, developer can't skip)
+- GitLab: "Compliance pipelines" (org-level, injected into all project pipelines)
+- Self-hosted: Webhook triggers audit in governance repo CI
+
+**The minimal trust anchors for the entire system:**
+
+| Trust anchor | What it provides | Who controls it |
+|--------------|-----------------|-----------------|
+| Governance repo | Authorization policy, RoleBindings, audit pipeline | Governance board (not developers) |
+| Git platform settings | Branch protection, required status checks | Platform admin |
+| aibox binary | Signature verification, manifest creation | Distributed/compiled |
+
+Everything else is derived from these three. The product repo, including its CI files,
+is explicitly untrusted.
+
+**Even if ALL real-time enforcement is bypassed:** The verification manifests in git
+history create a permanent, immutable evidence trail. A developer can bypass CI but
+cannot erase the evidence from git's DAG (force-push is prevented by branch protection).
+Any later audit — quarterly compliance review, team lead spot-check, incident
+investigation — will catch violations.
+
 **Q-A (Scope of governance):** Entity files with frontmatter go through aibox RBAC.
 Narrative content (research, work instructions) can be directly edited — they're authored
 content, not process state. The boundary: does this file represent a state machine entity?
@@ -1482,6 +1630,16 @@ process repo architecture and per-file authorization enforcement. Key outcomes:
 - **Per-file authorization policy** (§2.58): Signed `.aibox/authorization-policy.toml`
   maps file patterns to required roles and approval counts. Enforced at three layers:
   local CLI (advisory), git pre-receive hooks (mechanical), post-facto audit (detective).
+- **RoleBinding indirection** (§2.59): Certificates carry identity only, not roles.
+  Roles assigned via RoleBinding entities. No certificate reissue on role changes.
+  RoleBinding is the 18th primitive.
+- **Verification manifests** (§2.60): Every commit carries a signed verification log
+  entry proving authorization. Enforcement is provider-agnostic — verification happens
+  on read (audit), not on write (push). Works with bare git.
+- **Governance repo as trust anchor** (§2.61): Audit pipeline runs from governance repo,
+  not product repo. Developer cannot tamper with enforcement because they can't push to
+  governance repo. Three minimal trust anchors: governance repo, platform settings,
+  aibox binary.
 
 Full research: `context/research/aiadm-aictl-architecture-2026-03.md`
 
@@ -1674,6 +1832,22 @@ here for historical context. The Phase 3 resolutions below replace them.
 63. **Process repo event log is probabilistic**: Low-frequency changes mean no git scaling
     problem. Git commit history IS the deterministic audit trail. Event-log skill captures
     reasoning (probabilistic). No external event infrastructure needed for governance repos.
+64. **RoleBinding as 18th primitive**: Certificates carry identity only (CN=username), not
+    roles. Roles bound via RoleBinding entities (actor + role + scope). Adding/removing
+    roles requires no certificate reissue. RoleBinding files are governance entities
+    (low-volume, Pattern A naming). Protected by authorization-policy.toml.
+65. **Verification manifests in commits**: Every `aibox commit` appends a signed entry to
+    `.aibox/verification-log.jsonl` recording: files changed, actor, roles claimed,
+    policy rule matched. Verification happens on read (`aibox lint --audit`), not on
+    write. Provider-agnostic — works with bare git, no server-side hook required.
+66. **Governance repo as external trust anchor**: The audit pipeline runs from the governance
+    repo, which the developer cannot push to. This is the minimal external dependency for
+    enforcement. Three trust anchors: governance repo, git platform settings, aibox binary.
+    Product repo (including its CI files) is explicitly untrusted.
+67. **Enforcement is layered, not single-point**: Five layers from weakest to strongest:
+    client hook (advisory) → verification manifest (tamper-evident) → CI audit (blocks
+    merge) → external audit from governance repo (tamper-proof) → server pre-receive hook
+    (mechanical). Every team gets layers 1-3. Layers 4-5 for higher security.
 11. **Three-level rule**: All entity .md files follow Level 1 (intro) → Level 2 (overview) →
     Level 3 (details). Directory INDEX.md files provide Level 0.
 12. **Filename conventions**: Inverse date prefix for temporal files + content slug for human
