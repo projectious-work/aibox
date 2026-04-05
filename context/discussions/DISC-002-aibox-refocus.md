@@ -263,35 +263,39 @@ Does the index logic live in aibox CLI (Rust) or in the process repo (Python MCP
 - If in aibox CLI: fast, compiled, but couples aibox to the schema
 - If in MCP server: flexible, schema changes don't require CLI updates, but slower
 
-### Q3: Which DISC-001 principles to carry forward?
+### Q3: Which DISC-001 principles to carry forward? (resolved)
 
-Candidate principles from DISC-001 not yet covered in DISC-002:
+Owner decisions:
 
-- **File-per-entity storage** (DISC-001 §2.3): Each entity = own markdown file. Minimal
-  merge conflicts. Git-native diffs.
-- **Word-based IDs** (DISC-001 §2.12, Decision 4): `BACK-swift-oak` format via petname
-  crate. ~20M combinations per prefix type.
-- **Two filename patterns** (DISC-001 §2.45, Decision 40): Pattern A (human-named) for
-  low-volume entities, Pattern B (word-id + slug) for high-volume.
-- **Markdown+frontmatter as source of truth, SQLite as derived index** (Decision 1):
-  No dual-master.
-- **Directory sharding** (DISC-001 §2.15, Decision 10): Configurable per entity type.
-- **Process packages as activation tiers** (DISC-001 §2.38, Decision 30): Packages
-  activate progressively more primitives. Not framework choices.
-- **Dual event sources** (DISC-001 §2.32): Agent logs process events (probabilistic),
-  aibox logs infrastructure events (deterministic).
-- **Actor types** (DISC-001 §2.20, Decision 49): human, ai-agent, service. All use same
-  process model.
-- **Identity via ~/.aibox/identity.toml** (DISC-001 §2.48): Local, never committed.
-  Cascade: identity.toml → env var → provider → git config.
+**Carry forward (modified):**
+- **File-per-entity storage** — yes, as-is
+- **Markdown+frontmatter as source of truth, SQLite as derived index** — yes, as-is
+- **ID format configurable** — user chooses in aibox.toml between UUID-based or
+  word-based IDs (petname). Independent of that, user chooses whether to add content
+  slugs or not. All four combinations valid. Resolves DISC-001 contradiction between
+  Decision 4 and Decision 40.
+- **Directory sharding** — yes, configurable per entity type
+- **Process packages as activation tiers** — yes, as-is
+- **Actor types (human, ai-agent, service)** — yes, as-is
+- **Identity via ~/.aibox/identity.toml** — yes, as-is
 
-Owner to review: which of these carry forward as-is, which need modification, which
-are dropped.
+**Modified:**
+- **Event log: all probabilistic.** No dual event sources. Agent logs everything via
+  event-log skill. Deterministic event enforcement is another project's concern.
+  aibox may still write infrastructure notes (lint warnings, sync results) but these
+  are informational, not an authoritative event log.
 
-### Q4: Minimal MCP execution environment
+**Dropped (another project):**
+- RBAC enforcement in Role definitions. Role remains a primitive (describes
+  responsibilities) but has no enforcement semantics in aibox.
+- All enterprise governance schemas (signed definitions, verification manifests, etc.)
 
-What is the smallest Python runtime needed in the dev container for skill MCP servers?
-See §8.
+**Under investigation:**
+- RoleBinding as 18th primitive vs generalized Binding primitive. See §11.
+
+### Q4: Minimal MCP execution environment (resolved)
+
+Python >= 3.10 + uv. Official SDK + PEP 723 inline dependencies. See §8.
 
 ## 8. Minimal Python MCP Execution Environment
 
@@ -402,11 +406,222 @@ DISC-001 is preserved as-is. It contains valuable research and exploration:
 - **Drop / rethink:** aiadm/aictl binary split (resolved: one binary), OS-level
   filesystem lockdown (resolved: out of scope), daemon mode.
 
-## 10. Next Steps
+## 11. Investigation: Binding as a Generalized Primitive
 
-- [ ] Owner review: Q3 (which DISC-001 principles carry forward)
-- [ ] Research: minimal Python MCP environment for dev containers (Q4)
+### The question
+
+DISC-001 introduced RoleBinding as the 18th primitive (actor + role + scope). Owner
+asks: should this be generalized? The pattern of "binding two things together so one
+can change without changing the other" is a fundamental principle in programming
+(GoF patterns, SOLID, dependency inversion). Does it deserve to be a general primitive?
+
+### The pattern in programming
+
+The Gang of Four identified several patterns that are all forms of indirection:
+
+| Pattern | What it binds | Why |
+|---------|---------------|-----|
+| Adapter | Client ↔ Service (incompatible interfaces) | Decouple interface from implementation |
+| Bridge | Abstraction ↔ Implementation | Vary both independently |
+| Strategy | Context ↔ Algorithm | Swap behavior without changing the user |
+| Mediator | Colleague ↔ Colleague | Decouple many-to-many interactions |
+| Dependency Injection | Consumer ↔ Dependency | Change implementation without changing consumer |
+
+The common principle: **put an indirection between two things so either can change
+independently.** In refactoring terms: "program to an interface, not an implementation."
+
+### The pattern in process management
+
+Where does this indirection appear with our 18 primitives?
+
+**Currently modeled as references in frontmatter (tight coupling):**
+
+```yaml
+# Work item directly references an actor
+kind: WorkItem
+spec:
+  assigned_to: ACTOR-alice        # Changing assignee = editing work item
+```
+
+```yaml
+# Process directly references gates
+kind: Process
+spec:
+  gates: [GATE-code-review, GATE-security-scan]   # Changing gates = editing process
+```
+
+```yaml
+# Actor directly references roles
+kind: Actor
+spec:
+  roles: [ROLE-developer, ROLE-architect]   # Changing roles = editing actor
+```
+
+**The problem with tight coupling:** To change Alice's role, you edit Alice's Actor file.
+To change which gate applies to a process in a specific scope, you edit the Process
+file. Every relationship change requires modifying one of the two endpoints.
+
+**With a Binding primitive (loose coupling):**
+
+```yaml
+# Separate binding entity — neither endpoint changes
+kind: Binding
+spec:
+  type: role-assignment
+  subject: ACTOR-alice
+  target: ROLE-developer
+  scope: SCOPE-project-x
+  valid_from: 2026-01-01
+  valid_until: 2026-12-31
+```
+
+```yaml
+kind: Binding
+spec:
+  type: process-gate
+  subject: PROC-release
+  target: GATE-security-scan
+  scope: SCOPE-project-x
+```
+
+```yaml
+kind: Binding
+spec:
+  type: assignment
+  subject: BACK-swift-oak
+  target: ACTOR-alice
+  scope: SCOPE-sprint-42
+```
+
+### When bindings add value vs when they're overhead
+
+**Bindings add value when:**
+
+1. **The relationship is scoped.** "Alice is a developer *on project X*" — the scope
+   means the same actor-role pair has different truth in different contexts. You can't
+   express this in Alice's Actor file without listing every project.
+
+2. **The relationship is temporal.** "Alice fills the tech lead role *from Jan to June*"
+   — the time dimension makes it a separate fact, not a property of Alice or the Role.
+
+3. **The relationship is many-to-many.** Multiple actors fill multiple roles on multiple
+   projects. This is a junction table problem — the relationship itself has attributes
+   (scope, time, conditions) that belong to neither endpoint.
+
+4. **You want to change the relationship without touching either endpoint.** "Move the
+   security gate from the release process to the deploy process" — modify one binding
+   entity instead of editing two process files.
+
+5. **You want to audit relationship changes independently.** Git history of a binding
+   file shows exactly when a role assignment changed, without noise from other changes
+   to the actor or role file.
+
+**Bindings are overhead when:**
+
+1. **The relationship is 1:1 and permanent.** "This work item is of type: bug" — just a
+   field in frontmatter. No need for indirection.
+
+2. **The relationship has no scope or time dimension.** "This decision is linked to that
+   work item" — a simple cross-reference in frontmatter.
+
+3. **Solo developer.** One person, one project, no scoping needed. References in
+   frontmatter are simpler.
+
+### The database analogy
+
+In relational databases:
+
+| Relationship type | Modeling | Analogy |
+|---|---|---|
+| 1:1 or 1:many | Foreign key in the child table | Reference in frontmatter |
+| Many-to-many | Junction table | Binding entity |
+| Many-to-many with attributes | Junction table with extra columns | Binding entity with scope/time/conditions |
+
+RoleBinding is a junction table between Actor and Role. The question is: are there
+enough many-to-many-with-attributes relationships to justify a general Binding primitive?
+
+### Inventory of relationships that benefit from bindings
+
+| Binding type | Subject | Target | Why not just a reference? |
+|---|---|---|---|
+| role-assignment | Actor | Role | Scoped per project, temporal, auditable |
+| work-assignment | WorkItem | Actor | Temporal (sprint-scoped), re-assignable |
+| process-gate | Process | Gate | Scoped (different gates per project) |
+| process-scope | Process | Scope | Which process applies where |
+| schedule-scope | Schedule | Scope | Which cadence applies to which project |
+| constraint-scope | Constraint | Scope | Which constraints apply where |
+| category-assignment | any entity | Category | Could be scoped/temporal |
+
+At least 7 relationship types benefit from bindings. This is not a one-off pattern.
+
+### Recommendation: generalize RoleBinding to Binding
+
+**Rename the 18th primitive from RoleBinding to Binding.** A Binding connects any two
+entities with optional scope, temporality, and conditions.
+
+```yaml
+apiVersion: aibox/v1
+kind: Binding
+metadata:
+  id: BIND-calm-fox
+spec:
+  type: role-assignment           # binding type (freeform, conventions per process)
+  subject: ACTOR-alice            # the entity being bound
+  target: ROLE-developer          # what it's being bound to
+  scope: SCOPE-project-x          # where this binding applies (optional)
+  valid_from: 2026-01-01          # temporal start (optional)
+  valid_until: 2026-12-31         # temporal end (optional)
+  conditions:                     # arbitrary conditions (optional)
+    approval_required: true
+  description: "Alice fills Developer role on Project X for 2026"
+```
+
+**What stays as references:** Simple, unscoped, permanent relationships remain as
+frontmatter fields. "This work item blocks that work item" = cross-reference. "This
+decision relates to that work item" = cross-reference. No need to promote everything
+to bindings.
+
+**The rule:** If a relationship has **scope**, **time**, or **its own attributes** —
+it's a Binding. If it's just "A relates to B" — it's a cross-reference in frontmatter.
+
+**Impact on primitive count:** Still 18. RoleBinding is renamed to Binding, not added
+alongside it.
+
+### Open question for owner
+
+Does this generalization feel right? The trade-off:
+- **Pro:** One primitive handles all scoped/temporal relationships. Cleaner, more
+  powerful, aligns with established software design principles.
+- **Con:** More abstract. "Create a Binding" is less intuitive than "Create a
+  RoleBinding." The skill/MCP server needs to handle multiple binding types.
+
+## 12. Decisions (DISC-002)
+
+1. **aibox = dev container + skills scaffolding.** Not a workflow engine, not a
+   governance platform, not a Docker wrapper.
+2. **Two repos from the start.** aibox repo (Rust CLI + images) and process repo
+   (primitives + skills + processes). Process repo releases as git tags.
+3. **Skills are multi-artifact packages.** Markdown instructions (3-level) + examples +
+   templates + Python MCP servers.
+4. **MCP servers use official SDK + uv PEP 723 inline dependencies.** Container needs
+   only Python >= 3.10 and uv (both already present).
+5. **ID format is configurable.** User chooses in aibox.toml: UUID or word-based (petname).
+   Independently: with or without content slugs. Four combinations, all valid.
+6. **Event log is all probabilistic.** Agent logs events via skill. No dual event sources.
+   Deterministic enforcement is another project.
+7. **Directory sharding included.** Configurable per entity type.
+8. **RBAC enforcement is out of scope.** Role remains a primitive (describes responsibilities).
+   No enforcement semantics in aibox.
+9. **Enterprise governance is another project.** Likely Kubernetes-based. DISC-001 research
+   preserved for future use.
+10. **No inner system fallacy.** aibox.toml for aibox concerns only. Docker options edited
+    directly in Dockerfile/docker-compose.
+
+## 13. Next Steps
+
+- [ ] Owner review: Binding as generalized primitive (§11)
 - [ ] Name the process repo (Q1)
 - [ ] Decide where SQLite index logic lives (Q2)
-- [ ] Record formal decisions
+- [ ] Consolidate principles into numbered list (P1-P10 + resolved Q3 items)
+- [ ] Record formal decisions in DECISIONS.md
 - [ ] Create process repo and scaffold it with aibox
