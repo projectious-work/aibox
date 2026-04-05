@@ -730,9 +730,128 @@ All skills — both technical (rust-conventions, python-best-practices) and proc
 - [x] ~~Name the process repo (Q1)~~ — resolved: **processkit** (projectious-work/processkit)
 - [x] ~~Decide where SQLite index logic lives (Q2)~~ — resolved: Option B (process repo MCP servers)
 - [x] ~~Decide where existing 85 skills live~~ — resolved: Option A (all in processkit)
-- [ ] Create implementation plan
+- [x] ~~Create implementation plan~~ — see §16
 - [ ] Record formal decisions in DECISIONS.md
-- [ ] Create processkit repo and scaffold it
+- [ ] Owner: create processkit repo (Phase 1.1)
+- [ ] Begin Phase 1 (processkit bootstrap)
+- [ ] Begin Phase 4.4-4.5 (aibox lint + ID gen — no dependency on processkit)
+
+## 16. Implementation Plan
+
+### Overview
+
+Two workstreams running mostly in parallel:
+- **Workstream A (processkit):** Create the repo, define schemas, migrate skills, build MCP servers
+- **Workstream B (aibox CLI):** Modify `aibox init` to consume processkit, add `aibox lint`, add ID generation
+
+Dependency: Workstream B needs processkit's repo structure (Phase 1) to exist before
+the consumption logic can be built. But the schema and skill work in processkit can
+happen in parallel with aibox CLI changes.
+
+### Phase 1 — Foundation (processkit repo bootstrap)
+
+**Goal:** processkit exists as a repo with the right structure and the first primitives.
+
+| # | Task | Repo | Details |
+|---|------|------|---------|
+| 1.1 | Create `projectious-work/processkit` repo | GitHub | Owner creates. Initialize with aibox dev container (dogfooding). |
+| 1.2 | Scaffold repo structure | processkit | `primitives/schemas/`, `primitives/state-machines/`, `skills/`, `processes/`, `packages/`, `.devcontainer/`, `context/` |
+| 1.3 | Define entity file format spec | processkit | Document the `apiVersion/kind/metadata/spec` YAML frontmatter contract. Write as `primitives/FORMAT.md` (three-level). |
+| 1.4 | Create schemas for 3 foundation primitives | processkit | LogEntry, WorkItem, DecisionRecord — YAML schema files in `primitives/schemas/`. These are the most immediately useful. |
+| 1.5 | Create default state machines | processkit | WorkItem states (backlog → in-progress → review → done), at minimum. `primitives/state-machines/workitem.yaml` |
+| 1.6 | First git tag: `v0.1.0` | processkit | Marks "consumable structure exists." |
+
+**Exit criterion:** `processkit` has a tagged release with schemas, state machines, and the documented file format.
+
+### Phase 2 — Skill Migration (processkit)
+
+**Goal:** All 85 existing skills + new process primitive skills live in processkit as multi-artifact packages.
+
+| # | Task | Repo | Details |
+|---|------|------|---------|
+| 2.1 | Define SKILL.md standard | processkit | Document the skill package format: directory layout, frontmatter fields (`name`, `description`, `layer`, `uses`, `provides`), three-level structure requirements. Write as `skills/FORMAT.md`. |
+| 2.2 | Migrate 85 skills from aibox | processkit | Move `templates/skills/*` → `skills/*`. Each skill keeps its current SKILL.md content. Add frontmatter fields (`layer`, `uses`). No three-level rewrite yet — that's Phase 2.5. |
+| 2.3 | Create 6 foundation process skills | processkit | New multi-artifact packages for: `event-log`, `workitem-management`, `decision-record`, `role-management`, `actor-profile`, `binding-management`. Each gets: SKILL.md (three-level), examples/, templates/ (YAML frontmatter entity templates). MCP servers come in Phase 3. |
+| 2.4 | Create remaining process skills | processkit | `scope-management`, `gate-management`, `schedule-management`, `constraint-management`, `category-management`, `metrics-management`, `discussion-management`, `process-management`, `state-machine-management`, `cross-reference-management`. Lighter than foundation — SKILL.md + templates/ initially. |
+| 2.5 | Three-level rewrite of migrated skills | processkit | Review each of the 85 migrated skills. Ensure Level 1 (1-3 sentences), Level 2 (key workflows), Level 3 (full reference) structure. Many are already close. |
+| 2.6 | Define package tiers | processkit | `packages/minimal.yaml`, `packages/managed.yaml`, `packages/software.yaml`, `packages/research.yaml`, `packages/product.yaml`. Each lists which skills are included. |
+| 2.7 | Remove skills from aibox repo | aibox | Delete `templates/skills/` directory. Update `context.rs` to no longer embed skills. Skills now come from processkit. |
+| 2.8 | Tag `v0.2.0` | processkit | Marks "all skills migrated, packages defined." |
+
+**Exit criterion:** processkit contains all skills (85 migrated + ~16 new process skills), organized in packages.
+
+### Phase 3 — MCP Servers (processkit)
+
+**Goal:** Foundation skills have working MCP servers. SQLite index works.
+
+| # | Task | Repo | Details |
+|---|------|------|---------|
+| 3.1 | Build index MCP server | processkit | `skills/index-management/mcp/server.py` — parses all entity files, builds SQLite index, serves queries (`query_entities`, `search`, `get_by_id`). Uses official MCP SDK + uv PEP 723. |
+| 3.2 | Build event-log MCP server | processkit | `skills/event-log/mcp/server.py` — `log_event`, `query_events`, `recent_events`. Writes LogEntry markdown files. |
+| 3.3 | Build workitem-management MCP server | processkit | `skills/workitem-management/mcp/server.py` — `create_workitem`, `transition_workitem`, `query_workitems`, `link_workitems`. Validates state machine. |
+| 3.4 | Build decision-record MCP server | processkit | `skills/decision-record/mcp/server.py` — `record_decision`, `query_decisions`, `link_decision`. |
+| 3.5 | Build binding-management MCP server | processkit | `skills/binding-management/mcp/server.py` — `create_binding`, `query_bindings`, `resolve_bindings_for`. |
+| 3.6 | Create mcp-config.json snippets | processkit | Each skill with an MCP server includes `mcp/mcp-config.json` — the fragment that gets merged into the project's MCP config. |
+| 3.7 | Tag `v0.3.0` | processkit | Marks "MCP servers operational." |
+
+**Exit criterion:** 5 MCP servers work end-to-end (create entity → file written → indexed in SQLite → queryable).
+
+### Phase 4 — aibox CLI Changes
+
+**Goal:** aibox consumes processkit releases instead of embedded templates.
+
+| # | Task | Repo | Details |
+|---|------|------|---------|
+| 4.1 | Add processkit fetch/cache logic | aibox CLI | `cli/src/processkit.rs` — clone/fetch processkit repo at a specific tag, cache in `~/.cache/aibox/processkit/v{version}/`. Respect `aibox.toml` version pin. |
+| 4.2 | Modify `aibox init` to consume processkit | aibox CLI | Replace embedded skill/process templates with processkit consumption. Install ALL skills from the cached processkit into `context/skills/`. Generate `context/processes/` from processkit processes. |
+| 4.3 | Generate MCP config from installed skills | aibox CLI | During `aibox init` / `aibox sync`, scan installed skills for `mcp/mcp-config.json` fragments. Merge into project's `.mcp.json` or `mcp.json` (provider-dependent). |
+| 4.4 | Add `aibox lint` command | aibox CLI | Basic structural validation: each file in `context/` that has YAML frontmatter must have `apiVersion`, `kind`, `metadata.id`. No schema-aware validation (that's processkit's MCP server). |
+| 4.5 | Add configurable ID generation | aibox CLI | In `aibox.toml`: `id_format = "word"` or `"uuid"`, `id_slug = true` or `false`. `aibox id generate` command. Uses `petname` crate for word-based IDs. |
+| 4.6 | Add `aibox process install <git-url>` | aibox CLI | Install community process packages from any GitHub repo (P13). Clone, validate structure (`package.yaml`), merge into project. |
+| 4.7 | Template originals for migration | aibox CLI | During `aibox init`, store processkit version snapshot in `context/.aibox/templates/v{version}/`. Foundation for future `aibox migrate`. |
+| 4.8 | Update E2E tests | aibox CLI | Tier 1 tests for new init flow (processkit consumption, MCP config generation, lint). Tier 2 tests for full lifecycle with processkit skills. |
+
+**Exit criterion:** `aibox init` produces a project with processkit skills, MCP config, and entity templates. `aibox lint` validates structure.
+
+### Phase 5 — Polish and Release
+
+| # | Task | Repo | Details |
+|---|------|------|---------|
+| 5.1 | Skill hierarchy validation | processkit | Validate `uses:` references form a DAG (no cycles). Add to index MCP server. |
+| 5.2 | Record all DISC-002 decisions in DECISIONS.md | aibox | Formal decision records for the ~12 decisions made in DISC-002. |
+| 5.3 | Update aibox documentation | aibox | docs-site: new pages for processkit integration, skill authoring, entity format, MCP servers. |
+| 5.4 | processkit `v1.0.0` | processkit | First stable release. All primitives, all skills, MCP servers for foundation skills. |
+| 5.5 | aibox release with processkit support | aibox | CLI version that consumes processkit. Breaking change: skills no longer embedded. |
+
+### Parallel execution map
+
+```
+Phase 1 ─────────────────┐
+  (processkit bootstrap)  │
+                          ├──→ Phase 2 (skill migration) ──→ Phase 2.7 (remove from aibox)
+                          │
+                          ├──→ Phase 3 (MCP servers) ──────→ Phase 3.7 (tag v0.3.0)
+                          │
+                          └──→ Phase 4.1-4.2 (aibox fetch + init rewrite)
+                                  │
+Phase 4.4-4.5 ──────────────────  │  (lint + ID gen — no processkit dependency)
+  (can start anytime)             │
+                                  ▼
+                          Phase 4.3 (MCP config gen — needs Phase 3.6)
+                                  │
+                                  ▼
+                          Phase 4.6-4.8 (community packages, migration, tests)
+                                  │
+                                  ▼
+                          Phase 5 (polish + release)
+```
+
+### What can start immediately (no dependencies)
+
+1. **Phase 1.1** — Owner creates processkit repo
+2. **Phase 4.4** — `aibox lint` (basic frontmatter validation, no processkit needed)
+3. **Phase 4.5** — ID generation (`petname` crate integration)
+4. **Phase 5.2** — Record DISC-002 decisions in DECISIONS.md
 
 ## 14. SQLite Index Logic — Where Does It Live?
 
