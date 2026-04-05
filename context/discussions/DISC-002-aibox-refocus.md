@@ -134,6 +134,36 @@ All entity files use structured YAML frontmatter: `apiVersion`, `kind`,
 `metadata` (id, timestamps, labels), `spec` (entity-specific fields). This enables
 schema versioning, validation, and future migration tooling.
 
+### P11: Slim base image + composable addons
+
+aibox provides a single base image (`debian:trixie-slim`) with essential dev tooling
+(git, zellij, yazi, vim, ripgrep, fd, bat, fzf, delta, starship, lazygit, gh).
+
+Everything else is an **addon** — a YAML definition that composes onto the base:
+- **Languages:** python, rust, node, go, latex, typst
+- **Tools:** kubernetes, infrastructure, cloud-aws/azure/gcp
+- **Docs:** docusaurus, hugo, mdbook, mkdocs, starlight, zensical
+- **AI providers:** claude, aider, gemini, mistral
+
+Each addon declares **opinionated versions** — a curated set of supported versions with
+a sensible default (e.g., Python 3.12/3.13/3.14, default 3.13). Users override in
+aibox.toml. aibox does NOT attempt to support every version — it curates.
+
+Addons compose via Minijinja-rendered Dockerfile stages. Heavy addons (Rust, LaTeX,
+Kubernetes) use parallel builder stages. The final image stays slim — only runtime
+artifacts are copied from builders.
+
+**Already implemented.** 22 addons, version-validated, template-rendered, generating
+`.devcontainer/Dockerfile` + `docker-compose.yml` + `devcontainer.json`.
+
+### P12: Binding as generalized primitive
+
+The 18th primitive is Binding (generalized from RoleBinding). A Binding connects any
+two entities with optional scope, temporality, and conditions. See §11 for full analysis.
+
+**Rule:** If a relationship has scope, time, or its own attributes → Binding entity.
+If it's just "A relates to B" → cross-reference in frontmatter.
+
 ## 4. What aibox is NOT
 
 - **Not a workflow engine.** aibox does not execute processes. Agents do.
