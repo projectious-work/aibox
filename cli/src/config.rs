@@ -359,11 +359,13 @@ pub enum ConfigLayout {
     Dev,
     /// One tool per tab, fullscreen, zero distraction
     Focus,
-    /// Side-by-side coding with AI: yazi+vim left, claude right
+    /// Side-by-side coding with AI: yazi+vim left (50%), claude right (50%)
     Cowork,
+    /// Cowork swapped: yazi+ai left (40%), vim editor right (60%)
+    CoworkSwap,
     /// Yazi-focused with large preview and AI pane
     Browse,
-    /// AI-first: Yazi left, AI agent right (horizontal split, no editor on first screen)
+    /// AI-first: Yazi left (60%), AI agent right (40%), no editor on first screen
     Ai,
 }
 
@@ -373,6 +375,7 @@ impl std::fmt::Display for ConfigLayout {
             ConfigLayout::Dev => write!(f, "dev"),
             ConfigLayout::Focus => write!(f, "focus"),
             ConfigLayout::Cowork => write!(f, "cowork"),
+            ConfigLayout::CoworkSwap => write!(f, "cowork-swap"),
             ConfigLayout::Browse => write!(f, "browse"),
             ConfigLayout::Ai => write!(f, "ai"),
         }

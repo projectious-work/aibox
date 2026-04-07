@@ -4,7 +4,7 @@
 # =============================================================================
 
 [mgr]
-ratio = [1, 3, 4]           # parent : current : preview
+ratio = [3, 5, 18]          # parent : current : preview (preview-heavy default)
 sort_by = "natural"
 sort_sensitive = false
 sort_dir_first = true

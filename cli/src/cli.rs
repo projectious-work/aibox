@@ -9,11 +9,13 @@ pub enum Layout {
     Dev,
     /// One tool per tab, fullscreen, zero distraction
     Focus,
-    /// Side-by-side coding with AI: yazi+vim left, claude right
+    /// Side-by-side coding with AI: yazi+vim left (50%), claude right (50%)
     Cowork,
+    /// Cowork swapped: yazi+ai left (40%), vim editor right (60%)
+    CoworkSwap,
     /// Yazi-focused with large preview and AI pane
     Browse,
-    /// AI-first: Yazi left, AI agent right (horizontal split, no editor on first screen)
+    /// AI-first: Yazi left (60%), AI agent right (40%), no editor on first screen
     Ai,
 }
 
@@ -23,6 +25,7 @@ impl std::fmt::Display for Layout {
             Layout::Dev => write!(f, "dev"),
             Layout::Focus => write!(f, "focus"),
             Layout::Cowork => write!(f, "cowork"),
+            Layout::CoworkSwap => write!(f, "cowork-swap"),
             Layout::Browse => write!(f, "browse"),
             Layout::Ai => write!(f, "ai"),
         }
@@ -132,9 +135,9 @@ pub enum Commands {
     /// creates/starts the container, then attaches via zellij.
     /// If already running, just attaches.
     ///
-    /// Available layouts: dev (default), focus, cowork, browse, ai.
+    /// Available layouts: dev (default), focus, cowork, cowork-swap, browse, ai.
     Start {
-        /// Zellij layout to use (dev, focus, cowork, browse, ai)
+        /// Zellij layout to use (dev, focus, cowork, cowork-swap, browse, ai)
         #[arg(long, value_enum)]
         layout: Option<Layout>,
     },

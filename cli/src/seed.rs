@@ -393,10 +393,118 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
     )
 }
 
+/// Generate the zellij cowork-swap layout dynamically based on configured AI providers.
+///
+/// cowork-swap is a re-arrangement of `cowork` for users who prefer the editor on
+/// the right (the bigger pane). The outer split is 40/60 instead of cowork's
+/// 50/50, and the editor and AI panes swap roles:
+///
+///   Tab 1 ("cowork-swap"):
+///     ┌──────────────────┬────────────────────────────────────────┐
+///     │  yazi (top, 40%) │                                        │
+///     │                  │                                        │
+///     ├──────────────────┤  vim editor (60%)                      │
+///     │  AI agent (60%)  │                                        │
+///     │                  │                                        │
+///     └──────────────────┴────────────────────────────────────────┘
+///   Tab 2 ("git"):    fullscreen lazygit
+///   Tab 3 ("shell"):  fullscreen bash
+///
+/// When no AI providers are configured, the cowork-swap tab degenerates to
+/// the same yazi-left + vim-right shape as `dev` (with the cowork-swap tab
+/// name preserved).
+///
+/// AIBOX_EDITOR_DIR is "right" (the default) on yazi/vim because vim is
+/// to the right of yazi geometrically — opening a file from yazi via `e`
+/// moves focus right.
+fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> String {
+    let ai_pane = ai_pane_kdl(providers);
+
+    if ai_pane.is_empty() {
+        // No AI providers — fall back to a simple yazi-left + vim-right shape
+        // (same as dev, with the cowork-swap tab name preserved).
+        return r#"layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+    tab name="cowork-swap" focus=true {
+        pane split_direction="vertical" {
+            pane size="40%" name="files" focus=true {
+                command "yazi"
+                cwd "/workspace"
+            }
+            pane size="60%" name="editor" {
+                command "vim-loop"
+                cwd "/workspace"
+            }
+        }
+    }
+    tab name="git" {
+        pane name="lazygit" {
+            command "lazygit"
+            cwd "/workspace"
+        }
+    }
+    tab name="shell" {
+        pane name="bash" {
+            command "bash"
+            cwd "/workspace"
+        }
+    }
+}
+"#
+        .to_string();
+    }
+
+    format!(
+        r#"layout {{
+    default_tab_template {{
+        children
+        pane size=1 borderless=true {{
+            plugin location="zellij:status-bar"
+        }}
+    }}
+    tab name="cowork-swap" focus=true {{
+        pane split_direction="vertical" {{
+            pane size="40%" split_direction="horizontal" {{
+                pane size="40%" name="files" focus=true {{
+                    command "yazi"
+                    cwd "/workspace"
+                }}
+                pane size="60%" {{
+{ai_pane}
+                }}
+            }}
+            pane size="60%" name="editor" {{
+                command "vim-loop"
+                cwd "/workspace"
+            }}
+        }}
+    }}
+    tab name="git" {{
+        pane name="lazygit" {{
+            command "lazygit"
+            cwd "/workspace"
+        }}
+    }}
+    tab name="shell" {{
+        pane name="bash" {{
+            command "bash"
+            cwd "/workspace"
+        }}
+    }}
+}}
+"#
+    )
+}
+
 /// Generate the zellij ai layout dynamically based on configured AI providers.
 ///
 /// AI layout: yazi-first, AI-first.
-///   Tab 1 ("ai"):     left 40% yazi, right 60% AI agent pane (vertical split, no editor)
+///   Tab 1 ("ai"):     left 60% yazi, right 40% AI agent pane (vertical split, no editor)
 ///   Tab 2 ("editor"): fullscreen vim
 ///   Tab 3 ("git"):    fullscreen lazygit
 ///   Tab 4 ("shell"):  fullscreen bash
@@ -456,12 +564,12 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
     }}
     tab name="ai" focus=true {{
         pane split_direction="vertical" {{
-            pane size="40%" name="files" focus=true {{
+            pane size="60%" name="files" focus=true {{
                 command "bash"
                 args "-c" "AIBOX_EDITOR_DIR=tab exec yazi"
                 cwd "/workspace"
             }}
-            pane size="60%" {{
+            pane size="40%" {{
 {ai_pane}
             }}
         }}
@@ -593,7 +701,7 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
 /// `migrate_yazi_section` helper rewrites existing host-side files at sync
 /// time. Do not change `[mgr]` back to `[manager]`.
 const DEFAULT_YAZI_CONFIG: &str = r#"[mgr]
-ratio = [1, 3, 4]
+ratio = [3, 5, 18]
 sort_by = "natural"
 sort_sensitive = false
 sort_dir_first = true
@@ -757,7 +865,7 @@ const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference
   Ctrl+b /         Search
   Ctrl+b q         QUIT (or Ctrl+q)
 
-  LAYOUTS: aibox start --layout dev|focus|cowork|browse|ai
+  LAYOUTS: aibox start --layout dev|focus|cowork|cowork-swap|browse|ai
   TABS: Ctrl+b 1 dev  2 git  3 shell  4 help
 "#;
 
@@ -887,6 +995,14 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
             .join("layouts")
             .join("ai.kdl"),
         &generate_ai_layout(providers),
+    )?;
+    seed_file(
+        &root
+            .join(".config")
+            .join("zellij")
+            .join("layouts")
+            .join("cowork-swap.kdl"),
+        &generate_cowork_swap_layout(providers),
     )?;
 
     // Yazi config + theme
@@ -1108,6 +1224,16 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
     )? {
         updated.push(".config/zellij/layouts/ai.kdl".to_string());
     }
+    if force_seed_file(
+        &root
+            .join(".config")
+            .join("zellij")
+            .join("layouts")
+            .join("cowork-swap.kdl"),
+        &generate_cowork_swap_layout(providers),
+    )? {
+        updated.push(".config/zellij/layouts/cowork-swap.kdl".to_string());
+    }
 
     // lazygit config
     if force_seed_file(
@@ -1248,6 +1374,13 @@ mod tests {
                 .join("zellij")
                 .join("layouts")
                 .join("ai.kdl")
+                .exists()
+        );
+        assert!(
+            root.join(".config")
+                .join("zellij")
+                .join("layouts")
+                .join("cowork-swap.kdl")
                 .exists()
         );
         assert!(root.join(".config").join("yazi").join("yazi.toml").exists());
@@ -1492,8 +1625,9 @@ mod tests {
         assert!(layout.contains("tab name=\"git\""), "should have git tab");
         assert!(layout.contains("tab name=\"shell\""), "should have shell tab");
         assert!(layout.contains("split_direction=\"vertical\""), "should split vertically");
-        assert!(layout.contains("size=\"40%\""), "yazi pane should be 40%");
-        assert!(layout.contains("size=\"60%\""), "ai pane should be 60%");
+        // v0.14.4: yazi gets 60%, AI pane gets 40% (was 40/60 in v0.14.2/3)
+        assert!(layout.contains("size=\"60%\" name=\"files\""), "yazi pane should be 60%");
+        assert!(layout.contains("size=\"40%\""), "ai pane should be 40%");
         assert!(!layout.contains("stacked"), "single provider should not be stacked");
     }
 
@@ -1523,6 +1657,77 @@ mod tests {
         let yazi_pos = layout.find("yazi").unwrap();
         let claude_pos = layout.find("command \"claude\"").unwrap();
         assert!(yazi_pos < claude_pos, "yazi should appear left of (before) AI pane");
+    }
+
+    #[test]
+    fn cowork_swap_layout_single_provider() {
+        let providers = vec![AiProvider::Claude];
+        let layout = generate_cowork_swap_layout(&providers);
+        assert!(layout.contains("tab name=\"cowork-swap\""), "should have cowork-swap tab");
+        assert!(layout.contains("command \"claude\""), "should have claude pane");
+        assert!(layout.contains("name=\"editor\""), "should have editor pane");
+        assert!(layout.contains("vim-loop"), "should run vim-loop");
+        assert!(layout.contains("yazi"), "should run yazi");
+        assert!(layout.contains("tab name=\"git\""), "should have git tab");
+        assert!(layout.contains("tab name=\"shell\""), "should have shell tab");
+        // Outer split: left 40% / right 60% (editor on the right gets the bigger half)
+        assert!(
+            layout.contains("size=\"40%\" split_direction=\"horizontal\""),
+            "left side should be 40% with horizontal sub-split"
+        );
+        assert!(
+            layout.contains("size=\"60%\" name=\"editor\""),
+            "right side (editor) should be 60%"
+        );
+        // Inner left split: yazi 40% top, AI 60% bottom
+        assert!(layout.contains("size=\"40%\" name=\"files\""), "yazi pane should be 40% of left stack");
+        assert!(!layout.contains("stacked"), "single provider should not be stacked");
+    }
+
+    #[test]
+    fn cowork_swap_layout_multiple_providers_stacked() {
+        let providers = vec![AiProvider::Claude, AiProvider::Aider];
+        let layout = generate_cowork_swap_layout(&providers);
+        assert!(layout.contains("stacked=true"), "multiple providers should be stacked");
+        assert!(layout.contains("command \"claude\""), "should have claude");
+        assert!(layout.contains("command \"aider\""), "should have aider");
+    }
+
+    #[test]
+    fn cowork_swap_layout_no_providers() {
+        let providers: Vec<AiProvider> = vec![];
+        let layout = generate_cowork_swap_layout(&providers);
+        assert!(layout.contains("tab name=\"cowork-swap\""), "should still have cowork-swap tab");
+        assert!(!layout.contains("claude"), "should not have claude");
+        assert!(layout.contains("yazi"), "should still have yazi pane");
+        assert!(layout.contains("vim-loop"), "should still have vim editor");
+        assert!(layout.contains("size=\"40%\" name=\"files\""), "yazi should be 40% (left)");
+        assert!(layout.contains("size=\"60%\" name=\"editor\""), "vim should be 60% (right)");
+    }
+
+    #[test]
+    fn cowork_swap_layout_editor_right_of_files() {
+        let providers = vec![AiProvider::Claude];
+        let layout = generate_cowork_swap_layout(&providers);
+        let files_pos = layout.find("name=\"files\"").unwrap();
+        let editor_pos = layout.find("name=\"editor\"").unwrap();
+        assert!(
+            files_pos < editor_pos,
+            "yazi (files) should appear before editor in layout source — editor sits to the right"
+        );
+    }
+
+    #[test]
+    fn cowork_swap_layout_ai_below_files_in_left_stack() {
+        let providers = vec![AiProvider::Claude];
+        let layout = generate_cowork_swap_layout(&providers);
+        let files_pos = layout.find("name=\"files\"").unwrap();
+        let claude_pos = layout.find("command \"claude\"").unwrap();
+        let editor_pos = layout.find("name=\"editor\"").unwrap();
+        assert!(
+            files_pos < claude_pos && claude_pos < editor_pos,
+            "yazi → claude (left stack top→bottom) → editor (right) order in source"
+        );
     }
 
     #[test]
