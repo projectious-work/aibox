@@ -115,6 +115,47 @@ aibox sync [OPTIONS]
 
 Only files whose content has actually changed are written. Reports what was updated.
 
+### Sync perimeter
+
+`aibox sync` is allowed to create, modify, or delete **only** the files
+listed below. Anything else — including `README.md`, `AGENTS.md`,
+`CLAUDE.md`, `LICENSE`, `src/`, `tests/`, `docs/`, `context/BACKLOG.md`,
+`context/skills/`, and any user-authored content — is **out of perimeter
+and will never be touched**, in any release, under any configuration.
+
+| Path | Why |
+|------|-----|
+| `aibox.toml` | One-time schema migrations (e.g. inserting `[processkit]`) |
+| `.aibox-version` | Tracks installed CLI version for migration detection |
+| `.aibox-home/**` | Runtime config seed (shells, vim, zellij, yazi, …); gitignored |
+| `.devcontainer/Dockerfile` | Regenerated from `aibox.toml` |
+| `.devcontainer/docker-compose.yml` | Regenerated from `aibox.toml` |
+| `.devcontainer/devcontainer.json` | Regenerated from `aibox.toml` |
+| `.claude/skills/**` | Skill deployment (write-if-missing; never overwrites) |
+| `context/AIBOX.md` | Universal baseline (regenerated; explicitly aibox-owned) |
+| `context/migrations/**` | Migration documents (additive; never overwrites) |
+
+The perimeter is enforced two ways:
+
+1. **Statically** — a unit test (`all_known_sync_write_targets_are_in_perimeter`)
+   verifies every known sync write site against the list at every build.
+   Adding a new sync write outside the perimeter fails CI immediately.
+2. **At runtime** — `aibox sync` snapshots a set of representative
+   out-of-perimeter sentinel files (`README.md`, `AGENTS.md`, `CLAUDE.md`,
+   `context/BACKLOG.md`, etc.) before running, and verifies after that
+   none were modified. A violation aborts with an error naming the
+   offending path before the (slow) image build runs.
+
+This perimeter is a **stable contract**. If a future release needs to
+expand it, that change requires an entry in `DECISIONS.md` and a
+visible note in the changelog. See [issue #34](https://github.com/projectious-work/aibox/issues/34).
+
+> **Note:** This perimeter applies to `aibox sync`, not `aibox init`.
+> `init` is allowed to create files outside this list as part of project
+> bootstrap (`README.md`, `.gitignore`, `CLAUDE.md`, etc.) — its contract
+> is "I am setting up a new project root", not "I am refreshing
+> aibox-managed files in an existing one".
+
 ### Examples
 
 ```bash

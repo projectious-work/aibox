@@ -32,6 +32,7 @@ mod reset;
 mod runtime;
 mod seed;
 mod skill_cmd;
+mod sync_perimeter;
 mod themes;
 mod update;
 

@@ -119,6 +119,22 @@ pub enum Commands {
     /// Seeds config files, regenerates .devcontainer/ files, reconciles
     /// skills, and builds the container image. The primary command for
     /// applying any config change.
+    ///
+    /// Sync perimeter (files aibox sync may create, modify, or delete):
+    ///   - aibox.toml                          (one-time schema migrations)
+    ///   - .aibox-version                      (CLI version tracking)
+    ///   - .aibox-home/**                      (runtime config seed; gitignored)
+    ///   - .devcontainer/Dockerfile            (regenerated)
+    ///   - .devcontainer/docker-compose.yml    (regenerated)
+    ///   - .devcontainer/devcontainer.json     (regenerated)
+    ///   - .claude/skills/**                   (skill deployment, write-if-missing)
+    ///   - context/AIBOX.md                    (universal baseline, regenerated)
+    ///   - context/migrations/**               (additive migration documents)
+    ///
+    /// Anything else (README.md, AGENTS.md, src/, tests/, context/BACKLOG.md,
+    /// context/skills/, etc.) is OUT of perimeter and will never be touched.
+    /// Attempts to write outside the perimeter via aibox internals are
+    /// blocked at the source. See cli/src/sync_perimeter.rs.
     #[command(alias = "generate")]
     Sync {
         /// Build without cache (force full rebuild)

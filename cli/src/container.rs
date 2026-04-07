@@ -594,7 +594,20 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
 }
 
 /// Sync command: force-seed theme-dependent files, seed missing configs, regenerate .devcontainer/.
+///
+/// See `crate::sync_perimeter` for the documented set of files this
+/// command is allowed to create, modify, or delete. The tripwire below
+/// snapshots a small set of representative out-of-perimeter files
+/// before the sync runs and verifies after that none of them were
+/// touched — providing a runtime guarantee in addition to the static
+/// `is_within_perimeter` check used by sync write helpers.
 pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) -> Result<()> {
+    // Snapshot out-of-perimeter sentinels before any sync work runs.
+    // The tripwire is verified at the end of cmd_sync.
+    let tripwire = crate::sync_perimeter::Tripwire::snapshot(
+        std::env::current_dir().ok().as_deref(),
+    );
+
     // Check for version migration before any other sync steps
     crate::migration::check_and_generate_migration()?;
 
@@ -662,6 +675,10 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         },
         Err(e) => output::warn(&format!("Failed to determine working directory: {}", e)),
     }
+
+    // Verify the perimeter tripwire BEFORE the (potentially long) image
+    // build, so a perimeter violation aborts as fast as possible.
+    tripwire.verify()?;
 
     // Build container image (if a container runtime is available)
     if no_build {
