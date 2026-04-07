@@ -1,7 +1,7 @@
 # projectious.work theme for Yazi
 # Brand palette: Midnight #1d3352, Accent #E05232, Slate #546a82
 
-[manager]
+[mgr]
 cwd = { fg = "#8AACC8" }
 
 hovered = { fg = "#C5DAF0", bg = "#1d3352" }

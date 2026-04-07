@@ -1,94 +1,87 @@
-# aibox v0.14.2
+# aibox v0.14.3
 
-CLI patch release. Fixes a layout-sync bug, adds a new "ai" zellij layout, and
-re-releases the macOS binaries (the v0.14.2 macOS artifacts from a prior
-incomplete release attempt are superseded by this clean release).
+CLI patch release. Fixes a yazi config bug where layout settings (`ratio`,
+`sort_by`, etc.) were silently ignored because aibox was still using the
+deprecated `[manager]` section name. Yazi 25+ renamed it to `[mgr]`.
 
-## Bug fix: layout setting in `aibox.toml` now actually applies
+## Bug fix: yazi `ratio` and other `[manager]` settings now apply
 
-Two places hard-coded the layout to `dev` and ignored `[customization] layout`
-in `aibox.toml`. After this release the configured layout is honored
-everywhere:
+Yazi 25 renamed the `[manager]` section in `yazi.toml`, `keymap.toml`, and
+`theme.toml` to **`[mgr]`**. Files that still use `[manager]` are silently
+ignored — yazi parses them and uses defaults instead. The seeded yazi
+configs in aibox were still on the old name, which is why changing
+`ratio = [1, 3, 4]` in `.aibox-home/.config/yazi/yazi.toml` had no effect
+even after restarting yazi.
 
-- **`.aibox-home/.config/zellij/config.kdl`** — `default_layout` is now
-  substituted from `aibox.toml` at seed time. Previously the seeded config
-  always wrote `default_layout "dev"`, so any zellij invocation that did not
-  pass `--layout` (e.g. opening a new VS Code terminal) silently fell back
-  to `dev`.
-- **`.devcontainer/devcontainer.json`** — VS Code's zellij terminal profile
-  is now generated with the configured layout in its `--layout` argument.
-  Previously it was hard-coded to `["--layout", "dev"]`.
+### What this release does
 
-After upgrading to v0.14.2, run `aibox sync` to regenerate both files. Your
-chosen layout will then take effect for `aibox start`, VS Code's zellij
-terminal profile, and any other path into zellij.
+1. **Rewrites the embedded yazi config templates** — `seed.rs`
+   `DEFAULT_YAZI_CONFIG` now uses `[mgr]`. New `aibox init`s and freshly
+   seeded files write the correct section name.
 
-## New layout: `ai`
+2. **Updates the image-baked yazi configs** in `images/base-debian/config/yazi/`
+   so the `:base-debian-v0.14.3` image carries the correct section names too:
+   - `yazi.toml`
+   - `keymap.toml`
+   - `theme.toml`
+   - All 6 theme files under `themes/` (catppuccin-mocha, catppuccin-latte,
+     dracula, nord, projectious, tokyo-night)
 
-A new zellij layout for AI-first workflows: **yazi on the left, AI agent on
-the right**, vertical split with no editor on the first screen.
+3. **Adds a migration step to `aibox sync`** — existing host-side files at
+   `.aibox-home/.config/yazi/{yazi,keymap,theme}.toml` that still use
+   `[manager]` are rewritten to `[mgr]` in place. The migration:
+   - Is **idempotent** — files already on `[mgr]` are untouched
+   - **Preserves user customizations** — only the section header line is
+     rewritten; everything else (your `ratio`, comments, custom keys) stays
+   - Skips substring matches — a comment line containing the word "manager"
+     elsewhere in the file is not affected
+
+After installing the new CLI, run `aibox sync` in any project. The output
+will report any migrated files:
 
 ```
-┌──────────────────┬────────────────────────────┐
-│                  │                            │
-│  yazi (40%)      │  claude (60%)              │
-│                  │                            │
-│                  │                            │
-├──────────────────┴────────────────────────────┤
-│  status-bar                                   │
-└───────────────────────────────────────────────┘
-
-  Tab 1: ai   Tab 2: editor   Tab 3: git   Tab 4: shell
+✓ Updated .config/yazi/yazi.toml (migrated [manager] → [mgr])
 ```
 
-The editor still lives in tab 2 (fullscreen vim), so opening a file from
-yazi via `e` brings up the editor exactly like the `browse` layout. Tabs 3
-and 4 are git and shell as in every other layout.
+Then restart yazi (or open a new terminal) — your `ratio` will take effect.
 
-If multiple AI providers are configured, they are stacked in the right pane
-(same convention as `cowork` and `browse`).
+## Tests
 
-Select with:
-
-```bash
-aibox start --layout ai
-```
-
-or set as default in `aibox.toml`:
-
-```toml
-[customization]
-layout = "ai"
-```
+309 tests pass. Six new tests in `seed::tests`:
+- `default_yazi_config_uses_mgr_section`
+- `migrate_yazi_section_rewrites_manager_to_mgr`
+- `migrate_yazi_section_idempotent_on_mgr`
+- `migrate_yazi_section_missing_file_is_noop`
+- `migrate_yazi_section_preserves_user_customization`
+- `migrate_yazi_section_does_not_touch_substring_matches`
 
 ## Container Images
 
-- `ghcr.io/projectious-work/aibox:base-debian-v0.14.2`
+- `ghcr.io/projectious-work/aibox:base-debian-v0.14.3`
 - `ghcr.io/projectious-work/aibox:base-debian-latest`
 
-The base image is rebuilt with the new version label only — there are no
-content changes from `v0.14.1`. Users on the v0.14.1 image can stay on it;
-the v0.14.2 CLI is fully compatible.
+The base image is rebuilt with the corrected yazi config files. Functionally,
+this matters most for the keymap (which had been silently ignoring all
+`[manager]` rebindings in the image-baked file — they were only working
+because the `.aibox-home`-mounted version, generated by the v0.14.2 CLI's
+already-correct keymap template, shadowed the broken image file).
 
 ## CLI Binaries
 
-- `aibox-v0.14.2-aarch64-unknown-linux-gnu.tar.gz`
-- `aibox-v0.14.2-x86_64-unknown-linux-gnu.tar.gz`
-- `aibox-v0.14.2-aarch64-apple-darwin.tar.gz` (added in Phase 2)
-- `aibox-v0.14.2-x86_64-apple-darwin.tar.gz` (added in Phase 2)
+- `aibox-v0.14.3-aarch64-unknown-linux-gnu.tar.gz`
+- `aibox-v0.14.3-x86_64-unknown-linux-gnu.tar.gz`
+- `aibox-v0.14.3-aarch64-apple-darwin.tar.gz` (added in Phase 2)
+- `aibox-v0.14.3-x86_64-apple-darwin.tar.gz` (added in Phase 2)
 
 ## Upgrading
 
 ```bash
-# Install the new CLI (Linux)
+# Install the new CLI
 curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash
 
 # Or on macOS, follow Phase 2 instructions on the host
 
-# In each project, regenerate the seeded config and devcontainer files:
+# In each project, run sync — your existing yazi.toml will be migrated:
 cd <project>
 aibox sync
 ```
-
-After `aibox sync`, the layout in `aibox.toml` is the source of truth for
-all zellij invocations.

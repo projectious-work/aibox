@@ -3,7 +3,7 @@
 # Docs: https://yazi-rs.github.io/docs/configuration/keymap
 # =============================================================================
 
-[manager]
+[mgr]
 prepend_keymap = [
     # Enter: open in vim in-place (suspends yazi, :q returns)
     { on = "<Enter>", run = "open",              desc = "Edit in-place" },

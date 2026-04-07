@@ -586,7 +586,13 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
 }
 
 /// Default yazi config.
-const DEFAULT_YAZI_CONFIG: &str = r#"[manager]
+///
+/// Note on `[mgr]` (formerly `[manager]`):
+/// Yazi 25+ renamed the `[manager]` section to `[mgr]`. Files using the old
+/// name are silently ignored — `ratio` and friends have no effect. The
+/// `migrate_yazi_section` helper rewrites existing host-side files at sync
+/// time. Do not change `[mgr]` back to `[manager]`.
+const DEFAULT_YAZI_CONFIG: &str = r#"[mgr]
 ratio = [1, 3, 4]
 sort_by = "natural"
 sort_sensitive = false
@@ -971,6 +977,46 @@ pub fn force_seed_file(path: &Path, content: &str) -> Result<bool> {
     crate::context::write_if_changed(path, content)
 }
 
+/// Migrate the deprecated yazi `[manager]` section name to `[mgr]`.
+///
+/// Yazi 25+ renamed the section, and uses of `[manager]` are silently
+/// ignored. This helper edits an existing yazi config file in place,
+/// rewriting any line that begins with `[manager]` to `[mgr]`. It is
+/// idempotent — files already using `[mgr]` are left untouched.
+///
+/// Used for `yazi.toml`, `keymap.toml`, and `theme.toml` (which all
+/// previously used `[manager]`). User customizations OUTSIDE the section
+/// header are preserved.
+///
+/// Returns Ok(true) if the file was modified, Ok(false) otherwise (file
+/// missing or no `[manager]` line found).
+pub fn migrate_yazi_section(path: &Path) -> Result<bool> {
+    if !path.is_file() {
+        return Ok(false);
+    }
+    let content = fs::read_to_string(path)
+        .with_context(|| format!("Failed to read {}", path.display()))?;
+    if !content.lines().any(|l| l.trim_end() == "[manager]") {
+        return Ok(false);
+    }
+    let new_content: String = content
+        .lines()
+        .map(|line| {
+            if line.trim_end() == "[manager]" {
+                "[mgr]".to_string()
+            } else {
+                line.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+        // Preserve trailing newline if the original had one
+        + if content.ends_with('\n') { "\n" } else { "" };
+    fs::write(path, new_content)
+        .with_context(|| format!("Failed to write {}", path.display()))?;
+    Ok(true)
+}
+
 /// Force-seed all theme-dependent and AI-provider-dependent config files.
 /// Overwrites existing files when content has changed. Used by `aibox sync`.
 pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
@@ -1071,12 +1117,25 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
         updated.push(".config/lazygit/config.yml".to_string());
     }
 
-    // Yazi theme
+    // Yazi theme — force-update from the bundled theme for the selected theme
     if force_seed_file(
         &root.join(".config").join("yazi").join("theme.toml"),
         crate::themes::yazi_theme(theme),
     )? {
         updated.push(".config/yazi/theme.toml".to_string());
+    }
+
+    // Yazi config migration: rewrite [manager] → [mgr] in existing files.
+    // Yazi 25+ silently ignores [manager], so any user customization that
+    // still uses the old section name (from older aibox releases) needs to
+    // be migrated. The migration is idempotent and preserves user content
+    // outside the section header.
+    let yazi_dir = root.join(".config").join("yazi");
+    for filename in ["yazi.toml", "keymap.toml", "theme.toml"] {
+        let path = yazi_dir.join(filename);
+        if migrate_yazi_section(&path)? {
+            updated.push(format!(".config/yazi/{} (migrated [manager] → [mgr])", filename));
+        }
     }
 
     // Starship prompt
@@ -1464,6 +1523,93 @@ mod tests {
         let yazi_pos = layout.find("yazi").unwrap();
         let claude_pos = layout.find("command \"claude\"").unwrap();
         assert!(yazi_pos < claude_pos, "yazi should appear left of (before) AI pane");
+    }
+
+    #[test]
+    fn default_yazi_config_uses_mgr_section() {
+        // Regression test for the [manager] → [mgr] rename in yazi 25+.
+        // The seeded config must use [mgr] or yazi will silently ignore it.
+        assert!(
+            DEFAULT_YAZI_CONFIG.contains("[mgr]"),
+            "default yazi config must use [mgr] section"
+        );
+        assert!(
+            !DEFAULT_YAZI_CONFIG.contains("[manager]"),
+            "default yazi config must not use deprecated [manager] section"
+        );
+    }
+
+    #[test]
+    fn migrate_yazi_section_rewrites_manager_to_mgr() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("yazi.toml");
+        fs::write(
+            &path,
+            "[manager]\nratio = [1, 3, 4]\nsort_by = \"natural\"\n",
+        )
+        .unwrap();
+
+        let changed = migrate_yazi_section(&path).unwrap();
+        assert!(changed, "should report change");
+
+        let content = fs::read_to_string(&path).unwrap();
+        assert!(content.starts_with("[mgr]\n"), "should rename to [mgr]");
+        assert!(content.contains("ratio = [1, 3, 4]"), "should preserve user values");
+        assert!(content.contains("sort_by = \"natural\""), "should preserve other lines");
+        assert!(!content.contains("[manager]"), "should not contain old section name");
+    }
+
+    #[test]
+    fn migrate_yazi_section_idempotent_on_mgr() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("yazi.toml");
+        let original = "[mgr]\nratio = [1, 3, 4]\n";
+        fs::write(&path, original).unwrap();
+
+        let changed = migrate_yazi_section(&path).unwrap();
+        assert!(!changed, "no change should be reported for already-migrated file");
+
+        let content = fs::read_to_string(&path).unwrap();
+        assert_eq!(content, original, "file content must be unchanged");
+    }
+
+    #[test]
+    fn migrate_yazi_section_missing_file_is_noop() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("missing.toml");
+        let changed = migrate_yazi_section(&path).unwrap();
+        assert!(!changed);
+    }
+
+    #[test]
+    fn migrate_yazi_section_preserves_user_customization() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("yazi.toml");
+        // User has changed ratio and added a comment — both must survive.
+        let custom = "# my customizations\n[manager]\nratio = [2, 4, 1]\n# end\n";
+        fs::write(&path, custom).unwrap();
+
+        let changed = migrate_yazi_section(&path).unwrap();
+        assert!(changed);
+
+        let content = fs::read_to_string(&path).unwrap();
+        assert!(content.contains("ratio = [2, 4, 1]"), "user ratio must be preserved");
+        assert!(content.contains("# my customizations"), "user comments must be preserved");
+        assert!(content.contains("# end"), "trailing comment must be preserved");
+        assert!(content.contains("[mgr]"), "section must be renamed");
+        assert!(!content.contains("[manager]"));
+    }
+
+    #[test]
+    fn migrate_yazi_section_does_not_touch_substring_matches() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("yazi.toml");
+        // A line that contains "manager" as part of a value should NOT be touched.
+        let content = "[mgr]\ndescription = \"the manager pane\"\n";
+        fs::write(&path, content).unwrap();
+        let changed = migrate_yazi_section(&path).unwrap();
+        assert!(!changed);
+        assert_eq!(fs::read_to_string(&path).unwrap(), content);
     }
 
     #[test]

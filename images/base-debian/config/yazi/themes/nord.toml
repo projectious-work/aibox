@@ -3,7 +3,7 @@
 # Docs: https://yazi-rs.github.io/docs/configuration/theme
 # =============================================================================
 
-[manager]
+[mgr]
 cwd = { fg = "#88C0D0" }
 
 # Hovered item
