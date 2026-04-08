@@ -101,7 +101,8 @@ This single command does:
 
 **Prerequisites:** Rust toolchain on macOS, `gh` authenticated with `write:packages` scope, Docker/OrbStack running.
 
-**Note:** If `gh` is missing `read:packages` or `write:packages` scopes (happens after `/login` in Claude Code), run:
+**Note:** If `gh` is missing the `write:packages` scope (happens after `/login` in Claude Code, and after a fresh `gh auth login` which only grants the default `repo` scope), the GHCR push step fails with `denied: permission_denied: The token provided does not match expected scopes`. Run:
 ```bash
-gh auth refresh -s read:packages,delete:packages
+gh auth refresh -s read:packages,write:packages,delete:packages
 ```
+Then re-run `./scripts/maintain.sh release-host X.Y.Z`. The script is idempotent for the binary upload step, so a partial run is fine to retry.

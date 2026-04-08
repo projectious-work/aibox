@@ -247,6 +247,18 @@ pub(crate) fn update_gitignore(addons: &AddonsSection) -> Result<()> {
     // from aibox.lock; never tracked.
     content.push_str("context/.cache/\n\n");
 
+    // Privacy tier (DEC-030): any directory named `private` anywhere
+    // under context/ is excluded recursively, no matter how deep. Lets
+    // a user keep personal notes, drafts, and per-user state alongside
+    // the project-public context content without risk of leaking it.
+    content.push_str(
+        "# ── Privacy tier (DEC-030) ──────────────────────────────────────────────────\n",
+    );
+    content.push_str("# Any directory named `private` under context/ is never tracked.\n");
+    content.push_str("# Use this for personal notes, drafts, secrets, and per-user state.\n");
+    content.push_str("context/**/private/\n");
+    content.push_str("context/private/\n\n");
+
     // OS generated
     content.push_str(
         "# ── OS generated files ───────────────────────────────────────────────────────\n",
@@ -363,6 +375,11 @@ fn ensure_aibox_entries(gitignore_path: &Path) -> Result<()> {
         // Runtime cache for fetched processkit / aibox content.
         // Reproducible from aibox.lock; never tracked.
         "context/.cache/",
+        // Privacy tier (DEC-030): any directory named `private` under
+        // context/ is never tracked. Two patterns to cover both the
+        // top-level case and arbitrary nesting depth.
+        "context/private/",
+        "context/**/private/",
     ];
 
     let existing = fs::read_to_string(gitignore_path).context("Failed to read .gitignore")?;
@@ -608,6 +625,50 @@ mod tests {
             let body = fs::read_to_string(".gitignore").unwrap();
             assert!(body.contains(".aibox-home/"));
             assert!(body.contains("context/.cache/"));
+        });
+    }
+
+    #[test]
+    #[serial]
+    fn update_gitignore_creates_privacy_tier_rules() {
+        in_temp_dir(|| {
+            let addons = AddonsSection::default();
+            update_gitignore(&addons).unwrap();
+            let body = fs::read_to_string(".gitignore").unwrap();
+            assert!(
+                body.contains("context/private/"),
+                "missing top-level private/ rule"
+            );
+            assert!(
+                body.contains("context/**/private/"),
+                "missing recursive private/ rule"
+            );
+            assert!(
+                body.contains("DEC-030"),
+                "should reference the formal decision"
+            );
+        });
+    }
+
+    #[test]
+    #[serial]
+    fn ensure_aibox_entries_appends_privacy_tier_to_existing() {
+        in_temp_dir(|| {
+            // Pre-existing .gitignore with the v0.16.2 entries but no privacy rule.
+            fs::write(
+                ".gitignore",
+                "# user\nmy-secret\n\n# aibox generated\n.aibox-home/\n.aibox-version\n.aibox-backup/\n.aibox-env/\ncontext/.cache/\n",
+            )
+            .unwrap();
+            let addons = AddonsSection::default();
+            update_gitignore(&addons).unwrap();
+            let body = fs::read_to_string(".gitignore").unwrap();
+            assert!(body.contains("my-secret"), "user entries preserved");
+            assert!(
+                body.contains("context/private/"),
+                "privacy rule appended on upgrade"
+            );
+            assert!(body.contains("context/**/private/"));
         });
     }
 

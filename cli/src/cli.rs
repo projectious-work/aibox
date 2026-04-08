@@ -110,9 +110,21 @@ pub enum Commands {
         #[arg(long, value_enum)]
         prompt: Option<StarshipPreset>,
 
-        /// Addon names to enable (e.g., python, infrastructure, kubernetes)
+        /// Addon names to enable (e.g., python, infrastructure, kubernetes).
+        /// Each selected addon's `requires` are auto-added transitively
+        /// (e.g. selecting `docs-docusaurus` also pulls in `node`).
         #[arg(long, num_args = 1..)]
         addons: Option<Vec<String>>,
+
+        /// Pin a specific tool version inside an addon. Repeatable.
+        /// Format: `addon:tool=version`. Examples:
+        ///
+        ///   --addon-tool python:python=3.14 --addon-tool node:pnpm=10
+        ///
+        /// Overrides the addon's default version and skips the
+        /// interactive version picker for that tool.
+        #[arg(long = "addon-tool")]
+        addon_tool: Vec<String>,
 
         /// processkit source URL (default: projectious-work/processkit upstream).
         /// Use this to point at a fork or a compatible alternative repo.

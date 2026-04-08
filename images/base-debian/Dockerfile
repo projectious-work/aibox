@@ -314,6 +314,12 @@ COPY config/yazi/plugins/              /home/aibox/.config/yazi/plugins/
 # Helper scripts (chmod via COPY --chmod to avoid extra layer)
 COPY --chmod=755 config/bin/open-in-editor.sh /usr/local/bin/open-in-editor
 COPY --chmod=755 config/bin/vim-loop.sh       /usr/local/bin/vim-loop
+# xdg-open shim — headless containers have no browser, so any tool that
+# calls xdg-open (gh auth login, git credential helpers, opencode, ...)
+# would otherwise hit a confusing "Failed opening a web browser" error.
+# The shim prints the URL with copy-this-to-your-host instructions and
+# exits 0 so the caller thinks the browser opened. See DEC-031.
+COPY --chmod=755 config/bin/xdg-open.sh       /usr/local/bin/xdg-open
 
 # Quick reference cheatsheet
 COPY config/cheatsheet.txt             /home/aibox/.config/cheatsheet.txt

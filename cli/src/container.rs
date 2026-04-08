@@ -20,6 +20,11 @@ pub struct InitParams {
     pub theme: Option<Theme>,
     pub prompt: Option<StarshipPreset>,
     pub addons: Option<Vec<String>>,
+    /// Repeated `addon:tool=version` overrides for individual tools
+    /// inside selected addons. See [`parse_addon_tool_override`] for
+    /// the syntax. Each override skips the interactive version picker
+    /// for that tool and pins the version into `aibox.toml`.
+    pub addon_tool: Vec<String>,
     /// Override the processkit source URL. `None` → use the default
     /// upstream from `ProcessKitSection::default()`.
     pub processkit_source: Option<String>,
@@ -173,6 +178,169 @@ fn resolve_processkit_section(
     Ok(section)
 }
 
+// ---------------------------------------------------------------------------
+// Addon resolution: requires expansion, default tools, version overrides
+// ---------------------------------------------------------------------------
+
+/// Parse a single `--addon-tool addon:tool=version` CLI flag value into
+/// its three components. Pure function so it's unit-testable.
+///
+/// Examples:
+/// - `python:python=3.14` → `("python", "python", "3.14")`
+/// - `node:pnpm=10` → `("node", "pnpm", "10")`
+fn parse_addon_tool_override(s: &str) -> Result<(String, String, String)> {
+    let (addon_tool, version) = s.split_once('=').ok_or_else(|| {
+        anyhow::anyhow!(
+            "--addon-tool '{}' is missing '=<version>'. Expected format: addon:tool=version",
+            s
+        )
+    })?;
+    let (addon, tool) = addon_tool.split_once(':').ok_or_else(|| {
+        anyhow::anyhow!(
+            "--addon-tool '{}' is missing the addon prefix. Expected format: addon:tool=version",
+            s
+        )
+    })?;
+    if addon.is_empty() || tool.is_empty() || version.is_empty() {
+        anyhow::bail!(
+            "--addon-tool '{}' has an empty component. Expected format: addon:tool=version",
+            s
+        );
+    }
+    Ok((addon.to_string(), tool.to_string(), version.to_string()))
+}
+
+/// Map of `addon -> tool -> version` overrides built from the
+/// repeated `--addon-tool` flag values. Used by both the interactive
+/// resolver (to skip prompts when a version is already pinned) and
+/// the populator (to override the default version).
+type ToolOverrides = std::collections::HashMap<String, std::collections::HashMap<String, String>>;
+
+fn build_tool_overrides(values: &[String]) -> Result<ToolOverrides> {
+    let mut out: ToolOverrides = std::collections::HashMap::new();
+    for v in values {
+        let (addon, tool, version) = parse_addon_tool_override(v)?;
+        out.entry(addon).or_default().insert(tool, version);
+    }
+    Ok(out)
+}
+
+/// Transitively expand the user's selected addon list to include every
+/// addon required (directly or indirectly) by the selection.
+///
+/// Picking `docs-docusaurus` (which `requires: [node]`) without picking
+/// `node` used to error out at sync time with "Addon 'docs-docusaurus'
+/// requires 'node'". Now both `aibox init` and `aibox addon add` call
+/// this helper so the resulting `aibox.toml` already has the
+/// dependencies and `aibox sync` never sees a broken graph.
+///
+/// Pure function — no I/O. The caller is responsible for surfacing
+/// `expanded - initial` to the user via `output::info` if desired.
+pub(crate) fn expand_addon_requires(initial: &[String]) -> Vec<String> {
+    use std::collections::{HashSet, VecDeque};
+    let mut result: Vec<String> = initial.to_vec();
+    let mut seen: HashSet<String> = result.iter().cloned().collect();
+    let mut queue: VecDeque<String> = result.iter().cloned().collect();
+    while let Some(name) = queue.pop_front() {
+        if let Some(addon) = crate::addon_loader::get_addon(&name) {
+            for req in &addon.requires {
+                if seen.insert(req.clone()) {
+                    result.push(req.clone());
+                    queue.push_back(req.clone());
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Build the `[addons.<name>.tools]` section for a single addon at
+/// init time. Populates every `default_enabled` tool at the addon's
+/// `default_version`, with three layered override sources (later wins):
+///
+/// 1. Addon's `default_version`
+/// 2. Interactive picker — only when `interactive == true` AND the
+///    tool has more than one entry in `supported_versions` AND no
+///    explicit override is set
+/// 3. `--addon-tool addon:tool=version` CLI flag (highest priority,
+///    suppresses the interactive picker for that tool)
+///
+/// Tools that are NOT `default_enabled` are skipped entirely. Users
+/// who want them can edit `aibox.toml` directly afterwards (the
+/// `aibox addon info <name>` command lists them).
+fn populate_addon_tools(
+    addon_name: &str,
+    overrides_for_addon: Option<&std::collections::HashMap<String, String>>,
+    interactive: bool,
+) -> Result<crate::config::AddonToolsSection> {
+    use crate::config::{AddonToolsSection, ToolEntry};
+    use std::collections::HashMap;
+
+    let mut tools: HashMap<String, ToolEntry> = HashMap::new();
+
+    let Some(loaded) = crate::addon_loader::get_addon(addon_name) else {
+        // Unknown addon — caller will surface this elsewhere; we just
+        // return an empty section so the rest of init can proceed.
+        return Ok(AddonToolsSection { tools });
+    };
+
+    for tool in &loaded.tools {
+        if !tool.default_enabled {
+            continue;
+        }
+
+        // Highest priority: explicit CLI override.
+        let override_version = overrides_for_addon.and_then(|m| m.get(&tool.name)).cloned();
+
+        // Second priority: interactive picker (only when there's a
+        // real choice and the user hasn't pinned via the CLI).
+        let picked_version = if override_version.is_none()
+            && interactive
+            && tool.supported_versions.len() > 1
+        {
+            let default_idx = tool
+                .supported_versions
+                .iter()
+                .position(|v| v == &tool.default_version)
+                .unwrap_or(0);
+            let items: Vec<String> = tool
+                .supported_versions
+                .iter()
+                .enumerate()
+                .map(|(i, v)| {
+                    if i == default_idx {
+                        format!("{} (default)", v)
+                    } else {
+                        v.clone()
+                    }
+                })
+                .collect();
+            let idx = dialoguer::Select::new()
+                .with_prompt(format!("{}.{} version", addon_name, tool.name))
+                .items(&items)
+                .default(default_idx)
+                .interact()?;
+            Some(tool.supported_versions[idx].clone())
+        } else {
+            None
+        };
+
+        // Default version as the floor.
+        let version = override_version
+            .or(picked_version)
+            .unwrap_or_else(|| tool.default_version.clone());
+
+        tools.insert(
+            tool.name.clone(),
+            ToolEntry {
+                version: Some(version),
+            },
+        );
+    }
+
+    Ok(AddonToolsSection { tools })
+}
+
 /// Determine the default project name from the current directory.
 fn default_project_name() -> String {
     std::env::current_dir()
@@ -266,15 +434,29 @@ pub fn cmd_start(config_path: &Option<String>, layout: &str) -> Result<()> {
 
     // Version mismatch check: if container exists, ensure its image version matches config.
     // No label = pre-BACK-060 image; allow start without check (backward compat).
+    //
+    // Two failure modes give the same symptom (the existing container's
+    // image label != config.aibox.version) but have different fixes:
+    //
+    //   A) the image was already rebuilt at the new version by an earlier
+    //      `aibox sync`, but the container still references the old image
+    //      → fix: `aibox remove && aibox start` to recreate the container
+    //   B) the image itself is still at the old version
+    //      → fix: `aibox sync` to rebuild the image, then start
+    //
+    // We can't cheaply distinguish them from inside cmd_start without
+    // poking the local image store, so we name both fixes in the error.
     if state != ContainerState::Missing
         && let Ok(Some(container_version)) = runtime.get_container_image_version(name)
         && container_version != config.aibox.version
     {
         bail!(
             "Version mismatch: the existing container was built from image v{} \
-             but aibox.toml pins v{}.\n\
-             Run `aibox sync` to rebuild the image at the configured version, \
-             then try again.",
+             but aibox.toml pins v{}.\n\n\
+             Likely cause: an old container survived an aibox upgrade. Recreate it:\n\
+             \n    aibox remove && aibox start\n\n\
+             If you have not yet rebuilt the image at the new version, run \
+             `aibox sync` first to rebuild it, then the recreate command above.",
             container_version,
             config.aibox.version
         );
@@ -502,19 +684,14 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("# [addons] — language runtimes and tool bundles\n");
     out.push_str(sep);
     out.push_str("# Each addon installs a tool set into the container at build time.\n");
+    out.push_str("# Selected addons land here pre-populated with default-enabled tools at\n");
+    out.push_str("# their default versions; edit the version strings to switch.\n");
+    out.push_str("#\n");
     out.push_str("# Run `aibox addon list` to see all available addons.\n");
-    out.push_str("# Run `aibox addon info <name>` for tool details and supported versions.\n");
+    out.push_str("# Run `aibox addon info <name>` to see every supported tool/version per addon.\n");
     out.push_str("#\n");
-    out.push_str("# Examples (uncomment and adjust versions as needed):\n");
-    out.push_str("# [addons.python.tools]\n");
-    out.push_str("# python = { version = \"3.13\" }     # CPython interpreter\n");
-    out.push_str("# uv     = { version = \"0.7\" }      # Fast Python package manager\n");
-    out.push_str("#\n");
-    out.push_str("# [addons.rust.tools]\n");
-    out.push_str("# rust = { version = \"stable\" }     # Rust toolchain via rustup (stable/beta/nightly)\n");
-    out.push_str("#\n");
-    out.push_str("# [addons.node.tools]\n");
-    out.push_str("# node = { version = \"22\" }         # Node.js LTS\n");
+    out.push_str("# To add an addon after init, edit this file and re-run `aibox sync`,\n");
+    out.push_str("# or use `aibox addon add <name>` (which also pulls in transitive `requires`).\n");
     if !config.addons.addons.is_empty() {
         let mut addon_names: Vec<_> = config.addons.addons.keys().collect();
         addon_names.sort();
@@ -689,13 +866,32 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
         },
         process: None,
         addons: {
+            // Build the addon section in three steps:
+            //   1. Transitively expand `requires` so that picking
+            //      `docs-docusaurus` automatically pulls in `node`.
+            //   2. Parse the repeated --addon-tool flag values into a
+            //      nested map (addon → tool → version).
+            //   3. For each (now-complete) addon, populate its tools
+            //      sub-table with default-enabled tools at the right
+            //      version (CLI override > interactive pick > default).
+            let expanded_addons = expand_addon_requires(&addon_names);
+            for added in &expanded_addons {
+                if !addon_names.contains(added) {
+                    output::info(&format!(
+                        "Adding addon '{}' (transitively required by your selection)",
+                        added
+                    ));
+                }
+            }
+            let tool_overrides = build_tool_overrides(&params.addon_tool)?;
             let mut section = AddonsSection::default();
-            for name in &addon_names {
-                section.addons.entry(name.clone()).or_insert_with(|| {
-                    crate::config::AddonToolsSection {
-                        tools: std::collections::HashMap::new(),
-                    }
-                });
+            for name in &expanded_addons {
+                let tools = populate_addon_tools(
+                    name,
+                    tool_overrides.get(name),
+                    interactive,
+                )?;
+                section.addons.insert(name.clone(), tools);
             }
             section
         },
@@ -919,6 +1115,7 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
                 output::info("Building container image...");
                 runtime.compose_build(crate::config::COMPOSE_FILE, no_cache)?;
                 output::ok("Sync complete — image built");
+                warn_if_container_lags_image(&runtime, &config);
             }
             Err(_) => {
                 output::warn("No container runtime found — skipping image build");
@@ -928,6 +1125,39 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     }
 
     Ok(())
+}
+
+/// Warn the user if a container exists for this project AND its image
+/// label disagrees with the just-built image. This catches the
+/// "I synced but my old container is still running on the old image"
+/// situation BEFORE the user runs `aibox start` and gets a hard error.
+///
+/// Best-effort: any failure (runtime probe, label read) is silently
+/// swallowed. The warning is informational, not load-bearing — its
+/// only job is to surface a stale runtime so the next `aibox start`
+/// isn't a surprise.
+fn warn_if_container_lags_image(runtime: &Runtime, config: &AiboxConfig) {
+    let name = &config.container.name;
+    let Ok(state) = runtime.container_status(name) else {
+        return;
+    };
+    if state == ContainerState::Missing {
+        return;
+    }
+    let Ok(Some(container_version)) = runtime.get_container_image_version(name) else {
+        return;
+    };
+    if container_version == config.aibox.version {
+        return;
+    }
+    output::warn(&format!(
+        "Container '{}' is still running on image v{} but the freshly-built image is v{}.\n    \
+         The current container will keep running on the old image until you recreate it. To upgrade:\n    \
+         \n        aibox remove && aibox start\n    \
+         \n    Existing in-flight work in the container (open editors, running processes) will be lost \
+         on recreation; project files under /workspace are mounted from the host and survive.",
+        name, container_version, config.aibox.version
+    ));
 }
 
 #[cfg(test)]
@@ -963,6 +1193,86 @@ mod tests {
         assert_eq!(base, BaseImage::Debian);
         assert_eq!(process, vec!["research".to_string()]);
         assert_eq!(addons, vec!["latex".to_string()]);
+    }
+
+    // ── parse_addon_tool_override / build_tool_overrides ────────────────────
+
+    #[test]
+    fn parse_addon_tool_override_happy_path() {
+        let (a, t, v) = parse_addon_tool_override("python:python=3.14").unwrap();
+        assert_eq!(a, "python");
+        assert_eq!(t, "python");
+        assert_eq!(v, "3.14");
+    }
+
+    #[test]
+    fn parse_addon_tool_override_handles_dotted_versions() {
+        let (a, t, v) = parse_addon_tool_override("node:pnpm=10.5.0").unwrap();
+        assert_eq!(a, "node");
+        assert_eq!(t, "pnpm");
+        assert_eq!(v, "10.5.0");
+    }
+
+    #[test]
+    fn parse_addon_tool_override_rejects_missing_equals() {
+        let err = parse_addon_tool_override("python:python").unwrap_err();
+        assert!(format!("{}", err).contains("=<version>"));
+    }
+
+    #[test]
+    fn parse_addon_tool_override_rejects_missing_colon() {
+        let err = parse_addon_tool_override("python=3.14").unwrap_err();
+        assert!(format!("{}", err).contains("addon prefix"));
+    }
+
+    #[test]
+    fn parse_addon_tool_override_rejects_empty_components() {
+        assert!(parse_addon_tool_override(":python=3.14").is_err());
+        assert!(parse_addon_tool_override("python:=3.14").is_err());
+        assert!(parse_addon_tool_override("python:python=").is_err());
+    }
+
+    #[test]
+    fn build_tool_overrides_groups_by_addon() {
+        let raw = vec![
+            "python:python=3.14".to_string(),
+            "python:uv=0.8".to_string(),
+            "node:node=20".to_string(),
+        ];
+        let map = build_tool_overrides(&raw).unwrap();
+        assert_eq!(map["python"]["python"], "3.14");
+        assert_eq!(map["python"]["uv"], "0.8");
+        assert_eq!(map["node"]["node"], "20");
+        assert_eq!(map.len(), 2);
+    }
+
+    #[test]
+    fn build_tool_overrides_propagates_parse_error() {
+        let raw = vec!["bogus".to_string()];
+        assert!(build_tool_overrides(&raw).is_err());
+    }
+
+    // ── expand_addon_requires ───────────────────────────────────────────────
+    //
+    // The full transitive expansion is exercised by the e2e tests
+    // (cli/tests/e2e/) which load the real addon registry. The unit
+    // tests below cover the dedupe and ordering invariants without
+    // depending on the registry.
+
+    #[test]
+    fn expand_addon_requires_preserves_initial_order() {
+        // No addon registry initialized in unit tests → expansion is a
+        // no-op (get_addon returns None for everything). The function
+        // must still preserve the input order and not duplicate.
+        let input = vec!["python".to_string(), "node".to_string()];
+        let out = expand_addon_requires(&input);
+        assert_eq!(out, vec!["python", "node"]);
+    }
+
+    #[test]
+    fn expand_addon_requires_handles_empty() {
+        let out = expand_addon_requires(&[]);
+        assert!(out.is_empty());
     }
 
     // ── sync_should_install_processkit ──────────────────────────────────────

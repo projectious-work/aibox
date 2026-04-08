@@ -52,8 +52,13 @@ pub fn cmd_addon_list(config_path: &Option<String>) -> Result<()> {
 
 /// Add an add-on to aibox.toml with default-enabled tools, then sync.
 pub fn cmd_addon_add(config_path: &Option<String>, name: &str, no_build: bool) -> Result<()> {
-    let addon_def = addon_registry::get_addon(name)
-        .ok_or_else(|| anyhow::anyhow!("Unknown add-on '{}'. Run 'aibox addon list' to see available add-ons.", name))?;
+    // Verify the named addon exists before touching the config file.
+    if addon_registry::get_addon(name).is_none() {
+        bail!(
+            "Unknown add-on '{}'. Run 'aibox addon list' to see available add-ons.",
+            name
+        );
+    }
 
     let path = toml_path(config_path);
     if !path.exists() {
@@ -66,44 +71,68 @@ pub fn cmd_addon_add(config_path: &Option<String>, name: &str, no_build: bool) -
         .parse::<toml_edit::DocumentMut>()
         .with_context(|| format!("Failed to parse {}", path.display()))?;
 
-    // Check if already present
-    if doc
-        .get("addons")
-        .and_then(|a| a.get(name))
-        .is_some()
-    {
-        output::warn(&format!("Add-on '{}' is already in aibox.toml", name));
-        return Ok(());
-    }
+    // Transitively expand `requires`. Picking `docs-docusaurus` here
+    // also pulls in `node`, etc. The expansion is idempotent: any
+    // addon already present in aibox.toml is a no-op.
+    let expanded = crate::container::expand_addon_requires(std::slice::from_ref(&name.to_string()));
 
-    // Build tools table with default-enabled tools
-    let mut tools_table = toml_edit::Table::new();
-    for tool in addon_def.tools.iter().filter(|t| t.default_enabled) {
-        if tool.default_version.is_empty() {
-            // Versionless tool: tool_name = {}
-            tools_table.insert(tool.name, toml_edit::value(toml_edit::InlineTable::new()));
-        } else {
-            // Versioned tool: tool_name = { version = "X.Y" }
-            let mut entry = toml_edit::InlineTable::new();
-            entry.insert("version", tool.default_version.into());
-            tools_table.insert(tool.name, toml_edit::value(entry));
-        }
-    }
-
-    // Ensure [addons] table exists
+    // Ensure [addons] table exists.
     if doc.get("addons").is_none() {
         doc.insert("addons", toml_edit::Item::Table(toml_edit::Table::new()));
     }
 
-    // Insert [addons.<name>] with tools subtable
-    let mut addon_table = toml_edit::Table::new();
-    addon_table.insert("tools", toml_edit::Item::Table(tools_table));
-    doc["addons"][name] = toml_edit::Item::Table(addon_table);
+    let mut added_any = false;
+    for addon_name in &expanded {
+        if doc.get("addons").and_then(|a| a.get(addon_name)).is_some() {
+            if addon_name == name {
+                output::warn(&format!("Add-on '{}' is already in aibox.toml", name));
+                return Ok(());
+            }
+            // Transitive dep already present — nothing to do for this entry.
+            continue;
+        }
+
+        let addon_def = addon_registry::get_addon(addon_name).ok_or_else(|| {
+            anyhow::anyhow!(
+                "Internal: addon '{}' was returned by expand_addon_requires \
+                 but is unknown to the registry",
+                addon_name
+            )
+        })?;
+
+        // Build tools table with default-enabled tools at default versions.
+        let mut tools_table = toml_edit::Table::new();
+        for tool in addon_def.tools.iter().filter(|t| t.default_enabled) {
+            if tool.default_version.is_empty() {
+                tools_table.insert(tool.name, toml_edit::value(toml_edit::InlineTable::new()));
+            } else {
+                let mut entry = toml_edit::InlineTable::new();
+                entry.insert("version", tool.default_version.into());
+                tools_table.insert(tool.name, toml_edit::value(entry));
+            }
+        }
+
+        let mut addon_table = toml_edit::Table::new();
+        addon_table.insert("tools", toml_edit::Item::Table(tools_table));
+        doc["addons"][addon_name.as_str()] = toml_edit::Item::Table(addon_table);
+
+        if addon_name == name {
+            output::ok(&format!("Added add-on '{}' to aibox.toml", name));
+        } else {
+            output::info(&format!(
+                "Adding addon '{}' (transitively required by '{}')",
+                addon_name, name
+            ));
+        }
+        added_any = true;
+    }
+
+    if !added_any {
+        return Ok(());
+    }
 
     std::fs::write(&path, doc.to_string())
         .with_context(|| format!("Failed to write {}", path.display()))?;
-
-    output::ok(&format!("Added add-on '{}' to aibox.toml", name));
 
     // Run sync to apply changes
     crate::container::cmd_sync(config_path, false, no_build)?;

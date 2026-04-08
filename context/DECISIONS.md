@@ -2,6 +2,106 @@
 
 Inverse chronological. Each decision has a rationale and alternatives considered.
 
+## DEC-031 — Ship an xdg-open shim in the base image for headless OAuth flows (2026-04-08)
+
+**Decision:** The aibox base image (`images/base-debian/Dockerfile`) ships a 30-line `/usr/local/bin/xdg-open` shim that prints the URL with copy-to-host instructions and exits 0, instead of attempting to launch a real browser (which can never succeed in a headless dev container). The shim replaces the missing-binary error path with a clean, framed message that any tool calling `xdg-open` (gh auth login, git credential helpers, opencode, claude code device-flow, etc.) sees as a successful browser launch.
+
+**Rationale:**
+
+The user reported a confusing failure during `gh auth login` inside a derived project's container:
+
+```
+! First copy your one-time code: 2F91-B163
+Press Enter to open github.com in your browser...
+! Failed opening a web browser at https://github.com/login/device
+  exec: "xdg-open,x-www-browser,www-browser,wslview": executable file not found in $PATH
+  Please try entering the URL in your browser manually
+```
+
+The error is misleading: gh's device-flow polling continues in the background, the user can complete the auth manually in their host browser, and everything works. But the "Failed" line creates the impression that the auth flow has aborted. Every aibox user runs into this on their first `gh auth login` and burns a few minutes diagnosing.
+
+The fix has three properties we want:
+
+1. **Tools that call `xdg-open` should think it succeeded.** Any non-zero exit makes the calling tool error out, fall back to a worse path (e.g. interactive prompt), or abort polling. Exit 0 keeps the device-flow loop alive.
+2. **The user should see the URL clearly.** Plain text, framed, with the `https://...` URL on its own line so it's trivially copy-pasteable. ANSI bold + a unicode box around it so it stands out from whatever output the calling tool just printed.
+3. **No new apt package.** Installing `xdg-utils` would provide a real `xdg-open` that tries to find `x-www-browser`/`firefox`/`google-chrome` and fails with a *different* confusing error (no DISPLAY, no browser found). The shim is a 30-line shell script — no package, no extra image layer.
+
+**Alternatives:**
+
+- *Install `xdg-utils`* — rejected. Trades one confusing error for another. The package would also pull ~50 MB of desktop-integration cruft into a headless container.
+- *Set `BROWSER=echo` in the container's environment* — would work for tools that respect the `$BROWSER` env var (most do via Python's `webbrowser` module), but `gh` uses Go's `webbrowser.Open` which doesn't read `BROWSER` and falls straight through to xdg-open. So we'd need both `BROWSER=echo` *and* an xdg-open shim. Just shipping the shim covers more cases.
+- *Document the workaround instead of fixing it* — rejected. The point of aibox is to give users a working environment, not a chunk of FAQ they have to read. Every tool that tries to open a browser inside a container hits this — once we fix it, all of them benefit.
+- *Per-tool wrappers (`gh-auth-login` script that pre-prints the URL, etc.)* — rejected as unscalable. The xdg-open shim is the universal touchpoint.
+
+**Implementation:**
+
+- New file: `images/base-debian/config/bin/xdg-open.sh` — POSIX `/bin/sh` script, no bash dependencies. ANSI bold + unicode box rendering for the URL frame.
+- `images/base-debian/Dockerfile` — one new `COPY --chmod=755` line right after the existing `open-in-editor` and `vim-loop` helper scripts.
+- The shim ships only in the base-debian image. If aibox grows additional base images (BACK-007), each carries its own copy.
+- Lands in v0.16.3 base image, which the user pulls during Phase 2 of the v0.16.3 release.
+
+**Migration impact:** **Backwards compatible.** Existing dev containers (built from older base images) keep their behavior. After Phase 2 of the v0.16.3 release, projects pull the new base image on the next `aibox sync` and the shim becomes available.
+
+**Source:** Reported by user during a `gh auth login` flow in a derived project's container while testing v0.16.2. The diagnosis (gh polling continues in the background, error message is misleading) was quick; the design call was whether to install a real `xdg-open` or ship a friendly shim. Shim won on package weight + no-DISPLAY robustness.
+
+## DEC-030 — Three-tier privacy model: public / project-private / user-private (2026-04-08)
+
+**Decision:** Context content lives at one of three privacy tiers. The tier is enforced by **directory naming convention** (any directory named `private` under `context/` is treated as user-private and gitignored), with no per-file frontmatter requirement. aibox owns the gitignore rule; processkit owns everything else (the schema convention, the docs-site filtering, the per-user directory layout).
+
+| Tier | Visible to | Mechanism | Examples |
+|---|---|---|---|
+| **public** | the world (git-tracked, on docs site, on GitHub) | default location, no marker | `README.md`, published `docs-site/`, `LICENSE`, `AGENTS.md` |
+| **project-private** | anyone working on the project (git-tracked, not published) | default location under `context/`, no marker | `context/BACKLOG.md`, `context/DECISIONS.md`, `context/PRD.md`, `context/skills/`, `context/processes/` |
+| **user-private** | only the individual user (never git-tracked, never shared) | any directory named `private/` anywhere under `context/` | `context/private/`, `context/notes/private/`, `context/workitems/private/scratch.md` |
+
+aibox v0.16.3 generates `.gitignore` with two patterns to cover both top-level and arbitrary nesting depth:
+
+```
+context/private/
+context/**/private/
+```
+
+Both `update_gitignore` (fresh `.gitignore` creation) and `ensure_aibox_entries` (append to existing) carry the rule. Existing v0.16.2 projects pick it up on the next `aibox sync` via the existing append-missing-entries path.
+
+**Rationale:**
+
+- **Why directory-based, not frontmatter-based:** the user explicitly asked "could we gitignore all private content with a simple gitignore rule, eg one that ignores all `private` named directories in context/, no matter where they live (could that be some rule like `context/**/private/**`?)" and accepted directory-based as the lightweight answer. Frontmatter would require every consumer of context content (aibox, processkit MCP servers, the docs site, the agent harness) to read and respect the field. Directory naming is observable from the path alone — no parser needed, every tool that walks the filesystem already understands it.
+- **Why three tiers, not two:** "public" and "project-private" alone don't capture the per-user state that legitimately exists alongside project content — personal notes, draft thoughts, agent-personal MCP state, secrets the user keeps to themselves but wants their AI agent to see. Without a user-private tier these things either leak into git (bad) or live outside the project entirely (loses the locality that makes context useful).
+- **Why "private" as the directory name:** short, unambiguous, already widely understood (matches how npm scopes use `@private/`, how unix conventions use `~/.private/`, etc.). Alternatives considered: `personal/` (less clear who it belongs to), `user/` (sounds like a multi-user system), `local/` (overloaded with build tools), `_private/` (Python-style underscore prefix is too language-specific). `private` won.
+- **Why both `context/private/` AND `context/**/private/`:** git's gitignore semantics treat `**` and a top-level entry differently in some edge cases (depending on git version and whether the repo has any prior tracking of the path). Carrying both is belt-and-braces; both are inexpensive.
+
+**Boundary with processkit:**
+
+This decision lives in aibox's territory specifically for the **gitignore generation** part. Three related questions are explicitly **processkit territory** and are tracked in a processkit issue (filed as a follow-up to this DEC):
+
+1. **Schema:** does the processkit primitive YAML format need a `metadata.privacy: public|project|user` field? Frontmatter-based override on top of the directory convention. The user's preference is *no* unless a real use case forces it.
+2. **Docs-site filtering:** when processkit ships a docs site (or when aibox-docs ingests processkit content), private subtrees must not be published. That's a docs-site build filter, not a runtime concern.
+3. **Per-user directory layout:** if multiple users work on the same project, do they each get their own `context/private/<username>/` subdirectory? Or is `context/private/` shared between users via `~/.aibox-home`-style mounting? Open question for processkit's multi-user story (which doesn't yet exist).
+
+aibox does **not** scaffold a `context/private/` directory at init time. The convention is opt-in: the first time the user creates such a directory (or asks an agent to put something private there), the gitignore rule already protects it. Scaffolding an empty `private/` would be presumptuous about what belongs there and might surprise users who don't want to think about privacy yet.
+
+**Alternatives:**
+
+- *Per-file frontmatter `privacy: ...`* — rejected as too heavy. Would require every consumer to parse and respect it. Directory convention is observable from the path.
+- *gitignore by file extension or naming pattern (e.g. `*.private.md`)* — rejected. File extensions are ugly, and directories let you keep an entire subtree private without renaming every file.
+- *Two tiers only (public / private)* — rejected as not capturing the project-vs-user distinction. The whole point is that some things are private to the project (gitignored from the world but visible to teammates) and some things are private to the user (gitignored even from teammates).
+- *aibox creates a `context/private/` skeleton at init* — rejected as too presumptuous. Opt-in is cleaner.
+- *Use git's `assume-unchanged` or `skip-worktree` instead of gitignore* — rejected. Those are local-only flags that don't propagate, easy to forget, and break on fresh clones.
+
+**Implementation (this release, v0.16.3):**
+
+- `cli/src/context.rs::update_gitignore` — adds the privacy block right after the aibox-generated block, with a "DEC-030" comment marker.
+- `cli/src/context.rs::ensure_aibox_entries` — appends `context/private/` and `context/**/private/` to existing `.gitignore` files.
+- 2 new unit tests: `update_gitignore_creates_privacy_tier_rules` (fresh creation) and `ensure_aibox_entries_appends_privacy_tier_to_existing` (upgrade path).
+
+**Implementation (deferred to processkit):**
+
+- A processkit issue is filed asking the project owners to (a) decide on the schema-level frontmatter question, (b) document the directory convention in `src/scaffolding/AGENTS.md`, (c) define the docs-site filtering rules.
+
+**Migration impact:** **Backwards compatible.** Existing projects gain the rule on next `aibox sync` without any user action. Anything not in a `private/` subdirectory remains git-tracked exactly as before.
+
+**Source:** Approved in an earlier session (the user said "privacy tiers et al ok" in `scratch.md` lines ~3833-3853), formalized as a DEC entry in v0.16.3 after the user asked about prior discussion. The directory-based mechanism with the simple gitignore rule was the lightweight answer the user explicitly preferred over per-file frontmatter.
+
 ## DEC-029 — list_versions GitHub fallback + sync perimeter catch-up (2026-04-08)
 
 **Decision:** v0.16.2 closes two real-run footguns from v0.16.1, both surfaced by the first end-to-end `aibox init` → `aibox sync` user run after the v0.16.1 release shipped.

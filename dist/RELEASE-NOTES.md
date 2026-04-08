@@ -1,94 +1,233 @@
-# aibox v0.16.2 — close two real-run footguns from v0.16.1
+# aibox v0.16.3 — quality-of-life patch (9 fixes from real v0.16.2 use)
 
-Patch release. Both fixes came from the first real `aibox init` →
-`aibox sync` user run after v0.16.1 shipped.
+Patch release. Every fix in v0.16.3 came from a real `aibox init` →
+`aibox sync` → `aibox start` user run after v0.16.2 shipped, plus a
+formalisation of a long-standing visibility-tier discussion.
 
-## Bug fix #1 — `list_versions` falls back when GitHub API rate-limits
+## Container lifecycle UX
 
-`aibox init`'s interactive picker called the GitHub Releases API to
-list available processkit versions. The unauthenticated GitHub API is
-capped at **60 requests/hour per IP** — a real footgun on shared
-NATs, CI runners, and developer machines that already use other
-GitHub-using tooling. When the limit was hit the picker silently fell
-through to `unset` with a warning, leaving the user with the same
-v0.16.0 footgun the v0.16.1 release was supposed to fix.
+### `aibox start` error message — name both fixes, not just one
 
-`list_versions` now tries the API first (it gives nicer release
-metadata if/when we want it) and **falls back to `git ls-remote
---tags --refs <source>` on any failure** — including 403, network,
-JSON parse, and empty result. The git smart-HTTP protocol has a much
-higher rate limit and is the canonical source of truth for tags
-anyway. Same fallback behavior the install script (`scripts/install.sh`)
-got in v0.16.1.
+When the existing container's image label disagrees with `aibox.toml`,
+v0.16.2 said "Run `aibox sync` to rebuild the image at the configured
+version, then try again." But the most common cause is the *opposite*:
+sync already rebuilt the image, the container is stale. The error now
+names both fixes:
 
-Identical fix shape to the install.sh fix from earlier today, just
-applied to the in-CLI version listing path.
+```
+Version mismatch: the existing container was built from image v0.14.1
+but aibox.toml pins v0.16.3.
 
-## Bug fix #2 — sync perimeter tripwire fired on AGENTS.md install
+Likely cause: an old container survived an aibox upgrade. Recreate it:
 
-The sync auto-install path landed in v0.16.1 (BACK-110). It correctly
-fetched processkit content and copied 262 files including `AGENTS.md`
-at the project root. But the **sync perimeter** — the documented and
-runtime-enforced set of files sync may write — was not updated to
-match. The result: a runtime tripwire fired on the very first sync
-that materialized processkit content, with the misleading error
-"these out-of-perimeter paths were modified during sync, which is a
-bug: AGENTS.md (absent → present, 4719 bytes)".
+    aibox remove && aibox start
 
-The auto-install path was right; the perimeter was stale. v0.16.2
-brings the perimeter into agreement with v0.16.1's install behavior:
+If you have not yet rebuilt the image at the new version, run
+`aibox sync` first to rebuild it, then the recreate command above.
+```
 
-**`SYNC_PERIMETER` additions:**
-- `aibox.lock` (top-level pin file written by the installer)
-- `AGENTS.md` (canonical agent entrypoint installed by processkit)
-- `context/skills/` (live install destination)
-- `context/schemas/` (primitive schemas)
-- `context/state-machines/` (state machines)
-- `context/processes/` (process definitions)
-- `context/templates/` (immutable upstream cache mirror used by the
-  three-way diff)
+### `aibox sync` warns about a stale running container
 
-**`TRIPWIRE_SENTINELS` removal:**
-- `AGENTS.md` is no longer a sentinel — sync legitimately writes it
-  on the first install. The tripwire still watches `README.md`,
-  `CLAUDE.md`, `LICENSE`, `CHANGELOG.md`, `.gitignore`, and the
-  user-owned `context/{BACKLOG,DECISIONS,PRD,PROJECTS,STANDUPS,OWNER}.md`.
+After the build step, `cmd_sync` checks whether a container exists for
+the project AND its image label disagrees with the freshly-built
+image. If so, it prints a warning so the next `aibox start` isn't a
+surprise:
 
-Module doc-comment in `cli/src/sync_perimeter.rs` rewritten to spell
-out the v0.16.1 perimeter expansion. Migration impact: **none**, this
-matches the implementation that already shipped — it's the
-specification catching up.
+```
+! Container 'processkit' is still running on image v0.14.1 but the
+  freshly-built image is v0.16.3.
+  The current container will keep running on the old image until you
+  recreate it. To upgrade:
 
-## Tests
+      aibox remove && aibox start
 
-- 443/443 passing (was 438 in v0.16.1)
-- 6 new sync_perimeter tests covering the new in-perimeter
-  paths and the new tripwire behavior:
-  - `aibox_lock_is_in_perimeter`
-  - `agents_md_is_in_perimeter`
-  - `processkit_install_destinations_are_in_perimeter` (5 paths)
-  - `processkit_templates_mirror_is_in_perimeter`
-  - `tripwire_does_not_fire_when_agents_md_is_created`
-  - `tripwire_fires_when_readme_is_created` (positive control)
-- Updated `all_known_sync_write_targets_are_in_perimeter` to include
-  the 9 new install-time write targets (aibox.lock, AGENTS.md, the
-  five context/ subtree samples, plus two templates/ samples).
+  Existing in-flight work in the container (open editors, running
+  processes) will be lost on recreation; project files under
+  /workspace are mounted from the host and survive.
+```
 
-`cargo audit`: clean.
-`cargo clippy --all-targets -- -D warnings`: clean.
+Best-effort: any failure to read runtime state is silently swallowed.
+
+## Addon UX
+
+### `[addons.X.tools]` populated with defaults at init time
+
+v0.16.2 wrote empty `[addons.python.tools]` sections — users had to
+know to uncomment the example block to get a working config. v0.16.3
+populates every selected addon's tools sub-table with all
+`default_enabled: true` tools at their `default_version`:
+
+```toml
+[addons.python.tools]
+python = { version = "3.13" }
+uv = { version = "0.7" }
+```
+
+### Interactive per-tool version picker
+
+After the addon MultiSelect, for every `default_enabled` tool with
+more than one entry in `supported_versions`, `aibox init` now prompts
+with a `dialoguer::Select`:
+
+```
+? python.python version › 3.13 (default)
+                          3.14
+                          3.12
+```
+
+Tools with a single supported version (e.g. `docusaurus = ["3"]`)
+get no prompt — silent default. Tools that aren't `default_enabled`
+are skipped entirely.
+
+### `--addon-tool` CLI flag
+
+New repeatable flag for scripted overrides. Format:
+`addon:tool=version`. Skips the interactive picker for that tool.
+
+```bash
+aibox init --addons python node \
+  --addon-tool python:python=3.14 \
+  --addon-tool python:uv=0.8 \
+  --addon-tool node:node=20
+```
+
+Parsed by a new pure helper `parse_addon_tool_override` with five
+unit tests covering happy path, dotted versions, missing equals,
+missing colon, and empty components.
+
+### Transitive addon dependencies are auto-resolved
+
+Selecting `docs-docusaurus` (which `requires: [node]`) without also
+selecting `node` used to error out at sync time with
+*"Addon 'docs-docusaurus' requires 'node' addon"*. v0.16.3 expands
+the `requires` graph transitively at both `aibox init` time AND
+`aibox addon add` time, prints a notice for each auto-added addon,
+and writes the complete addon set to `aibox.toml` so sync sees a
+valid graph from the start.
+
+The expansion is a pure helper (`expand_addon_requires`) shared
+between both call sites.
+
+## Privacy tier — DEC-030
+
+`.gitignore` generated by `aibox init` now includes a privacy tier
+rule (and `aibox sync` appends it to existing `.gitignore` files via
+the existing append-missing-entries path):
+
+```
+# ── Privacy tier (DEC-030) ──────────────────────────────────────────────
+# Any directory named `private` under context/ is never tracked.
+# Use this for personal notes, drafts, secrets, and per-user state.
+context/**/private/
+context/private/
+```
+
+The three-tier model formalised in **DEC-030** is:
+
+| Tier | Visible to | Mechanism |
+|---|---|---|
+| **public** | the world (git-tracked, on docs site, on GitHub) | default location, no marker |
+| **project-private** | anyone working on the project (git-tracked, not published) | default location under `context/`, no marker |
+| **user-private** | only the individual user (never git-tracked) | any directory named `private/` under `context/` |
+
+Mechanism is **directory-based**, not frontmatter-based, per the
+explicit owner preference: any directory named `private` anywhere
+under `context/` is excluded recursively. No new schema, no
+per-file markers, no parser required — every tool that walks the
+filesystem already understands directory names.
+
+A companion processkit issue (**`projectious-work/processkit#1`**)
+tracks the related processkit-side decisions:
+- Should processkit primitives carry an optional
+  `metadata.privacy: public | project | user` frontmatter field?
+- How does the docs-site build filter private subtrees?
+- For multi-user projects, do users get per-user
+  `context/private/<username>/` subdirectories?
+
+aibox owns the gitignore part; processkit owns the
+schema/docs/per-user parts.
+
+## Headless OAuth flows — DEC-031
+
+The base-debian image now ships a 40-line `xdg-open` shim at
+`/usr/local/bin/xdg-open`. Without it, every CLI tool that tries to
+launch a browser inside a container (`gh auth login`, git credential
+helpers, opencode, claude code device-flow) errors out with the
+confusing:
+
+```
+! Failed opening a web browser at https://github.com/login/device
+  exec: "xdg-open,x-www-browser,www-browser,wslview": executable
+  file not found in $PATH
+```
+
+The shim renders the URL with clear copy-to-host instructions and
+exits 0, so the calling tool thinks the browser opened and continues
+its OAuth polling loop. The user copies the URL into their host
+browser, authorises, returns to the container — auth completes
+normally.
+
+```
+
+  ┃ Headless container — no browser available here.
+  ┃ Open this URL in your host machine's browser:
+
+      https://github.com/login/device
+
+  (the calling tool is now waiting for you to authorize in the browser)
+
+```
+
+POSIX `/bin/sh`, no apt package, no `xdg-utils` install (which would
+trade one confusing error for another). Lands in the
+`ghcr.io/projectious-work/aibox:base-debian-v0.16.3` image — pulled
+during Phase 2 of this release.
+
+A future host-forwarding feature (forwarding `xdg-open` calls to the
+host's browser via `lemonade` or similar) is on the v0.17+ backlog;
+the shim is the universal baseline that the forwarder will fall back
+to when the host daemon isn't running.
+
+## Documentation
+
+`context/work-instructions/RELEASE-PROCESS.md` — the documented
+`gh auth refresh` command for Phase 2 was missing the `write:packages`
+scope. Hit by the v0.16.2 release. Fixed.
+
+## Quality gates
+
+- 454/454 tests pass (was 443 in v0.16.2) — 11 new tests:
+  - Addon: 9 (`parse_addon_tool_override` × 5,
+    `build_tool_overrides` × 2, `expand_addon_requires` × 2)
+  - Gitignore: 2 (`update_gitignore_creates_privacy_tier_rules`,
+    `ensure_aibox_entries_appends_privacy_tier_to_existing`)
+- `cargo clippy --all-targets -- -D warnings` clean
+- `cargo audit` clean
 
 ## Migration impact
 
-**Backwards compatible.** No config schema changes. Existing v0.16.1
-projects pick up the fixes on the next `aibox sync`. If you got stuck
-on the v0.16.1 tripwire, just upgrade to v0.16.2 and re-run sync.
+**Backwards compatible.** No config schema changes. No CLI breaking
+changes. Existing v0.16.2 projects pick up:
+
+- The `cmd_start` improved error message and `cmd_sync` stale-container
+  warning on the next CLI invocation.
+- The privacy gitignore rule on the next `aibox sync` (via the
+  existing append-missing-entries path).
+- The xdg-open shim on the next `aibox sync` after Phase 2 builds and
+  pushes the new base image.
+
+The addon UX improvements affect new `aibox init` runs only — they
+don't retroactively populate existing aibox.toml files (which already
+have the addons the user wanted, just possibly with empty tools
+sub-tables).
 
 ## Linked decisions
 
-- **DEC-029** — list_versions GitHub fallback + sync perimeter
-  catch-up (this release)
+- **DEC-031** — xdg-open shim in base image for headless OAuth flows
+- **DEC-030** — Three-tier privacy model: public / project-private /
+  user-private
+- **DEC-029** — list_versions GitHub fallback + sync perimeter catch-up
 - **DEC-028** — sync auto-installs processkit, init picks the version
-  (v0.16.1)
 - **DEC-027** — aibox v0.16.0: rip the bundled process layer
 - **DEC-026** — Cache-tracked processkit reference
 - **DEC-025** — Generic content-source release-asset fetcher
