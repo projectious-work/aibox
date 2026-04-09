@@ -89,13 +89,12 @@ ${bold}Development:${reset}
   test-visual              Run screencast smoke tests (~40s)
   record-docs              Regenerate all docs screencasts + README GIF
 
-${bold}Release cycle (run in order):${reset}
-  sync-processkit          [Step 0] Check for new processkit release; patch constants +
-                           show FORMAT.md diff; may require CLI changes before proceeding
-  test                     [Step 1] Verify code is clean (fmt, clippy, tests)
-  release <version>        [Step 2] Tag, build CLI binary, generate release prompt
-  release-host <version>   [Step 3, macOS] Build macOS binaries, upload to GH release,
-                           build + push images to GHCR
+${bold}Release:${reset}
+  sync-processkit          Check for new processkit release; patch constants + show diff
+                           (runs automatically inside 'release'; also available standalone)
+  release <version>        Sync processkit, test, tag, build CLI, generate release prompt
+  release-host <version>   Build macOS binaries, upload to GH release,
+                           build + push images to GHCR (run on macOS host)
 
 ${bold}Container (this project's dev-container):${reset}
   start                    Ensure running, then attach via zellij
@@ -467,7 +466,17 @@ cmd_release() {
     die "Tag ${tag} already exists."
   fi
 
-  # ── Step 2: Run tests ──────────────────────────────────────────────────────
+  # ── Step 2: Sync processkit ───────────────────────────────────────────────
+  # Check for a newer processkit release. Patches PROCESSKIT_DEFAULT_VERSION,
+  # shows the FORMAT.md diff, and aborts if the tree is dirty — forcing any
+  # required CLI changes to be made and committed before the build proceeds.
+  cmd_sync_processkit
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo ""
+    die "processkit_vocab.rs was updated. Review the diff, make any required CLI changes, commit, then re-run release."
+  fi
+
+  # ── Step 3: Run tests ──────────────────────────────────────────────────────
   info "Running tests..."
   cmd_test
 
