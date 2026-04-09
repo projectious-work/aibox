@@ -543,7 +543,12 @@ cmd_release() {
     "${built_archives[@]}"
   ok "GitHub release ${tag} created with Linux binaries"
 
-  # ── Step 7: Generate host-side prompt ────────────────────────────────────
+  # ── Step 7: Deploy documentation ─────────────────────────────────────────
+  info "Deploying documentation..."
+  cmd_docs_deploy
+  ok "Documentation deployed"
+
+  # ── Step 8: Generate host-side prompt ────────────────────────────────────
   # The macOS binaries and container image push must be done by the maintainer
   # on the macOS host (cross-compilation to Darwin is not possible from Linux;
   # container runtime is not available inside the devcontainer).
@@ -575,6 +580,7 @@ cmd_release() {
   for a in "${built_archives[@]}"; do
     echo "    $(basename "${a}")"
   done
+  echo "  Documentation: deployed to gh-pages"
   echo ""
   echo "  ${bold}Remaining (macOS host):${reset} ./scripts/maintain.sh release-host ${version}"
 }
