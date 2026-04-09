@@ -28,6 +28,7 @@ mod content_migration;
 #[allow(dead_code)]
 mod content_source;
 mod mcp_registration;
+mod processkit_vocab;
 mod reset;
 mod runtime;
 mod seed;

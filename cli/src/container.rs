@@ -1348,24 +1348,22 @@ mod tests {
         // it alone. The user has explicitly opted out by typing "unset".
         assert!(!sync_should_install_processkit(
             crate::config::PROCESSKIT_VERSION_UNSET,
-            "https://github.com/projectious-work/processkit.git",
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
             None,
         ));
         assert!(!sync_should_install_processkit(
             crate::config::PROCESSKIT_VERSION_UNSET,
-            "https://github.com/projectious-work/processkit.git",
-            Some(("https://github.com/projectious-work/processkit.git", "v0.5.1")),
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
         ));
     }
 
     #[test]
     fn sync_install_runs_when_version_pinned_and_no_lock() {
-        // The reported bug: `aibox init` left version="unset", user edited
-        // aibox.toml to v0.5.1, ran `aibox sync`, nothing happened. Fix:
-        // sync must auto-install when there's no lock yet.
+        // User pinned a real version but no lock exists yet — sync must install.
         assert!(sync_should_install_processkit(
-            "v0.5.1",
-            "https://github.com/projectious-work/processkit.git",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
             None,
         ));
     }
@@ -1376,20 +1374,20 @@ mod tests {
         // sync should NOT re-install. The downstream three-way diff path
         // handles drift detection from here on.
         assert!(!sync_should_install_processkit(
-            "v0.5.1",
-            "https://github.com/projectious-work/processkit.git",
-            Some(("https://github.com/projectious-work/processkit.git", "v0.5.1")),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
         ));
     }
 
     #[test]
     fn sync_install_runs_when_lock_version_stale() {
-        // User bumped processkit.version in aibox.toml from v0.5.0 → v0.5.1.
+        // User bumped processkit.version in aibox.toml from v0.5.1 → v0.6.0.
         // Sync must re-install so the new version's content lands.
         assert!(sync_should_install_processkit(
-            "v0.5.1",
-            "https://github.com/projectious-work/processkit.git",
-            Some(("https://github.com/projectious-work/processkit.git", "v0.5.0")),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, "v0.5.1")),
         ));
     }
 
@@ -1399,9 +1397,9 @@ mod tests {
         // Sync must re-install from the new source even if the version tag
         // happens to match.
         assert!(sync_should_install_processkit(
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             "https://github.com/acme/processkit-acme.git",
-            Some(("https://github.com/projectious-work/processkit.git", "v0.5.1")),
+            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
         ));
     }
 

@@ -605,7 +605,7 @@ runtime: |
             .get_attr("tools").unwrap()
             .get_attr("mytool").unwrap()
             .get_attr("pinned").unwrap();
-        assert_eq!(pinned.is_true(), false, "pinned should be false for 'latest'");
+        assert!(!pinned.is_true(), "pinned should be false for 'latest'");
     }
 
     #[test]

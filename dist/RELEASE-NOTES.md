@@ -1,74 +1,32 @@
-# aibox v0.17.0 — generalised lock file absorbs .aibox-version (DEC-037)
+# aibox v0.17.2
 
-`aibox.lock` is now the single source of truth for both the CLI version that
-last touched a project **and** the pinned processkit content. The legacy
-`.aibox-version` file is deleted on first `aibox sync` (hard-cut, idempotent).
+## What's new
 
-## What changed
+### processkit v0.6.0 compatibility
 
-### Sectioned lock format (`[aibox]` + `[processkit]`)
+aibox is now fully aligned with processkit v0.6.0:
 
-`aibox.lock` gains a two-section TOML shape:
+- **`core: true` skill enforcement** — skills marked `metadata.processkit.core: true` (e.g. `skill-finder`) are installed unconditionally regardless of `[skills].include`/`[skills].exclude`. `aibox doctor` warns when a core skill appears in your exclude list.
+- **Updated default version** — `PROCESSKIT_DEFAULT_VERSION` bumped to `v0.6.0` across all test fixtures and documentation.
 
-```toml
-[aibox]
-cli_version = "0.17.0"
-synced_at   = "2026-04-08T16:42:00Z"
+### Central constants module (`processkit_vocab.rs`)
 
-[processkit]
-source               = "https://github.com/projectious-work/processkit.git"
-version              = "v0.5.1"
-src_path             = "src"
-resolved_commit      = "abc123def456"
-installed_at         = "2026-04-08T16:42:00Z"
-```
+All processkit-related compile-time vocabulary is now consolidated in a single module:
 
-The former flat shape (all processkit fields at top level, no `[aibox]`
-section) is auto-upgraded on first read — no manual migration needed.
+- Path constants: `TEMPLATES_PROCESSKIT_DIR`, `LIVE_SKILLS_DIR`, `LIVE_SCHEMAS_DIR`, `LIVE_STATE_MACHINES_DIR`, `LIVE_PROCESSES_DIR`, `LIVE_LIB_DIR`
+- Filename constants: `SKILL_FILENAME`, `PROVENANCE_FILENAME`, `FORMAT_FILENAME`, `INDEX_FILENAME`, `AGENTS_FILENAME`
+- Source tree segments: `processkit_vocab::src::{SKILLS, PRIMITIVES, SCHEMAS, STATE_MACHINES, PROCESSES, LIB, SCAFFOLDING, PACKAGES}`
+- URL constant: `PROCESSKIT_GIT_SOURCE`
+- Category vocabulary: `CATEGORY_ORDER`, `category_sort_index()`
+- Shared frontmatter types: `SkillFrontmatter`, `SkillProcesskitMeta` (with `core: bool`), `parse_skill_frontmatter()`
 
-### One-time hard-cut migration
+All production code that previously embedded these as string/numeric literals now references the central constants. This eliminates an entire class of copy-paste drift bugs.
 
-`aibox sync` now calls `migrate_legacy_lock_files` as its first step:
+### Docs trimmed to aibox's perimeter
 
-1. If `.aibox-version` is present, `aibox.lock` is read (and upgraded in
-   memory if it is still in the flat shape), written back in the new
-   sectioned format, and `.aibox-version` is deleted.
-2. If `.aibox-version` is absent, the step is a no-op.
+Skill and process documentation that belongs to processkit's domain has been removed from the aibox docs site. The skills and process-packages pages now point to the upstream processkit docs (placeholder link, pending processkit doc-site launch) rather than duplicating content that processkit owns.
 
-### `.aibox-version` removed from all aibox-owned surfaces
+## Upgrade notes
 
-| Surface | Change |
-|---|---|
-| `aibox init` | No longer writes `.aibox-version` |
-| `.gitignore` (generated) | Entry removed from aibox section |
-| `aibox doctor` | Reads `aibox.lock [aibox].cli_version` instead |
-| `aibox doctor expected_files` | Now checks `aibox.lock` (not `.aibox-version`) |
-| `aibox reset` / backup | `aibox.lock` is now in managed items; `.aibox-version` kept as legacy cleanup |
-| Sync perimeter | `.aibox-version` removed; `aibox.lock` was already present |
-| Migration doc rollback snippet | Updated from `.aibox-version` to `aibox.lock` |
-
-### Also in this release
-
-Vim insert-mode word-movement bindings in the seeded vimrc:
-
-- `Alt-Left` → move to previous word beginning (VSCode-style)
-- `Alt-Right` → move to next word end
-- `Home` → smart home (first non-blank vs column 0 toggle)
-
-Zellij `ai-layout` horizontal split changed from 53/47 to **50/50**.
-
-## Upgrading
-
-Run `aibox sync` once. You will see:
-
-```
-✓ Migrated: .aibox-version absorbed into aibox.lock
-```
-
-After that `.aibox-version` is gone and `aibox.lock` holds everything.
-
-## Breaking changes
-
-None for existing projects — migration is automatic. Projects consuming aibox
-as a library should update any code that read `.aibox-version` directly to
-read `aibox.lock [aibox].cli_version` instead.
+- Run `aibox sync` after upgrading to pick up changes
+- If you are a processkit consumer: pin `[processkit].version = "v0.6.0"` in your `aibox.toml` and run `aibox sync` to install the v0.6.0 content set (sharded entities, privacy controls, sqlite index, `skill-finder` as a core skill)

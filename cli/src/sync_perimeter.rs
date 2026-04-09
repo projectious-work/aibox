@@ -60,8 +60,8 @@
 //! - `context/BACKLOG.md`, `context/DECISIONS.md`, `context/PRD.md`,
 //!   `context/PROJECTS.md`, `context/STANDUPS.md`, `context/OWNER.md`,
 //!   `context/work-instructions/` (these are user-authored or owned by
-//!   processkit *single-file* skills like `backlog-context` /
-//!   `decisions-adr` which write them on first use, not by aibox sync)
+//!   processkit skills like `workitem-management` / `decision-record`
+//!   which write them on first use, not by aibox sync)
 //! - `.claude/`, `.gemini/`, any other provider directory
 //! - `.gitignore` (created by `aibox init`; sync never edits it)
 //!
@@ -89,6 +89,8 @@ use std::fs;
 use std::path::{Component, Path, PathBuf};
 use std::time::SystemTime;
 
+use crate::processkit_vocab::AGENTS_FILENAME;
+
 /// The complete list of project-root-relative path prefixes that
 /// `aibox sync` is allowed to create, modify, or delete. Each entry is
 /// either a literal file path or a directory path ending in `/`. A
@@ -114,7 +116,7 @@ pub const SYNC_PERIMETER: &[&str] = &[
     ".devcontainer/docker-compose.yml",
     ".devcontainer/devcontainer.json",
     // ── Canonical agent entrypoint (installed by processkit; v0.16.1+) ──
-    "AGENTS.md",
+    AGENTS_FILENAME,
     // ── processkit live install destinations (v0.16.1+ sync auto-install) ─
     "context/skills/",
     "context/schemas/",
@@ -266,8 +268,8 @@ const TRIPWIRE_SENTINELS: &[&str] = &[
     "CHANGELOG.md",
     ".gitignore",
     // Top-level user-owned context files (product process). Not
-    // sync-managed: created by user or by processkit single-file skills
-    // (backlog-context, decisions-adr, …) on first use, not by sync.
+    // sync-managed: created by user or by processkit skills
+    // (workitem-management, decision-record, …) on first use, not by sync.
     "context/BACKLOG.md",
     "context/DECISIONS.md",
     "context/PRD.md",
@@ -439,8 +441,8 @@ mod tests {
         // context/templates/processkit/<version>/ and is the baseline
         // the three-way diff compares against.
         assert!(within("context/templates"));
-        assert!(within("context/templates/processkit/v0.5.1/skills/event-log/SKILL.md"));
-        assert!(within("context/templates/processkit/v0.5.1/PROVENANCE.toml"));
+        assert!(within("context/templates/processkit/v0.6.0/skills/event-log/SKILL.md"));
+        assert!(within("context/templates/processkit/v0.6.0/PROVENANCE.toml"));
     }
 
     // -- Files explicitly OUT of perimeter ---------------------------------
@@ -623,8 +625,8 @@ mod tests {
             "context/schemas/workitem.yaml",
             "context/state-machines/workitem.yaml",
             "context/processes/release.md",
-            "context/templates/processkit/v0.5.1/PROVENANCE.toml",
-            "context/templates/processkit/v0.5.1/skills/event-log/SKILL.md",
+            "context/templates/processkit/v0.6.0/PROVENANCE.toml",
+            "context/templates/processkit/v0.6.0/skills/event-log/SKILL.md",
             // mcp_registration::regenerate_mcp_configs (v0.16.5+ DEC-033)
             ".mcp.json",
             ".cursor/mcp.json",

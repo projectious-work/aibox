@@ -53,6 +53,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{AiProvider, AiboxConfig};
 use crate::output;
+use crate::processkit_vocab::TEMPLATES_PROCESSKIT_DIR;
 
 // ---------------------------------------------------------------------------
 // Spec types
@@ -122,7 +123,7 @@ pub fn collect_processkit_mcp_specs(
         return Ok(Vec::new());
     }
     let mirror_skills_dir = project_root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(processkit_version)
         .join("skills");
     if !mirror_skills_dir.is_dir() {
@@ -599,7 +600,7 @@ mod tests {
         json_body: &str,
     ) -> PathBuf {
         let dir = mirror_root
-            .join("context/templates/processkit")
+            .join(crate::processkit_vocab::TEMPLATES_PROCESSKIT_DIR)
             .join(version)
             .join("skills")
             .join(skill)
@@ -627,7 +628,7 @@ mod tests {
     #[test]
     fn collect_returns_empty_when_mirror_missing() {
         let tmp = TempDir::new().unwrap();
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         assert!(specs.is_empty());
     }
 
@@ -645,7 +646,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_skill_mcp(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             "workitem-management", // <-- directory name (unprefixed)
             r#"{
                 "mcpServers": {
@@ -657,7 +658,7 @@ mod tests {
             }"#,
         );
 
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         assert_eq!(specs.len(), 1);
         // The spec name MUST be the JSON key (prefixed), not the
         // directory name (unprefixed).
@@ -682,7 +683,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_skill_mcp(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             "workitem-management",
             r#"{
                 "mcpServers": {
@@ -693,7 +694,7 @@ mod tests {
                 }
             }"#,
         );
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         assert_eq!(specs.len(), 1);
         assert_eq!(specs[0].name, "workitem-management");
         assert_eq!(specs[0].command, "uv");
@@ -706,7 +707,7 @@ mod tests {
         for skill in &["scope-management", "decision-record", "workitem-management"] {
             write_synth_skill_mcp(
                 tmp.path(),
-                "v0.5.1",
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
                 skill,
                 &format!(
                     r#"{{"mcpServers":{{"{}":{{"command":"uv","args":[]}}}}}}"#,
@@ -714,7 +715,7 @@ mod tests {
                 ),
             );
         }
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
         assert_eq!(
             names,
@@ -727,18 +728,20 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_skill_mcp(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             "workitem-management",
             r#"{"mcpServers":{"workitem-management":{"command":"uv","args":[]}}}"#,
         );
         // Skill with no mcp/ subdirectory.
         let docs_only_skill = tmp
             .path()
-            .join("context/templates/processkit/v0.5.1/skills/code-review");
+            .join(crate::processkit_vocab::TEMPLATES_PROCESSKIT_DIR)
+            .join(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)
+            .join("skills/code-review");
         fs::create_dir_all(&docs_only_skill).unwrap();
         fs::write(docs_only_skill.join("SKILL.md"), "# code review\n").unwrap();
 
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         assert_eq!(specs.len(), 1);
         assert_eq!(specs[0].name, "workitem-management");
     }
@@ -749,7 +752,7 @@ mod tests {
         for skill in &["workitem-management", "decision-record", "scope-management"] {
             write_synth_skill_mcp(
                 tmp.path(),
-                "v0.5.1",
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
                 skill,
                 &format!(
                     r#"{{"mcpServers":{{"{}":{{"command":"uv","args":[]}}}}}}"#,
@@ -760,7 +763,7 @@ mod tests {
         let mut filter = HashSet::new();
         filter.insert("workitem-management".to_string());
         filter.insert("scope-management".to_string());
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", Some(&filter)).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, Some(&filter)).unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
         assert_eq!(names, vec!["scope-management", "workitem-management"]);
     }
@@ -771,10 +774,12 @@ mod tests {
         // _lib is the shared processkit Python lib, not a real skill.
         let lib = tmp
             .path()
-            .join("context/templates/processkit/v0.5.1/skills/_lib/processkit");
+            .join(crate::processkit_vocab::TEMPLATES_PROCESSKIT_DIR)
+            .join(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)
+            .join("skills/_lib/processkit");
         fs::create_dir_all(&lib).unwrap();
         fs::write(lib.join("entity.py"), "x = 1\n").unwrap();
-        let specs = collect_processkit_mcp_specs(tmp.path(), "v0.5.1", None).unwrap();
+        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
         assert!(specs.is_empty());
     }
 

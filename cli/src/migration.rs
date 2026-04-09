@@ -280,6 +280,10 @@ with v{to}.
 /// don't yet have one. The content is intentionally a string literal (not
 /// generated from `ProcessKitSection::default()`) so this migration is stable
 /// and reviewable as a fixture.
+///
+/// NOTE: the source URL here must match `crate::processkit_vocab::PROCESSKIT_GIT_SOURCE`.
+/// Rust's `concat!` macro does not accept non-literal `const` values, so we
+/// cannot embed the constant directly. Update both places together.
 const DEFAULT_PROCESSKIT_BLOCK: &str = "\
 # =============================================================================
 # [processkit] — content layer source (skills, primitives, processes)

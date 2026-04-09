@@ -13,23 +13,27 @@
 //! | Schemas | `context/schemas/<name>.yaml` | `context/templates/processkit/<version>/primitives/schemas/<name>.yaml` |
 //! | State machines | `context/state-machines/<name>.yaml` | `context/templates/processkit/<version>/primitives/state-machines/<name>.yaml` |
 //!
-//! ## Category vocabulary (processkit v0.5+)
+//! ## Category vocabulary
 //!
 //! Skills carry `metadata.processkit.category` in their YAML frontmatter.
-//! 14 values: `process`, `meta`, `design`, `language`, `infrastructure`,
-//! `data`, `architecture`, `ai`, `security`, `framework`, `observability`,
-//! `database`, `api`, `performance`.
+//! The 14 valid values and their canonical display order are defined in
+//! [`crate::processkit_vocab::CATEGORY_ORDER`].
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::cli::OutputFormat;
 use crate::config::AiboxConfig;
 use crate::lock;
 use crate::output;
+use crate::processkit_vocab::{
+    self as processkit_vocab, parse_skill_frontmatter,
+    DESCRIPTION_DISPLAY_MAX, INDEX_FILENAME, LIVE_PROCESSES_DIR, LIVE_SCHEMAS_DIR,
+    LIVE_SKILLS_DIR, LIVE_STATE_MACHINES_DIR, SKILL_FILENAME, TEMPLATES_PROCESSKIT_DIR,
+};
 
 // ---------------------------------------------------------------------------
 // Path helpers
@@ -55,9 +59,9 @@ fn templates_skills_dir(root: &Path) -> Option<PathBuf> {
     let lock = lock::read_lock(root).ok()??;
     let pk = lock.processkit?;
     let dir = root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(&pk.version)
-        .join("skills");
+        .join(processkit_vocab::src::SKILLS);
     if dir.is_dir() { Some(dir) } else { None }
 }
 
@@ -65,62 +69,13 @@ fn templates_processes_dir(root: &Path) -> Option<PathBuf> {
     let lock = lock::read_lock(root).ok()??;
     let pk = lock.processkit?;
     let dir = root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(&pk.version)
-        .join("processes");
+        .join(processkit_vocab::src::PROCESSES);
     if dir.is_dir() { Some(dir) } else { None }
 }
 
-// ---------------------------------------------------------------------------
-// Frontmatter parsing
-// ---------------------------------------------------------------------------
-
-/// Parsed YAML frontmatter from a processkit SKILL.md file.
-#[derive(Debug, Clone, Deserialize, Default)]
-struct SkillFrontmatter {
-    #[serde(default)]
-    pub name: String,
-    #[serde(default)]
-    pub description: String,
-    #[serde(default)]
-    pub metadata: Option<SkillMetadata>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-struct SkillMetadata {
-    pub processkit: Option<SkillProcesskitMeta>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-struct SkillProcesskitMeta {
-    #[serde(default)]
-    pub category: String,
-    #[serde(default)]
-    pub version: String,
-}
-
-/// Parse YAML frontmatter from a markdown file (between the first two `---` fences).
-/// Returns an empty `SkillFrontmatter` if no frontmatter is found.
-fn parse_frontmatter(path: &Path) -> Result<SkillFrontmatter> {
-    let content = std::fs::read_to_string(path)
-        .with_context(|| format!("failed to read {}", path.display()))?;
-
-    // Find `---` fences
-    let mut lines = content.lines();
-    if lines.next().map(str::trim) != Some("---") {
-        return Ok(SkillFrontmatter::default());
-    }
-
-    let yaml_block: String = lines
-        .take_while(|l| l.trim() != "---")
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let fm: SkillFrontmatter = serde_yaml::from_str(&yaml_block)
-        .unwrap_or_default();
-
-    Ok(fm)
-}
+// Frontmatter parsing is provided by crate::processkit_vocab::parse_skill_frontmatter.
 
 // ---------------------------------------------------------------------------
 // Skill discovery
@@ -150,7 +105,7 @@ fn walk_skills_dir(dir: &Path, installed_names: &std::collections::HashSet<Strin
         if !path.is_dir() {
             continue;
         }
-        let skill_file = path.join("SKILL.md");
+        let skill_file = path.join(SKILL_FILENAME);
         if !skill_file.exists() {
             continue;
         }
@@ -166,31 +121,26 @@ fn walk_skills_dir(dir: &Path, installed_names: &std::collections::HashSet<Strin
             continue;
         }
 
-        let fm = parse_frontmatter(&skill_file).unwrap_or_default();
+        let fm = parse_skill_frontmatter(&skill_file).unwrap_or_default();
 
         // Use directory name as fallback for `name` when frontmatter is absent/empty.
+        // Compute category and description before consuming fm.name.
+        let category = fm.category().to_string();
+        let description = fm.description.clone();
         let name = if fm.name.is_empty() { dir_name.clone() } else { fm.name };
-        let category = fm
-            .metadata
-            .as_ref()
-            .and_then(|m| m.processkit.as_ref())
-            .map(|p| p.category.clone())
-            .filter(|c| !c.is_empty())
-            .unwrap_or_else(|| "uncategorized".to_string());
-
         let installed = installed_names.contains(&dir_name);
 
         skills.push(SkillEntry {
             name,
-            description: fm.description,
+            description,
             category,
             installed,
         });
     }
 
     skills.sort_by(|a, b| {
-        category_order(&a.category)
-            .cmp(&category_order(&b.category))
+        processkit_vocab::category_sort_index(&a.category)
+            .cmp(&processkit_vocab::category_sort_index(&b.category))
             .then(a.name.cmp(&b.name))
     });
 
@@ -199,7 +149,7 @@ fn walk_skills_dir(dir: &Path, installed_names: &std::collections::HashSet<Strin
 
 /// Collect the set of skill directory names present in `context/skills/`.
 fn installed_skill_names(root: &Path) -> std::collections::HashSet<String> {
-    let dir = root.join("context/skills");
+    let dir = root.join(LIVE_SKILLS_DIR);
     if !dir.is_dir() {
         return std::collections::HashSet::new();
     }
@@ -209,7 +159,7 @@ fn installed_skill_names(root: &Path) -> std::collections::HashSet<String> {
         .flatten()
         .filter(|e| {
             e.path().is_dir()
-                && e.path().join("SKILL.md").exists()
+                && e.path().join(SKILL_FILENAME).exists()
                 && !e
                     .file_name()
                     .to_str()
@@ -218,27 +168,6 @@ fn installed_skill_names(root: &Path) -> std::collections::HashSet<String> {
         })
         .filter_map(|e| e.file_name().to_str().map(|s| s.to_string()))
         .collect()
-}
-
-/// Canonical sort order for the 14-value processkit category vocabulary.
-fn category_order(cat: &str) -> usize {
-    match cat {
-        "process" => 0,
-        "meta" => 1,
-        "architecture" => 2,
-        "language" => 3,
-        "framework" => 4,
-        "ai" => 5,
-        "data" => 6,
-        "infrastructure" => 7,
-        "database" => 8,
-        "api" => 9,
-        "security" => 10,
-        "observability" => 11,
-        "design" => 12,
-        "performance" => 13,
-        _ => 99,
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -282,7 +211,7 @@ fn walk_processes_dir(dir: &Path, installed_names: &std::collections::HashSet<St
 }
 
 fn installed_process_names(root: &Path) -> std::collections::HashSet<String> {
-    let dir = root.join("context/processes");
+    let dir = root.join(LIVE_PROCESSES_DIR);
     if !dir.is_dir() {
         return std::collections::HashSet::new();
     }
@@ -292,7 +221,7 @@ fn installed_process_names(root: &Path) -> std::collections::HashSet<String> {
         .flatten()
         .filter(|e| {
             e.path().extension().and_then(|x| x.to_str()) == Some("md")
-                && e.file_name().to_str().map(|n| n != "INDEX.md").unwrap_or(false)
+                && e.file_name().to_str().map(|n| n != INDEX_FILENAME).unwrap_or(false)
         })
         .filter_map(|e| {
             e.path()
@@ -347,8 +276,8 @@ fn collect_schema_entries(root: &Path) -> Vec<SchemaEntry> {
     let mut entries = Vec::new();
 
     for (dir, kind) in [
-        (root.join("context/schemas"), "schema"),
-        (root.join("context/state-machines"), "state-machine"),
+        (root.join(LIVE_SCHEMAS_DIR), "schema"),
+        (root.join(LIVE_STATE_MACHINES_DIR), "state-machine"),
     ] {
         if !dir.is_dir() {
             continue;
@@ -392,7 +321,7 @@ pub fn cmd_kit_list(config_path: &Option<String>, format: OutputFormat) -> Resul
     let available_skills = templates_skills_dir(&root).as_deref().and_then(|d| {
         std::fs::read_dir(d).ok().map(|entries| {
             entries.flatten()
-                .filter(|e| e.path().is_dir() && e.path().join("SKILL.md").exists()
+                .filter(|e| e.path().is_dir() && e.path().join(SKILL_FILENAME).exists()
                     && !e.file_name().to_str().map(|n| n.starts_with('_')).unwrap_or(false))
                 .count()
         })
@@ -402,7 +331,7 @@ pub fn cmd_kit_list(config_path: &Option<String>, format: OutputFormat) -> Resul
             entries.flatten()
                 .filter(|e| {
                     e.path().extension().and_then(|x| x.to_str()) == Some("md")
-                        && e.file_name().to_str().map(|n| n != "INDEX.md").unwrap_or(false)
+                        && e.file_name().to_str().map(|n| n != INDEX_FILENAME).unwrap_or(false)
                 })
                 .count()
         })
@@ -471,11 +400,11 @@ pub fn cmd_kit_skill_list(
                      pinned processkit version first.",
                 );
                 // Fall back to installed only
-                walk_skills_dir(&root.join("context/skills"), &installed_names)
+                walk_skills_dir(&root.join(LIVE_SKILLS_DIR), &installed_names)
             }
         }
     } else {
-        walk_skills_dir(&root.join("context/skills"), &installed_names)
+        walk_skills_dir(&root.join(LIVE_SKILLS_DIR), &installed_names)
     };
 
     let skills: Vec<&SkillEntry> = if let Some(cat) = filter_category {
@@ -503,7 +432,7 @@ pub fn cmd_kit_skill_list(
             }
 
             let name_w = skills.iter().map(|s| s.name.len()).max().unwrap_or(5).max(5);
-            let desc_w = skills.iter().map(|s| s.description.len().min(60)).max().unwrap_or(11).max(11);
+            let desc_w = skills.iter().map(|s| s.description.len().min(DESCRIPTION_DISPLAY_MAX)).max().unwrap_or(11).max(11);
 
             let mut cur_cat = "";
             for s in &skills {
@@ -517,8 +446,8 @@ pub fn cmd_kit_skill_list(
                     }
                     cur_cat = &s.category;
                 }
-                let desc_trunc: String = s.description.chars().take(60).collect();
-                let desc_display = if s.description.len() > 60 {
+                let desc_trunc: String = s.description.chars().take(DESCRIPTION_DISPLAY_MAX).collect();
+                let desc_display = if s.description.len() > DESCRIPTION_DISPLAY_MAX {
                     format!("{}…", desc_trunc)
                 } else {
                     s.description.clone()
@@ -544,7 +473,7 @@ pub fn cmd_kit_skill_categories(config_path: &Option<String>, format: OutputForm
     // Use templates mirror if available for full picture; fall back to installed
     let skills = match templates_skills_dir(&root) {
         Some(ref tmpl_dir) => walk_skills_dir(tmpl_dir, &installed_names),
-        None => walk_skills_dir(&root.join("context/skills"), &installed_names),
+        None => walk_skills_dir(&root.join(LIVE_SKILLS_DIR), &installed_names),
     };
 
     // Aggregate: category → (total, installed)
@@ -560,7 +489,10 @@ pub fn cmd_kit_skill_categories(config_path: &Option<String>, format: OutputForm
         .into_iter()
         .map(|(cat, (total, inst))| (cat, total, inst))
         .collect();
-    rows.sort_by(|a, b| category_order(&a.0).cmp(&category_order(&b.0)));
+    rows.sort_by(|a, b| {
+        processkit_vocab::category_sort_index(&a.0)
+            .cmp(&processkit_vocab::category_sort_index(&b.0))
+    });
 
     #[derive(Serialize)]
     struct CatRow {
@@ -595,8 +527,8 @@ pub fn cmd_kit_skill_info(config_path: &Option<String>, name: &str, format: Outp
     let installed_names = installed_skill_names(&root);
 
     // Try live install first, then templates mirror
-    let skill_file = root.join("context/skills").join(name).join("SKILL.md");
-    let tmpl_file = templates_skills_dir(&root).map(|d| d.join(name).join("SKILL.md"));
+    let skill_file = root.join(LIVE_SKILLS_DIR).join(name).join(SKILL_FILENAME);
+    let tmpl_file = templates_skills_dir(&root).map(|d| d.join(name).join(SKILL_FILENAME));
 
     let (path, installed) = if skill_file.exists() {
         (skill_file, true)
@@ -616,18 +548,10 @@ pub fn cmd_kit_skill_info(config_path: &Option<String>, name: &str, format: Outp
         );
     };
 
-    let fm = parse_frontmatter(&path)?;
-    let category = fm
-        .metadata
-        .as_ref()
-        .and_then(|m| m.processkit.as_ref())
-        .map(|p| p.category.clone())
-        .filter(|c| !c.is_empty())
-        .unwrap_or_else(|| "uncategorized".to_string());
+    let fm = parse_skill_frontmatter(&path)?;
+    let category = fm.category().to_string();
     let version = fm
-        .metadata
-        .as_ref()
-        .and_then(|m| m.processkit.as_ref())
+        .processkit_meta()
         .map(|p| p.version.clone())
         .filter(|v| !v.is_empty())
         .unwrap_or_default();
@@ -811,11 +735,11 @@ pub fn cmd_kit_process_list(
                     "No templates mirror found. Run 'aibox init' or 'aibox sync' with a \
                      pinned processkit version first.",
                 );
-                walk_processes_dir(&root.join("context/processes"), &installed_names)
+                walk_processes_dir(&root.join(LIVE_PROCESSES_DIR), &installed_names)
             }
         }
     } else {
-        walk_processes_dir(&root.join("context/processes"), &installed_names)
+        walk_processes_dir(&root.join(LIVE_PROCESSES_DIR), &installed_names)
     };
 
     match format {
@@ -827,15 +751,15 @@ pub fn cmd_kit_process_list(
                 return Ok(());
             }
             let name_w = processes.iter().map(|p| p.name.len()).max().unwrap_or(5).max(5);
-            let desc_w = processes.iter().map(|p| p.description.len().min(60)).max().unwrap_or(11).max(11);
+            let desc_w = processes.iter().map(|p| p.description.len().min(DESCRIPTION_DISPLAY_MAX)).max().unwrap_or(11).max(11);
             if all {
                 println!("  {:<nw$}  {:<dw$}  STATUS", "PROCESS", "DESCRIPTION", nw = name_w, dw = desc_w);
             } else {
                 println!("  {:<nw$}  {:<dw$}", "PROCESS", "DESCRIPTION", nw = name_w, dw = desc_w);
             }
             for p in &processes {
-                let desc_trunc: String = p.description.chars().take(60).collect();
-                let desc_display = if p.description.len() > 60 { format!("{}…", desc_trunc) } else { p.description.clone() };
+                let desc_trunc: String = p.description.chars().take(DESCRIPTION_DISPLAY_MAX).collect();
+                let desc_display = if p.description.len() > DESCRIPTION_DISPLAY_MAX { format!("{}…", desc_trunc) } else { p.description.clone() };
                 if all {
                     let status = if p.installed { "installed" } else { "available" };
                     println!("  {:<nw$}  {:<dw$}  {}", p.name, desc_display, status, nw = name_w, dw = desc_w);
@@ -853,7 +777,7 @@ pub fn cmd_kit_process_list(
 pub fn cmd_kit_process_info(config_path: &Option<String>, name: &str, format: OutputFormat) -> Result<()> {
     let root = project_root(config_path);
 
-    let live_file = root.join("context/processes").join(format!("{}.md", name));
+    let live_file = root.join(LIVE_PROCESSES_DIR).join(format!("{}.md", name));
     let tmpl_file = templates_processes_dir(&root).map(|d| d.join(format!("{}.md", name)));
 
     let (path, installed) = if live_file.exists() {

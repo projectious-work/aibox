@@ -498,7 +498,7 @@ pub struct ProcessKitSection {
 }
 
 fn default_processkit_source() -> String {
-    "https://github.com/projectious-work/processkit.git".to_string()
+    crate::processkit_vocab::PROCESSKIT_GIT_SOURCE.to_string()
 }
 
 fn default_processkit_version() -> String {
@@ -569,7 +569,7 @@ pub struct AgentsSection {
 }
 
 fn default_agents_canonical() -> String {
-    "AGENTS.md".to_string()
+    crate::processkit_vocab::AGENTS_FILENAME.to_string()
 }
 
 impl Default for AgentsSection {
@@ -1699,10 +1699,7 @@ theme = "{input}"
     #[test]
     fn processkit_section_default_values() {
         let pk = ProcessKitSection::default();
-        assert_eq!(
-            pk.source,
-            "https://github.com/projectious-work/processkit.git"
-        );
+        assert_eq!(pk.source, crate::processkit_vocab::PROCESSKIT_GIT_SOURCE);
         assert_eq!(pk.version, "unset");
         assert_eq!(pk.src_path, "src");
         assert_eq!(pk.branch, None);

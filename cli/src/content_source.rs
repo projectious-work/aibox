@@ -73,6 +73,7 @@ use std::process::Command;
 
 use crate::config::PROCESSKIT_VERSION_UNSET;
 use crate::output;
+use crate::processkit_vocab::PROVENANCE_FILENAME;
 
 /// Result of a successful fetch.
 #[derive(Debug, Clone)]
@@ -663,7 +664,7 @@ fn read_marker(path: &Path) -> (Option<String>, Option<String>) {
 /// Sanity-check that a fetched cache contains the expected shape.
 /// Returns `Ok(())` if `<cache_root>/<src_path>/PROVENANCE.toml` exists.
 pub fn validate_cache(cache_root: &Path, src_path: &str) -> Result<()> {
-    let provenance = cache_root.join(src_path).join("PROVENANCE.toml");
+    let provenance = cache_root.join(src_path).join(PROVENANCE_FILENAME);
     if !provenance.exists() {
         bail!(
             "fetched source does not have the expected shape (missing {}). \
@@ -689,11 +690,11 @@ pub fn validate_cache(cache_root: &Path, src_path: &str) -> Result<()> {
 pub fn resolve_src_path(cache_root: &Path, src_path: &str) -> Result<PathBuf> {
     // Wrapped layout — check first because it's the historical default.
     let wrapped = cache_root.join(src_path);
-    if wrapped.join("PROVENANCE.toml").exists() {
+    if wrapped.join(PROVENANCE_FILENAME).exists() {
         return Ok(wrapped);
     }
     // Flat layout — release asset where the tarball top level IS the src.
-    if cache_root.join("PROVENANCE.toml").exists() {
+    if cache_root.join(PROVENANCE_FILENAME).exists() {
         return Ok(cache_root.to_path_buf());
     }
     bail!(
@@ -1168,7 +1169,7 @@ mod tests {
     #[test]
     fn cache_dir_parses_github_https_url() {
         let p = cache_dir(
-            "https://github.com/projectious-work/processkit.git",
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
             "v0.4.0",
         )
         .unwrap();
@@ -1243,8 +1244,8 @@ mod tests {
     #[test]
     fn release_asset_url_default_template_github() {
         let url = build_release_asset_url(
-            "https://github.com/projectious-work/processkit.git",
-            &parsed_for("https://github.com/projectious-work/processkit.git"),
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+            &parsed_for(crate::processkit_vocab::PROCESSKIT_GIT_SOURCE),
             "v0.5.1",
             None,
         )
@@ -1420,7 +1421,7 @@ mod tests {
     #[test]
     fn resolve_src_path_flat_layout() {
         let tmp = TempDir::new().unwrap();
-        fs::write(tmp.path().join("PROVENANCE.toml"), "v\n").unwrap();
+        fs::write(tmp.path().join(PROVENANCE_FILENAME), "v\n").unwrap();
         // Even with src_path = "src" requested, a flat layout is detected.
         let resolved = resolve_src_path(tmp.path(), "src").unwrap();
         assert_eq!(resolved, tmp.path().to_path_buf());
@@ -1433,7 +1434,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         fs::create_dir_all(tmp.path().join("src")).unwrap();
         fs::write(tmp.path().join("src/PROVENANCE.toml"), "wrapped\n").unwrap();
-        fs::write(tmp.path().join("PROVENANCE.toml"), "flat\n").unwrap();
+        fs::write(tmp.path().join(PROVENANCE_FILENAME), "flat\n").unwrap();
         let resolved = resolve_src_path(tmp.path(), "src").unwrap();
         assert_eq!(resolved, tmp.path().join("src"));
     }
@@ -1477,7 +1478,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         extract_tar_gz_auto(&tar_gz, tmp.path()).unwrap();
         // Wrapper directory was stripped.
-        assert!(tmp.path().join("PROVENANCE.toml").exists());
+        assert!(tmp.path().join(PROVENANCE_FILENAME).exists());
         assert!(tmp.path().join("skills/event-log/SKILL.md").exists());
         assert!(!tmp.path().join("processkit-v0.5.1").exists());
     }
@@ -1492,7 +1493,7 @@ mod tests {
         ]);
         let tmp = TempDir::new().unwrap();
         extract_tar_gz_auto(&tar_gz, tmp.path()).unwrap();
-        assert!(tmp.path().join("PROVENANCE.toml").exists());
+        assert!(tmp.path().join(PROVENANCE_FILENAME).exists());
         assert!(tmp.path().join("skills/event-log/SKILL.md").exists());
         assert!(tmp.path().join("primitives/schemas/workitem.yaml").exists());
     }
@@ -1538,7 +1539,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         let src = tmp.path().join("src");
         fs::create_dir_all(src.join("primitives/schemas")).unwrap();
-        fs::write(src.join("PROVENANCE.toml"), "version = \"v0.4.0\"\n").unwrap();
+        fs::write(src.join(PROVENANCE_FILENAME), "version = \"v0.4.0\"\n").unwrap();
         fs::write(src.join("primitives/schemas/workitem.yaml"), "name: x\n").unwrap();
         validate_cache(tmp.path(), "src").unwrap();
     }
@@ -1578,20 +1579,20 @@ mod tests {
         }
 
         let cache_root = cache_dir(
-            "https://github.com/projectious-work/processkit.git",
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
             "v0.4.0",
         )
         .unwrap();
         // Synthesize the cache contents.
         let src = cache_root.join("src");
         fs::create_dir_all(src.join("skills/event-log")).unwrap();
-        fs::write(src.join("PROVENANCE.toml"), "version = \"v0.4.0\"\n").unwrap();
+        fs::write(src.join(PROVENANCE_FILENAME), "version = \"v0.4.0\"\n").unwrap();
         fs::write(src.join("skills/event-log/SKILL.md"), "# event log\n").unwrap();
         // Marker is now two lines: commit, then sha256.
         fs::write(cache_root.join(".fetch-complete"), "deadbeef\n\n").unwrap();
 
         let result = fetch(
-            "https://github.com/projectious-work/processkit.git",
+            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
             "v0.4.0",
             None,
             "src",

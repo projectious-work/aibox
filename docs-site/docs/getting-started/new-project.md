@@ -52,14 +52,12 @@ my-app/
 │   └── devcontainer.json       # Generated — VS Code integration
 └── context/
     ├── skills/                 # Editable skill copies — installed by processkit
-    │   ├── code-review/SKILL.md
-    │   ├── backlog-context/SKILL.md
-    │   └── ... (108 skills in processkit v0.5.1)
     ├── processes/              # release, code-review, feature-development, bug-fix
-    ├── primitives/             # schemas, state-machines
+    ├── schemas/                # primitive schemas
+    ├── state-machines/         # state machine definitions
     └── templates/
         └── processkit/
-            └── v0.5.1/         # Immutable upstream snapshot, used by `aibox sync` for three-way diffs
+            └── v0.6.0/         # Immutable upstream snapshot, used by `aibox sync` for three-way diffs
 ```
 
 :::warning Pin a processkit version
@@ -71,23 +69,10 @@ processes, or `AGENTS.md` until you set a real tag:
 ```toml
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.5.1"
+version = "v0.6.0"
 ```
 
 Then re-run `aibox sync` to land the content.
-
-:::
-
-:::tip Single-file vs entity-sharded context tracks
-
-Skills like `backlog-context`, `decisions-adr`, and `standup-context` operate
-on **single files** (`context/BACKLOG.md`, `context/DECISIONS.md`,
-`context/STANDUPS.md`). They do not ship a starter template — the agent
-creates the file in place the first time it needs to write to it.
-
-The entity-sharded counterparts (`workitem-management`, `decision-record`, …)
-use per-item YAML files plus an MCP server. Both tracks ship in every
-processkit release; pick the one that fits your project.
 
 :::
 
@@ -118,7 +103,7 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.5.1"   # Pin a real tag — "unset" skips fetching
+version = "v0.6.0"   # Pin a real tag — "unset" skips fetching
 
 # Addons install tool sets into the container.
 # Run `aibox addon list` to see all available addons.

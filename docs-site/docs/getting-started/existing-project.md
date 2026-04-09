@@ -40,7 +40,7 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.5.1"   # Pin a real tag — "unset" skips fetching
+version = "v0.6.0"   # Pin a real tag — "unset" skips fetching
 
 [ai]
 providers = ["claude"]
@@ -51,7 +51,7 @@ enabled = false
 
 :::tip Pin processkit before sync
 
-Set `[processkit].version` to a real tag (e.g. `v0.5.1`) before the first
+Set `[processkit].version` to a real tag (e.g. `v0.6.0`) before the first
 `aibox sync`. The default sentinel `unset` skips processkit content
 installation entirely — you will get devcontainer files but no skills,
 processes, or `AGENTS.md`.

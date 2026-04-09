@@ -55,7 +55,7 @@ aibox init [OPTIONS]
    from the processkit scaffolding template at this point.
 
 > If `[processkit].version` is the sentinel `unset`, the processkit install step
-> is skipped — pin a real tag (e.g. `v0.5.1`) and re-run `aibox sync` to land
+> is skipped — pin a real tag (e.g. `v0.6.0`) and re-run `aibox sync` to land
 > the content.
 
 ### Examples

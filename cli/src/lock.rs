@@ -30,6 +30,8 @@ use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
+use crate::processkit_vocab::{self as pk, PROVENANCE_FILENAME};
+
 // ---------------------------------------------------------------------------
 // Lock file (v0.17.0+ sectioned shape)
 // ---------------------------------------------------------------------------
@@ -42,7 +44,7 @@ use std::path::{Component, Path, PathBuf};
 //
 //     [processkit]                     # what processkit version is installed
 //     source                = "https://github.com/projectious-work/processkit.git"
-//     version               = "v0.5.1"
+//     version               = "v0.6.0"
 //     src_path              = "src"
 //     branch                = "main"           # optional
 //     resolved_commit       = "abc123def456"   # optional
@@ -305,35 +307,37 @@ pub fn group_for_path(rel_path: &Path) -> Option<String> {
     }
 
     // 1. PROVENANCE.toml at top
-    if parts.len() == 1 && parts[0] == "PROVENANCE.toml" {
+    if parts.len() == 1 && parts[0] == PROVENANCE_FILENAME {
         return Some("PROVENANCE".to_string());
     }
 
     // 2. skills/<name>/...
-    if parts[0] == "skills" && parts.len() >= 2 {
-        return Some(format!("skills/{}", parts[1]));
+    if parts[0] == pk::src::SKILLS && parts.len() >= 2 {
+        return Some(format!("{}/{}", pk::src::SKILLS, parts[1]));
     }
 
     // 3, 4, 5. primitives/...
-    if parts[0] == "primitives" {
-        if parts.len() >= 3 && (parts[1] == "schemas" || parts[1] == "state-machines") {
+    if parts[0] == pk::src::PRIMITIVES {
+        if parts.len() >= 3
+            && (parts[1] == pk::src::SCHEMAS || parts[1] == pk::src::STATE_MACHINES)
+        {
             // Strip a trailing extension from the leaf so all files
             // describing the same primitive share a group.
             let leaf = strip_known_ext(&parts[2]);
-            return Some(format!("primitives/{}/{}", parts[1], leaf));
+            return Some(format!("{}/{}/{}", pk::src::PRIMITIVES, parts[1], leaf));
         }
-        return Some("primitives".to_string());
+        return Some(pk::src::PRIMITIVES.to_string());
     }
 
     // 6. lib/...
-    if parts[0] == "lib" {
-        return Some("lib".to_string());
+    if parts[0] == pk::src::LIB {
+        return Some(pk::src::LIB.to_string());
     }
 
     // 7. processes/<name>(/...)
-    if parts[0] == "processes" && parts.len() >= 2 {
+    if parts[0] == pk::src::PROCESSES && parts.len() >= 2 {
         let leaf = strip_known_ext(&parts[1]);
-        return Some(format!("processes/{}", leaf));
+        return Some(format!("{}/{}", pk::src::PROCESSES, leaf));
     }
 
     // 8. fallback — immediate parent dir, or None for top-level loose files.
@@ -364,7 +368,7 @@ mod tests {
 
     fn sample_pk() -> ProcessKitLockSection {
         ProcessKitLockSection {
-            source: "https://github.com/projectious-work/processkit.git".to_string(),
+            source: crate::processkit_vocab::PROCESSKIT_GIT_SOURCE.to_string(),
             version: "v0.4.0".to_string(),
             src_path: "src".to_string(),
             branch: None,

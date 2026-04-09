@@ -16,7 +16,7 @@ state machines). The boundary is deliberate and load-bearing: it lets the two
 projects move at their own velocity without dragging each other through breaking
 changes.
 
-## Where to find skills
+## Where skills land in your project
 
 After running `aibox init` and `aibox sync` in your project, processkit content
 is materialised under your `context/` directory:
@@ -24,28 +24,23 @@ is materialised under your `context/` directory:
 ```
 context/
 ├── skills/                          # Active, editable skill copies
-│   ├── code-review/SKILL.md
-│   ├── backlog-context/SKILL.md
-│   ├── decisions-adr/SKILL.md
-│   └── ... (108 skills total in v0.5.1)
 └── templates/
     └── processkit/
-        └── v0.5.1/                  # Immutable upstream snapshot, git-tracked
+        └── v0.6.0/                  # Immutable upstream snapshot, git-tracked
             ├── skills/
-            ├── packages/            # minimal.yaml, managed.yaml, software.yaml,
-            │                        # research.yaml, product.yaml
+            ├── packages/
             ├── primitives/
             ├── processes/
             └── scaffolding/
                 └── AGENTS.md
 ```
 
-The version in the path (`v0.5.1`) is whatever you pinned in `aibox.toml`:
+The version in the path (`v0.6.0`) is whatever you pinned in `aibox.toml`:
 
 ```toml
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.5.1"
+version = "v0.6.0"
 ```
 
 The `context/skills/` copies are yours to edit. The `context/templates/processkit/<version>/`
@@ -53,56 +48,44 @@ copies are the immutable upstream snapshot — `aibox sync` uses them as the bas
 side of a three-way diff to detect upstream changes that should be pulled into
 your local edits.
 
-## Browsing skills
+## Skill catalogue and documentation
 
-The full skill catalogue lives upstream:
-
-- **Source:** https://github.com/projectious-work/processkit/tree/main/src/skills
-- **Releases:** https://github.com/projectious-work/processkit/releases
-- **In your project, after `aibox sync`:** `context/skills/` and
-  `context/templates/processkit/<version>/skills/`
+> **processkit documentation** is not yet deployed as a standalone site.
+> Until then, browse the upstream source directly:
+>
+> - **GitHub:** https://github.com/projectious-work/processkit/tree/main/src/skills
+> - **Releases:** https://github.com/projectious-work/processkit/releases
+> - **In your project, after `aibox sync`:** `context/skills/` and
+>   `context/templates/processkit/<version>/skills/`
 
 Every skill is a directory with at least a `SKILL.md` (the agent-readable
-instructions) and may include `references/`, `mcp/`, and `templates/` siblings.
-Skills follow the open [Agent Skills specification](https://agentskills.io/specification).
+instructions) and may include `references/`, `mcp/`, `assets/`, and `scripts/`
+siblings. Skills follow the open [Agent Skills specification](https://agentskills.io/specification).
 
-## Two tracks for the same artefact
+## Browsing installed skills
 
-processkit deliberately ships **two tracks** for context-management skills, and
-both are installed into every project regardless of selected package:
-
-| Track | Examples | How it works |
-|-------|----------|--------------|
-| **Single-file** | `backlog-context`, `decisions-adr`, `standup-context`, `session-handover`, `context-archiving` | The skill instructs the agent to create and maintain a single Markdown file in place (e.g. `context/BACKLOG.md`). No starter template — the file is born when the agent first writes to it. |
-| **Entity-sharded** | `workitem-management`, `decision-record`, `scope-management`, … | Per-item YAML files with IDs, slugs, and state machines. Backed by an MCP server. |
-
-You pick the track that fits the project; both tracks coexist peacefully and
-nothing forces you to use one over the other.
+```bash
+aibox kit skill list               # list installed skills, grouped by category
+aibox kit skill list --all         # include available-but-not-installed skills
+aibox kit skill list --category ai # filter by category
+aibox kit skill info <name>        # frontmatter + description for one skill
+aibox kit skill categories         # skill count per category
+```
 
 ## Packages
 
-Five processkit packages compose skill sets via `extends:` in upstream YAML:
-
-| Package | Purpose |
-|---------|---------|
-| `minimal` | Bare-minimum skill set for scripts and experiments |
-| `managed` | Recommended default — backlog, decisions, standups, handover |
-| `software` | `managed` + code review, testing, debugging, refactoring, architecture |
-| `research` | `managed` + data science, documentation, research artefacts |
-| `product` | Everything — `software` + design, security, operations, product planning |
-
-You select packages declaratively in `aibox.toml`:
+processkit ships five packages (`minimal`, `managed`, `software`, `research`,
+`product`) that compose skill sets. Select the one that fits your project in
+`aibox.toml`:
 
 ```toml
 [context]
 packages = ["managed"]   # or ["software"], ["research"], ["product"], ["minimal"]
 ```
 
-In **v0.16.0**, package selection is metadata that agents read to decide which
-skills are *relevant* for the project — but aibox installs **all** processkit
-skills regardless. The full set is always available; the package list tells
-agents which subset to prefer. The package YAMLs themselves live in
-`context/templates/processkit/<version>/packages/`.
+For the full package definitions and their exact skill composition, see:
+- `context/templates/processkit/<version>/packages/` (after `aibox sync`)
+- https://github.com/projectious-work/processkit/tree/main/src/packages
 
 ## Custom skills
 
@@ -115,6 +98,13 @@ context/skills/my-custom-skill/
 
 Local skills are not touched by `aibox sync`. They are also not part of any
 processkit package — they exist purely for the local project.
+
+## Core skills
+
+Some processkit skills carry `metadata.processkit.core: true` in their
+frontmatter (e.g. `skill-finder`). Core skills are installed regardless of any
+`[skills].include` / `[skills].exclude` configuration. `aibox doctor` warns if
+you attempt to exclude a core skill.
 
 ## Why this split?
 

@@ -3,6 +3,7 @@ use std::path::Path;
 
 use crate::config::AiboxConfig;
 use crate::output;
+use crate::processkit_vocab::AGENTS_FILENAME;
 use crate::runtime::{ContainerState, Runtime};
 
 /// Embedded schema document for v1.0.0.
@@ -32,7 +33,7 @@ impl DiagResult {
 /// creates: the version marker, the gitignore, and the canonical
 /// agent entrypoint installed by processkit.
 fn expected_files(_packages: &[String]) -> Vec<&'static str> {
-    vec!["AGENTS.md", "aibox.lock", ".gitignore"]
+    vec![AGENTS_FILENAME, "aibox.lock", ".gitignore"]
 }
 
 /// Look up the embedded schema for a given version string.

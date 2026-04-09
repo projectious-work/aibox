@@ -89,6 +89,12 @@
 
 use std::path::{Path, PathBuf};
 
+use crate::processkit_vocab::{
+    self as pk, AGENTS_FILENAME, FORMAT_FILENAME, INDEX_FILENAME,
+    LIVE_LIB_DIR, LIVE_PROCESSES_DIR, LIVE_SCHEMAS_DIR, LIVE_SKILLS_DIR,
+    LIVE_STATE_MACHINES_DIR,
+};
+
 /// What to do with a single file from the processkit cache.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InstallAction {
@@ -130,7 +136,7 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
     // (Note: INDEX.md files are NOT blanket-skipped here. They are
     // routed by the per-directory branches below to their parent
     // directory's destination. See BACK-116 for the v0.16.4 fix.)
-    if parts.last().copied() == Some("FORMAT.md") {
+    if parts.last().copied() == Some(FORMAT_FILENAME) {
         return InstallAction::Skip;
     }
 
@@ -141,9 +147,10 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
     //     directly; the templates mirror has it for browsing)
     //   - anything else → skipped (unknown top-level file)
     if parts.len() == 1 {
-        return match parts[0] {
-            "INDEX.md" => InstallAction::Install(PathBuf::from("context/INDEX.md")),
-            _ => InstallAction::Skip,
+        return if parts[0] == INDEX_FILENAME {
+            InstallAction::Install(PathBuf::from("context").join(INDEX_FILENAME))
+        } else {
+            InstallAction::Skip
         };
     }
 
@@ -151,8 +158,8 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
         // skills/<name>/...  →  context/skills/<name>/...
         // Provider-neutral location. Any agent discovers skills via CLAUDE.md /
         // AGENTS.md pointing at context/skills/.
-        "skills" if parts.len() >= 2 => {
-            let mut p = PathBuf::from("context/skills");
+        s if s == pk::src::SKILLS && parts.len() >= 2 => {
+            let mut p = PathBuf::from(LIVE_SKILLS_DIR);
             for part in &parts[1..] {
                 p.push(part);
             }
@@ -162,8 +169,8 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
         // lib/processkit/...  →  context/skills/_lib/processkit/...
         // Matches MCP server _find_lib() walk-up: from
         // context/skills/<name>/mcp/server.py it finds context/skills/_lib/.
-        "lib" if parts.len() >= 2 => {
-            let mut p = PathBuf::from("context/skills/_lib");
+        s if s == pk::src::LIB && parts.len() >= 2 => {
+            let mut p = PathBuf::from(LIVE_LIB_DIR);
             for part in &parts[1..] {
                 p.push(part);
             }
@@ -174,29 +181,29 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
         // primitives/state-machines/X.yaml →  context/state-machines/X.yaml
         // primitives/<anything-else>      →  skipped (including FORMAT.md
         //                                    handled above and INDEX.md)
-        "primitives" if parts.len() >= 3 => match parts[1] {
-            "schemas" => {
-                let mut p = PathBuf::from("context/schemas");
+        s if s == pk::src::PRIMITIVES && parts.len() >= 3 => {
+            if parts[1] == pk::src::SCHEMAS {
+                let mut p = PathBuf::from(LIVE_SCHEMAS_DIR);
                 for part in &parts[2..] {
                     p.push(part);
                 }
                 InstallAction::Install(p)
-            }
-            "state-machines" => {
-                let mut p = PathBuf::from("context/state-machines");
+            } else if parts[1] == pk::src::STATE_MACHINES {
+                let mut p = PathBuf::from(LIVE_STATE_MACHINES_DIR);
                 for part in &parts[2..] {
                     p.push(part);
                 }
                 InstallAction::Install(p)
+            } else {
+                InstallAction::Skip
             }
-            _ => InstallAction::Skip,
-        },
+        }
 
         // processes/<f>.md  →  context/processes/<f>.md
         // Top-level under context/, existing convention. May coexist with
         // user-authored processes — Strawman D says edit in place.
-        "processes" if parts.len() >= 2 => {
-            let mut p = PathBuf::from("context/processes");
+        s if s == pk::src::PROCESSES && parts.len() >= 2 => {
+            let mut p = PathBuf::from(LIVE_PROCESSES_DIR);
             for part in &parts[1..] {
                 p.push(part);
             }
@@ -205,9 +212,8 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
 
         // packages/*  →  skipped from the live install. The full set is
         // available in context/templates/processkit/<version>/packages/
-        // for agents to read declaratively. v0.16.0 installs every skill
-        // processkit ships regardless of selected package.
-        "packages" => InstallAction::Skip,
+        // for agents to read declaratively.
+        s if s == pk::src::PACKAGES => InstallAction::Skip,
 
         // scaffolding/AGENTS.md  →  AGENTS.md (project root)
         // The canonical agent entry point. processkit owns the template
@@ -217,10 +223,10 @@ pub fn install_action_for(rel_path: &Path) -> InstallAction {
         // through untouched so processkit's onboarding skill can find
         // and fill them with the project owner.
         // scaffolding/INDEX.md and any other scaffolding files are skipped.
-        "scaffolding" if parts.len() == 2 && parts[1] == "AGENTS.md" => {
-            InstallAction::InstallTemplated(PathBuf::from("AGENTS.md"))
+        s if s == pk::src::SCAFFOLDING && parts.len() == 2 && parts[1] == AGENTS_FILENAME => {
+            InstallAction::InstallTemplated(PathBuf::from(AGENTS_FILENAME))
         }
-        "scaffolding" => InstallAction::Skip,
+        s if s == pk::src::SCAFFOLDING => InstallAction::Skip,
 
         // Anything else is unknown — skip rather than guess.
         _ => InstallAction::Skip,

@@ -27,6 +27,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::output;
+use crate::processkit_vocab::INDEX_FILENAME;
 
 // ---------------------------------------------------------------------------
 // MigrationState
@@ -334,7 +335,7 @@ pub fn list_migrations(
         if path.extension().and_then(|s| s.to_str()) != Some("md") {
             continue;
         }
-        if path.file_name().and_then(|s| s.to_str()) == Some("INDEX.md") {
+        if path.file_name().and_then(|s| s.to_str()) == Some(INDEX_FILENAME) {
             continue;
         }
         match MigrationDocument::parse_from_file(&path) {
@@ -375,7 +376,7 @@ pub fn list_all_migrations(project_root: &Path) -> Result<Vec<MigrationDocument>
             let path = entry.path();
             if !path.is_file()
                 || path.extension().and_then(|s| s.to_str()) != Some("md")
-                || path.file_name().and_then(|s| s.to_str()) == Some("INDEX.md")
+                || path.file_name().and_then(|s| s.to_str()) == Some(INDEX_FILENAME)
             {
                 continue;
             }
@@ -485,7 +486,7 @@ pub fn update_index(project_root: &Path) -> Result<()> {
             let path = entry.path();
             if !path.is_file()
                 || path.extension().and_then(|s| s.to_str()) != Some("md")
-                || path.file_name().and_then(|s| s.to_str()) == Some("INDEX.md")
+                || path.file_name().and_then(|s| s.to_str()) == Some(INDEX_FILENAME)
             {
                 continue;
             }
@@ -504,7 +505,7 @@ pub fn update_index(project_root: &Path) -> Result<()> {
     let now = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
     let content = format_index(&now, &pending, &in_progress, &applied, &rejected);
 
-    let index_path = root.join("INDEX.md");
+    let index_path = root.join(INDEX_FILENAME);
     // Only write if content changed (idempotence + cleaner git diffs).
     let needs_write = match fs::read_to_string(&index_path) {
         Ok(existing) => strip_generated_line(&existing) != strip_generated_line(&content),

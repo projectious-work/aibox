@@ -57,6 +57,7 @@ use crate::lock::{self, AiboxLock, group_for_path, should_skip_entry};
 use crate::content_install::{InstallAction, install_action_for};
 use crate::content_source;
 use crate::context;
+use crate::processkit_vocab::{self, SKILL_FILENAME, TEMPLATES_PROCESSKIT_DIR};
 
 // ---------------------------------------------------------------------------
 // [skills].include / [skills].exclude activation (BACK-118 / DEC-035)
@@ -108,7 +109,7 @@ pub fn build_effective_skill_set(
         return Ok(None);
     }
     let packages_dir = project_root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(&config.processkit.version)
         .join("packages");
     if !packages_dir.is_dir() {
@@ -157,13 +158,60 @@ pub fn build_effective_skill_set(
         effective.remove(skill);
     }
 
+    // Step 4: enforce core skills (metadata.processkit.core: true).
+    // Core skills are always installed regardless of include/exclude — they
+    // are added back unconditionally after the exclude pass. `aibox doctor`
+    // warns separately when a core skill appears in [skills].exclude.
+    // See processkit/aibox#36 for the proposed convention.
+    let core_skills = collect_core_skills(&packages_dir.join("..").join("skills"));
+    for skill in core_skills {
+        effective.insert(skill);
+    }
+
     Ok(Some(effective))
 }
 
+/// Walk `skills_dir` (the templates mirror's `skills/` subdirectory) and
+/// return the names of skills whose frontmatter declares `core: true`.
+///
+/// Called by `build_effective_skill_set` to re-insert core skills after
+/// the exclude pass, and by `validate_skill_overrides` to emit doctor
+/// warnings when the user attempts to exclude a core skill.
+///
+/// Returns an empty vec when `skills_dir` does not exist (e.g. no mirror
+/// yet on the first install).
+pub fn collect_core_skills(skills_dir: &Path) -> Vec<String> {
+    let Ok(entries) = fs::read_dir(skills_dir) else {
+        return Vec::new();
+    };
+    let mut core = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let name = match entry.file_name().to_str() {
+            Some(n) if !n.starts_with('_') && !n.starts_with('.') => n.to_string(),
+            _ => continue,
+        };
+        let skill_file = path.join(SKILL_FILENAME);
+        if !skill_file.exists() {
+            continue;
+        }
+        if processkit_vocab::parse_skill_frontmatter(&skill_file)
+            .map(|fm| fm.is_core())
+            .unwrap_or(false)
+        {
+            core.push(name);
+        }
+    }
+    core
+}
+
 /// Validate that every name in `[skills].include` and `[skills].exclude`
-/// corresponds to a real skill that some selected package would have
-/// pulled in. Returns the list of unknown names (empty if all OK).
-/// Used by `aibox doctor` to surface typos.
+/// corresponds to a real skill. Also warns when a core skill is in exclude
+/// (it will be installed regardless — see processkit/aibox#36).
+/// Returns diagnostic strings (empty if all OK); used by `aibox doctor`.
 pub fn validate_skill_overrides(
     project_root: &Path,
     config: &AiboxConfig,
@@ -173,11 +221,8 @@ pub fn validate_skill_overrides(
         None => return Ok(Vec::new()),
     };
     // Build the universe = set BEFORE applying user overrides.
-    // Anything in user `include` that isn't already in the package
-    // expansion AND isn't a known skill name in the templates mirror
-    // is suspicious. Same for `exclude`.
     let mirror_skills_dir = project_root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(&config.processkit.version)
         .join("skills");
     if !mirror_skills_dir.is_dir() {
@@ -196,18 +241,28 @@ pub fn validate_skill_overrides(
         }
     }
 
-    let mut unknown = Vec::new();
+    // Collect core skills for the exclude-core warning.
+    let core_skills: HashSet<String> =
+        collect_core_skills(&mirror_skills_dir).into_iter().collect();
+
+    let mut warnings = Vec::new();
     for name in &config.skills.include {
         if !all_skills.contains(name) {
-            unknown.push(format!("[skills].include = \"{}\" — not a known processkit skill", name));
+            warnings.push(format!("[skills].include = \"{}\" — not a known processkit skill", name));
         }
     }
     for name in &config.skills.exclude {
         if !all_skills.contains(name) && !effective.contains(name) {
-            unknown.push(format!("[skills].exclude = \"{}\" — not a known processkit skill", name));
+            warnings.push(format!("[skills].exclude = \"{}\" — not a known processkit skill", name));
+        } else if core_skills.contains(name) {
+            warnings.push(format!(
+                "[skills].exclude = \"{}\" — this is a core skill (metadata.processkit.core: true) \
+                 and will be installed regardless of [skills].exclude",
+                name
+            ));
         }
     }
-    Ok(unknown)
+    Ok(warnings)
 }
 
 /// Result of a content-source install run, for reporting.
@@ -389,7 +444,7 @@ pub fn install_files_from_cache_with_vars(
 /// Compute the templates dir for a given processkit version.
 pub fn templates_dir_for_version(project_root: &Path, version: &str) -> PathBuf {
     project_root
-        .join("context/templates/processkit")
+        .join(TEMPLATES_PROCESSKIT_DIR)
         .join(version)
 }
 
@@ -696,7 +751,7 @@ mod tests {
     ) {
         // (package_name, extends, skills)
         let dir = project_root
-            .join("context/templates/processkit")
+            .join(TEMPLATES_PROCESSKIT_DIR)
             .join(version)
             .join("packages");
         fs::create_dir_all(&dir).unwrap();
@@ -753,7 +808,7 @@ mod tests {
     #[test]
     fn effective_skill_set_returns_none_when_mirror_missing() {
         let tmp = TempDir::new().unwrap();
-        let config = config_with_packages_and_skills("v0.5.1", &["managed"], &[], &[]);
+        let config = config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["managed"], &[], &[]);
         let result = build_effective_skill_set(tmp.path(), &config).unwrap();
         assert!(result.is_none());
     }
@@ -763,10 +818,10 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_packages_dir(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             &[("minimal", &[], &["workitem-management", "decision-record"])],
         );
-        let config = config_with_packages_and_skills("v0.5.1", &["minimal"], &[], &[]);
+        let config = config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["minimal"], &[], &[]);
         let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
         assert_eq!(set.len(), 2);
         assert!(set.contains("workitem-management"));
@@ -778,14 +833,14 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_packages_dir(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             &[
                 ("minimal", &[], &["workitem-management"]),
                 ("managed", &["minimal"], &["decision-record", "scope-management"]),
                 ("software", &["managed"], &["code-review"]),
             ],
         );
-        let config = config_with_packages_and_skills("v0.5.1", &["software"], &[], &[]);
+        let config = config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["software"], &[], &[]);
         let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
         assert_eq!(set.len(), 4);
         assert!(set.contains("workitem-management")); // from minimal
@@ -799,11 +854,11 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_packages_dir(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             &[("minimal", &[], &["workitem-management"])],
         );
         let config =
-            config_with_packages_and_skills("v0.5.1", &["minimal"], &["latex-authoring"], &[]);
+            config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["minimal"], &["latex-authoring"], &[]);
         let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
         assert_eq!(set.len(), 2);
         assert!(set.contains("workitem-management"));
@@ -815,11 +870,11 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_packages_dir(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             &[("minimal", &[], &["workitem-management", "decision-record"])],
         );
         let config =
-            config_with_packages_and_skills("v0.5.1", &["minimal"], &[], &["decision-record"]);
+            config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["minimal"], &[], &["decision-record"]);
         let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
         assert_eq!(set.len(), 1);
         assert!(set.contains("workitem-management"));
@@ -833,7 +888,7 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         write_synth_packages_dir(
             tmp.path(),
-            "v0.5.1",
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             &[
                 ("a", &[], &["from-a"]),
                 ("b", &["a"], &["from-b"]),
@@ -841,7 +896,7 @@ mod tests {
                 ("d", &["b", "c"], &["from-d"]),
             ],
         );
-        let config = config_with_packages_and_skills("v0.5.1", &["d"], &[], &[]);
+        let config = config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["d"], &[], &[]);
         let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
         assert_eq!(set.len(), 4);
         for skill in &["from-a", "from-b", "from-c", "from-d"] {
@@ -852,10 +907,75 @@ mod tests {
     #[test]
     fn effective_skill_set_errors_on_unknown_package() {
         let tmp = TempDir::new().unwrap();
-        write_synth_packages_dir(tmp.path(), "v0.5.1", &[("minimal", &[], &["x"])]);
-        let config = config_with_packages_and_skills("v0.5.1", &["nonexistent"], &[], &[]);
+        write_synth_packages_dir(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &[("minimal", &[], &["x"])]);
+        let config = config_with_packages_and_skills(crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, &["nonexistent"], &[], &[]);
         let err = build_effective_skill_set(tmp.path(), &config).unwrap_err();
         assert!(format!("{}", err).contains("nonexistent"));
+    }
+
+    #[test]
+    fn core_skill_survives_user_exclude() {
+        // A skill with `metadata.processkit.core: true` must land even when the
+        // user puts it in [skills].exclude. This is the enforcement point for
+        // the core: true convention (processkit/aibox#36).
+        let tmp = TempDir::new().unwrap();
+        let version = crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION;
+        write_synth_packages_dir(
+            tmp.path(),
+            version,
+            &[("minimal", &[], &["workitem-management", "skill-finder"])],
+        );
+        // Write a minimal SKILL.md with core: true for skill-finder.
+        let skills_dir = tmp.path()
+            .join(TEMPLATES_PROCESSKIT_DIR)
+            .join(version)
+            .join("skills/skill-finder");
+        fs::create_dir_all(&skills_dir).unwrap();
+        fs::write(
+            skills_dir.join("SKILL.md"),
+            "---\nname: skill-finder\nmetadata:\n  processkit:\n    core: true\n---\n",
+        )
+        .unwrap();
+
+        let config = config_with_packages_and_skills(version, &["minimal"], &[], &["skill-finder"]);
+        let set = build_effective_skill_set(tmp.path(), &config).unwrap().unwrap();
+        // skill-finder is excluded by the user but must be re-added because core: true.
+        assert!(set.contains("skill-finder"), "core skill must survive exclude");
+        assert!(set.contains("workitem-management"));
+    }
+
+    #[test]
+    fn validate_skill_overrides_warns_on_excluded_core_skill() {
+        let tmp = TempDir::new().unwrap();
+        let version = crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION;
+        write_synth_packages_dir(
+            tmp.path(),
+            version,
+            &[("minimal", &[], &["workitem-management", "skill-finder"])],
+        );
+        // Materialise the templates mirror skills dir so validate can read it.
+        let mirror_skills = tmp.path()
+            .join(TEMPLATES_PROCESSKIT_DIR)
+            .join(version)
+            .join("skills");
+        let sf_dir = mirror_skills.join("skill-finder");
+        let wm_dir = mirror_skills.join("workitem-management");
+        fs::create_dir_all(&sf_dir).unwrap();
+        fs::create_dir_all(&wm_dir).unwrap();
+        fs::write(
+            sf_dir.join("SKILL.md"),
+            "---\nname: skill-finder\nmetadata:\n  processkit:\n    core: true\n---\n",
+        )
+        .unwrap();
+        fs::write(wm_dir.join("SKILL.md"), "---\nname: workitem-management\n---\n").unwrap();
+
+        let config = config_with_packages_and_skills(version, &["minimal"], &[], &["skill-finder"]);
+        let warnings = validate_skill_overrides(tmp.path(), &config).unwrap();
+        assert!(
+            warnings.iter().any(|w| w.contains("core skill")),
+            "expected a core-skill warning, got: {:?}",
+            warnings
+        );
     }
 
     /// Build a synthetic processkit-shaped src tree under `root`. Includes
@@ -954,7 +1074,7 @@ mod tests {
         assert_eq!(report.fetched_version, PROCESSKIT_VERSION_UNSET);
         // No lock, no templates dir — we did no I/O.
         assert!(!lock::lock_path(tmp.path()).exists());
-        assert!(!tmp.path().join("context/templates/processkit").exists());
+        assert!(!tmp.path().join(TEMPLATES_PROCESSKIT_DIR).exists());
     }
 
     // -- install_files_from_cache -------------------------------------------

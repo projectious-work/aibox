@@ -47,24 +47,14 @@ my-project/
 ├── aibox.toml
 ├── .devcontainer/
 └── context/
-    ├── BACKLOG.md                  # Created by the agent on first use
-    ├── DECISIONS.md                # Created by the agent on first use
-    ├── STANDUPS.md                 # Created by the agent on first use
-    ├── OWNER.md                    # Profile of the project owner
-    ├── skills/                     # Editable skill copies (108 in v0.5.1)
+    ├── skills/                     # Editable skill copies
     ├── processes/                  # release, code-review, feature-development, bug-fix
-    ├── primitives/                 # schemas, state-machines
+    ├── schemas/                    # primitive schemas
+    ├── state-machines/             # state machine definitions
     └── templates/
         └── processkit/
-            └── v0.5.1/             # Immutable upstream snapshot — base of three-way diffs
+            └── v0.6.0/             # Immutable upstream snapshot — base of three-way diffs
 ```
-
-Notable: the single-file context tracks (`BACKLOG.md`, `DECISIONS.md`,
-`STANDUPS.md`, …) are **not** scaffolded as starter files. The corresponding
-processkit skill — `backlog-context`, `decisions-adr`, `standup-context` —
-instructs the agent to create the file in place the first time it needs to
-write to it. There is deliberately no template; the file is born by being
-used.
 
 ### AGENTS.md, CLAUDE.md, and provider files
 
@@ -77,9 +67,9 @@ any AI harness.
 When `[ai].providers` includes `claude`, aibox also writes a thin `CLAUDE.md`
 at the project root that just points at `AGENTS.md`. **No content is written
 under `.claude/skills/` or any other provider-specific directory** as of
-v0.16.0 — that path is gone. Other providers (Aider, Gemini, Mistral) use
-config files (`.aider.conf.yml`, `.gemini/settings.json`, `.mistral/config.json`)
-which are scaffolded by the addon system; they do not get a markdown pointer.
+v0.16.0. Other providers (Aider, Gemini, Mistral) use config files
+(`.aider.conf.yml`, `.gemini/settings.json`, `.mistral/config.json`) which are
+scaffolded by the addon system.
 
 ## OWNER.md — Developer Identity
 
@@ -96,38 +86,14 @@ asks), with fields that help AI agents understand who they are working with:
 - **Current focus** — what the developer is currently working on or learning
 - **Communication preferences** — style and conventions for AI interactions
 
-## Two Tracks for the Same Artefact
+## Skills and Processes
 
-processkit deliberately ships **two tracks** for context-management. Both are
-installed in every release; pick the one that fits each project.
+Skills and processes are owned by processkit. For full documentation on what's
+available, how skills are organised, and which packages to use, see:
 
-| Track | Skills | How it works |
-|-------|--------|--------------|
-| **Single-file** | `backlog-context`, `decisions-adr`, `standup-context`, `session-handover`, `context-archiving` | The skill maintains a single Markdown file in place (e.g. `context/BACKLOG.md`). No starter template — the file is born when the agent first writes to it. |
-| **Entity-sharded** | `workitem-management`, `decision-record`, `scope-management`, … | Per-item YAML files with IDs, slugs, and state machines. Backed by an MCP server. |
-
-## Process Packages
-
-processkit ships **five packages** that compose skill sets via `extends:` in
-upstream YAMLs (`packages/{minimal,managed,software,research,product}.yaml`).
-You select packages declaratively in `aibox.toml`:
-
-```toml
-[context]
-packages = ["managed"]
-```
-
-| Package | Best for |
-|---------|----------|
-| `minimal` | Scripts, experiments, small utilities |
-| `managed` | Recommended default — backlog, decisions, standups, handover |
-| `software` | Software projects with a recurring build/test/review cycle |
-| `research` | Learning, documentation, academic work |
-| `product` | Full product development with security, ops, design, planning |
-
-In v0.16.0, package selection is **declarative metadata**. aibox installs every
-processkit skill regardless; the package list tells agents which subset to
-prefer. See [Process Packages](process-packages.md) for the full breakdown.
+- [Skills](../skills/index.md) — how skills install and how to browse them
+- [Process Packages](process-packages.md) — package tiers and selection
+- [processkit on GitHub](https://github.com/projectious-work/processkit)
 
 ## Version Tracking
 
@@ -141,13 +107,11 @@ version = "0.16.0"
 schema_version = "1.0.0"
 
 [processkit]
-version = "v0.5.1"
+version = "v0.6.0"
 ```
 
-`.aibox-version` in the project root records the aibox CLI version that was
-last applied. When the schema evolves, `aibox doctor` flags version mismatches
-and `aibox sync` runs the relevant migrations. See [Migration](migration.md)
-for details.
+When the schema evolves, `aibox doctor` flags version mismatches and `aibox sync`
+runs the relevant migrations. See [Migration](migration.md) for details.
 
 ## Relationship to aibox.toml
 
@@ -161,12 +125,10 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.5.1"
+version = "v0.6.0"
 ```
 
-Changing `[context].packages` after initialisation does not move files around —
-the install set is always the full processkit skill catalogue. Run `aibox sync`
-after editing `[processkit].version` to pull a new release.
+Run `aibox sync` after editing `[processkit].version` to pull a new release.
 
 ## Design Principles
 
@@ -177,12 +139,12 @@ so AI agents can find them without special instructions.
 without any tooling.
 
 **Editable in place.** Everything under `context/skills/`, `context/processes/`,
-and `context/primitives/` is yours to edit. The immutable snapshot under
-`context/templates/processkit/<version>/` exists only as the base of
-`aibox sync`'s three-way diff.
+`context/schemas/`, and `context/state-machines/` is yours to edit. The
+immutable snapshot under `context/templates/processkit/<version>/` exists only
+as the base of `aibox sync`'s three-way diff.
 
-**No lock-in.** Context files are plain Markdown in a `context/` directory.
-Stop using aibox and the files remain useful.
+**No lock-in.** Context files are plain Markdown and YAML in a `context/`
+directory. Stop using aibox and the files remain useful.
 
 **Clean boundary between container and content.** aibox owns the box;
 processkit owns what goes in it. Each ships on its own cadence.

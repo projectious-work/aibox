@@ -27,7 +27,7 @@ packages = ["managed"]
 
 [processkit]
 source   = "https://github.com/projectious-work/processkit.git"
-version  = "v0.5.1"                   # Pin a real tag; "unset" skips fetching
+version  = "v0.6.0"                   # Pin a real tag; "unset" skips fetching
 src_path = "src"
 # branch = "main"                     # Optional; tarball-first, branch as fallback
 # release_asset_url_template = "..."  # Optional, for non-GitHub hosts
@@ -155,7 +155,7 @@ repo, but any processkit-compatible source works (forks, self-hosted, private
 mirrors).
 
 If `version` is the sentinel `unset`, both `aibox init` and `aibox sync` skip
-the processkit fetch entirely. Pin a real tag (e.g. `v0.5.1`) to land the
+the processkit fetch entirely. Pin a real tag (e.g. `v0.6.0`) to land the
 content. The downloaded tarball is git-tracked under
 `context/templates/processkit/<version>/` so derived projects always have the
 original to diff against.

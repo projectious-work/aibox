@@ -7,6 +7,7 @@ use crate::cli::OutputFormat;
 use crate::config::AiboxConfig;
 use crate::generate;
 use crate::output;
+use crate::processkit_vocab::AGENTS_FILENAME;
 use crate::reset;
 
 /// Environment storage directory.
@@ -18,7 +19,7 @@ const STATE_FILE: &str = "state.toml";
 /// `AGENTS.md` (owned by processkit, but `write_if_missing` lets users
 /// hand-customize it; envs should snapshot those customizations) and
 /// the thin-pointer `CLAUDE.md`.
-const ENV_FILES: &[&str] = &["aibox.toml", "AGENTS.md", "CLAUDE.md"];
+const ENV_FILES: &[&str] = &["aibox.toml", AGENTS_FILENAME, "CLAUDE.md"];
 /// Per-environment directory (excluding shared/).
 const ENV_CONTEXT_DIR: &str = "context";
 /// Shared subdirectory name — excluded from env copy.
