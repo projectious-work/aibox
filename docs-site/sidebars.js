@@ -36,7 +36,7 @@ const sidebars = {
     },
     {
       type: 'category', label: 'Reference',
-      items: ['reference/cli-commands', 'reference/configuration', 'reference/cheatsheet'],
+      items: ['reference/cli-commands', 'reference/configuration', 'reference/local-config', 'reference/cheatsheet'],
     },
     'roadmap',
     {

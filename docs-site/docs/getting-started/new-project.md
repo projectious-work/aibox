@@ -57,22 +57,33 @@ my-app/
     ├── state-machines/         # state machine definitions
     └── templates/
         └── processkit/
-            └── v0.6.0/         # Immutable upstream snapshot, used by `aibox sync` for three-way diffs
+            └── v0.8.0/         # Immutable upstream snapshot, used by `aibox sync` for three-way diffs
 ```
 
-:::warning Pin a processkit version
+:::tip .aibox-local.toml — secrets and per-developer overrides
 
-By default the `[processkit].version` is the sentinel `unset`, which **skips**
-the processkit fetch. You will get the slim skeleton above but no skills,
-processes, or `AGENTS.md` until you set a real tag:
+`.aibox-local.toml` is added to `.gitignore` by `aibox init`. Use it for API keys and host-specific bind mounts that should not be committed:
 
 ```toml
-[processkit]
-source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.6.0"
+[container.environment]
+ANTHROPIC_API_KEY = "sk-ant-..."
+
+[[container.extra_volumes]]
+source = "~/.config/gh"
+target = "/home/aibox/.config/gh"
 ```
 
-Then re-run `aibox sync` to land the content.
+Shared settings stay in `aibox.toml`; personal secrets go here.
+
+:::
+
+:::tip processkit version
+
+By default, `aibox init` interactively picks the latest processkit version and pins it in `aibox.toml`. Use `--processkit-version` to pin a specific tag non-interactively:
+
+```bash
+aibox init --name my-app --processkit-version v0.8.0
+```
 
 :::
 
@@ -88,7 +99,7 @@ The scaffolded config file comes with commented documentation for every option:
 # Full documentation: https://projectious-work.github.io/aibox/docs/reference/configuration
 
 [aibox]
-version = "0.16.0"
+version = "0.17.5"
 base    = "debian"
 
 [container]
@@ -103,7 +114,7 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.6.0"   # Pin a real tag — "unset" skips fetching
+version = "v0.8.0"
 
 # Addons install tool sets into the container.
 # Run `aibox addon list` to see all available addons.
@@ -143,7 +154,7 @@ aibox start    # Start the container and attach via Zellij
 
 You land in a Zellij session with the **dev** layout: Yazi file browser (40%) and Vim editor (60%) side by side, plus tabs for lazygit and shell.
 
-Two additional layouts are available: **focus** (one tool per tab, fullscreen) and **cowork** (Yazi+Vim left, Claude right). See [Layouts](../container/base-image.md#layouts).
+Six layouts are available: **dev** (default), **focus** (one tool per tab, fullscreen), **cowork** (Yazi+Vim left, Claude right), **cowork-swap**, **browse**, and **ai**. See [Layouts](../container/base-image.md#layouts).
 
 The project root is mounted at `/workspace`. Persistent configuration lives in `.aibox-home/` on the host, mounted into the container automatically.
 

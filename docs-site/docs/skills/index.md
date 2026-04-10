@@ -26,21 +26,19 @@ context/
 ├── skills/                          # Active, editable skill copies
 └── templates/
     └── processkit/
-        └── v0.6.0/                  # Immutable upstream snapshot, git-tracked
-            ├── skills/
-            ├── packages/
-            ├── primitives/
-            ├── processes/
-            └── scaffolding/
-                └── AGENTS.md
+        └── v0.8.0/                  # Immutable upstream snapshot, git-tracked
+            ├── context/
+            │   └── skills/
+            ├── .processkit/
+            └── AGENTS.md
 ```
 
-The version in the path (`v0.6.0`) is whatever you pinned in `aibox.toml`:
+The version in the path (`v0.8.0`) is whatever you pinned in `aibox.toml`:
 
 ```toml
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.6.0"
+version = "v0.8.0"
 ```
 
 The `context/skills/` copies are yours to edit. The `context/templates/processkit/<version>/`
@@ -56,7 +54,7 @@ your local edits.
 > - **GitHub:** https://github.com/projectious-work/processkit/tree/main/src/skills
 > - **Releases:** https://github.com/projectious-work/processkit/releases
 > - **In your project, after `aibox sync`:** `context/skills/` and
->   `context/templates/processkit/<version>/skills/`
+>   `context/templates/processkit/<version>/context/skills/`
 
 Every skill is a directory with at least a `SKILL.md` (the agent-readable
 instructions) and may include `references/`, `mcp/`, `assets/`, and `scripts/`
@@ -84,8 +82,8 @@ packages = ["managed"]   # or ["software"], ["research"], ["product"], ["minimal
 ```
 
 For the full package definitions and their exact skill composition, see:
-- `context/templates/processkit/<version>/packages/` (after `aibox sync`)
-- https://github.com/projectious-work/processkit/tree/main/src/packages
+- `context/templates/processkit/<version>/.processkit/packages/` (after `aibox sync`)
+- https://github.com/projectious-work/processkit/releases
 
 ## Custom skills
 

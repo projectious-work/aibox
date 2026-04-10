@@ -11,7 +11,7 @@ title: Configuration
 
 ```toml
 [aibox]
-version = "0.16.0"                    # aibox version used to generate this project
+version = "0.17.5"                    # aibox version used to generate this project
 base    = "debian"                    # Base image
 
 [container]
@@ -19,6 +19,15 @@ name     = "my-app"                   # Container name
 hostname = "my-app"                   # Container hostname
 user     = "aibox"                    # Container user (default: aibox)
 post_create_command = "npm install"   # Command to run after container creation
+keepalive = false                     # Network keepalive (default: false)
+
+[container.environment]
+NODE_ENV = "development"              # Project-wide env vars (non-secret; use .aibox-local.toml for secrets)
+
+[[container.extra_volumes]]
+source    = "~/.config/gh"            # Host path (~ expanded)
+target    = "/home/aibox/.config/gh"  # Container path
+read_only = true
 
 [context]
 schema_version = "1.0.0"              # Context schema version (semver)
@@ -27,7 +36,7 @@ packages = ["managed"]
 
 [processkit]
 source   = "https://github.com/projectious-work/processkit.git"
-version  = "v0.6.0"                   # Pin a real tag; "unset" skips fetching
+version  = "v0.8.0"                   # Pin a real tag; "unset" skips fetching
 src_path = "src"
 # branch = "main"                     # Optional; tarball-first, branch as fallback
 # release_asset_url_template = "..."  # Optional, for non-GitHub hosts
@@ -47,7 +56,7 @@ providers = ["claude", "aider"]       # AI providers to install
 [customization]
 theme  = "gruvbox-dark"               # Color theme (7 options)
 prompt = "default"                    # Starship preset (7 options)
-layout = "dev"                        # Zellij layout (4 options)
+layout = "dev"                        # Zellij layout (6 options)
 
 [audio]
 enabled      = false                  # Enable audio bridging
@@ -76,10 +85,46 @@ Container configuration. Controls the generated `docker-compose.yml` and `Docker
 | `user` | String | No | `"aibox"` | Container user |
 | `post_create_command` | String | No | -- | Command to run after container creation |
 | `keepalive` | Boolean | No | `false` | Network keepalive (prevents OrbStack/VM NAT idle dropout) |
+| `environment` | Map (String → String) | No | `{}` | Environment variables injected into the container. Suitable for non-secret project-wide values; use `.aibox-local.toml` for secrets. |
+| `extra_volumes` | Array of ExtraVolume | No | `[]` | Additional bind mounts. Each entry has `source`, `target`, and optional `read_only`. |
+
+#### [[container.extra_volumes]]
+
+Each entry in the `extra_volumes` array is an `ExtraVolume` with these fields:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `source` | String | Yes | -- | Host path (supports `~` expansion) |
+| `target` | String | Yes | -- | Container path where the volume is mounted |
+| `read_only` | Boolean | No | `false` | Mount the volume read-only |
+
+Example — mount your GitHub CLI config:
+
+```toml
+[[container.extra_volumes]]
+source    = "~/.config/gh"
+target    = "/home/aibox/.config/gh"
+read_only = true
+```
 
 :::tip Customizing ports, packages, volumes, and environment variables
-Use `Dockerfile.local` for installing additional packages, and `docker-compose.override.yml` for ports, volumes, and environment variables. Both files are scaffolded by `aibox init` and are never overwritten by `aibox sync`.
+Use `Dockerfile.local` for installing additional packages, and `docker-compose.override.yml` for ports and additional services. Both files are scaffolded by `aibox init` and are never overwritten by `aibox sync`.
+
+Environment variables and bind mounts can also be configured directly in `[container.environment]` / `[[container.extra_volumes]]` in `aibox.toml`, or — for secrets and per-developer settings that should not be committed — in [`.aibox-local.toml`](./local-config.md).
 :::
+
+### .aibox-local.toml
+
+`.aibox-local.toml` is a personal, gitignored overlay for per-developer settings that should never be committed — API keys, personal bind mounts, and similar secrets. It lives next to `aibox.toml` in the project root and is automatically added to `.gitignore` by `aibox init` and `aibox sync`.
+
+Only two sections are supported:
+
+- **`[container.environment]`** — merged on top of `aibox.toml`'s `[container.environment]`. Local values win on conflicts.
+- **`[[container.extra_volumes]]`** — appended after any volumes declared in `aibox.toml`.
+
+All other configuration (container name, addons, processkit version, etc.) must remain in `aibox.toml`.
+
+See the dedicated [Local Config reference](./local-config.md) for a full example and merge-behavior details.
 
 ### [context]
 
@@ -147,7 +192,7 @@ AI provider configuration. Providers listed here are automatically installed as 
 
 ### [processkit]
 
-The **load-bearing** content section in v0.16.0. Configures the content source
+The **load-bearing** content section. Configures the content source
 the project consumes — skills, primitives, processes, package YAMLs, and the
 canonical `AGENTS.md` template. The default upstream is the canonical
 [projectious-work/processkit](https://github.com/projectious-work/processkit)
@@ -155,7 +200,7 @@ repo, but any processkit-compatible source works (forks, self-hosted, private
 mirrors).
 
 If `version` is the sentinel `unset`, both `aibox init` and `aibox sync` skip
-the processkit fetch entirely. Pin a real tag (e.g. `v0.6.0`) to land the
+the processkit fetch entirely. Pin a real tag (e.g. `v0.8.0`) to land the
 content. The downloaded tarball is git-tracked under
 `context/templates/processkit/<version>/` so derived projects always have the
 original to diff against.
@@ -236,7 +281,7 @@ Visual and layout configuration. See [Themes](../customization/themes.md) and [L
 |-------|------|----------|---------|-------------|
 | `theme` | String | No | `"gruvbox-dark"` | Color theme: `gruvbox-dark`, `catppuccin-mocha`, `catppuccin-latte`, `dracula`, `tokyo-night`, `nord`, `projectious` |
 | `prompt` | String | No | `"default"` | Starship preset: `default`, `plain`, `arrow`, `minimal`, `nerd-font`, `pastel`, `bracketed` |
-| `layout` | String | No | `"dev"` | Zellij layout: `dev`, `focus`, `cowork`, `browse` |
+| `layout` | String | No | `"dev"` | Zellij layout: `dev`, `focus`, `cowork`, `cowork-swap`, `browse`, `ai` |
 
 ### [audio]
 

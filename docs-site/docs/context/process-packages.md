@@ -23,8 +23,8 @@ packages = ["managed"]   # or "minimal", "software", "research", "product"
 
 processkit ships five packages. For the exact skill composition of each, see:
 
-- `context/templates/processkit/<version>/packages/` in your project (after `aibox sync`)
-- https://github.com/projectious-work/processkit/tree/main/src/packages
+- `context/templates/processkit/<version>/.processkit/packages/` in your project (after `aibox sync`)
+- https://github.com/projectious-work/processkit/releases
 
 > **processkit documentation** is not yet deployed as a standalone site.
 > Until then, the package YAML files are the canonical source of truth.
@@ -51,16 +51,16 @@ context/
 ├── state-machines/                      # state machine definitions
 └── templates/
     └── processkit/
-        └── v0.6.0/
-            ├── skills/
-            ├── packages/                # The package YAMLs themselves
-            ├── processes/
-            ├── primitives/
-            └── scaffolding/
-                └── AGENTS.md
+        └── v0.8.0/
+            ├── context/
+            │   ├── skills/
+            │   └── schemas/
+            ├── .processkit/
+            │   └── packages/            # The package YAMLs themselves
+            └── AGENTS.md
 ```
 
-The version path (`v0.6.0` above) is whatever `[processkit].version` is pinned
+The version path (`v0.8.0` above) is whatever `[processkit].version` is pinned
 to in `aibox.toml`.
 
 ## Changing Packages
@@ -78,7 +78,7 @@ The package YAMLs and the skills they reference are owned by processkit:
 
 - Repository: https://github.com/projectious-work/processkit
 - Releases: https://github.com/projectious-work/processkit/releases
-- Local copy in your project: `context/templates/processkit/<version>/packages/`
+- Local copy in your project: `context/templates/processkit/<version>/.processkit/packages/`
 
 To consume a fork or a private mirror, point `[processkit].source` at it (see
 [`[processkit]` configuration](../reference/configuration.md#processkit)).

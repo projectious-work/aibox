@@ -49,7 +49,7 @@ Options:
 
 ```bash
 # Install a specific version
-curl -fsSL .../install.sh | VERSION=0.8.0 bash
+curl -fsSL .../install.sh | VERSION=0.17.5 bash
 
 # Install to a custom directory
 curl -fsSL .../install.sh | INSTALL_DIR=/usr/local/bin sudo -E bash
@@ -61,8 +61,8 @@ Download the binary for your platform from the [releases page](https://github.co
 
 ```bash
 # Example for macOS ARM64
-tar xzf aibox-v0.8.0-aarch64-apple-darwin.tar.gz
-mv aibox-v0.8.0-aarch64-apple-darwin ~/.local/bin/aibox
+tar xzf aibox-v0.17.5-aarch64-apple-darwin.tar.gz
+mv aibox-v0.17.5-aarch64-apple-darwin ~/.local/bin/aibox
 chmod +x ~/.local/bin/aibox
 ```
 
@@ -70,10 +70,10 @@ Available binaries:
 
 | Platform | File |
 |----------|------|
-| macOS ARM64 (Apple Silicon) | `aibox-v0.8.0-aarch64-apple-darwin.tar.gz` |
-| macOS x86_64 (Intel) | `aibox-v0.8.0-x86_64-apple-darwin.tar.gz` |
-| Linux ARM64 | `aibox-v0.8.0-aarch64-unknown-linux-gnu.tar.gz` |
-| Linux x86_64 | `aibox-v0.8.0-x86_64-unknown-linux-gnu.tar.gz` |
+| macOS ARM64 (Apple Silicon) | `aibox-v0.17.5-aarch64-apple-darwin.tar.gz` |
+| macOS x86_64 (Intel) | `aibox-v0.17.5-x86_64-apple-darwin.tar.gz` |
+| Linux ARM64 | `aibox-v0.17.5-aarch64-unknown-linux-gnu.tar.gz` |
+| Linux x86_64 | `aibox-v0.17.5-x86_64-unknown-linux-gnu.tar.gz` |
 
 ## Build from source
 
@@ -91,7 +91,7 @@ Installs the binary to `~/.cargo/bin/`.
 
 ```bash
 aibox --version
-# aibox 0.8.0
+# aibox 0.17.5
 ```
 
 ## Shell completions

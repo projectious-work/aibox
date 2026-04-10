@@ -26,7 +26,7 @@ If you prefer to write it by hand:
 
 ```toml
 [aibox]
-version = "0.16.0"
+version = "0.17.5"
 base    = "debian"
 
 [container]
@@ -40,7 +40,7 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.6.0"   # Pin a real tag — "unset" skips fetching
+version = "v0.8.0"
 
 [ai]
 providers = ["claude"]
@@ -51,7 +51,7 @@ enabled = false
 
 :::tip Pin processkit before sync
 
-Set `[processkit].version` to a real tag (e.g. `v0.6.0`) before the first
+Set `[processkit].version` to a real tag (e.g. `v0.8.0`) before the first
 `aibox sync`. The default sentinel `unset` skips processkit content
 installation entirely — you will get devcontainer files but no skills,
 processes, or `AGENTS.md`.
@@ -84,9 +84,8 @@ If your project already has a `.devcontainer/` directory with hand-written files
    ```
 2. Run `aibox sync` -- it will overwrite the existing files
 3. Move any custom configuration into `aibox.toml`:
-   - Extra apt packages go in `container.extra_packages`
-   - Port mappings go in `container.ports`
-   - Environment variables go in `container.environment`
+   - Environment variables go in `[container.environment]`
+   - Bind mounts go in `[[container.extra_volumes]]` (or `.aibox-local.toml` for secrets and per-developer paths)
 4. Rebuild: `aibox sync --no-cache`
 
 ### Option B: Keep hand-written files
@@ -158,10 +157,10 @@ The `migrations/` directory in the aibox repository contains ready-made
 
 ### Common gaps to watch for
 
-- **Node.js version pinning** -- `extra_packages` installs the Debian version, not NodeSource LTS. Pin via a post-create script if needed.
+- **Node.js version pinning** -- the `node` addon installs the Debian version; pin via a post-create script if you need NodeSource LTS.
 - **postCreateCommand** -- use `post_create_command` in `[container]` config. For git identity, use `.aibox-home/.config/git/config` instead.
-- **VS Code extensions/settings** -- use `vscode_extensions` in `[container]` config to add project-specific extensions. For project-specific settings, keep a `.vscode/settings.json`.
-- **Third-party CLI tools** (Gemini, Jules) -- install via extra_packages or mount from host via extra_volumes.
+- **VS Code extensions/settings** -- the generated `devcontainer.json` works with VS Code Dev Containers. For project-specific settings, keep a `.vscode/settings.json`.
+- **Third-party CLI tools** (Gemini, Jules) -- mount from host via `[[container.extra_volumes]]`, or add installation to `post_create_command`.
 
 ## Build and Start
 

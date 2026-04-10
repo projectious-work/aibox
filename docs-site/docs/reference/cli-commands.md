@@ -15,6 +15,7 @@ These options apply to all commands:
 |--------|---------------------|---------|-------------|
 | `--config <PATH>` | -- | `./aibox.toml` | Path to configuration file |
 | `--log-level <LEVEL>` | `AIBOX_LOG_LEVEL` | `info` | Log verbosity: `trace`, `debug`, `info`, `warn`, `error` |
+| `-y`, `--yes` | -- | -- | Skip all confirmation prompts |
 
 ---
 
@@ -55,7 +56,7 @@ aibox init [OPTIONS]
    from the processkit scaffolding template at this point.
 
 > If `[processkit].version` is the sentinel `unset`, the processkit install step
-> is skipped — pin a real tag (e.g. `v0.6.0`) and re-run `aibox sync` to land
+> is skipped — pin a real tag (e.g. `v0.8.0`) and re-run `aibox sync` to land
 > the content.
 
 ### Examples
@@ -112,6 +113,7 @@ aibox sync [OPTIONS]
 | Option | Description |
 |--------|-------------|
 | `--no-cache` | Build the container image without using the layer cache |
+| `--no-build` | Skip the image build step — apply config-only changes without rebuilding |
 
 ### What It Does
 
@@ -215,7 +217,7 @@ aibox start [OPTIONS]
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--layout <LAYOUT>` | `dev` | Zellij layout: `dev`, `focus`, or `cowork` |
+| `--layout <LAYOUT>` | `dev` | Zellij layout: `dev`, `focus`, `cowork`, `cowork-swap`, `browse`, or `ai` |
 
 ### What It Does
 
@@ -236,7 +238,10 @@ This is the primary command for daily use. It handles the full lifecycle:
 |--------|-------------|
 | `dev` | Yazi (40%) + Vim (60%) side by side (default) |
 | `focus` | One tool per tab, fullscreen |
-| `cowork` | Yazi+Vim left, Claude right — side-by-side AI collaboration |
+| `cowork` | Yazi+Vim left, AI right — 50/50 split |
+| `cowork-swap` | Yazi+AI left (40%), Vim right (60%) |
+| `browse` | Yazi-focused with large preview and AI pane |
+| `ai` | AI-first: Yazi left (60%), AI agent right (40%) |
 
 All layouts include shared tabs for **git** (lazygit) and **shell** (extra bash).
 
@@ -738,18 +743,20 @@ Shows each add-on's name, tool count, and whether it's installed in the current 
 Add an add-on to `aibox.toml` and run sync.
 
 ```bash
-aibox addon add <name>
+aibox addon add <name> [--no-build]
 ```
 
-Inserts `[addons.<name>.tools]` with default-enabled tools into `aibox.toml`, then runs a full sync (regenerates files and rebuilds the image).
+Inserts `[addons.<name>.tools]` with default-enabled tools into `aibox.toml`, then runs a full sync (regenerates files and rebuilds the image). Use `--no-build` to update config files only without rebuilding the image.
 
 #### aibox addon remove
 
 Remove an add-on from `aibox.toml` and run sync.
 
 ```bash
-aibox addon remove <name>
+aibox addon remove <name> [--no-build]
 ```
+
+Use `--no-build` to remove the addon from config without triggering an image rebuild.
 
 #### aibox addon info
 
@@ -847,3 +854,234 @@ aibox audio setup --port 4715
 |------|---------|
 | 0 | Success (check passed or setup completed) |
 | 1 | Setup failed (e.g., brew install failed) |
+
+---
+
+## aibox migrate
+
+Manage schema and content migrations between aibox versions.
+
+Migration documents live under `context/migrations/{pending,in-progress,applied}/`. Each migration is a markdown file with a unique ID.
+
+### Subcommands
+
+#### aibox migrate continue
+
+Show pending and in-progress migrations, and refresh `context/migrations/INDEX.md`.
+
+```bash
+aibox migrate continue
+```
+
+#### aibox migrate start
+
+Transition a migration from `pending` to `in-progress`.
+
+```bash
+aibox migrate start <id>
+```
+
+#### aibox migrate apply
+
+Mark an in-progress migration as applied.
+
+```bash
+aibox migrate apply <id>
+```
+
+#### aibox migrate reject
+
+Move a migration to `applied/` with a rejection note.
+
+```bash
+aibox migrate reject <id> --reason <text>
+```
+
+### Examples
+
+```bash
+# See what needs attention
+aibox migrate continue
+
+# Start working on a migration
+aibox migrate start 0003-context-schema-v2
+
+# Mark it done
+aibox migrate apply 0003-context-schema-v2
+
+# Reject with a reason
+aibox migrate reject 0003-context-schema-v2 --reason "Not applicable — project predates this schema"
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Migration ID not found, or missing `--reason` for reject |
+
+---
+
+## aibox uninstall
+
+Remove the aibox CLI binary from its install location.
+
+:::warning This removes the CLI, not your project files
+`aibox uninstall` only removes the binary. Project files (`aibox.toml`, `.devcontainer/`, `context/`, etc.) are untouched. Use `aibox reset` to clean up project files.
+:::
+
+### Usage
+
+```bash
+aibox uninstall [OPTIONS]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Preview what would be removed without making changes |
+| `--purge` | Also remove `~/.aibox/` global config directory |
+
+### What It Does
+
+Removes the `aibox` binary from its install location. With `--purge`, also removes `~/.aibox/` (global configuration and cache).
+
+### Examples
+
+```bash
+# Preview what would be removed
+aibox uninstall --dry-run
+
+# Remove the binary
+aibox uninstall
+
+# Remove binary and global config
+aibox uninstall --purge
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Binary not found or removal failed |
+
+---
+
+## aibox kit
+
+Inspect installed processkit content — skills, processes, and packages.
+
+### Subcommands
+
+#### aibox kit list
+
+Show a summary of all installed processkit content.
+
+```bash
+aibox kit list
+```
+
+#### aibox kit skill list
+
+List available skills.
+
+```bash
+aibox kit skill list [--all] [--category <name>] [-o <format>]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Show all skills including those not in the active package scope |
+| `--category <name>` | Filter by category |
+| `-o <format>` | Output format (e.g. `json`, `table`) |
+
+#### aibox kit skill categories
+
+List all skill categories.
+
+```bash
+aibox kit skill categories
+```
+
+#### aibox kit skill info
+
+Show detailed information about a specific skill.
+
+```bash
+aibox kit skill info <name>
+```
+
+#### aibox kit skill install
+
+Add a skill to `[skills].include` in `aibox.toml`.
+
+```bash
+aibox kit skill install <name>
+```
+
+Updates `aibox.toml` only — does **not** run `aibox sync`. Run `aibox sync` afterwards to materialise the skill under `context/skills/`.
+
+#### aibox kit skill uninstall
+
+Add a skill to `[skills].exclude` in `aibox.toml`.
+
+```bash
+aibox kit skill uninstall <name>
+```
+
+Adjusts `aibox.toml` only — does **not** run `aibox sync`.
+
+#### aibox kit process list
+
+List available processes.
+
+```bash
+aibox kit process list [--all]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Show all processes, not just those in the active scope |
+
+#### aibox kit process info
+
+Show detailed information about a specific process.
+
+```bash
+aibox kit process info <name>
+```
+
+### Examples
+
+```bash
+# Overview of installed content
+aibox kit list
+
+# Browse skills by category
+aibox kit skill categories
+aibox kit skill list --category testing
+
+# Learn about a skill
+aibox kit skill info python-best-practices
+
+# Add a skill and apply
+aibox kit skill install fastapi-patterns
+aibox sync
+
+# Remove a skill
+aibox kit skill uninstall pandas-polars
+aibox sync
+
+# Browse processes
+aibox kit process list --all
+aibox kit process info code-review
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Skill or process name not found |

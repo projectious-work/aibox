@@ -1,73 +1,64 @@
-# aibox v0.17.4
+# aibox v0.17.5
 
-Patch release adding user-extensible bind mounts, personal credential overlays,
-and automatic migration of old processkit runtime settings out of `aibox.toml`.
+Compatibility release for processkit v0.8.0 (GrandLily src/ restructure).
 
-## New features
+## Breaking change in processkit
 
-### User-extensible bind mounts (`[[container.extra_volumes]]`)
+processkit v0.8.0 restructured its `src/` directory to be a literal mirror of
+the consumer project root. All content moved from flat top-level segments to
+`context/` sub-paths:
 
-Projects can now declare additional bind mounts in `aibox.toml`:
+| Content | Before (v0.7.0) | After (v0.8.0) |
+|---|---|---|
+| Skills | `src/skills/<name>/` | `src/context/skills/<name>/` |
+| Shared lib | `src/lib/processkit/` | `src/context/skills/_lib/processkit/` |
+| Schemas | `src/primitives/schemas/` | `src/context/schemas/` |
+| State machines | `src/primitives/state-machines/` | `src/context/state-machines/` |
+| AGENTS.md template | `src/scaffolding/AGENTS.md` | `src/AGENTS.md` |
+| Packages | `src/packages/` | `src/.processkit/packages/` |
+| FORMAT.md | `src/skills/FORMAT.md` | `src/.processkit/FORMAT.md` |
 
-```toml
-[[container.extra_volumes]]
-source = "/home/user/.local/share/fish"
-target = "/home/aibox/.local/share/fish"
+The **live install destinations are unchanged** — `context/skills/`,
+`context/schemas/`, etc. — so existing projects are unaffected structurally.
+Only the aibox installer and sync machinery needed updating.
 
-[[container.extra_volumes]]
-source = "/data/models"
-target = "/home/aibox/models"
-read_only = true
-```
+## What changed in aibox
 
-Volumes are appended after the built-in aibox mounts in `docker-compose.yml`.
-Path traversal (`..`) is rejected at load time.
+### Installer routing (`content_install.rs`)
 
-### Personal credential overlay (`.aibox-local.toml`)
+`install_action_for()` now handles both v0.8.0+ and legacy v0.7.0 layouts in
+one function. The two prefix sets are disjoint (`context/` vs. bare names) so
+no version check is needed — projects pinned to v0.7.0 continue to install and
+sync correctly with the new aibox binary.
 
-A gitignored `.aibox-local.toml` file can be placed alongside `aibox.toml` to
-declare per-developer credentials and extra mounts without touching the shared
-config:
+New v0.8.0 routing: `context/...` paths install at the same path (the tarball
+already mirrors the consumer root); `AGENTS.md` at the tarball root installs
+as a rendered template; `.processkit/...` is skipped as catalog-only content.
 
-```toml
-[container.environment]
-GITHUB_TOKEN = "ghp_..."
-OPENAI_API_KEY = "sk-..."
+### Diff grouping (`lock.rs`)
 
-[[container.extra_volumes]]
-source = "/home/user/.config/gh"
-target = "/home/aibox/.config/gh"
-```
+`group_for_path()` updated to match v0.8.0 PROVENANCE.toml paths
+(`context/skills/<name>/...` → group `skills/<name>`, etc.) alongside the
+legacy grouping. Group name strings are identical across both layouts, so the
+3-way diff logic is unaffected.
 
-Environment variables from `.aibox-local.toml` win on conflict with `aibox.toml`.
-Extra volumes are additive. `aibox context` now warns if `.aibox-local.toml` is
-missing from `.gitignore`.
+### Templates mirror consumers
 
-### Cargo registry mounts (rust addon)
+All code that navigates into the templates mirror (`kit`, `mcp_registration`,
+`claude_commands`, `content_init`) now uses three new helpers from
+`processkit_vocab`:
 
-When the `rust` addon is enabled, `aibox sync` now mounts the host cargo
-registry into the container to avoid re-downloading crates on rebuild:
+- `mirror_skills_dir(root, version)` — tries v0.8.0 path first, falls back to legacy
+- `mirror_processes_dir(root, version)` — same pattern
+- `mirror_packages_dir(root, version)` — tries `.processkit/packages/`, falls back to `packages/`
 
-```
-~/.cargo/registry  →  /home/aibox/.cargo/registry
-~/.cargo/git       →  /home/aibox/.cargo/git
-```
+### Vocabulary constants (`processkit_vocab.rs`)
 
-Only the registry cache is mounted — `~/.cargo/bin` is intentionally excluded
-because host-compiled binaries won't run inside the container.
+`pub mod src` restructured for v0.8.0: new `CONTEXT_DIR`, `LIB_SEGMENT`,
+`DOTPROCESSKIT` constants; legacy constants preserved as `LEGACY_*` for
+backward-compat routing. `PROCESSKIT_DEFAULT_VERSION` bumped to `v0.8.0`.
 
-## Migration: processkit runtime settings (aibox#38)
+### `maintain.sh`
 
-`aibox sync` now detects and migrates old processkit runtime settings that were
-previously written directly into `aibox.toml [context]`:
-
-| Old key in `[context]`         | Migrated to                                              |
-|-------------------------------|----------------------------------------------------------|
-| `id_format`, `id_slug`        | `context/skills/id-management/config/settings.toml`     |
-| `directories`, `sharding`, `index` | `context/skills/index-management/config/settings.toml` |
-
-After migration the keys are removed from `aibox.toml` while preserving all
-comments and formatting. The migration is idempotent — if a `settings.toml`
-already exists (agent already set it up), the old keys are removed without
-overwriting the file. Unknown keys (`budget`, `grooming`, …) are left in place
-with a warning.
+`sync-processkit` now fetches `src/.processkit/FORMAT.md` (was
+`src/skills/FORMAT.md`) for vocabulary diffing.

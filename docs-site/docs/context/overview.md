@@ -53,13 +53,13 @@ my-project/
     ├── state-machines/             # state machine definitions
     └── templates/
         └── processkit/
-            └── v0.6.0/             # Immutable upstream snapshot — base of three-way diffs
+            └── v0.8.0/             # Immutable upstream snapshot — base of three-way diffs
 ```
 
 ### AGENTS.md, CLAUDE.md, and provider files
 
 `AGENTS.md` at the project root is the **canonical** agent entry document. It
-is rendered from the processkit scaffolding template (`src/scaffolding/AGENTS.md`)
+is rendered from the processkit template (`AGENTS.md` at the processkit tarball root)
 during `aibox init` (write-if-missing — never overwrites). The
 [agents.md](https://agents.md/) ecosystem convention is to read this file from
 any AI harness.
@@ -107,7 +107,7 @@ version = "0.16.0"
 schema_version = "1.0.0"
 
 [processkit]
-version = "v0.6.0"
+version = "v0.8.0"
 ```
 
 When the schema evolves, `aibox doctor` flags version mismatches and `aibox sync`
@@ -125,7 +125,7 @@ packages = ["managed"]
 
 [processkit]
 source  = "https://github.com/projectious-work/processkit.git"
-version = "v0.6.0"
+version = "v0.8.0"
 ```
 
 Run `aibox sync` after editing `[processkit].version` to pull a new release.

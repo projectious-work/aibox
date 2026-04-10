@@ -20,10 +20,6 @@ Anything you wrote into it by hand should be moved into `AGENTS.md`,
 `context/DECISIONS.md`, or one of the work-instructions files, depending on
 its nature.
 
-The `[skills]` section in `aibox.toml` still parses but is **reserved / no-op**
-in v0.16.0. Every project gets every processkit skill installed under
-`context/skills/` regardless of `include`/`exclude`.
-
 :::
 
 ## How Version Tracking Works
@@ -71,64 +67,45 @@ Example output when migration is needed:
 
 ## Migration Artifacts
 
-When a version mismatch is detected, `doctor` generates files in `.aibox/migration/`:
+When a version mismatch is detected, `doctor` generates migration artifacts in
+`context/migrations/`:
 
 ```
-.aibox/
-└── migration/
-    ├── schema-diff.md        # What changed between versions
-    ├── migration-prompt.md   # Instructions for an AI agent to apply the migration
-    └── checklist.md          # Manual checklist of required changes
+context/
+└── migrations/
+    ├── pending/       # Migrations queued but not yet started
+    ├── in-progress/   # Migration currently being applied
+    └── applied/       # Completed migrations (archived for reference)
 ```
 
-### schema-diff.md
+Each migration is identified by a MIG-ID and lives as a versioned document in
+the appropriate subdirectory. Migrations are managed via the `aibox migrate`
+commands:
 
-Documents the differences between the old and new schema versions:
-
-- New files that should be created
-- Files that have been renamed or moved
-- Structural changes to existing files
-- Removed files (if any)
-
-### migration-prompt.md
-
-A ready-to-use prompt for an AI agent (like Claude Code) that describes exactly what needs to change. You can paste this into a conversation to have the agent apply the migration:
-
-```markdown
-The project needs to migrate from context schema v0.9.0 to v1.0.0.
-
-Changes required:
-1. Create context/work-instructions/TEAM.md with the following template: ...
-2. Rename context/NOTES.md to context/project-notes/README.md
-3. Add the `schema_version` field to the [context] section of aibox.toml
-```
-
-### checklist.md
-
-A human-readable checklist for manual migration:
-
-```markdown
-- [ ] Create context/work-instructions/TEAM.md
-- [ ] Move context/NOTES.md to context/project-notes/README.md
-- [ ] Update [context] section in aibox.toml
-- [ ] Update .aibox-version to 1.0.0
+```bash
+aibox migrate start    # begin the next pending migration
+aibox migrate continue # resume an in-progress migration
+aibox migrate apply    # mark the current migration as applied
+aibox migrate reject   # reject and archive a migration without applying
 ```
 
 ## Applying a Migration
 
 ### With an AI agent (recommended)
 
-1. Run `aibox doctor` to generate migration artifacts
-2. Open `.aibox/migration/migration-prompt.md`
-3. Paste its contents into a Claude Code session
-4. Review the changes the agent makes
-5. Update `.aibox-version` to the new version
+1. Run `aibox doctor` to identify gaps and queue migration artifacts
+2. Run `aibox migrate start` to begin the next pending migration
+3. Open the migration document from `context/migrations/in-progress/`
+4. Paste its contents into a Claude Code session (or let the agent find it via `AGENTS.md`)
+5. Review the changes the agent makes
+6. Run `aibox migrate apply` to mark the migration complete
 
 ### Manually
 
 1. Run `aibox doctor` to generate migration artifacts
-2. Follow `.aibox/migration/checklist.md`
-3. Update `.aibox-version` to the new version
+2. Run `aibox migrate start` to move the next migration to `context/migrations/in-progress/`
+3. Follow the migration document's checklist
+4. Run `aibox migrate apply` to archive the migration to `context/migrations/applied/`
 
 :::warning Review before applying
 
