@@ -44,12 +44,10 @@ impl std::fmt::Display for Layout {
     }
 }
 
-#[derive(Parser)]
-#[command(
-    name = "aibox",
-    about = "Manage AI-ready development container environments",
-    long_about = "\
-aibox — manage AI-ready development container environments
+const LONG_ABOUT: &str = concat!(
+    "aibox v",
+    env!("CARGO_PKG_VERSION"),
+    " — manage AI-ready development container environments
 
 aibox creates reproducible, containerized development environments with
 built-in AI context structure and work process management.
@@ -64,7 +62,14 @@ Examples:
   aibox start --layout focus                 Start with a specific layout
   aibox doctor                               Validate project structure
   aibox update --check                       Check for newer versions
-  aibox audio check                          Diagnose host audio setup",
+  aibox audio check                          Diagnose host audio setup"
+);
+
+#[derive(Parser)]
+#[command(
+    name = "aibox",
+    about = "Manage AI-ready development container environments",
+    long_about = LONG_ABOUT,
     version
 )]
 pub struct Cli {
