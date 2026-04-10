@@ -10,14 +10,14 @@ export default function Features() {
         <h2>Single Base Image + Add-ons</h2>
         <p>One base-debian image provides the foundation. Everything else — Python, Rust, Node, LaTeX, Kubernetes tools — is a declarative add-on with per-tool version selection.</p>
 
-        <h2>13 Composable Process Packages</h2>
-        <p>No more one-size-fits-all. Pick the packages that match your project: tracking, standups, handover, code, research, documentation, design, architecture, security, data, operations, and product management.</p>
+        <h2>5 Process Packages</h2>
+        <p>minimal, managed, software, research, product — composable tiers that install the right skill set for your project type. Select in aibox.toml; switch any time with aibox sync.</p>
 
-        <h2>83 Curated AI Skills</h2>
-        <p>Each skill follows the SKILL.md standard with progressive disclosure: trigger conditions, structured instructions, and real examples. Skills are selectively deployed based on your process packages.</p>
+        <h2>Curated AI Skills via processkit</h2>
+        <p>Skills follow the open SKILL.md standard with progressive disclosure: trigger conditions, structured instructions, and real examples. The skill catalogue is owned and versioned by <a href="https://github.com/projectious-work/processkit">processkit</a>; aibox handles installation and sync.</p>
 
-        <h2>6 Color Themes</h2>
-        <p>Gruvbox Dark, Catppuccin Mocha, Catppuccin Latte, Dracula, Tokyo Night, and Nord — applied consistently across Zellij, Vim, Yazi, lazygit, and Starship.</p>
+        <h2>7 Color Themes</h2>
+        <p>Gruvbox Dark, Catppuccin Mocha, Catppuccin Latte, Dracula, Tokyo Night, Nord, and Projectious — applied consistently across Zellij, Vim, Yazi, lazygit, and Starship.</p>
 
         <h2>Declarative Configuration</h2>
         <p>One aibox.toml controls everything: base image, add-ons with versions, process packages, skill selection, themes, and AI providers. Run aibox sync to reconcile.</p>

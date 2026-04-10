@@ -32,16 +32,16 @@ const features = [
     description: 'From zero to a fully configured dev environment with aibox init. Container, AI context, skills, and theming — all scaffolded.',
   },
   {
-    title: '13 Process Packages',
-    description: 'Composable workflow packages: tracking, code, research, design, security, operations, and more. Pick what fits your project.',
+    title: '5 Process Packages',
+    description: 'minimal, managed, software, research, product — pick the one that fits your project and get the right set of agent skills installed automatically.',
   },
   {
-    title: '83 Curated Skills',
-    description: 'Vetted AI agent skills with progressive disclosure. Not skill slop — each skill is handcrafted with examples and reference files.',
+    title: 'Curated Skills via processkit',
+    description: 'Vetted AI agent skills following the open SKILL.md standard — handcrafted with examples and reference files, managed by processkit and installed by aibox.',
   },
   {
-    title: '17 Add-ons',
-    description: 'Python, Rust, Node, LaTeX, Kubernetes, and more — each with per-tool version selection from curated lists.',
+    title: '25 Add-ons',
+    description: 'Python, Rust, Node, Go, LaTeX, Kubernetes, cloud providers, docs frameworks, and more — each with per-tool version selection from curated lists.',
   },
 ];
 
@@ -73,9 +73,9 @@ function QuickStart() {
     <section className={styles.quickstart}>
       <div className="container">
         <h2>Quick Start</h2>
-        <pre><code>{`curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/install.sh | sh
-aibox init --name my-project --base debian
-aibox build && aibox start`}</code></pre>
+        <pre><code>{`curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash
+aibox init --name my-project
+aibox sync && aibox start`}</code></pre>
       </div>
     </section>
   );
