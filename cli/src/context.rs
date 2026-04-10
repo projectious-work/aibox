@@ -344,13 +344,22 @@ pub(crate) fn update_gitignore(addons: &AddonsSection) -> Result<()> {
     content.push_str(
         "# ── OS generated files ───────────────────────────────────────────────────────\n",
     );
+    // macOS
     content.push_str(".DS_Store\n");
     content.push_str(".DS_Store?\n");
     content.push_str("._*\n");
     content.push_str(".Spotlight-V100\n");
     content.push_str(".Trashes\n");
+    // Linux
+    content.push_str(".Trash-*/\n");
+    content.push_str(".fuse_tmp*\n");
+    content.push_str(".directory\n");
+    content.push_str(".nfs*\n");
+    // Windows
     content.push_str("Thumbs.db\n");
-    content.push_str("ehthumbs.db\n\n");
+    content.push_str("ehthumbs.db\n");
+    content.push_str("Desktop.ini\n");
+    content.push_str("$RECYCLE.BIN/\n\n");
 
     // Editor/IDE
     content.push_str(

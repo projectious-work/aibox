@@ -86,6 +86,22 @@ v0.16.0:
 If something process-related is missing, add it to processkit, not
 aibox.
 
+## Runtime artifacts for agents (derived projects)
+
+When an AI agent is working inside a project that uses aibox, the following
+runtime files are available for orientation — they are gitignored but always
+present after the first `aibox sync`:
+
+| Path | Contents |
+|------|----------|
+| `.aibox/aibox.log` | NDJSON structured log of every `aibox` command run in this project. One line per invocation with timestamp, command, outcome, and key fields. Rotates at 1 MB (→ `aibox.log.1`). **Read this to understand what aibox did recently.** |
+| `aibox.lock` | Pinned versions of the aibox CLI and processkit that were last synced. |
+| `context/migrations/` | Migration briefings generated when the CLI version changed. Review any unread ones before starting work. |
+
+> **Note for agents:** If you are unsure whether processkit content is current
+> or what the last sync did, read `.aibox/aibox.log` — it is the ground truth
+> for recent aibox activity.
+
 ## GitHub organization
 
 - **Repo:** `projectious-work/aibox`

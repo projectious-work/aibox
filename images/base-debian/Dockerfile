@@ -323,6 +323,7 @@ COPY config/zellij/layouts/cowork.kdl  /home/aibox/.config/zellij/layouts/cowork
 COPY config/yazi/yazi.toml             /home/aibox/.config/yazi/yazi.toml
 COPY config/yazi/keymap.toml           /home/aibox/.config/yazi/keymap.toml
 COPY config/yazi/theme.toml            /home/aibox/.config/yazi/theme.toml
+COPY config/yazi/init.lua              /home/aibox/.config/yazi/init.lua
 COPY config/yazi/themes/               /home/aibox/.config/yazi/themes/
 COPY config/yazi/plugins/              /home/aibox/.config/yazi/plugins/
 

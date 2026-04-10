@@ -37,6 +37,14 @@ image_filter = "nearest"
 #   .excalidraw — JSON-based design files; no TUI preview possible. Yazi falls
 #     back to text preview automatically (known limitation: raw JSON is shown).
 [plugin]
+# git.yazi: run before built-in fetchers so git status is available for all
+# files and directories. init.lua calls require("git"):setup {} to register
+# the linemode renderer that shows status signs next to file names.
+prepend_fetchers = [
+    { id = "git", url = "*",  run = "git" },
+    { id = "git", url = "*/", run = "git" },
+]
+
 prepend_previewers = [
     # SVG: convert to raster with resvg, then display as image
     { name = "*.svg", run = "svg" },

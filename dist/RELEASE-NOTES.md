@@ -1,26 +1,57 @@
-# aibox v0.17.11
+# aibox v0.17.12
 
-Bug-fix release: `[aibox].version = "latest"` no longer generates a broken Dockerfile.
+Feature release: Yazi git status integration, complete OS gitignore entries, and
+improved processkit migration guidance for agents.
 No processkit version change — still compatible with v0.8.0.
 
-## Fix: `[aibox].version = "latest"` produced invalid Docker image tag
+## Yazi git status integration (`git.yazi`)
 
-When `[aibox].version = "latest"` was set, `aibox sync` generated:
+Yazi now shows git file status (modified, untracked, ignored, staged, deleted)
+inline in the file list — similar to VS Code's file explorer. The official
+`git.yazi` plugin from `yazi-rs/plugins` is bundled directly in the base image.
 
-```dockerfile
-FROM ghcr.io/projectious-work/aibox:base-debian-vlatest AS aibox
+Signs displayed next to file names:
+- ` ` modified
+- ` ` added/staged
+- ` ` deleted
+- `? ` untracked
+- ` ` ignored (dimmed)
+
+Status propagates up to parent directories automatically. No configuration
+needed — enabled by default in all aibox containers.
+
+## Complete OS-specific gitignore entries
+
+New `.gitignore` files created by `aibox init` now include entries for all
+three major OS families:
+
+**Linux** (new): `.Trash-*/`, `.fuse_tmp*`, `.directory`, `.nfs*`
+**Windows** (expanded): added `Desktop.ini`, `$RECYCLE.BIN/`
+**macOS**: unchanged
+
+Existing `.gitignore` files are not modified (OS entries are informational
+defaults, not enforced aibox entries).
+
+## Template-snapshot diff guidance in migration documents
+
+Migration briefings now explicitly instruct agents to diff the **old processkit
+template snapshot** against the **new one** when reviewing template changes
+(e.g. `AGENTS.md`), rather than diffing the customized installed file against
+the new template.
+
+Comparing installed (customized) vs new template produces noise from project
+customizations that hides real upstream changes. The correct workflow:
+
+```
+diff context/templates/processkit/v{old}/AGENTS.md \
+     context/templates/processkit/v{new}/AGENTS.md
 ```
 
-The tag `base-debian-vlatest` does not exist in GHCR (image tags follow
-`base-<flavor>-v<semver>`), causing the Docker build to fail.
+Then apply only the upstream delta onto the customized installed file.
 
-The fix mirrors how processkit's `"latest"` is handled: `cmd_sync` now resolves
-`[aibox].version = "latest"` to a concrete image version via the GHCR tags API
-before Dockerfile generation, and logs the resolved version:
+## AGENTS.md: runtime artifacts for agents
 
-```
-==> Resolved aibox image 'latest' → v0.17.11
-```
-
-The `"latest"` sentinel stays in `aibox.toml`; only the generated `Dockerfile`
-uses the concrete resolved tag.
+Added a "Runtime artifacts for agents" section documenting `.aibox/aibox.log`
+(NDJSON structured log of every aibox command), `aibox.lock`, and
+`context/migrations/` — with explicit guidance for agents to read the log to
+understand recent aibox activity.

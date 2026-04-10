@@ -90,6 +90,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.8.0",
         note: "fix: [aibox].version = \"latest\" resolved to concrete image tag before Dockerfile generation",
     },
+    CompatEntry {
+        aibox_version: "0.17.12",
+        processkit_version: "v0.8.0",
+        note: "yazi git.yazi plugin; Linux/Windows gitignore entries; template-snapshot diff guidance in migration docs",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

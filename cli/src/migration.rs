@@ -302,6 +302,11 @@ fn format_migration_doc(
         .unwrap_or("not configured");
     let effective_pk_version = effective_pk_version.trim_start_matches('v');
 
+    // Previous processkit version (from lock) — used to guide template diffing.
+    let prev_pk_version = pk
+        .map(|p| p.version.trim_start_matches('v').to_string())
+        .unwrap_or_default();
+
     // Build processkit header line.
     let pk_line = if effective_pk_version == "not configured" {
         "not configured".to_string()
@@ -363,6 +368,14 @@ fn format_migration_doc(
         }
     };
 
+    // Snapshot dir label for template diffs: "v0.8.0" if previous version known,
+    // otherwise a generic placeholder.
+    let prev_pk_snapshot_dir = if prev_pk_version.is_empty() {
+        "v<previous-version>".to_string()
+    } else {
+        format!("v{}", prev_pk_version)
+    };
+
     format!(
         "\
 # Migration: v{from} \u{2192} v{to}
@@ -417,6 +430,13 @@ and discuss action items with the project owner.
 - [ ] Check `/workspace/context/migrations/pending/` for processkit content migration files:
       - Use `skill-finder` to locate the processkit migration skill, then work through each
         file with the owner in chronological order — do NOT handle migrations manually
+      - **When reviewing template files like `AGENTS.md`:** do NOT diff the installed
+        (customized) file against the new template — that creates noise from project
+        customizations, hiding real upstream changes. Instead, diff the two template
+        snapshots to see only what changed in the upstream:
+        `diff context/templates/processkit/{prev_pk_snapshot_dir}/AGENTS.md \
+context/templates/processkit/v{effective_pk_version}/AGENTS.md`
+        Then apply only those delta changes on top of the customized installed file.
 - [ ] Mark this migration as completed (change Status to \"completed\")
 
 ## processkit State
