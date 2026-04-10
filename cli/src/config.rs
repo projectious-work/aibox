@@ -262,7 +262,6 @@ impl Default for AiSection {
     }
 }
 
-
 // ---------------------------------------------------------------------------
 // [addons] section — REWRITTEN
 // ---------------------------------------------------------------------------
@@ -423,13 +422,13 @@ fn default_theme() -> Theme {
 #[clap(rename_all = "kebab-case")]
 pub enum StarshipPreset {
     #[default]
-    Default,       // Clean, informative — dir, git, language, duration
-    Plain,         // ASCII only — no Nerd Font needed
-    Minimal,       // Just directory + git branch
-    NerdFont,      // Full Nerd Font symbols
-    Pastel,        // Soft powerline segments
-    Bracketed,     // [segments] in brackets
-    Arrow,         // Powerline-style chevron/arrow segments (airline-style)
+    Default, // Clean, informative — dir, git, language, duration
+    Plain,     // ASCII only — no Nerd Font needed
+    Minimal,   // Just directory + git branch
+    NerdFont,  // Full Nerd Font symbols
+    Pastel,    // Soft powerline segments
+    Bracketed, // [segments] in brackets
+    Arrow,     // Powerline-style chevron/arrow segments (airline-style)
 }
 
 impl std::fmt::Display for StarshipPreset {
@@ -810,23 +809,27 @@ impl AiboxConfig {
     pub fn load_or_default() -> Result<Self> {
         let path = PathBuf::from("aibox.toml");
         if !path.exists() {
-            bail!(
-                "No aibox.toml found in the current directory. Run 'aibox init' to create one."
-            );
+            bail!("No aibox.toml found in the current directory. Run 'aibox init' to create one.");
         }
         let mut config = Self::load(&path)?;
 
         // Merge .aibox-local.toml if present (gitignored personal overlay).
         let local_path = PathBuf::from(".aibox-local.toml");
         if local_path.exists() {
-            let local_content = std::fs::read_to_string(&local_path)
-                .context("Failed to read .aibox-local.toml")?;
-            let local: AiboxLocalConfig = toml::from_str(&local_content)
-                .context("Failed to parse .aibox-local.toml")?;
+            let local_content =
+                std::fs::read_to_string(&local_path).context("Failed to read .aibox-local.toml")?;
+            let local: AiboxLocalConfig =
+                toml::from_str(&local_content).context("Failed to parse .aibox-local.toml")?;
             // Environment: local wins on key conflicts.
-            config.container.environment.extend(local.container.environment);
+            config
+                .container
+                .environment
+                .extend(local.container.environment);
             // Extra volumes: additive.
-            config.container.extra_volumes.extend(local.container.extra_volumes);
+            config
+                .container
+                .extra_volumes
+                .extend(local.container.extra_volumes);
             // Validate merged extra_volumes from both sources.
             config.validate_extra_volumes()?;
         }
@@ -1021,9 +1024,9 @@ impl AiboxConfig {
             // shape (e.g. "0.4", "1.0.0-rc1").
             let semver_ok = semver::Version::parse(stripped).is_ok();
             let relaxed_ok = !stripped.is_empty()
-                && stripped.chars().all(|c| {
-                    c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '+')
-                })
+                && stripped
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '+'))
                 && stripped.chars().any(|c| c.is_ascii_digit());
             if !semver_ok && !relaxed_ok {
                 bail!(
@@ -1283,10 +1286,7 @@ name = "my-project"
         assert!(config.addons.has_addon("cloud-aws"));
 
         // Check specific tool versions
-        assert_eq!(
-            config.addons.tool_version("python", "python"),
-            Some("3.13")
-        );
+        assert_eq!(config.addons.tool_version("python", "python"), Some("3.13"));
         assert_eq!(config.addons.tool_version("python", "uv"), Some("0.7"));
         assert_eq!(config.addons.tool_version("rust", "rustc"), Some("1.87"));
         assert_eq!(config.addons.tool_version("rust", "clippy"), None);
@@ -1642,10 +1642,7 @@ name = "test"
 packages = ["managed", "code", "research"]
 "#;
         let config = parse_toml(toml).unwrap();
-        assert_eq!(
-            config.context.packages,
-            vec!["managed", "code", "research"]
-        );
+        assert_eq!(config.context.packages, vec!["managed", "code", "research"]);
     }
 
     // -- Skills section -----------------------------------------------------
@@ -2017,9 +2014,8 @@ source = "https://github.com/projectious-work/processkit.git"
 version = "{ver}"
 "#
             );
-            parse_toml(&toml).unwrap_or_else(|e| {
-                panic!("version {ver} should validate, but got error: {e}")
-            });
+            parse_toml(&toml)
+                .unwrap_or_else(|e| panic!("version {ver} should validate, but got error: {e}"));
         }
     }
 
@@ -2083,7 +2079,10 @@ read_only = true
         let config = AiboxConfig::from_str(toml).unwrap();
         assert_eq!(config.container.extra_volumes.len(), 2);
         assert_eq!(config.container.extra_volumes[0].source, "~/.config/gh");
-        assert_eq!(config.container.extra_volumes[0].target, "/home/aibox/.config/gh");
+        assert_eq!(
+            config.container.extra_volumes[0].target,
+            "/home/aibox/.config/gh"
+        );
         assert!(!config.container.extra_volumes[0].read_only);
         assert!(config.container.extra_volumes[1].read_only);
     }
@@ -2101,8 +2100,22 @@ GH_TOKEN = "ghp_abc"
 MY_VAR = "hello"
 "#;
         let config = AiboxConfig::from_str(toml).unwrap();
-        assert_eq!(config.container.environment.get("GH_TOKEN").map(|s| s.as_str()), Some("ghp_abc"));
-        assert_eq!(config.container.environment.get("MY_VAR").map(|s| s.as_str()), Some("hello"));
+        assert_eq!(
+            config
+                .container
+                .environment
+                .get("GH_TOKEN")
+                .map(|s| s.as_str()),
+            Some("ghp_abc")
+        );
+        assert_eq!(
+            config
+                .container
+                .environment
+                .get("MY_VAR")
+                .map(|s| s.as_str()),
+            Some("hello")
+        );
     }
 
     #[test]
@@ -2177,8 +2190,22 @@ target = "/home/aibox/.config/gh"
         std::env::set_current_dir(orig).unwrap();
 
         // Local env merged: GH_TOKEN added, SHARED overridden by local
-        assert_eq!(config.container.environment.get("GH_TOKEN").map(|s| s.as_str()), Some("ghp_secret"));
-        assert_eq!(config.container.environment.get("SHARED").map(|s| s.as_str()), Some("local-wins"));
+        assert_eq!(
+            config
+                .container
+                .environment
+                .get("GH_TOKEN")
+                .map(|s| s.as_str()),
+            Some("ghp_secret")
+        );
+        assert_eq!(
+            config
+                .container
+                .environment
+                .get("SHARED")
+                .map(|s| s.as_str()),
+            Some("local-wins")
+        );
         // Volume appended
         assert_eq!(config.container.extra_volumes.len(), 1);
         assert_eq!(config.container.extra_volumes[0].source, "~/.config/gh");

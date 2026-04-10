@@ -132,12 +132,15 @@ fn load_from_dir(dir: &Path) -> Result<Vec<LoadedAddon>> {
         let path = entry.path();
         if path.is_dir() {
             // Category subdirectory — read YAML files inside
-            for file_entry in fs::read_dir(&path)
-                .with_context(|| format!("Failed to read {}", path.display()))?
+            for file_entry in
+                fs::read_dir(&path).with_context(|| format!("Failed to read {}", path.display()))?
             {
                 let file_entry = file_entry?;
                 let file_path = file_entry.path();
-                if file_path.extension().is_some_and(|e| e == "yaml" || e == "yml") {
+                if file_path
+                    .extension()
+                    .is_some_and(|e| e == "yaml" || e == "yml")
+                {
                     let addon = load_yaml_file(&file_path)?;
                     addons.push(addon);
                 }
@@ -296,9 +299,7 @@ fn build_template_context(
     let mut tool_map = HashMap::new();
 
     for tool_def in &addon.tools {
-        let enabled = tools
-            .get(&tool_def.name)
-            .is_some_and(|t| t.enabled);
+        let enabled = tools.get(&tool_def.name).is_some_and(|t| t.enabled);
 
         // "latest" is a sentinel that explicitly opts out of version pinning.
         // It maps to an empty version string so templates that check
@@ -314,7 +315,10 @@ fn build_template_context(
         entry.insert("enabled".to_string(), minijinja::Value::from(enabled));
         entry.insert("version".to_string(), minijinja::Value::from(version));
         entry.insert("pinned".to_string(), minijinja::Value::from(pinned));
-        tool_map.insert(tool_def.name.clone(), minijinja::Value::from_serialize(&entry));
+        tool_map.insert(
+            tool_def.name.clone(),
+            minijinja::Value::from_serialize(&entry),
+        );
     }
 
     minijinja::Value::from_serialize(HashMap::from([("tools", tool_map)]))
@@ -338,18 +342,18 @@ pub fn render_builder(
 
     let tmpl = env.get_template("builder").unwrap();
     let ctx = build_template_context(addon, tools);
-    let rendered = tmpl
-        .render(&ctx)
-        .with_context(|| format!("Failed to render builder template for addon '{}'", addon.name))?;
+    let rendered = tmpl.render(&ctx).with_context(|| {
+        format!(
+            "Failed to render builder template for addon '{}'",
+            addon.name
+        )
+    })?;
 
     Ok(Some(rendered))
 }
 
 /// Render the runtime commands template for an addon.
-pub fn render_runtime(
-    addon: &LoadedAddon,
-    tools: &HashMap<String, ToolConfig>,
-) -> Result<String> {
+pub fn render_runtime(addon: &LoadedAddon, tools: &HashMap<String, ToolConfig>) -> Result<String> {
     let template_str = match &addon.runtime_template {
         Some(t) => t,
         None => return Ok(String::new()),
@@ -363,9 +367,12 @@ pub fn render_runtime(
 
     let tmpl = env.get_template("runtime").unwrap();
     let ctx = build_template_context(addon, tools);
-    let rendered = tmpl
-        .render(&ctx)
-        .with_context(|| format!("Failed to render runtime template for addon '{}'", addon.name))?;
+    let rendered = tmpl.render(&ctx).with_context(|| {
+        format!(
+            "Failed to render runtime template for addon '{}'",
+            addon.name
+        )
+    })?;
 
     Ok(rendered)
 }
@@ -560,7 +567,11 @@ runtime: |
         let result = load_from_dir(Path::new("/nonexistent/path"));
         assert!(result.is_err());
         let err = result.unwrap_err().to_string();
-        assert!(err.contains("install script"), "error should mention install: {}", err);
+        assert!(
+            err.contains("install script"),
+            "error should mention install: {}",
+            err
+        );
     }
 
     #[test]
@@ -602,9 +613,12 @@ runtime: |
         // Verify `pinned` is also false
         let ctx = build_template_context(&addon, &tools);
         let pinned = ctx
-            .get_attr("tools").unwrap()
-            .get_attr("mytool").unwrap()
-            .get_attr("pinned").unwrap();
+            .get_attr("tools")
+            .unwrap()
+            .get_attr("mytool")
+            .unwrap()
+            .get_attr("pinned")
+            .unwrap();
         assert!(!pinned.is_true(), "pinned should be false for 'latest'");
     }
 
@@ -627,5 +641,4 @@ tools: []
         assert_eq!(addons[0].category, "AI Providers");
         assert_eq!(addons[0].description, "Test AI addon");
     }
-
 }

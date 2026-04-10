@@ -934,8 +934,14 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
         root.join(".config").join("zellij").join("themes"),
         root.join(".config").join("zellij").join("layouts"),
         root.join(".config").join("yazi"),
-        root.join(".config").join("yazi").join("plugins").join("eps.yazi"),
-        root.join(".config").join("yazi").join("plugins").join("svg.yazi"),
+        root.join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("eps.yazi"),
+        root.join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("svg.yazi"),
         root.join(".config").join("git"),
         root.join(".config").join("lazygit"),
     ];
@@ -981,7 +987,10 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
     // Seed config files (never overwrite)
     let theme = &config.customization.theme;
     let vimrc = DEFAULT_VIMRC
-        .replace("AIBOX_VIM_COLORSCHEME", crate::themes::vim_colorscheme(theme))
+        .replace(
+            "AIBOX_VIM_COLORSCHEME",
+            crate::themes::vim_colorscheme(theme),
+        )
         .replace("AIBOX_VIM_BG", crate::themes::vim_background(theme));
     seed_file(&root.join(".vim").join("vimrc"), &vimrc)?;
     seed_file(
@@ -1108,10 +1117,7 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
 
     // lazygit theme config
     seed_file(
-        &root
-            .join(".config")
-            .join("lazygit")
-            .join("config.yml"),
+        &root.join(".config").join("lazygit").join("config.yml"),
         crate::themes::lazygit_theme(theme),
     )?;
 
@@ -1164,8 +1170,8 @@ pub fn migrate_yazi_section(path: &Path) -> Result<bool> {
     if !path.is_file() {
         return Ok(false);
     }
-    let content = fs::read_to_string(path)
-        .with_context(|| format!("Failed to read {}", path.display()))?;
+    let content =
+        fs::read_to_string(path).with_context(|| format!("Failed to read {}", path.display()))?;
     if !content.lines().any(|l| l.trim_end() == "[manager]") {
         return Ok(false);
     }
@@ -1182,8 +1188,7 @@ pub fn migrate_yazi_section(path: &Path) -> Result<bool> {
         .join("\n")
         // Preserve trailing newline if the original had one
         + if content.ends_with('\n') { "\n" } else { "" };
-    fs::write(path, new_content)
-        .with_context(|| format!("Failed to write {}", path.display()))?;
+    fs::write(path, new_content).with_context(|| format!("Failed to write {}", path.display()))?;
     Ok(true)
 }
 
@@ -1197,7 +1202,10 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
 
     // vimrc — colorscheme and background
     let vimrc = DEFAULT_VIMRC
-        .replace("AIBOX_VIM_COLORSCHEME", crate::themes::vim_colorscheme(theme))
+        .replace(
+            "AIBOX_VIM_COLORSCHEME",
+            crate::themes::vim_colorscheme(theme),
+        )
         .replace("AIBOX_VIM_BG", crate::themes::vim_background(theme));
     if force_seed_file(&root.join(".vim").join("vimrc"), &vimrc)? {
         updated.push(".vim/vimrc".to_string());
@@ -1314,7 +1322,10 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
     for filename in ["yazi.toml", "keymap.toml", "theme.toml"] {
         let path = yazi_dir.join(filename);
         if migrate_yazi_section(&path)? {
-            updated.push(format!(".config/yazi/{} (migrated [manager] → [mgr])", filename));
+            updated.push(format!(
+                ".config/yazi/{} (migrated [manager] → [mgr])",
+                filename
+            ));
         }
     }
 
@@ -1530,8 +1541,14 @@ mod tests {
     fn dev_layout_claude_only() {
         let providers = vec![AiProvider::Claude];
         let layout = generate_dev_layout(&providers);
-        assert!(layout.contains("tab name=\"claude\""), "should have claude tab");
-        assert!(layout.contains("command \"claude\""), "should have claude command");
+        assert!(
+            layout.contains("tab name=\"claude\""),
+            "should have claude tab"
+        );
+        assert!(
+            layout.contains("command \"claude\""),
+            "should have claude command"
+        );
         assert!(!layout.contains("aider"), "should not have aider");
     }
 
@@ -1539,8 +1556,14 @@ mod tests {
     fn dev_layout_aider_only() {
         let providers = vec![AiProvider::Aider];
         let layout = generate_dev_layout(&providers);
-        assert!(layout.contains("tab name=\"aider\""), "should have aider tab");
-        assert!(layout.contains("command \"aider\""), "should have aider command");
+        assert!(
+            layout.contains("tab name=\"aider\""),
+            "should have aider tab"
+        );
+        assert!(
+            layout.contains("command \"aider\""),
+            "should have aider command"
+        );
         assert!(!layout.contains("claude"), "should not have claude");
     }
 
@@ -1548,8 +1571,14 @@ mod tests {
     fn dev_layout_multiple_providers() {
         let providers = vec![AiProvider::Claude, AiProvider::Aider];
         let layout = generate_dev_layout(&providers);
-        assert!(layout.contains("tab name=\"claude\""), "should have claude tab");
-        assert!(layout.contains("tab name=\"aider\""), "should have aider tab");
+        assert!(
+            layout.contains("tab name=\"claude\""),
+            "should have claude tab"
+        );
+        assert!(
+            layout.contains("tab name=\"aider\""),
+            "should have aider tab"
+        );
     }
 
     #[test]
@@ -1559,31 +1588,52 @@ mod tests {
         assert!(!layout.contains("claude"), "should not have claude");
         assert!(!layout.contains("aider"), "should not have aider");
         assert!(!layout.contains("gemini"), "should not have gemini");
-        assert!(layout.contains("tab name=\"dev\""), "should still have dev tab");
-        assert!(layout.contains("tab name=\"git\""), "should still have git tab");
+        assert!(
+            layout.contains("tab name=\"dev\""),
+            "should still have dev tab"
+        );
+        assert!(
+            layout.contains("tab name=\"git\""),
+            "should still have git tab"
+        );
     }
 
     #[test]
     fn focus_layout_gemini() {
         let providers = vec![AiProvider::Gemini];
         let layout = generate_focus_layout(&providers);
-        assert!(layout.contains("tab name=\"gemini\""), "should have gemini tab");
-        assert!(layout.contains("command \"gemini\""), "should have gemini command");
+        assert!(
+            layout.contains("tab name=\"gemini\""),
+            "should have gemini tab"
+        );
+        assert!(
+            layout.contains("command \"gemini\""),
+            "should have gemini command"
+        );
     }
 
     #[test]
     fn cowork_layout_single_provider() {
         let providers = vec![AiProvider::Claude];
         let layout = generate_cowork_layout(&providers);
-        assert!(layout.contains("command \"claude\""), "should have claude pane");
-        assert!(!layout.contains("stacked"), "single provider should not be stacked");
+        assert!(
+            layout.contains("command \"claude\""),
+            "should have claude pane"
+        );
+        assert!(
+            !layout.contains("stacked"),
+            "single provider should not be stacked"
+        );
     }
 
     #[test]
     fn cowork_layout_multiple_providers_stacked() {
         let providers = vec![AiProvider::Claude, AiProvider::Aider];
         let layout = generate_cowork_layout(&providers);
-        assert!(layout.contains("stacked=true"), "multiple providers should be stacked");
+        assert!(
+            layout.contains("stacked=true"),
+            "multiple providers should be stacked"
+        );
         assert!(layout.contains("command \"claude\""), "should have claude");
         assert!(layout.contains("command \"aider\""), "should have aider");
     }
@@ -1593,7 +1643,10 @@ mod tests {
         let providers: Vec<AiProvider> = vec![];
         let layout = generate_cowork_layout(&providers);
         assert!(!layout.contains("claude"), "should not have claude");
-        assert!(layout.contains("tab name=\"cowork\""), "should still have cowork tab");
+        assert!(
+            layout.contains("tab name=\"cowork\""),
+            "should still have cowork tab"
+        );
     }
 
     #[test]
@@ -1612,10 +1665,7 @@ mod tests {
             layout.contains("tab name=\"editor\""),
             "should have editor tab"
         );
-        assert!(
-            layout.contains("tab name=\"git\""),
-            "should have git tab"
-        );
+        assert!(layout.contains("tab name=\"git\""), "should have git tab");
         assert!(
             layout.contains("AIBOX_EDITOR_DIR=tab"),
             "should use tab editor direction"
@@ -1663,10 +1713,7 @@ mod tests {
             yazi_pos < claude_pos,
             "yazi should appear before AI pane (top position)"
         );
-        assert!(
-            layout.contains("size=\"60%\""),
-            "yazi pane should be 60%"
-        );
+        assert!(layout.contains("size=\"60%\""), "yazi pane should be 60%");
     }
 
     #[test]
@@ -1674,22 +1721,43 @@ mod tests {
         let providers = vec![AiProvider::Claude];
         let layout = generate_ai_layout(&providers);
         assert!(layout.contains("tab name=\"ai\""), "should have ai tab");
-        assert!(layout.contains("command \"claude\""), "should have claude pane");
-        assert!(layout.contains("tab name=\"editor\""), "should have editor tab");
+        assert!(
+            layout.contains("command \"claude\""),
+            "should have claude pane"
+        );
+        assert!(
+            layout.contains("tab name=\"editor\""),
+            "should have editor tab"
+        );
         assert!(layout.contains("tab name=\"git\""), "should have git tab");
-        assert!(layout.contains("tab name=\"shell\""), "should have shell tab");
-        assert!(layout.contains("split_direction=\"vertical\""), "should split vertically");
+        assert!(
+            layout.contains("tab name=\"shell\""),
+            "should have shell tab"
+        );
+        assert!(
+            layout.contains("split_direction=\"vertical\""),
+            "should split vertically"
+        );
         // v0.16.5: yazi gets 50%, AI pane gets 50% (was 53/47 in v0.14.5+)
-        assert!(layout.contains("size=\"50%\" name=\"files\""), "yazi pane should be 50%");
+        assert!(
+            layout.contains("size=\"50%\" name=\"files\""),
+            "yazi pane should be 50%"
+        );
         assert!(layout.contains("size=\"50%\""), "ai pane should be 50%");
-        assert!(!layout.contains("stacked"), "single provider should not be stacked");
+        assert!(
+            !layout.contains("stacked"),
+            "single provider should not be stacked"
+        );
     }
 
     #[test]
     fn ai_layout_multiple_providers_stacked() {
         let providers = vec![AiProvider::Claude, AiProvider::Aider];
         let layout = generate_ai_layout(&providers);
-        assert!(layout.contains("stacked=true"), "multiple providers should be stacked");
+        assert!(
+            layout.contains("stacked=true"),
+            "multiple providers should be stacked"
+        );
         assert!(layout.contains("command \"claude\""), "should have claude");
         assert!(layout.contains("command \"aider\""), "should have aider");
     }
@@ -1698,9 +1766,15 @@ mod tests {
     fn ai_layout_no_providers() {
         let providers: Vec<AiProvider> = vec![];
         let layout = generate_ai_layout(&providers);
-        assert!(layout.contains("tab name=\"ai\""), "should still have ai tab");
+        assert!(
+            layout.contains("tab name=\"ai\""),
+            "should still have ai tab"
+        );
         assert!(!layout.contains("claude"), "should not have claude");
-        assert!(layout.contains("tab name=\"editor\""), "should still have editor tab");
+        assert!(
+            layout.contains("tab name=\"editor\""),
+            "should still have editor tab"
+        );
         assert!(layout.contains("yazi"), "should still have yazi pane");
     }
 
@@ -1710,20 +1784,35 @@ mod tests {
         let layout = generate_ai_layout(&providers);
         let yazi_pos = layout.find("yazi").unwrap();
         let claude_pos = layout.find("command \"claude\"").unwrap();
-        assert!(yazi_pos < claude_pos, "yazi should appear left of (before) AI pane");
+        assert!(
+            yazi_pos < claude_pos,
+            "yazi should appear left of (before) AI pane"
+        );
     }
 
     #[test]
     fn cowork_swap_layout_single_provider() {
         let providers = vec![AiProvider::Claude];
         let layout = generate_cowork_swap_layout(&providers);
-        assert!(layout.contains("tab name=\"cowork-swap\""), "should have cowork-swap tab");
-        assert!(layout.contains("command \"claude\""), "should have claude pane");
-        assert!(layout.contains("name=\"editor\""), "should have editor pane");
+        assert!(
+            layout.contains("tab name=\"cowork-swap\""),
+            "should have cowork-swap tab"
+        );
+        assert!(
+            layout.contains("command \"claude\""),
+            "should have claude pane"
+        );
+        assert!(
+            layout.contains("name=\"editor\""),
+            "should have editor pane"
+        );
         assert!(layout.contains("vim-loop"), "should run vim-loop");
         assert!(layout.contains("yazi"), "should run yazi");
         assert!(layout.contains("tab name=\"git\""), "should have git tab");
-        assert!(layout.contains("tab name=\"shell\""), "should have shell tab");
+        assert!(
+            layout.contains("tab name=\"shell\""),
+            "should have shell tab"
+        );
         // Outer split: left 40% / right 60% (editor on the right gets the bigger half)
         assert!(
             layout.contains("size=\"40%\" split_direction=\"horizontal\""),
@@ -1734,15 +1823,24 @@ mod tests {
             "right side (editor) should be 60%"
         );
         // Inner left split: yazi 40% top, AI 60% bottom
-        assert!(layout.contains("size=\"40%\" name=\"files\""), "yazi pane should be 40% of left stack");
-        assert!(!layout.contains("stacked"), "single provider should not be stacked");
+        assert!(
+            layout.contains("size=\"40%\" name=\"files\""),
+            "yazi pane should be 40% of left stack"
+        );
+        assert!(
+            !layout.contains("stacked"),
+            "single provider should not be stacked"
+        );
     }
 
     #[test]
     fn cowork_swap_layout_multiple_providers_stacked() {
         let providers = vec![AiProvider::Claude, AiProvider::Aider];
         let layout = generate_cowork_swap_layout(&providers);
-        assert!(layout.contains("stacked=true"), "multiple providers should be stacked");
+        assert!(
+            layout.contains("stacked=true"),
+            "multiple providers should be stacked"
+        );
         assert!(layout.contains("command \"claude\""), "should have claude");
         assert!(layout.contains("command \"aider\""), "should have aider");
     }
@@ -1751,12 +1849,21 @@ mod tests {
     fn cowork_swap_layout_no_providers() {
         let providers: Vec<AiProvider> = vec![];
         let layout = generate_cowork_swap_layout(&providers);
-        assert!(layout.contains("tab name=\"cowork-swap\""), "should still have cowork-swap tab");
+        assert!(
+            layout.contains("tab name=\"cowork-swap\""),
+            "should still have cowork-swap tab"
+        );
         assert!(!layout.contains("claude"), "should not have claude");
         assert!(layout.contains("yazi"), "should still have yazi pane");
         assert!(layout.contains("vim-loop"), "should still have vim editor");
-        assert!(layout.contains("size=\"40%\" name=\"files\""), "yazi should be 40% (left)");
-        assert!(layout.contains("size=\"60%\" name=\"editor\""), "vim should be 60% (right)");
+        assert!(
+            layout.contains("size=\"40%\" name=\"files\""),
+            "yazi should be 40% (left)"
+        );
+        assert!(
+            layout.contains("size=\"60%\" name=\"editor\""),
+            "vim should be 60% (right)"
+        );
     }
 
     #[test]
@@ -1813,9 +1920,18 @@ mod tests {
 
         let content = fs::read_to_string(&path).unwrap();
         assert!(content.starts_with("[mgr]\n"), "should rename to [mgr]");
-        assert!(content.contains("ratio = [1, 3, 4]"), "should preserve user values");
-        assert!(content.contains("sort_by = \"natural\""), "should preserve other lines");
-        assert!(!content.contains("[manager]"), "should not contain old section name");
+        assert!(
+            content.contains("ratio = [1, 3, 4]"),
+            "should preserve user values"
+        );
+        assert!(
+            content.contains("sort_by = \"natural\""),
+            "should preserve other lines"
+        );
+        assert!(
+            !content.contains("[manager]"),
+            "should not contain old section name"
+        );
     }
 
     #[test]
@@ -1826,7 +1942,10 @@ mod tests {
         fs::write(&path, original).unwrap();
 
         let changed = migrate_yazi_section(&path).unwrap();
-        assert!(!changed, "no change should be reported for already-migrated file");
+        assert!(
+            !changed,
+            "no change should be reported for already-migrated file"
+        );
 
         let content = fs::read_to_string(&path).unwrap();
         assert_eq!(content, original, "file content must be unchanged");
@@ -1852,9 +1971,18 @@ mod tests {
         assert!(changed);
 
         let content = fs::read_to_string(&path).unwrap();
-        assert!(content.contains("ratio = [2, 4, 1]"), "user ratio must be preserved");
-        assert!(content.contains("# my customizations"), "user comments must be preserved");
-        assert!(content.contains("# end"), "trailing comment must be preserved");
+        assert!(
+            content.contains("ratio = [2, 4, 1]"),
+            "user ratio must be preserved"
+        );
+        assert!(
+            content.contains("# my customizations"),
+            "user comments must be preserved"
+        );
+        assert!(
+            content.contains("# end"),
+            "trailing comment must be preserved"
+        );
         assert!(content.contains("[mgr]"), "section must be renamed");
         assert!(!content.contains("[manager]"));
     }
@@ -1889,7 +2017,10 @@ mod tests {
     #[test]
     fn ai_pane_kdl_empty() {
         let result = ai_pane_kdl(&[]);
-        assert!(result.is_empty(), "empty providers should produce empty string");
+        assert!(
+            result.is_empty(),
+            "empty providers should produce empty string"
+        );
     }
 
     #[test]
@@ -1917,7 +2048,10 @@ mod tests {
         config.ai.providers = vec![AiProvider::Aider];
         seed_root_dir(&config).unwrap();
 
-        assert!(root.join(".aider").is_dir(), ".aider directory should be created");
+        assert!(
+            root.join(".aider").is_dir(),
+            ".aider directory should be created"
+        );
         assert!(!root.join(".claude").exists(), ".claude should not exist");
 
         unsafe {
@@ -1934,7 +2068,10 @@ mod tests {
         config.ai.providers = vec![AiProvider::Gemini];
         seed_root_dir(&config).unwrap();
 
-        assert!(root.join(".gemini").is_dir(), ".gemini directory should be created");
+        assert!(
+            root.join(".gemini").is_dir(),
+            ".gemini directory should be created"
+        );
 
         unsafe {
             std::env::remove_var("AIBOX_HOST_ROOT");

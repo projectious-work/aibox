@@ -22,7 +22,18 @@ fn lifecycle_init_sync() {
     runner.cleanup(test);
 
     // Init
-    let output = runner.aibox(test, &["init", "--name", test, "--base", "debian", "--process", "managed"]);
+    let output = runner.aibox(
+        test,
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
+    );
     assert!(
         output.status.success(),
         "init failed: {}",
@@ -30,10 +41,22 @@ fn lifecycle_init_sync() {
     );
 
     // Verify files created
-    assert!(runner.file_exists(test, "aibox.toml"), "aibox.toml should exist");
-    assert!(runner.file_exists(test, ".devcontainer/Dockerfile"), "Dockerfile should exist");
-    assert!(runner.file_exists(test, ".devcontainer/docker-compose.yml"), "docker-compose.yml should exist");
-    assert!(runner.file_exists(test, "CLAUDE.md"), "CLAUDE.md should exist");
+    assert!(
+        runner.file_exists(test, "aibox.toml"),
+        "aibox.toml should exist"
+    );
+    assert!(
+        runner.file_exists(test, ".devcontainer/Dockerfile"),
+        "Dockerfile should exist"
+    );
+    assert!(
+        runner.file_exists(test, ".devcontainer/docker-compose.yml"),
+        "docker-compose.yml should exist"
+    );
+    assert!(
+        runner.file_exists(test, "CLAUDE.md"),
+        "CLAUDE.md should exist"
+    );
 
     // Sync (--no-build: config-only, no GHCR pull needed)
     let output = runner.aibox(test, &["sync", "--no-build"]);
@@ -54,10 +77,25 @@ fn claudemd_preserved_on_sync() {
     runner.cleanup(test);
 
     // Init
-    runner.aibox(test, &["init", "--name", test, "--base", "debian", "--process", "managed"]);
+    runner.aibox(
+        test,
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
+    );
 
     // Modify CLAUDE.md with user content
-    runner.write_file(test, "CLAUDE.md", "# My Custom CLAUDE.md\n\nUser-specific content here.\n");
+    runner.write_file(
+        test,
+        "CLAUDE.md",
+        "# My Custom CLAUDE.md\n\nUser-specific content here.\n",
+    );
 
     // Sync should not overwrite CLAUDE.md
     runner.aibox(test, &["sync"]);
@@ -79,10 +117,25 @@ fn generated_files_overwritten_on_sync() {
     runner.cleanup(test);
 
     // Init
-    runner.aibox(test, &["init", "--name", test, "--base", "debian", "--process", "managed"]);
+    runner.aibox(
+        test,
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
+    );
 
     // Tamper with generated Dockerfile
-    runner.write_file(test, ".devcontainer/Dockerfile", "# tampered\nFROM scratch\n");
+    runner.write_file(
+        test,
+        ".devcontainer/Dockerfile",
+        "# tampered\nFROM scratch\n",
+    );
 
     // Sync should regenerate it
     runner.aibox(test, &["sync"]);
@@ -107,7 +160,18 @@ fn status_without_container_shows_missing() {
     let test = "status-missing";
     runner.cleanup(test);
 
-    runner.aibox(test, &["init", "--name", test, "--base", "debian", "--process", "managed"]);
+    runner.aibox(
+        test,
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
+    );
 
     let output = runner.aibox(test, &["status"]);
     let combined = format!(
@@ -116,7 +180,9 @@ fn status_without_container_shows_missing() {
         String::from_utf8_lossy(&output.stderr)
     );
     assert!(
-        combined.contains("missing") || combined.contains("Missing") || combined.contains("not found"),
+        combined.contains("missing")
+            || combined.contains("Missing")
+            || combined.contains("not found"),
         "status should report missing when no container exists: {}",
         combined
     );
@@ -136,7 +202,15 @@ fn init_with_managed_preset_creates_context_files() {
 
     let output = runner.aibox(
         test,
-        &["init", "--name", test, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(
         output.status.success(),
@@ -144,8 +218,14 @@ fn init_with_managed_preset_creates_context_files() {
         String::from_utf8_lossy(&output.stderr)
     );
 
-    assert!(runner.file_exists(test, "CLAUDE.md"), "CLAUDE.md should exist");
-    assert!(runner.file_exists(test, "aibox.toml"), "aibox.toml should exist");
+    assert!(
+        runner.file_exists(test, "CLAUDE.md"),
+        "CLAUDE.md should exist"
+    );
+    assert!(
+        runner.file_exists(test, "aibox.toml"),
+        "aibox.toml should exist"
+    );
 
     // tracking package (managed preset includes tracking)
     assert!(
@@ -192,7 +272,15 @@ fn init_with_software_preset_creates_code_files() {
 
     let output = runner.aibox(
         test,
-        &["init", "--name", test, "--base", "debian", "--process", "software"],
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "software",
+        ],
     );
     assert!(
         output.status.success(),

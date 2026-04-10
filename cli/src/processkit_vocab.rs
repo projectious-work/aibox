@@ -25,8 +25,7 @@ use serde::Deserialize;
 /// Canonical Git source URL for the upstream processkit repository.
 /// Used as the default in `[processkit].source` and referenced in test fixtures.
 /// Update if the repository is ever moved.
-pub const PROCESSKIT_GIT_SOURCE: &str =
-    "https://github.com/projectious-work/processkit.git";
+pub const PROCESSKIT_GIT_SOURCE: &str = "https://github.com/projectious-work/processkit.git";
 
 /// The processkit release recommended for new projects created by `aibox init`.
 /// Updated here on each processkit release; `resolve_processkit_section` in

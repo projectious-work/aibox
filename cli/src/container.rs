@@ -1,9 +1,7 @@
 use anyhow::{Result, bail};
 use std::path::PathBuf;
 
-use crate::config::{
-    AiProvider, BaseImage, AiboxConfig, StarshipPreset, Theme,
-};
+use crate::config::{AiProvider, AiboxConfig, BaseImage, StarshipPreset, Theme};
 use crate::context;
 use crate::generate;
 use crate::output;
@@ -46,9 +44,15 @@ fn process_selection_items() -> (Vec<String>, Vec<String>) {
     const PRESETS: &[(&str, &str)] = &[
         ("minimal", "solo developers and small side projects"),
         ("managed", "small teams with a shared backlog (recommended)"),
-        ("software", "software engineering teams building production systems"),
+        (
+            "software",
+            "software engineering teams building production systems",
+        ),
         ("research", "research, data science, and ML projects"),
-        ("product", "full product development (engineering + design + ops)"),
+        (
+            "product",
+            "full product development (engineering + design + ops)",
+        ),
     ];
     let labels = PRESETS
         .iter()
@@ -148,14 +152,21 @@ fn resolve_processkit_section(
     if interactive {
         // Build the menu with the latest at the top + an explicit
         // "skip" escape hatch at the bottom.
-        let mut items: Vec<String> = versions.iter().enumerate().map(|(i, v)| {
-            if i == 0 {
-                format!("{} (latest)", v)
-            } else {
-                v.clone()
-            }
-        }).collect();
-        items.push(format!("{} — skip processkit install (configure later)", PROCESSKIT_VERSION_UNSET));
+        let mut items: Vec<String> = versions
+            .iter()
+            .enumerate()
+            .map(|(i, v)| {
+                if i == 0 {
+                    format!("{} (latest)", v)
+                } else {
+                    v.clone()
+                }
+            })
+            .collect();
+        items.push(format!(
+            "{} — skip processkit install (configure later)",
+            PROCESSKIT_VERSION_UNSET
+        ));
         let idx = dialoguer::Select::new()
             .with_prompt("processkit version")
             .items(&items)
@@ -294,36 +305,34 @@ fn populate_addon_tools(
 
         // Second priority: interactive picker (only when there's a
         // real choice and the user hasn't pinned via the CLI).
-        let picked_version = if override_version.is_none()
-            && interactive
-            && tool.supported_versions.len() > 1
-        {
-            let default_idx = tool
-                .supported_versions
-                .iter()
-                .position(|v| v == &tool.default_version)
-                .unwrap_or(0);
-            let items: Vec<String> = tool
-                .supported_versions
-                .iter()
-                .enumerate()
-                .map(|(i, v)| {
-                    if i == default_idx {
-                        format!("{} (default)", v)
-                    } else {
-                        v.clone()
-                    }
-                })
-                .collect();
-            let idx = dialoguer::Select::new()
-                .with_prompt(format!("{}.{} version", addon_name, tool.name))
-                .items(&items)
-                .default(default_idx)
-                .interact()?;
-            Some(tool.supported_versions[idx].clone())
-        } else {
-            None
-        };
+        let picked_version =
+            if override_version.is_none() && interactive && tool.supported_versions.len() > 1 {
+                let default_idx = tool
+                    .supported_versions
+                    .iter()
+                    .position(|v| v == &tool.default_version)
+                    .unwrap_or(0);
+                let items: Vec<String> = tool
+                    .supported_versions
+                    .iter()
+                    .enumerate()
+                    .map(|(i, v)| {
+                        if i == default_idx {
+                            format!("{} (default)", v)
+                        } else {
+                            v.clone()
+                        }
+                    })
+                    .collect();
+                let idx = dialoguer::Select::new()
+                    .with_prompt(format!("{}.{} version", addon_name, tool.name))
+                    .items(&items)
+                    .default(default_idx)
+                    .interact()?;
+                Some(tool.supported_versions[idx].clone())
+            } else {
+                None
+            };
 
         // Default version as the floor.
         let version = override_version
@@ -333,8 +342,17 @@ fn populate_addon_tools(
         // Empty string means "no separate version" (e.g. rustfmt is part
         // of the rustup toolchain and has no independent version pin).
         // Represent this as None so the TOML serialises as `tool = {}`.
-        let version_opt = if version.is_empty() { None } else { Some(version) };
-        tools.insert(tool.name.clone(), ToolEntry { version: version_opt });
+        let version_opt = if version.is_empty() {
+            None
+        } else {
+            Some(version)
+        };
+        tools.insert(
+            tool.name.clone(),
+            ToolEntry {
+                version: version_opt,
+            },
+        );
     }
 
     Ok(AddonToolsSection { tools })
@@ -410,7 +428,10 @@ pub fn resolve_init_values(
                     .with_prompt("Addons (space to select, enter to confirm)")
                     .items(&available)
                     .interact()?;
-                selections.into_iter().map(|i| available[i].clone()).collect()
+                selections
+                    .into_iter()
+                    .map(|i| available[i].clone())
+                    .collect()
             }
         }
         None => vec![],
@@ -479,7 +500,11 @@ pub fn cmd_start(config_path: &Option<String>, layout: &str) -> Result<()> {
     }
 
     output::info(&format!("Attaching via zellij (layout: {})...", layout));
-    runtime.exec_interactive(name, &config.container.user, &["zellij", "--layout", layout])?;
+    runtime.exec_interactive(
+        name,
+        &config.container.user,
+        &["zellij", "--layout", layout],
+    )?;
 
     Ok(())
 }
@@ -552,19 +577,17 @@ pub fn cmd_status(config_path: &Option<String>, format: crate::cli::OutputFormat
             });
             print!("{}", serde_yaml::to_string(&obj)?);
         }
-        crate::cli::OutputFormat::Table => {
-            match state {
-                ContainerState::Running => {
-                    output::ok(&format!("Container '{}' is running", name));
-                }
-                ContainerState::Stopped => {
-                    output::warn(&format!("Container '{}' is stopped", name));
-                }
-                ContainerState::Missing => {
-                    output::warn(&format!("Container '{}' does not exist", name));
-                }
+        crate::cli::OutputFormat::Table => match state {
+            ContainerState::Running => {
+                output::ok(&format!("Container '{}' is running", name));
             }
-        }
+            ContainerState::Stopped => {
+                output::warn(&format!("Container '{}' is stopped", name));
+            }
+            ContainerState::Missing => {
+                output::warn(&format!("Container '{}' does not exist", name));
+            }
+        },
     }
 
     Ok(())
@@ -578,8 +601,12 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     // File header
     out.push_str(sep);
     out.push_str("# aibox.toml — single source of truth for your aibox project.\n");
-    out.push_str("# All .devcontainer/ files are generated from this. Edit here, run `aibox sync`.\n");
-    out.push_str("# Reference: https://projectious-work.github.io/aibox/docs/reference/configuration\n");
+    out.push_str(
+        "# All .devcontainer/ files are generated from this. Edit here, run `aibox sync`.\n",
+    );
+    out.push_str(
+        "# Reference: https://projectious-work.github.io/aibox/docs/reference/configuration\n",
+    );
     out.push_str(sep);
     out.push('\n');
 
@@ -653,7 +680,9 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("#   software  software engineering teams (extends managed)\n");
     out.push_str("#   research  research, data science, ML projects (extends managed)\n");
     out.push_str("#   product   full product development (extends software)\n");
-    out.push_str("# See context/templates/processkit/<version>/packages/ for the YAML definitions.\n");
+    out.push_str(
+        "# See context/templates/processkit/<version>/packages/ for the YAML definitions.\n",
+    );
     out.push_str(&format!(
         "packages = [{}]\n",
         config
@@ -717,10 +746,14 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("#   \"\"       — use the addon's built-in default version\n");
     out.push_str("#\n");
     out.push_str("# Run `aibox addon list` to see all available addons.\n");
-    out.push_str("# Run `aibox addon info <name>` to see every supported tool/version per addon.\n");
+    out.push_str(
+        "# Run `aibox addon info <name>` to see every supported tool/version per addon.\n",
+    );
     out.push_str("#\n");
     out.push_str("# To add an addon after init, edit this file and re-run `aibox sync`,\n");
-    out.push_str("# or use `aibox addon add <name>` (which also pulls in transitive `requires`).\n");
+    out.push_str(
+        "# or use `aibox addon add <name>` (which also pulls in transitive `requires`).\n",
+    );
     if !config.addons.addons.is_empty() {
         let mut addon_names: Vec<_> = config.addons.addons.keys().collect();
         addon_names.sort();
@@ -732,7 +765,9 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
             for tool_name in tool_names {
                 let tool_entry = &addon_tools.tools[tool_name];
                 match &tool_entry.version {
-                    Some(v) => out.push_str(&format!("{} = {{ version = \"{}\" }}\n", tool_name, v)),
+                    Some(v) => {
+                        out.push_str(&format!("{} = {{ version = \"{}\" }}\n", tool_name, v))
+                    }
                     None => out.push_str(&format!("{} = {{}}\n", tool_name)),
                 }
             }
@@ -766,7 +801,9 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str(sep);
     out.push_str("# processkit ships the skills and primitives that aibox installs into the\n");
     out.push_str("# project. The default upstream is the canonical projectious-work/processkit\n");
-    out.push_str("# repo. Companies can fork processkit and have their projects consume the fork\n");
+    out.push_str(
+        "# repo. Companies can fork processkit and have their projects consume the fork\n",
+    );
     out.push_str("# by changing `source` to point at their fork.\n");
     out.push_str("#\n");
     out.push_str("# `version` is the git tag of the processkit source to consume. The sentinel\n");
@@ -778,7 +815,9 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str(&format!("src_path = \"{}\"\n", config.processkit.src_path));
     match &config.processkit.branch {
         Some(branch) => out.push_str(&format!("branch   = \"{}\"\n", branch)),
-        None => out.push_str("# branch = \"main\"   # optional — for tracking a moving branch (discouraged)\n"),
+        None => out.push_str(
+            "# branch = \"main\"   # optional — for tracking a moving branch (discouraged)\n",
+        ),
     }
     out.push_str("#\n");
     out.push_str("# Optional release-asset URL template for non-GitHub hosts (Gitea, GitLab,\n");
@@ -805,7 +844,10 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("#   full              — provider files contain rich provider-flavored content\n");
     out.push_str("#                       (use only when you genuinely need different content per harness)\n");
     out.push_str("[agents]\n");
-    out.push_str(&format!("canonical     = \"{}\"\n", config.agents.canonical));
+    out.push_str(&format!(
+        "canonical     = \"{}\"\n",
+        config.agents.canonical
+    ));
     let mode_str = match config.agents.provider_mode {
         crate::config::AgentsProviderMode::Pointer => "pointer",
         crate::config::AgentsProviderMode::Full => "full",
@@ -824,7 +866,9 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("# Starship prompt preset.\n");
     out.push_str("# Options: default | plain | minimal | nerd-font | pastel | bracketed | arrow\n");
     out.push_str(&format!("prompt = \"{}\"\n", config.customization.prompt));
-    out.push_str("# Default zellij layout. Options: dev | focus | cowork | cowork-swap | browse | ai\n");
+    out.push_str(
+        "# Default zellij layout. Options: dev | focus | cowork | cowork-swap | browse | ai\n",
+    );
     out.push_str(&format!("layout = \"{}\"\n", config.customization.layout));
 
     // [audio] section
@@ -850,9 +894,8 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
 /// Init command: create a aibox.toml and generate files.
 pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> {
     use crate::config::{
-        AddonsSection, AiSection, AudioSection, ContainerSection,
-        ContextSection, CustomizationSection, AiboxConfig, AiboxSection,
-        SkillsSection,
+        AddonsSection, AiSection, AiboxConfig, AiboxSection, AudioSection, ContainerSection,
+        ContextSection, CustomizationSection, SkillsSection,
     };
 
     let toml_path = config_path
@@ -869,8 +912,13 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
 
     let interactive = std::io::IsTerminal::is_terminal(&std::io::stdin());
 
-    let (project_name, base_image, process_packages, addon_names) =
-        resolve_init_values(params.name, params.base, params.process, params.addons, interactive)?;
+    let (project_name, base_image, process_packages, addon_names) = resolve_init_values(
+        params.name,
+        params.base,
+        params.process,
+        params.addons,
+        interactive,
+    )?;
 
     let container_user = params.user.unwrap_or_else(|| "aibox".to_string());
     let ai_providers = params.ai.unwrap_or_else(|| vec![AiProvider::Claude]);
@@ -918,11 +966,7 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             let tool_overrides = build_tool_overrides(&params.addon_tool)?;
             let mut section = AddonsSection::default();
             for name in &expanded_addons {
-                let tools = populate_addon_tools(
-                    name,
-                    tool_overrides.get(name),
-                    interactive,
-                )?;
+                let tools = populate_addon_tools(name, tool_overrides.get(name), interactive)?;
                 section.addons.insert(name.clone(), tools);
             }
             section
@@ -985,10 +1029,8 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             // After install, regenerate per-harness MCP config files.
             // Best-effort: any failure is warned-and-continued so an
             // MCP-registration glitch doesn't break the rest of init.
-            if let Err(e) = crate::mcp_registration::regenerate_mcp_configs(
-                &config,
-                &project_root,
-            ) {
+            if let Err(e) = crate::mcp_registration::regenerate_mcp_configs(&config, &project_root)
+            {
                 output::warn(&format!("MCP registration failed: {}", e));
             }
             // Sync processkit command adapter files to .claude/commands/
@@ -1022,9 +1064,8 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
 pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) -> Result<()> {
     // Snapshot out-of-perimeter sentinels before any sync work runs.
     // The tripwire is verified at the end of cmd_sync.
-    let tripwire = crate::sync_perimeter::Tripwire::snapshot(
-        std::env::current_dir().ok().as_deref(),
-    );
+    let tripwire =
+        crate::sync_perimeter::Tripwire::snapshot(std::env::current_dir().ok().as_deref());
 
     // Check for version migration before any other sync steps
     crate::migration::check_and_generate_migration()?;
@@ -1043,15 +1084,15 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     // Warn if processkit version is below minimum for this aibox
     let current_aibox = env!("CARGO_PKG_VERSION");
     if let Some(compat) = crate::compat::min_processkit_for(current_aibox)
-        && !crate::compat::processkit_meets_minimum(&config.processkit.version, compat.processkit_version)
+        && !crate::compat::processkit_meets_minimum(
+            &config.processkit.version,
+            compat.processkit_version,
+        )
     {
         crate::output::warn(&format!(
             "processkit {} is below the minimum recommended version {} for aibox v{} ({}). \
              Consider updating [processkit].version in aibox.toml.",
-            config.processkit.version,
-            compat.processkit_version,
-            current_aibox,
-            compat.note,
+            config.processkit.version, compat.processkit_version, current_aibox, compat.note,
         ));
     }
 
@@ -1171,29 +1212,29 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
                     // No processkit section yet — nothing to diff.
                 }
                 Some(pk) => {
-                output::info("Comparing processkit cache against project...");
-                match crate::content_diff::run_content_sync(&cwd, pk, &config) {
-                    Ok(report) => {
-                        if report.summary.has_user_relevant_changes() {
-                            output::info(&format!(
-                                "Processkit changes detected: {} upstream-only, {} conflicts, {} new, {} removed",
-                                report.summary.changed_upstream_only,
-                                report.summary.conflict,
-                                report.summary.new_upstream,
-                                report.summary.removed_upstream,
-                            ));
-                            if let Some(path) = report.migration_document_path {
-                                output::ok(&format!(
-                                    "Wrote migration document: {}",
-                                    path.display()
+                    output::info("Comparing processkit cache against project...");
+                    match crate::content_diff::run_content_sync(&cwd, pk, &config) {
+                        Ok(report) => {
+                            if report.summary.has_user_relevant_changes() {
+                                output::info(&format!(
+                                    "Processkit changes detected: {} upstream-only, {} conflicts, {} new, {} removed",
+                                    report.summary.changed_upstream_only,
+                                    report.summary.conflict,
+                                    report.summary.new_upstream,
+                                    report.summary.removed_upstream,
                                 ));
+                                if let Some(path) = report.migration_document_path {
+                                    output::ok(&format!(
+                                        "Wrote migration document: {}",
+                                        path.display()
+                                    ));
+                                }
+                            } else {
+                                output::ok("Processkit cache is in sync — no migration needed");
                             }
-                        } else {
-                            output::ok("Processkit cache is in sync — no migration needed");
                         }
+                        Err(e) => output::warn(&format!("Processkit diff failed: {}", e)),
                     }
-                    Err(e) => output::warn(&format!("Processkit diff failed: {}", e)),
-                }
                 } // Some(pk)
             },
             Ok(None) => { /* No lock file yet — nothing to diff against. */ }
@@ -1390,7 +1431,10 @@ mod tests {
         assert!(!sync_should_install_processkit(
             crate::config::PROCESSKIT_VERSION_UNSET,
             crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
-            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
+            Some((
+                crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION
+            )),
         ));
     }
 
@@ -1412,7 +1456,10 @@ mod tests {
         assert!(!sync_should_install_processkit(
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
-            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
+            Some((
+                crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION
+            )),
         ));
     }
 
@@ -1435,7 +1482,10 @@ mod tests {
         assert!(sync_should_install_processkit(
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             "https://github.com/acme/processkit-acme.git",
-            Some((crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION)),
+            Some((
+                crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION
+            )),
         ));
     }
 

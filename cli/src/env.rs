@@ -43,10 +43,10 @@ fn load_state() -> Result<EnvState> {
     if !path.exists() {
         return Ok(EnvState::default());
     }
-    let content = fs::read_to_string(&path)
-        .with_context(|| format!("Failed to read {}", path.display()))?;
-    let state: EnvState = toml::from_str(&content)
-        .with_context(|| format!("Failed to parse {}", path.display()))?;
+    let content =
+        fs::read_to_string(&path).with_context(|| format!("Failed to read {}", path.display()))?;
+    let state: EnvState =
+        toml::from_str(&content).with_context(|| format!("Failed to parse {}", path.display()))?;
     Ok(state)
 }
 
@@ -144,12 +144,9 @@ fn restore_env(name: &str) -> Result<()> {
 
 /// Copy context/ directory excluding the shared/ subdirectory.
 fn copy_context_excluding_shared(src: &Path, dst: &Path) -> Result<()> {
-    fs::create_dir_all(dst)
-        .with_context(|| format!("Failed to create {}", dst.display()))?;
+    fs::create_dir_all(dst).with_context(|| format!("Failed to create {}", dst.display()))?;
 
-    for entry in fs::read_dir(src)
-        .with_context(|| format!("Failed to read {}", src.display()))?
-    {
+    for entry in fs::read_dir(src).with_context(|| format!("Failed to read {}", src.display()))? {
         let entry = entry?;
         let name = entry.file_name();
         // Skip shared/
@@ -191,7 +188,9 @@ fn validate_env_name(name: &str) -> Result<()> {
         .chars()
         .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
     {
-        bail!("Environment name must contain only alphanumeric characters, hyphens, and underscores");
+        bail!(
+            "Environment name must contain only alphanumeric characters, hyphens, and underscores"
+        );
     }
     Ok(())
 }
@@ -251,10 +250,7 @@ pub fn cmd_env_switch(config_path: &Option<String>, name: &str, yes: bool) -> Re
     }
 
     let current_name = state.current.as_deref().unwrap_or("(unnamed)");
-    output::info(&format!(
-        "Switching from '{}' to '{}'",
-        current_name, name
-    ));
+    output::info(&format!("Switching from '{}' to '{}'", current_name, name));
 
     if !yes {
         let prompt = format!(
@@ -333,7 +329,11 @@ pub fn cmd_env_list(format: OutputFormat) -> Result<()> {
             eprintln!("\n  {:<25} Status", "Environment");
             eprintln!("  {}", "-".repeat(40));
             for r in &rows {
-                let marker = if r.current { "\x1b[32m\u{25cf} current\x1b[0m" } else { "" };
+                let marker = if r.current {
+                    "\x1b[32m\u{25cf} current\x1b[0m"
+                } else {
+                    ""
+                };
                 eprintln!("  {:<25} {}", r.name, marker);
             }
             eprintln!();
@@ -405,10 +405,7 @@ pub fn cmd_env_status(config_path: &Option<String>) -> Result<()> {
     }
 
     if !names.is_empty() {
-        eprintln!(
-            "  Available environments: {}",
-            names.join(", ")
-        );
+        eprintln!("  Available environments: {}", names.join(", "));
     }
 
     Ok(())
@@ -437,11 +434,7 @@ name = "test-project"
         fs::write(dir.join("context/shared/OWNER.md"), "# Owner").unwrap();
         fs::create_dir_all(dir.join("context/research")).unwrap();
         fs::write(dir.join("context/PROGRESS.md"), "# Progress").unwrap();
-        fs::write(
-            dir.join("context/research/notes.md"),
-            "# Research notes",
-        )
-        .unwrap();
+        fs::write(dir.join("context/research/notes.md"), "# Research notes").unwrap();
     }
 
     #[test]
@@ -511,7 +504,11 @@ name = "test-project"
 
         // Modify project files
         fs::write(dir.path().join("CLAUDE.md"), "# Modified").unwrap();
-        fs::write(dir.path().join("context/PROGRESS.md"), "# Modified progress").unwrap();
+        fs::write(
+            dir.path().join("context/PROGRESS.md"),
+            "# Modified progress",
+        )
+        .unwrap();
 
         // Restore "research"
         restore_env("research").unwrap();

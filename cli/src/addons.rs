@@ -36,7 +36,9 @@ fn topological_sort(
             if !name_set.contains(req.as_str()) {
                 bail!(
                     "Addon '{}' requires '{}' addon. Add [addons.{}] to your aibox.toml.",
-                    name, req, req
+                    name,
+                    req,
+                    req
                 );
             }
         }
@@ -51,7 +53,13 @@ fn topological_sort(
             if name_set.contains(req.as_str()) {
                 *in_degree.entry(name.as_str()).or_insert(0) += 1;
                 dependents
-                    .entry(addon_names.iter().find(|n| n.as_str() == req).unwrap().as_str())
+                    .entry(
+                        addon_names
+                            .iter()
+                            .find(|n| n.as_str() == req)
+                            .unwrap()
+                            .as_str(),
+                    )
                     .or_default()
                     .push(name.as_str());
             }
@@ -253,8 +261,14 @@ mod tests {
         let def = sample_addon_def();
         let configs = to_tool_configs("test-addon", &user_tools, &def);
 
-        assert!(configs.contains_key("alpha"), "default_enabled alpha should be present");
-        assert!(configs.contains_key("gamma"), "default_enabled gamma should be present");
+        assert!(
+            configs.contains_key("alpha"),
+            "default_enabled alpha should be present"
+        );
+        assert!(
+            configs.contains_key("gamma"),
+            "default_enabled gamma should be present"
+        );
         assert!(
             !configs.contains_key("beta"),
             "non-default beta should be absent"
@@ -293,7 +307,10 @@ mod tests {
         let def = sample_addon_def();
         let configs = to_tool_configs("test-addon", &user_tools, &def);
 
-        assert!(configs.contains_key("beta"), "beta should be present when user enables it");
+        assert!(
+            configs.contains_key("beta"),
+            "beta should be present when user enables it"
+        );
         assert_eq!(configs["beta"].version, "3.0");
     }
 
@@ -314,7 +331,10 @@ mod tests {
     #[test]
     fn unknown_addon_sorts_last() {
         let unknown = builder_order_key("some-future-addon");
-        assert_eq!(unknown, 3, "unknown addons should have weight 3 (no builder)");
+        assert_eq!(
+            unknown, 3,
+            "unknown addons should have weight 3 (no builder)"
+        );
     }
 
     // ── generate_dockerfile_content tests ───────────────────────────────

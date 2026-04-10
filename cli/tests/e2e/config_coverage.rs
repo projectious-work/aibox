@@ -37,7 +37,15 @@ fn run_in(dir: &std::path::Path, args: &[&str]) -> std::process::Output {
 fn init_project(dir: &std::path::Path, name: &str) {
     let output = run_in(
         dir,
-        &["init", "--name", name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(
         output.status.success(),
@@ -144,9 +152,13 @@ fn ai_claude_provider_volume_mount() {
 fn ai_aider_provider_volume_mount() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "ai-aider");
-    replace_toml_section(dir.path(), "ai", r#"
+    replace_toml_section(
+        dir.path(),
+        "ai",
+        r#"
 providers = ["aider"]
-"#);
+"#,
+    );
     sync_project(dir.path());
     let compose = read_generated(dir.path(), ".devcontainer/docker-compose.yml");
     assert!(
@@ -159,9 +171,13 @@ providers = ["aider"]
 fn ai_multiple_providers_volume_mounts() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "ai-multi");
-    replace_toml_section(dir.path(), "ai", r#"
+    replace_toml_section(
+        dir.path(),
+        "ai",
+        r#"
 providers = ["claude", "aider", "gemini"]
-"#);
+"#,
+    );
     sync_project(dir.path());
     let compose = read_generated(dir.path(), ".devcontainer/docker-compose.yml");
     assert!(compose.contains(".claude"), "compose should mount .claude");
@@ -175,9 +191,13 @@ providers = ["claude", "aider", "gemini"]
 fn audio_enabled_adds_mounts() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "audio-on");
-    replace_toml_section(dir.path(), "audio", r#"
+    replace_toml_section(
+        dir.path(),
+        "audio",
+        r#"
 enabled = true
-"#);
+"#,
+    );
     sync_project(dir.path());
     let compose = read_generated(dir.path(), ".devcontainer/docker-compose.yml");
     assert!(
@@ -190,9 +210,13 @@ enabled = true
 fn audio_disabled_no_mounts() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "audio-off");
-    replace_toml_section(dir.path(), "audio", r#"
+    replace_toml_section(
+        dir.path(),
+        "audio",
+        r#"
 enabled = false
-"#);
+"#,
+    );
     sync_project(dir.path());
     let compose = read_generated(dir.path(), ".devcontainer/docker-compose.yml");
     assert!(
@@ -207,11 +231,14 @@ enabled = false
 fn addon_python_in_dockerfile() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "addon-py");
-    patch_toml(dir.path(), r#"
+    patch_toml(
+        dir.path(),
+        r#"
 [addons.python.tools]
 python = { version = "3.13" }
 uv = { version = "0.7" }
-"#);
+"#,
+    );
     sync_project(dir.path());
     let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
     assert!(
@@ -224,10 +251,13 @@ uv = { version = "0.7" }
 fn addon_rust_in_dockerfile() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "addon-rs");
-    patch_toml(dir.path(), r#"
+    patch_toml(
+        dir.path(),
+        r#"
 [addons.rust.tools]
 rust = {}
-"#);
+"#,
+    );
     sync_project(dir.path());
     let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
     assert!(
@@ -240,13 +270,16 @@ rust = {}
 fn addon_multiple_in_dockerfile() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "addon-multi");
-    patch_toml(dir.path(), r#"
+    patch_toml(
+        dir.path(),
+        r#"
 [addons.python.tools]
 python = { version = "3.13" }
 
 [addons.node.tools]
 node = { version = "22" }
-"#);
+"#,
+    );
     sync_project(dir.path());
     let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
     assert!(
@@ -276,8 +309,14 @@ node = { version = "22" }
 
 fn assert_post_init_skeleton(dir: &std::path::Path) {
     assert!(dir.join("context").exists(), "context/ should exist");
-    assert!(dir.join("CLAUDE.md").exists(), "CLAUDE.md thin pointer should exist");
-    assert!(!dir.join(".aibox-version").exists(), ".aibox-version must NOT be created (absorbed into aibox.lock)");
+    assert!(
+        dir.join("CLAUDE.md").exists(),
+        "CLAUDE.md thin pointer should exist"
+    );
+    assert!(
+        !dir.join(".aibox-version").exists(),
+        ".aibox-version must NOT be created (absorbed into aibox.lock)"
+    );
     assert!(dir.join(".gitignore").exists(), ".gitignore should exist");
     let claude = fs::read_to_string(dir.join("CLAUDE.md")).unwrap();
     assert!(
@@ -291,7 +330,15 @@ fn process_minimal_creates_skeleton() {
     let dir = tempfile::tempdir().unwrap();
     let output = run_in(
         dir.path(),
-        &["init", "--name", "proc-min", "--base", "debian", "--process", "minimal"],
+        &[
+            "init",
+            "--name",
+            "proc-min",
+            "--base",
+            "debian",
+            "--process",
+            "minimal",
+        ],
     );
     assert!(output.status.success());
     assert_post_init_skeleton(dir.path());
@@ -302,7 +349,15 @@ fn process_managed_creates_skeleton() {
     let dir = tempfile::tempdir().unwrap();
     let output = run_in(
         dir.path(),
-        &["init", "--name", "proc-mgd", "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            "proc-mgd",
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(output.status.success());
     assert_post_init_skeleton(dir.path());
@@ -319,7 +374,15 @@ fn process_product_creates_skeleton() {
     let dir = tempfile::tempdir().unwrap();
     let output = run_in(
         dir.path(),
-        &["init", "--name", "proc-prod", "--base", "debian", "--process", "product"],
+        &[
+            "init",
+            "--name",
+            "proc-prod",
+            "--base",
+            "debian",
+            "--process",
+            "product",
+        ],
     );
     assert!(output.status.success());
     assert_post_init_skeleton(dir.path());
@@ -334,7 +397,15 @@ fn process_research_creates_skeleton() {
     let dir = tempfile::tempdir().unwrap();
     let output = run_in(
         dir.path(),
-        &["init", "--name", "proc-res", "--base", "debian", "--process", "research"],
+        &[
+            "init",
+            "--name",
+            "proc-res",
+            "--base",
+            "debian",
+            "--process",
+            "research",
+        ],
     );
     assert!(output.status.success());
     assert_post_init_skeleton(dir.path());

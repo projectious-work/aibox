@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::Serialize;
 use std::path::PathBuf;
 
@@ -70,7 +70,12 @@ pub fn cmd_addon_list(config_path: &Option<String>, format: OutputFormat) -> Res
         }
         OutputFormat::Table => {
             let name_width = rows.iter().map(|r| r.name.len()).max().unwrap_or(10).max(5);
-            let desc_width = rows.iter().map(|r| r.description.len()).max().unwrap_or(20).max(11);
+            let desc_width = rows
+                .iter()
+                .map(|r| r.description.len())
+                .max()
+                .unwrap_or(20)
+                .max(11);
 
             // Group by category and print with headers
             let mut current_cat = "";
@@ -82,15 +87,22 @@ pub fn cmd_addon_list(config_path: &Option<String>, format: OutputFormat) -> Res
                     println!("  \x1b[1m{}\x1b[0m", r.category);
                     println!(
                         "  {:<nw$}  {:<dw$}  {:>5}  STATUS",
-                        "ADDON", "DESCRIPTION", "TOOLS",
-                        nw = name_width, dw = desc_width
+                        "ADDON",
+                        "DESCRIPTION",
+                        "TOOLS",
+                        nw = name_width,
+                        dw = desc_width
                     );
                     current_cat = r.category;
                 }
                 println!(
                     "  {:<nw$}  {:<dw$}  {:>5}  {}",
-                    r.name, r.description, r.tools, r.status,
-                    nw = name_width, dw = desc_width
+                    r.name,
+                    r.description,
+                    r.tools,
+                    r.status,
+                    nw = name_width,
+                    dw = desc_width
                 );
             }
         }
@@ -227,8 +239,12 @@ pub fn cmd_addon_remove(config_path: &Option<String>, name: &str, no_build: bool
 
 /// Show detailed info about an add-on.
 pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
-    let loaded = addon_loader::get_addon(name)
-        .ok_or_else(|| anyhow::anyhow!("Unknown add-on '{}'. Run 'aibox addon list' to see available add-ons.", name))?;
+    let loaded = addon_loader::get_addon(name).ok_or_else(|| {
+        anyhow::anyhow!(
+            "Unknown add-on '{}'. Run 'aibox addon list' to see available add-ons.",
+            name
+        )
+    })?;
 
     match format {
         OutputFormat::Json | OutputFormat::Yaml => {
@@ -254,12 +270,16 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
                 description: &loaded.description,
                 addon_version: &loaded.addon_version,
                 requires: &loaded.requires,
-                tools: loaded.tools.iter().map(|t| ToolRow {
-                    name: &t.name,
-                    default_enabled: t.default_enabled,
-                    default_version: &t.default_version,
-                    supported_versions: &t.supported_versions,
-                }).collect(),
+                tools: loaded
+                    .tools
+                    .iter()
+                    .map(|t| ToolRow {
+                        name: &t.name,
+                        default_enabled: t.default_enabled,
+                        default_version: &t.default_version,
+                        supported_versions: &t.supported_versions,
+                    })
+                    .collect(),
             };
             if matches!(format, OutputFormat::Json) {
                 println!("{}", serde_json::to_string_pretty(&out)?);
@@ -284,14 +304,27 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
                 return Ok(());
             }
 
-            let name_width = loaded.tools.iter().map(|t| t.name.len()).max().unwrap_or(4).max(4);
+            let name_width = loaded
+                .tools
+                .iter()
+                .map(|t| t.name.len())
+                .max()
+                .unwrap_or(4)
+                .max(4);
             println!(
                 "  {:<nw$}  {:>7}  {:>10}  SUPPORTED",
-                "TOOL", "DEFAULT", "VERSION", nw = name_width
+                "TOOL",
+                "DEFAULT",
+                "VERSION",
+                nw = name_width
             );
             for tool in &loaded.tools {
                 let default = if tool.default_enabled { "yes" } else { "no" };
-                let version = if tool.default_version.is_empty() { "-" } else { &tool.default_version };
+                let version = if tool.default_version.is_empty() {
+                    "-"
+                } else {
+                    &tool.default_version
+                };
                 let supported = if tool.supported_versions.is_empty() {
                     "-".to_string()
                 } else {
@@ -299,7 +332,11 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
                 };
                 println!(
                     "  {:<nw$}  {:>7}  {:>10}  {}",
-                    tool.name, default, version, supported, nw = name_width
+                    tool.name,
+                    default,
+                    version,
+                    supported,
+                    nw = name_width
                 );
             }
         }
@@ -368,11 +405,17 @@ uv = { version = "0.7" }
         doc["addons"]["rust"] = toml_edit::Item::Table(addon_table);
 
         let result = doc.to_string();
-        assert!(result.contains("[addons.rust.tools]"), "should have rust addon section");
+        assert!(
+            result.contains("[addons.rust.tools]"),
+            "should have rust addon section"
+        );
         assert!(result.contains("rustc"), "should have rustc tool");
 
         // Original python addon should still be there
-        assert!(result.contains("[addons.python.tools]"), "should preserve python addon");
+        assert!(
+            result.contains("[addons.python.tools]"),
+            "should preserve python addon"
+        );
 
         // Verify the result is valid TOML that our config parser can read
         let _config: crate::config::AiboxConfig =

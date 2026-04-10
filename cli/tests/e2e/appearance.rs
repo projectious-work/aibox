@@ -31,11 +31,16 @@ fn init_with_appearance(dir: &std::path::Path, theme: &str, prompt: &str) {
         dir,
         &[
             "init",
-            "--name", "appearance-test",
-            "--base", "debian",
-            "--process", "managed",
-            "--theme", theme,
-            "--prompt", prompt,
+            "--name",
+            "appearance-test",
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+            "--theme",
+            theme,
+            "--prompt",
+            prompt,
         ],
     );
     assert!(
@@ -102,7 +107,10 @@ fn assert_no_placeholders(dir: &std::path::Path) {
                     "placeholder '{}' found in {}: {}",
                     placeholder,
                     file,
-                    content.lines().find(|l| l.contains(placeholder)).unwrap_or("???")
+                    content
+                        .lines()
+                        .find(|l| l.contains(placeholder))
+                        .unwrap_or("???")
                 );
             }
         }
@@ -143,7 +151,10 @@ fn theme_gruvbox_renders_correctly() {
     assert!(
         vimrc.contains("gruvbox") || vimrc.contains("retrobox"),
         "vimrc should use gruvbox-related colorscheme, got: {}",
-        vimrc.lines().find(|l| l.contains("colorscheme")).unwrap_or("no colorscheme line")
+        vimrc
+            .lines()
+            .find(|l| l.contains("colorscheme"))
+            .unwrap_or("no colorscheme line")
     );
 
     // Check zellij config
@@ -204,7 +215,10 @@ fn theme_change_updates_all_files() {
     assert!(
         vimrc.contains("dracula"),
         "vimrc colorscheme should be updated to dracula, got: {}",
-        vimrc.lines().find(|l| l.contains("colorscheme")).unwrap_or("no colorscheme line")
+        vimrc
+            .lines()
+            .find(|l| l.contains("colorscheme"))
+            .unwrap_or("no colorscheme line")
     );
 
     // Verify yazi theme updated (content should differ from gruvbox)
@@ -253,7 +267,10 @@ fn theme_alignment_all_tools_match_selected_theme() {
             "theme '{}': vimrc should contain 'colorscheme {}', got: {}",
             theme,
             vim_scheme,
-            vimrc.lines().find(|l| l.contains("colorscheme")).unwrap_or("no colorscheme line")
+            vimrc
+                .lines()
+                .find(|l| l.contains("colorscheme"))
+                .unwrap_or("no colorscheme line")
         );
 
         // Zellij must reference the theme name
@@ -298,10 +315,8 @@ fn yazi_keymap_includes_edit_in_pane_binding() {
     let dir = tempfile::tempdir().unwrap();
     init_with_appearance(dir.path(), "gruvbox-dark", "default");
 
-    let keymap = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/yazi/keymap.toml"),
-    )
-    .unwrap();
+    let keymap =
+        fs::read_to_string(dir.path().join(".aibox-home/.config/yazi/keymap.toml")).unwrap();
 
     assert!(
         keymap.contains(r#"on = "e""#),
@@ -353,10 +368,7 @@ fn prompt_default_generates_starship() {
     let dir = tempfile::tempdir().unwrap();
     init_with_appearance(dir.path(), "gruvbox-dark", "default");
 
-    let content = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/starship.toml"),
-    )
-    .unwrap();
+    let content = fs::read_to_string(dir.path().join(".aibox-home/.config/starship.toml")).unwrap();
 
     assert!(
         content.contains("directory") && content.contains("git_branch"),
@@ -369,10 +381,7 @@ fn prompt_plain_no_nerd_font() {
     let dir = tempfile::tempdir().unwrap();
     init_with_appearance(dir.path(), "gruvbox-dark", "plain");
 
-    let content = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/starship.toml"),
-    )
-    .unwrap();
+    let content = fs::read_to_string(dir.path().join(".aibox-home/.config/starship.toml")).unwrap();
 
     // Plain preset should mention it's ASCII-only or not have Nerd Font symbols
     assert!(

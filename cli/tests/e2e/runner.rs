@@ -159,7 +159,11 @@ impl E2eRunner {
         // container image, not in the seeded .aibox-home. Deploy them so the
         // aibox-e2e-testrunner can simulate the full container environment.
         let image_config = format!("{}/../images/base-debian/config", manifest_dir);
-        self.deploy_image_asset(&format!("{}/vimrc", image_config), "/opt/aibox/vimrc", false);
+        self.deploy_image_asset(
+            &format!("{}/vimrc", image_config),
+            "/opt/aibox/vimrc",
+            false,
+        );
         for (src, dst) in &[
             ("bin/open-in-editor.sh", "open-in-editor"),
             ("bin/vim-loop.sh", "vim-loop"),

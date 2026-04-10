@@ -33,9 +33,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::lock::{group_for_path, sha256_of_file, should_skip_entry};
 use crate::content_init::templates_dir_for_version;
 use crate::content_install::{InstallAction, install_action_for};
+use crate::lock::{group_for_path, sha256_of_file, should_skip_entry};
 
 // ---------------------------------------------------------------------------
 // Per-file classification
@@ -181,9 +181,10 @@ pub fn three_way_diff(
 
         let live_abs = project_root.join(&project_install);
         let live_sha_opt = if live_abs.is_file() {
-            Some(sha256_of_file(&live_abs).with_context(|| {
-                format!("failed to hash live file {}", live_abs.display())
-            })?)
+            Some(
+                sha256_of_file(&live_abs)
+                    .with_context(|| format!("failed to hash live file {}", live_abs.display()))?,
+            )
         } else {
             None
         };
@@ -191,10 +192,7 @@ pub fn three_way_diff(
         let reference_abs = templates_src_path.join(rel_path);
         let reference_sha_opt = if reference_abs.is_file() {
             Some(sha256_of_file(&reference_abs).with_context(|| {
-                format!(
-                    "failed to hash reference file {}",
-                    reference_abs.display()
-                )
+                format!("failed to hash reference file {}", reference_abs.display())
             })?)
         } else {
             None
@@ -253,13 +251,9 @@ pub fn three_way_diff(
 /// Recursively walk a directory, calling `cb` with each file's path
 /// relative to `root`. Honours [`should_skip_entry`] so the diff and the
 /// init walker agree on which files exist.
-fn walk_tree(
-    root: &Path,
-    dir: &Path,
-    cb: &mut dyn FnMut(&Path) -> Result<()>,
-) -> Result<()> {
-    for entry in fs::read_dir(dir)
-        .with_context(|| format!("failed to read directory {}", dir.display()))?
+fn walk_tree(root: &Path, dir: &Path, cb: &mut dyn FnMut(&Path) -> Result<()>) -> Result<()> {
+    for entry in
+        fs::read_dir(dir).with_context(|| format!("failed to read directory {}", dir.display()))?
     {
         let entry = entry?;
         let path = entry.path();
@@ -386,9 +380,8 @@ pub fn write_migration_document(
         return Ok(None);
     }
 
-    fs::create_dir_all(&pending_dir).with_context(|| {
-        format!("failed to create {}", pending_dir.display())
-    })?;
+    fs::create_dir_all(&pending_dir)
+        .with_context(|| format!("failed to create {}", pending_dir.display()))?;
 
     let now = chrono::Utc::now();
     let now_iso = now.format("%Y-%m-%dT%H:%M:%SZ").to_string();
@@ -553,9 +546,7 @@ fn existing_migration_matches(
     if !dir.is_dir() {
         return Ok(false);
     }
-    for entry in fs::read_dir(dir)
-        .with_context(|| format!("failed to read {}", dir.display()))?
-    {
+    for entry in fs::read_dir(dir).with_context(|| format!("failed to read {}", dir.display()))? {
         let entry = entry?;
         let path = entry.path();
         if !path.is_file() {
@@ -830,8 +821,7 @@ mod tests {
 
         // 3. Conflict: perturb both cache and live for entry.yaml.
         let conflict_cache = cache_src.join("skills/event-log/templates/entry.yaml");
-        let conflict_live =
-            project.join("context/skills/event-log/templates/entry.yaml");
+        let conflict_live = project.join("context/skills/event-log/templates/entry.yaml");
         fs::write(&conflict_cache, "name: upstream-edit\n").unwrap();
         fs::write(&conflict_live, "name: local-edit\n").unwrap();
 
@@ -1055,13 +1045,11 @@ mod tests {
         let summary = DiffSummary::from_diffs(&diffs);
 
         let first =
-            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs)
-                .unwrap();
+            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs).unwrap();
         assert!(first.is_some());
 
         let second =
-            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs)
-                .unwrap();
+            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs).unwrap();
         assert!(
             second.is_none(),
             "second call should be a no-op because a matching document already exists"
@@ -1086,8 +1074,7 @@ mod tests {
         }];
         let summary = DiffSummary::from_diffs(&diffs);
         let out =
-            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs)
-                .unwrap();
+            write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs).unwrap();
         assert!(out.is_none(), "should be no-op due to in-progress match");
     }
 }

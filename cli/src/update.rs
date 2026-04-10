@@ -253,8 +253,8 @@ fn do_upgrade(config_path: &Option<String>, dry_run: bool, global_yes: bool) -> 
             return Ok(());
         }
     };
-    let current = semver::Version::parse(current_version)
-        .unwrap_or_else(|_| semver::Version::new(0, 0, 0));
+    let current =
+        semver::Version::parse(current_version).unwrap_or_else(|_| semver::Version::new(0, 0, 0));
 
     if latest <= current {
         output::ok(&format!(
@@ -299,10 +299,7 @@ fn do_upgrade(config_path: &Option<String>, dry_run: bool, global_yes: bool) -> 
     let updated_config = AiboxConfig::from_cli_option(config_path)?;
     sync_config_files(&updated_config)?;
 
-    output::ok(&format!(
-        "Upgrade complete: {} -> {}",
-        current, latest_str
-    ));
+    output::ok(&format!("Upgrade complete: {} -> {}", current, latest_str));
 
     // 3. Offer to rebuild the container image
     if ask_yes_no("Rebuild container image now?", global_yes) {

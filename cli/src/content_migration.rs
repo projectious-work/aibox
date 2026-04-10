@@ -857,8 +857,8 @@ Some markdown here.
         let tmp = TempDir::new().unwrap();
         write_sample(tmp.path(), "pending", "MIG-bright-owl.md", SAMPLE_DOC);
 
-        let doc = transition_migration(tmp.path(), "MIG-bright-owl", MigrationState::InProgress)
-            .unwrap();
+        let doc =
+            transition_migration(tmp.path(), "MIG-bright-owl", MigrationState::InProgress).unwrap();
         assert_eq!(doc.state, MigrationState::InProgress);
         assert!(doc.path.to_string_lossy().contains("in-progress"));
         assert!(
@@ -930,8 +930,8 @@ Some markdown here.
     #[test]
     fn transition_migration_unknown_id_errors() {
         let tmp = TempDir::new().unwrap();
-        let err = transition_migration(tmp.path(), "MIG-ghost", MigrationState::InProgress)
-            .unwrap_err();
+        let err =
+            transition_migration(tmp.path(), "MIG-ghost", MigrationState::InProgress).unwrap_err();
         assert!(format!("{:#}", err).contains("No migration found"));
     }
 

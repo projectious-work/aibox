@@ -249,10 +249,10 @@ fn generate_devcontainer_json(config: &AiboxConfig, dir: &Path) -> Result<bool> 
             crate::config::AiProvider::Copilot => ("copilot", "/usr/local/bin/copilot"),
             crate::config::AiProvider::Cursor => continue,
         };
-        terminal_profiles.as_object_mut().unwrap().insert(
-            name.to_string(),
-            serde_json::json!({ "path": path }),
-        );
+        terminal_profiles
+            .as_object_mut()
+            .unwrap()
+            .insert(name.to_string(), serde_json::json!({ "path": path }));
     }
 
     // Build VS Code settings — start with base, add flavor-specific
@@ -788,7 +788,10 @@ mod tests {
         let config = make_config(&[], false);
         generate_devcontainer_json(&config, dir.path()).unwrap();
         let content = fs::read_to_string(dir.path().join("devcontainer.json")).unwrap();
-        assert!(content.contains("claude"), "default config should include claude profile");
+        assert!(
+            content.contains("claude"),
+            "default config should include claude profile"
+        );
     }
 
     #[test]
@@ -799,7 +802,10 @@ mod tests {
         config.resolve_ai_provider_addons();
         generate_devcontainer_json(&config, dir.path()).unwrap();
         let content = fs::read_to_string(dir.path().join("devcontainer.json")).unwrap();
-        assert!(!content.contains("claude"), "should not have claude profile");
+        assert!(
+            !content.contains("claude"),
+            "should not have claude profile"
+        );
         assert!(!content.contains("aider"), "should not have aider profile");
         assert!(content.contains("bash"), "should still have bash profile");
     }
@@ -813,7 +819,10 @@ mod tests {
         generate_devcontainer_json(&config, dir.path()).unwrap();
         let content = fs::read_to_string(dir.path().join("devcontainer.json")).unwrap();
         assert!(content.contains("aider"), "should have aider profile");
-        assert!(!content.contains("claude"), "should not have claude profile");
+        assert!(
+            !content.contains("claude"),
+            "should not have claude profile"
+        );
     }
 
     #[test]
@@ -825,7 +834,10 @@ mod tests {
         generate_dockerfile(&config, dir.path(), &test_env()).unwrap();
         let content = fs::read_to_string(dir.path().join("Dockerfile")).unwrap();
         assert!(content.contains("aider"), "should install aider");
-        assert!(content.contains("uv tool install"), "should use uv tool install");
+        assert!(
+            content.contains("uv tool install"),
+            "should use uv tool install"
+        );
     }
 
     #[test]
@@ -837,7 +849,10 @@ mod tests {
         generate_dockerfile(&config, dir.path(), &test_env()).unwrap();
         let content = fs::read_to_string(dir.path().join("Dockerfile")).unwrap();
         // Claude is installed via native installer (npm is deprecated)
-        assert!(content.contains("claude.ai/install.sh"), "should install Claude via native installer");
+        assert!(
+            content.contains("claude.ai/install.sh"),
+            "should install Claude via native installer"
+        );
         assert!(!content.contains("aider"), "should not install aider");
         assert!(!content.contains("gemini"), "should not install gemini");
     }
@@ -861,7 +876,10 @@ mod tests {
         config.resolve_ai_provider_addons();
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
         let content = fs::read_to_string(dir.path().join("docker-compose.yml")).unwrap();
-        assert!(content.contains(".gemini"), "should have gemini volume mount");
+        assert!(
+            content.contains(".gemini"),
+            "should have gemini volume mount"
+        );
     }
 
     #[test]
@@ -872,8 +890,14 @@ mod tests {
         config.resolve_ai_provider_addons();
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
         let content = fs::read_to_string(dir.path().join("docker-compose.yml")).unwrap();
-        assert!(!content.contains(".claude"), "should not have claude volume");
+        assert!(
+            !content.contains(".claude"),
+            "should not have claude volume"
+        );
         assert!(!content.contains(".aider"), "should not have aider volume");
-        assert!(!content.contains(".gemini"), "should not have gemini volume");
+        assert!(
+            !content.contains(".gemini"),
+            "should not have gemini volume"
+        );
     }
 }

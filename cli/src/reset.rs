@@ -157,8 +157,8 @@ pub fn copy_item(src: &Path, dst: &Path) -> Result<()> {
 pub fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
     fs::create_dir_all(dst)
         .with_context(|| format!("Failed to create directory: {}", dst.display()))?;
-    for entry in fs::read_dir(src)
-        .with_context(|| format!("Failed to read directory: {}", src.display()))?
+    for entry in
+        fs::read_dir(src).with_context(|| format!("Failed to read directory: {}", src.display()))?
     {
         let entry = entry?;
         let src_path = entry.path();
@@ -321,12 +321,8 @@ pub fn cmd_reset(
             "\x1b[1;31m  ║  DANGER: {:<6} items will be PERMANENTLY DELETED    ║\x1b[0m",
             delete_count
         );
-        eprintln!(
-            "\x1b[1;31m  ║  No backup will be created. This cannot be undone.    ║\x1b[0m"
-        );
-        eprintln!(
-            "\x1b[1;31m  ╚════════════════════════════════════════════════════════╝\x1b[0m"
-        );
+        eprintln!("\x1b[1;31m  ║  No backup will be created. This cannot be undone.    ║\x1b[0m");
+        eprintln!("\x1b[1;31m  ╚════════════════════════════════════════════════════════╝\x1b[0m");
     } else {
         output::info(&format!(
             "Backup target: {}",
@@ -411,8 +407,7 @@ pub fn cmd_uninstall(dry_run: bool, purge: bool, yes: bool) -> Result<()> {
 
     // Global directories (XDG Base Directory Specification)
     let global_dirs = crate::dirs::all_global_dirs();
-    let existing_global_dirs: Vec<&PathBuf> =
-        global_dirs.iter().filter(|d| d.exists()).collect();
+    let existing_global_dirs: Vec<&PathBuf> = global_dirs.iter().filter(|d| d.exists()).collect();
     let has_global_config = !existing_global_dirs.is_empty();
 
     // Determine whether to remove global directories:
@@ -436,15 +431,9 @@ pub fn cmd_uninstall(dry_run: bool, purge: bool, yes: bool) -> Result<()> {
     }
 
     // Show what will be removed
-    eprintln!(
-        "\n\x1b[1;31m  ╔════════════════════════════════════════════════════════╗\x1b[0m"
-    );
-    eprintln!(
-        "\x1b[1;31m  ║  DANGER: aibox will be PERMANENTLY UNINSTALLED        ║\x1b[0m"
-    );
-    eprintln!(
-        "\x1b[1;31m  ╚════════════════════════════════════════════════════════╝\x1b[0m"
-    );
+    eprintln!("\n\x1b[1;31m  ╔════════════════════════════════════════════════════════╗\x1b[0m");
+    eprintln!("\x1b[1;31m  ║  DANGER: aibox will be PERMANENTLY UNINSTALLED        ║\x1b[0m");
+    eprintln!("\x1b[1;31m  ╚════════════════════════════════════════════════════════╝\x1b[0m");
     eprintln!();
     eprintln!("  The following will be removed:");
     if binary_path.exists() {
@@ -455,15 +444,9 @@ pub fn cmd_uninstall(dry_run: bool, purge: bool, yes: bool) -> Result<()> {
     }
     for dir in &existing_global_dirs {
         if remove_global {
-            eprintln!(
-                "    \x1b[31m\u{2717}\x1b[0m  {} (remove)",
-                dir.display()
-            );
+            eprintln!("    \x1b[31m\u{2717}\x1b[0m  {} (remove)", dir.display());
         } else {
-            eprintln!(
-                "    \x1b[32m\u{2713}\x1b[0m  {} (kept)",
-                dir.display()
-            );
+            eprintln!("    \x1b[32m\u{2713}\x1b[0m  {} (kept)", dir.display());
         }
     }
     eprintln!();
@@ -510,7 +493,9 @@ pub fn cmd_uninstall(dry_run: bool, purge: bool, yes: bool) -> Result<()> {
 
     eprintln!();
     output::ok("aibox has been uninstalled.");
-    eprintln!("  To reinstall: curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash");
+    eprintln!(
+        "  To reinstall: curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash"
+    );
 
     Ok(())
 }

@@ -40,11 +40,7 @@ fn check_pip_audit() -> Result<()> {
         return Ok(()); // Not a Python project
     }
 
-    if Command::new("pip-audit")
-        .arg("--version")
-        .output()
-        .is_err()
-    {
+    if Command::new("pip-audit").arg("--version").output().is_err() {
         output::warn("pip-audit not installed. Install: pip install pip-audit");
         return Ok(());
     }
@@ -71,7 +67,9 @@ fn check_trivy(config: &Option<AiboxConfig>) -> Result<()> {
     };
 
     if Command::new("trivy").arg("--version").output().is_err() {
-        output::warn("trivy not installed. See: https://trivy.dev/latest/getting-started/installation/");
+        output::warn(
+            "trivy not installed. See: https://trivy.dev/latest/getting-started/installation/",
+        );
         return Ok(());
     }
 
@@ -119,15 +117,9 @@ pub fn doctor_check_audit_tools() {
         .output()
         .is_ok();
 
-    let pip_audit_available = Command::new("pip-audit")
-        .arg("--version")
-        .output()
-        .is_ok();
+    let pip_audit_available = Command::new("pip-audit").arg("--version").output().is_ok();
 
-    let trivy_available = Command::new("trivy")
-        .arg("--version")
-        .output()
-        .is_ok();
+    let trivy_available = Command::new("trivy").arg("--version").output().is_ok();
 
     if cargo_audit_available {
         output::ok("cargo-audit available");

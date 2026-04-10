@@ -7,7 +7,8 @@ use crate::config::{StarshipPreset, Theme};
 /// Returns the Zellij theme KDL content for the given theme.
 pub fn zellij_theme(theme: &Theme) -> &'static str {
     match theme {
-        Theme::GruvboxDark => r##"themes {
+        Theme::GruvboxDark => {
+            r##"themes {
     gruvbox-dark {
         fg "#D5C4A1"
         bg "#282828"
@@ -22,8 +23,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#D65D0E"
     }
 }
-"##,
-        Theme::CatppuccinMocha => r##"themes {
+"##
+        }
+        Theme::CatppuccinMocha => {
+            r##"themes {
     catppuccin-mocha {
         fg "#CDD6F4"
         bg "#1E1E2E"
@@ -38,8 +41,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#FAB387"
     }
 }
-"##,
-        Theme::CatppuccinLatte => r##"themes {
+"##
+        }
+        Theme::CatppuccinLatte => {
+            r##"themes {
     catppuccin-latte {
         fg "#4C4F69"
         bg "#EFF1F5"
@@ -54,8 +59,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#FE640B"
     }
 }
-"##,
-        Theme::Dracula => r##"themes {
+"##
+        }
+        Theme::Dracula => {
+            r##"themes {
     dracula {
         fg "#F8F8F2"
         bg "#282A36"
@@ -70,8 +77,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#FFB86C"
     }
 }
-"##,
-        Theme::TokyoNight => r##"themes {
+"##
+        }
+        Theme::TokyoNight => {
+            r##"themes {
     tokyo-night {
         fg "#C0CAF5"
         bg "#1A1B26"
@@ -86,8 +95,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#FF9E64"
     }
 }
-"##,
-        Theme::Nord => r##"themes {
+"##
+        }
+        Theme::Nord => {
+            r##"themes {
     nord {
         fg "#D8DEE9"
         bg "#2E3440"
@@ -102,8 +113,10 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#D08770"
     }
 }
-"##,
-        Theme::Projectious => r##"themes {
+"##
+        }
+        Theme::Projectious => {
+            r##"themes {
     projectious {
         fg "#C5DAF0"
         bg "#0E1720"
@@ -118,7 +131,8 @@ pub fn zellij_theme(theme: &Theme) -> &'static str {
         orange "#E05232"
     }
 }
-"##,
+"##
+        }
     }
 }
 
@@ -169,7 +183,8 @@ pub fn yazi_theme(theme: &Theme) -> &'static str {
 /// Returns the lazygit theme YAML snippet (gui.theme section).
 pub fn lazygit_theme(theme: &Theme) -> &'static str {
     match theme {
-        Theme::GruvboxDark => r#"gui:
+        Theme::GruvboxDark => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#D79921'
@@ -190,8 +205,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#D5C4A1'
     searchingActiveBorderColor:
       - '#FABD2F'
-"#,
-        Theme::CatppuccinMocha => r#"gui:
+"#
+        }
+        Theme::CatppuccinMocha => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#89B4FA'
@@ -212,8 +229,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#CDD6F4'
     searchingActiveBorderColor:
       - '#F9E2AF'
-"#,
-        Theme::CatppuccinLatte => r#"gui:
+"#
+        }
+        Theme::CatppuccinLatte => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#1E66F5'
@@ -234,8 +253,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#4C4F69'
     searchingActiveBorderColor:
       - '#DF8E1D'
-"#,
-        Theme::Dracula => r#"gui:
+"#
+        }
+        Theme::Dracula => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#FF79C6'
@@ -257,8 +278,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
     searchingActiveBorderColor:
       - '#8BE9FD'
       - bold
-"#,
-        Theme::TokyoNight => r#"gui:
+"#
+        }
+        Theme::TokyoNight => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#7AA2F7'
@@ -279,8 +302,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#C0CAF5'
     searchingActiveBorderColor:
       - '#E0AF68'
-"#,
-        Theme::Nord => r#"gui:
+"#
+        }
+        Theme::Nord => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#88C0D0'
@@ -301,8 +326,10 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#D8DEE9'
     searchingActiveBorderColor:
       - '#EBCB8B'
-"#,
-        Theme::Projectious => r#"gui:
+"#
+        }
+        Theme::Projectious => {
+            r#"gui:
   theme:
     activeBorderColor:
       - '#E05232'
@@ -323,7 +350,8 @@ pub fn lazygit_theme(theme: &Theme) -> &'static str {
       - '#C5DAF0'
     searchingActiveBorderColor:
       - '#8B6508'
-"#,
+"#
+        }
     }
 }
 
@@ -347,7 +375,7 @@ pub fn starship_config(preset: &StarshipPreset, theme: &Theme) -> String {
 
     match preset {
         StarshipPreset::Default => format!(
-r#"# aibox starship config — default preset
+            r#"# aibox starship config — default preset
 palette = "aibox"
 
 format = "$directory$git_branch$git_status$python$rust$nodejs$golang$cmd_duration$line_break$character"
@@ -390,10 +418,11 @@ error_symbol = "[❯](bold fg:red)"
 bg = "{bg}"
 fg = "{fg}"
 accent = "{accent}"
-"#),
+"#
+        ),
 
         StarshipPreset::Plain => format!(
-r#"# aibox starship config — plain preset (no Nerd Font needed)
+            r#"# aibox starship config — plain preset (no Nerd Font needed)
 format = "$directory$git_branch$git_status$cmd_duration$line_break$character"
 
 [directory]
@@ -418,10 +447,11 @@ symbol = "rs "
 symbol = "js "
 [golang]
 symbol = "go "
-"#),
+"#
+        ),
 
         StarshipPreset::Minimal => format!(
-r#"# aibox starship config — minimal preset
+            r#"# aibox starship config — minimal preset
 format = "$directory$git_branch$line_break$character"
 
 [directory]
@@ -435,10 +465,11 @@ format = " [$branch]($style)"
 [character]
 success_symbol = "[❯](fg:{accent})"
 error_symbol = "[❯](bold fg:red)"
-"#),
+"#
+        ),
 
         StarshipPreset::NerdFont => format!(
-r#"# aibox starship config — nerd-font preset
+            r#"# aibox starship config — nerd-font preset
 palette = "aibox"
 
 format = "$os$directory$git_branch$git_status$python$rust$nodejs$golang$docker_context$cmd_duration$line_break$character"
@@ -480,10 +511,11 @@ error_symbol = "[❯](bold fg:red)"
 bg = "{bg}"
 fg = "{fg}"
 accent = "{accent}"
-"#),
+"#
+        ),
 
         StarshipPreset::Pastel => format!(
-r#"# aibox starship config — pastel powerline preset
+            r#"# aibox starship config — pastel powerline preset
 palette = "aibox"
 
 format = """
@@ -516,10 +548,11 @@ error_symbol = "[❯](bold fg:red)"
 bg = "{bg}"
 fg = "{fg}"
 accent = "{accent}"
-"#),
+"#
+        ),
 
         StarshipPreset::Bracketed => format!(
-r#"# aibox starship config — bracketed segments preset
+            r#"# aibox starship config — bracketed segments preset
 format = "$directory$git_branch$git_status$python$rust$nodejs$golang$cmd_duration$line_break$character"
 
 [directory]
@@ -549,10 +582,11 @@ format = "[\\[$duration\\]](fg:#928374) "
 [character]
 success_symbol = "[❯](bold fg:{green})"
 error_symbol = "[❯](bold fg:red)"
-"#),
+"#
+        ),
 
         StarshipPreset::Arrow => format!(
-r#"# aibox starship config — arrow preset (powerline chevron/airline style)
+            r#"# aibox starship config — arrow preset (powerline chevron/airline style)
 # Requires a Nerd Font or Powerline-patched font for the arrow separators (e0b0/e0b2).
 palette = "aibox"
 
@@ -614,6 +648,7 @@ format = "[$symbol$version]($style) "
 bg = "{bg}"
 fg = "{fg}"
 accent = "{accent}"
-"#),
+"#
+        ),
     }
 }

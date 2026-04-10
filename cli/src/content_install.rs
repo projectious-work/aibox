@@ -89,9 +89,8 @@
 use std::path::{Path, PathBuf};
 
 use crate::processkit_vocab::{
-    self as pk, AGENTS_FILENAME, FORMAT_FILENAME, INDEX_FILENAME,
-    LIVE_LIB_DIR, LIVE_PROCESSES_DIR, LIVE_SCHEMAS_DIR, LIVE_SKILLS_DIR,
-    LIVE_STATE_MACHINES_DIR,
+    self as pk, AGENTS_FILENAME, FORMAT_FILENAME, INDEX_FILENAME, LIVE_LIB_DIR, LIVE_PROCESSES_DIR,
+    LIVE_SCHEMAS_DIR, LIVE_SKILLS_DIR, LIVE_STATE_MACHINES_DIR,
 };
 
 /// What to do with a single file from the processkit cache.
@@ -324,26 +323,14 @@ mod tests {
 
     #[test]
     fn v8_context_index_mds_install_verbatim() {
-        assert_installs_to(
-            "context/skills/INDEX.md",
-            "context/skills/INDEX.md",
-        );
-        assert_installs_to(
-            "context/schemas/INDEX.md",
-            "context/schemas/INDEX.md",
-        );
+        assert_installs_to("context/skills/INDEX.md", "context/skills/INDEX.md");
+        assert_installs_to("context/schemas/INDEX.md", "context/schemas/INDEX.md");
         assert_installs_to(
             "context/state-machines/INDEX.md",
             "context/state-machines/INDEX.md",
         );
-        assert_installs_to(
-            "context/processes/INDEX.md",
-            "context/processes/INDEX.md",
-        );
-        assert_installs_to(
-            "context/INDEX.md",
-            "context/INDEX.md",
-        );
+        assert_installs_to("context/processes/INDEX.md", "context/processes/INDEX.md");
+        assert_installs_to("context/INDEX.md", "context/INDEX.md");
     }
 
     #[test]

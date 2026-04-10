@@ -129,7 +129,10 @@ pub fn collect_processkit_mcp_specs(
     let mut specs: Vec<McpServerSpec> = Vec::new();
 
     for entry in fs::read_dir(&mirror_skills_dir).with_context(|| {
-        format!("failed to read templates mirror at {}", mirror_skills_dir.display())
+        format!(
+            "failed to read templates mirror at {}",
+            mirror_skills_dir.display()
+        )
     })? {
         let entry = entry?;
         let skill_dir = entry.path();
@@ -158,12 +161,10 @@ pub fn collect_processkit_mcp_specs(
             continue;
         }
 
-        let body = fs::read_to_string(&config_path).with_context(|| {
-            format!("failed to read {}", config_path.display())
-        })?;
-        let parsed: PerSkillConfig = serde_json::from_str(&body).with_context(|| {
-            format!("failed to parse JSON from {}", config_path.display())
-        })?;
+        let body = fs::read_to_string(&config_path)
+            .with_context(|| format!("failed to read {}", config_path.display()))?;
+        let parsed: PerSkillConfig = serde_json::from_str(&body)
+            .with_context(|| format!("failed to parse JSON from {}", config_path.display()))?;
 
         for (name, raw) in parsed.mcp_servers {
             specs.push(McpServerSpec {
@@ -199,10 +200,7 @@ fn managed_set(specs: &[McpServerSpec]) -> BTreeSet<String> {
 /// returns successfully. Idempotent: re-running on a stable
 /// `(processkit_version, providers, skills)` set produces byte-identical
 /// output.
-pub fn regenerate_mcp_configs(
-    config: &AiboxConfig,
-    project_root: &Path,
-) -> Result<()> {
+pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Result<()> {
     // The effective skill set (DEC-035 / BACK-118) constrains which
     // skills' MCP servers we register — same set the install path
     // uses to filter live-installed files. If the templates mirror
@@ -212,11 +210,8 @@ pub fn regenerate_mcp_configs(
     let effective = crate::content_init::build_effective_skill_set(project_root, config)
         .ok()
         .flatten();
-    let specs = collect_processkit_mcp_specs(
-        project_root,
-        &config.processkit.version,
-        effective.as_ref(),
-    )?;
+    let specs =
+        collect_processkit_mcp_specs(project_root, &config.processkit.version, effective.as_ref())?;
 
     if specs.is_empty() {
         // No processkit MCP servers to register. Don't bother writing
@@ -295,9 +290,7 @@ pub fn regenerate_mcp_configs(
     }
 
     // 5. Mistral — informational note when alone (not paired with Claude).
-    if providers.contains(&AiProvider::Mistral)
-        && !providers.contains(&AiProvider::Claude)
-    {
+    if providers.contains(&AiProvider::Mistral) && !providers.contains(&AiProvider::Claude) {
         output::info(
             "`mistral` does not ship a CLI tool that reads project-level MCP config. \
              aibox is writing `.mcp.json` (the standard Claude Code shape) at the \
@@ -329,29 +322,27 @@ fn write_mcp_servers_json(
     managed: &BTreeSet<String>,
     path: &Path,
 ) -> Result<()> {
-    let mut top: serde_json::Map<String, serde_json::Value> =
-        if path.is_file() {
-            let body = fs::read_to_string(path)
-                .with_context(|| format!("failed to read {}", path.display()))?;
-            if body.trim().is_empty() {
-                serde_json::Map::new()
-            } else {
-                serde_json::from_str(&body).with_context(|| {
-                    format!("failed to parse existing JSON at {}", path.display())
-                })?
-            }
-        } else {
+    let mut top: serde_json::Map<String, serde_json::Value> = if path.is_file() {
+        let body = fs::read_to_string(path)
+            .with_context(|| format!("failed to read {}", path.display()))?;
+        if body.trim().is_empty() {
             serde_json::Map::new()
-        };
+        } else {
+            serde_json::from_str(&body)
+                .with_context(|| format!("failed to parse existing JSON at {}", path.display()))?
+        }
+    } else {
+        serde_json::Map::new()
+    };
 
     // Get-or-create the mcpServers object.
     let mcp_servers = top
         .entry("mcpServers".to_string())
         .or_insert_with(|| serde_json::Value::Object(serde_json::Map::new()));
 
-    let obj = mcp_servers
-        .as_object_mut()
-        .ok_or_else(|| anyhow::anyhow!("`mcpServers` in {} is not a JSON object", path.display()))?;
+    let obj = mcp_servers.as_object_mut().ok_or_else(|| {
+        anyhow::anyhow!("`mcpServers` in {} is not a JSON object", path.display())
+    })?;
 
     // Step 1: remove all keys in the managed set. Preserves user keys.
     obj.retain(|k, _| !managed.contains(k));
@@ -363,27 +354,30 @@ fn write_mcp_servers_json(
 
     // Ensure parent dir exists (e.g. .cursor/, .gemini/).
     if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| {
-            format!("failed to create parent directory {}", parent.display())
-        })?;
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create parent directory {}", parent.display()))?;
     }
 
-    let formatted = serde_json::to_string_pretty(&top)
-        .context("failed to serialize MCP config")?;
-    fs::write(path, formatted)
-        .with_context(|| format!("failed to write {}", path.display()))?;
+    let formatted = serde_json::to_string_pretty(&top).context("failed to serialize MCP config")?;
+    fs::write(path, formatted).with_context(|| format!("failed to write {}", path.display()))?;
 
     Ok(())
 }
 
 fn spec_to_json(spec: &McpServerSpec) -> serde_json::Value {
     let mut entry = serde_json::Map::new();
-    entry.insert("command".to_string(), serde_json::Value::String(spec.command.clone()));
+    entry.insert(
+        "command".to_string(),
+        serde_json::Value::String(spec.command.clone()),
+    );
     if !spec.args.is_empty() {
         entry.insert(
             "args".to_string(),
             serde_json::Value::Array(
-                spec.args.iter().map(|a| serde_json::Value::String(a.clone())).collect(),
+                spec.args
+                    .iter()
+                    .map(|a| serde_json::Value::String(a.clone()))
+                    .collect(),
             ),
         );
     }
@@ -454,9 +448,9 @@ fn write_codex_config_toml(
 
     // Step 1: remove managed entries. Iterate over a snapshot of keys
     // to avoid mutating-while-iterating.
-    let mcp_table = doc["mcp_servers"]
-        .as_table_mut()
-        .ok_or_else(|| anyhow::anyhow!("`mcp_servers` in {} is not a TOML table", path.display()))?;
+    let mcp_table = doc["mcp_servers"].as_table_mut().ok_or_else(|| {
+        anyhow::anyhow!("`mcp_servers` in {} is not a TOML table", path.display())
+    })?;
     let existing_keys: Vec<String> = mcp_table.iter().map(|(k, _)| k.to_string()).collect();
     for key in existing_keys {
         if managed.contains(&key) {
@@ -486,9 +480,8 @@ fn write_codex_config_toml(
     }
 
     if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| {
-            format!("failed to create parent directory {}", parent.display())
-        })?;
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create parent directory {}", parent.display()))?;
     }
     fs::write(path, doc.to_string())
         .with_context(|| format!("failed to write {}", path.display()))?;
@@ -513,8 +506,7 @@ fn write_continue_mcp_dir(
     managed: &BTreeSet<String>,
     dir: &Path,
 ) -> Result<()> {
-    fs::create_dir_all(dir)
-        .with_context(|| format!("failed to create {}", dir.display()))?;
+    fs::create_dir_all(dir).with_context(|| format!("failed to create {}", dir.display()))?;
 
     // Step 1: list existing files matching managed names; mark for removal.
     let current_names: BTreeSet<String> = specs.iter().map(|s| s.name.clone()).collect();
@@ -539,8 +531,14 @@ fn write_continue_mcp_dir(
     // Step 2: write current spec files.
     for spec in specs {
         let mut entry = serde_json::Map::new();
-        entry.insert("name".to_string(), serde_json::Value::String(spec.name.clone()));
-        entry.insert("type".to_string(), serde_json::Value::String("stdio".to_string()));
+        entry.insert(
+            "name".to_string(),
+            serde_json::Value::String(spec.name.clone()),
+        );
+        entry.insert(
+            "type".to_string(),
+            serde_json::Value::String("stdio".to_string()),
+        );
         entry.insert(
             "command".to_string(),
             serde_json::Value::String(spec.command.clone()),
@@ -549,7 +547,10 @@ fn write_continue_mcp_dir(
             entry.insert(
                 "args".to_string(),
                 serde_json::Value::Array(
-                    spec.args.iter().map(|a| serde_json::Value::String(a.clone())).collect(),
+                    spec.args
+                        .iter()
+                        .map(|a| serde_json::Value::String(a.clone()))
+                        .collect(),
                 ),
             );
         }
@@ -614,19 +615,21 @@ mod tests {
     #[test]
     fn collect_skips_when_version_is_unset() {
         let tmp = TempDir::new().unwrap();
-        let specs = collect_processkit_mcp_specs(
-            tmp.path(),
-            crate::config::PROCESSKIT_VERSION_UNSET,
-            None,
-        )
-        .unwrap();
+        let specs =
+            collect_processkit_mcp_specs(tmp.path(), crate::config::PROCESSKIT_VERSION_UNSET, None)
+                .unwrap();
         assert!(specs.is_empty());
     }
 
     #[test]
     fn collect_returns_empty_when_mirror_missing() {
         let tmp = TempDir::new().unwrap();
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         assert!(specs.is_empty());
     }
 
@@ -656,7 +659,12 @@ mod tests {
             }"#,
         );
 
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         assert_eq!(specs.len(), 1);
         // The spec name MUST be the JSON key (prefixed), not the
         // directory name (unprefixed).
@@ -692,11 +700,19 @@ mod tests {
                 }
             }"#,
         );
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         assert_eq!(specs.len(), 1);
         assert_eq!(specs[0].name, "workitem-management");
         assert_eq!(specs[0].command, "uv");
-        assert_eq!(specs[0].args, vec!["run", "context/skills/workitem-management/mcp/server.py"]);
+        assert_eq!(
+            specs[0].args,
+            vec!["run", "context/skills/workitem-management/mcp/server.py"]
+        );
     }
 
     #[test]
@@ -713,7 +729,12 @@ mod tests {
                 ),
             );
         }
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
         assert_eq!(
             names,
@@ -741,7 +762,12 @@ mod tests {
         fs::create_dir_all(&docs_only_skill).unwrap();
         fs::write(docs_only_skill.join("SKILL.md"), "# code review\n").unwrap();
 
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         assert_eq!(specs.len(), 1);
         assert_eq!(specs[0].name, "workitem-management");
     }
@@ -763,7 +789,12 @@ mod tests {
         let mut filter = HashSet::new();
         filter.insert("workitem-management".to_string());
         filter.insert("scope-management".to_string());
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, Some(&filter)).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            Some(&filter),
+        )
+        .unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
         assert_eq!(names, vec!["scope-management", "workitem-management"]);
     }
@@ -782,7 +813,12 @@ mod tests {
             .join("processkit");
         fs::create_dir_all(&lib).unwrap();
         fs::write(lib.join("entity.py"), "x = 1\n").unwrap();
-        let specs = collect_processkit_mcp_specs(tmp.path(), crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION, None).unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+        )
+        .unwrap();
         assert!(specs.is_empty());
     }
 
@@ -819,10 +855,7 @@ mod tests {
         let obj = parsed["mcpServers"].as_object().unwrap();
         assert_eq!(obj.len(), 2);
         assert_eq!(obj["workitem-management"]["command"], "uv");
-        assert_eq!(
-            obj["workitem-management"]["args"][1],
-            "x.py"
-        );
+        assert_eq!(obj["workitem-management"]["args"][1], "x.py");
     }
 
     #[test]
@@ -851,7 +884,10 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&body).unwrap();
         let obj = parsed["mcpServers"].as_object().unwrap();
         assert_eq!(obj.len(), 2);
-        assert!(obj.contains_key("workitem-management"), "managed entry added");
+        assert!(
+            obj.contains_key("workitem-management"),
+            "managed entry added"
+        );
         assert!(obj.contains_key("my-custom-server"), "user entry preserved");
         assert_eq!(obj["my-custom-server"]["command"], "node");
     }
@@ -874,10 +910,7 @@ mod tests {
         .unwrap();
 
         // New state: managed set is now {a, c}. b is dropped.
-        let specs = vec![
-            spec("a", "uv", &["new", "args"]),
-            spec("c", "uv", &[]),
-        ];
+        let specs = vec![spec("a", "uv", &["new", "args"]), spec("c", "uv", &[])];
         // The managed set MUST include all old managed names too, so
         // the writer can remove `b`. We simulate the real flow where
         // the cache has the new content but the managed set is the
@@ -957,9 +990,18 @@ args = ["server.js"]
         write_codex_config_toml(&specs, &managed, &path).unwrap();
 
         let body = fs::read_to_string(&path).unwrap();
-        assert!(body.contains(r#"model = "gpt-5""#), "top-level key preserved");
-        assert!(body.contains("[mcp_servers.my-custom]"), "user MCP entry preserved");
-        assert!(body.contains("[mcp_servers.workitem-management]"), "managed entry added");
+        assert!(
+            body.contains(r#"model = "gpt-5""#),
+            "top-level key preserved"
+        );
+        assert!(
+            body.contains("[mcp_servers.my-custom]"),
+            "user MCP entry preserved"
+        );
+        assert!(
+            body.contains("[mcp_servers.workitem-management]"),
+            "managed entry added"
+        );
     }
 
     // ── write_continue_mcp_dir ──────────────────────────────────────────
@@ -1000,7 +1042,10 @@ args = ["server.js"]
         let managed = managed_set(&specs);
         write_continue_mcp_dir(&specs, &managed, &dir).unwrap();
 
-        assert!(dir.join("workitem-management.json").is_file(), "managed file written");
+        assert!(
+            dir.join("workitem-management.json").is_file(),
+            "managed file written"
+        );
         assert!(dir.join("my-custom.json").is_file(), "user file preserved");
     }
 
@@ -1019,6 +1064,9 @@ args = ["server.js"]
         write_continue_mcp_dir(&specs, &union_managed, &dir).unwrap();
 
         assert!(dir.join("workitem-management.json").is_file());
-        assert!(!dir.join("old-server.json").exists(), "stale managed file removed");
+        assert!(
+            !dir.join("old-server.json").exists(),
+            "stale managed file removed"
+        );
     }
 }

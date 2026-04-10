@@ -77,7 +77,15 @@ fn visual_kb_yazi_e_opens_file_in_vim_pane() {
     // Init project (seeds yazi keymap with `e` binding + zellij config)
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(
         init.status.success(),
@@ -211,7 +219,15 @@ fn visual_kb_yazi_enter_opens_vim_inplace() {
 
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(init.status.success(), "init failed");
 
@@ -299,7 +315,13 @@ true
 /// `vim_args` are appended to the `vim -u /opt/aibox/vimrc` invocation.
 /// `actions` is a list of `(delay_secs, shell_command)` pairs injected from a
 /// background process before zellij is killed at `kill_after_secs`.
-fn vim_driver(ws: &str, home: &str, vim_args: &str, actions: &[(f32, &str)], kill_after: f32) -> String {
+fn vim_driver(
+    ws: &str,
+    home: &str,
+    vim_args: &str,
+    actions: &[(f32, &str)],
+    kill_after: f32,
+) -> String {
     let mut action_lines = String::new();
     for (delay, cmd) in actions {
         action_lines.push_str(&format!("  sleep {delay}\n  {cmd}\n"));
@@ -354,7 +376,15 @@ fn visual_kb_vim_leader_e_opens_netrw() {
 
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(init.status.success(), "init failed");
 
@@ -368,8 +398,8 @@ fn visual_kb_vim_leader_e_opens_netrw() {
         &home,
         &format!("\"{}\"", format!("{ws}/project.toml")),
         &[
-            (0.5, "zellij action write 32"),         // <Space>
-            (0.1, "zellij action write-chars \"e\""),// e  → :Explore
+            (0.5, "zellij action write 32"),          // <Space>
+            (0.1, "zellij action write-chars \"e\""), // e  → :Explore
         ],
         2.0,
     );
@@ -405,7 +435,15 @@ fn visual_kb_vim_leader_l_shows_buffer_list() {
 
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(init.status.success(), "init failed");
 
@@ -418,7 +456,11 @@ fn visual_kb_vim_leader_l_shows_buffer_list() {
     let driver = vim_driver(
         &ws,
         &home,
-        &format!("\"{}\" \"{}\"", format!("{ws}/alpha.rs"), format!("{ws}/beta.rs")),
+        &format!(
+            "\"{}\" \"{}\"",
+            format!("{ws}/alpha.rs"),
+            format!("{ws}/beta.rs")
+        ),
         &[
             // Send Space+l as one write-chars call so vim receives the leader and
             // the key in a single chunk — avoids a timing gap that could cause vim
@@ -460,7 +502,15 @@ fn visual_kb_vim_leader_w_saves_file() {
 
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(init.status.success(), "init failed");
 
@@ -474,11 +524,11 @@ fn visual_kb_vim_leader_w_saves_file() {
         &home,
         &format!("\"{}\"", format!("{ws}/save_me.rs")),
         &[
-            (0.5,  "zellij action write-chars \"A\""),    // append at end of line
+            (0.5, "zellij action write-chars \"A\""), // append at end of line
             (0.15, "zellij action write-chars \" edited\""), // type some text
-            (0.15, "zellij action write 27"),              // Esc → normal mode
-            (0.2,  "zellij action write 32"),              // <Space>
-            (0.1,  "zellij action write-chars \"w\""),     // w  → :w
+            (0.15, "zellij action write 27"),         // Esc → normal mode
+            (0.2, "zellij action write 32"),          // <Space>
+            (0.1, "zellij action write-chars \"w\""), // w  → :w
         ],
         2.0,
     );
@@ -513,7 +563,15 @@ fn visual_kb_vim_leader_n_p_cycles_buffers() {
 
     let init = runner.aibox(
         test_name,
-        &["init", "--name", test_name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            test_name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(init.status.success(), "init failed");
 
@@ -526,12 +584,16 @@ fn visual_kb_vim_leader_n_p_cycles_buffers() {
     let driver = vim_driver(
         &ws,
         &home,
-        &format!("\"{}\" \"{}\"", format!("{ws}/alpha.rs"), format!("{ws}/beta.rs")),
+        &format!(
+            "\"{}\" \"{}\"",
+            format!("{ws}/alpha.rs"),
+            format!("{ws}/beta.rs")
+        ),
         &[
-            (0.5, "zellij action write 32"),         // <Space>
-            (0.1, "zellij action write-chars \"n\""),// n  → :bnext  (→ beta.rs)
+            (0.5, "zellij action write 32"),          // <Space>
+            (0.1, "zellij action write-chars \"n\""), // n  → :bnext  (→ beta.rs)
             (0.6, "zellij action write 32"),          // <Space>
-            (0.1, "zellij action write-chars \"p\""),// p  → :bprev  (→ alpha.rs)
+            (0.1, "zellij action write-chars \"p\""), // p  → :bprev  (→ alpha.rs)
         ],
         2.5,
     );
@@ -629,7 +691,9 @@ true
     assert!(cast.lines().count() > 5, "cast too small");
 
     assert!(
-        output.contains("Keybindings") || output.contains("Legend") || output.contains("keybinding"),
+        output.contains("Keybindings")
+            || output.contains("Legend")
+            || output.contains("keybinding"),
         "expected lazygit help overlay text after '?', not found in cast"
     );
 

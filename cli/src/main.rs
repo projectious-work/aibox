@@ -1,25 +1,18 @@
 mod addon_cmd;
 mod addon_loader;
-mod kit;
-pub mod compat;
 #[allow(dead_code)]
 mod addon_registry;
+pub mod compat;
 mod dirs;
+mod kit;
 
 mod addons;
-mod audit;
 mod audio;
+mod audit;
+mod claude_commands;
 mod cli;
 mod config;
 mod container;
-mod context;
-mod doctor;
-mod env;
-mod generate;
-#[allow(dead_code)]
-mod lock;
-mod migration;
-mod output;
 #[allow(dead_code)]
 mod content_diff;
 mod content_init;
@@ -28,10 +21,17 @@ mod content_install;
 mod content_migration;
 #[allow(dead_code)]
 mod content_source;
-mod claude_commands;
-mod mcp_registration;
-mod processkit_vocab;
+mod context;
+mod doctor;
+mod env;
+mod generate;
+#[allow(dead_code)]
+mod lock;
 mod log;
+mod mcp_registration;
+mod migration;
+mod output;
+mod processkit_vocab;
 mod reset;
 mod runtime;
 mod seed;
@@ -114,7 +114,11 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             timer.finish(
                 Path::new("."),
                 if result.is_ok() { 0 } else { 1 },
-                if result.is_ok() { "init completed" } else { "init failed" },
+                if result.is_ok() {
+                    "init completed"
+                } else {
+                    "init failed"
+                },
             );
             result
         }
@@ -124,7 +128,11 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             timer.finish(
                 Path::new("."),
                 if result.is_ok() { 0 } else { 1 },
-                if result.is_ok() { "sync completed" } else { "sync failed" },
+                if result.is_ok() {
+                    "sync completed"
+                } else {
+                    "sync failed"
+                },
             );
             result
         }
@@ -138,7 +146,11 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             timer.finish(
                 Path::new("."),
                 if result.is_ok() { 0 } else { 1 },
-                if result.is_ok() { "start completed" } else { "start failed" },
+                if result.is_ok() {
+                    "start completed"
+                } else {
+                    "start failed"
+                },
             );
             result
         }
@@ -178,7 +190,11 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             timer.finish(
                 Path::new("."),
                 if result.is_ok() { 0 } else { 1 },
-                if result.is_ok() { "reset completed" } else { "reset failed" },
+                if result.is_ok() {
+                    "reset completed"
+                } else {
+                    "reset failed"
+                },
             );
             result
         }
@@ -192,22 +208,20 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
         },
         cli::Commands::Addon { action } => match action {
             cli::AddonAction::List { format } => addon_cmd::cmd_addon_list(config_path, format),
-            cli::AddonAction::Add { name, no_build } => addon_cmd::cmd_addon_add(config_path, &name, no_build),
-            cli::AddonAction::Remove { name, no_build } => addon_cmd::cmd_addon_remove(config_path, &name, no_build),
+            cli::AddonAction::Add { name, no_build } => {
+                addon_cmd::cmd_addon_add(config_path, &name, no_build)
+            }
+            cli::AddonAction::Remove { name, no_build } => {
+                addon_cmd::cmd_addon_remove(config_path, &name, no_build)
+            }
             cli::AddonAction::Info { name, format } => addon_cmd::cmd_addon_info(&name, format),
         },
         cli::Commands::Migrate { action } => {
             let cwd = std::env::current_dir()?;
             match action {
-                cli::MigrateAction::Continue => {
-                    content_migration::cmd_migrate_continue(&cwd)
-                }
-                cli::MigrateAction::Start { id } => {
-                    content_migration::cmd_migrate_start(&cwd, &id)
-                }
-                cli::MigrateAction::Apply { id } => {
-                    content_migration::cmd_migrate_apply(&cwd, &id)
-                }
+                cli::MigrateAction::Continue => content_migration::cmd_migrate_continue(&cwd),
+                cli::MigrateAction::Start { id } => content_migration::cmd_migrate_start(&cwd, &id),
+                cli::MigrateAction::Apply { id } => content_migration::cmd_migrate_apply(&cwd, &id),
                 cli::MigrateAction::Reject { id, reason } => {
                     content_migration::cmd_migrate_reject(&cwd, &id, &reason)
                 }
@@ -216,9 +230,11 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
         cli::Commands::Kit { action } => match action {
             cli::KitAction::List { format } => kit::cmd_kit_list(config_path, format),
             cli::KitAction::Skill { action } => match action {
-                cli::KitSkillAction::List { all, category, format } => {
-                    kit::cmd_kit_skill_list(config_path, category.as_deref(), all, format)
-                }
+                cli::KitSkillAction::List {
+                    all,
+                    category,
+                    format,
+                } => kit::cmd_kit_skill_list(config_path, category.as_deref(), all, format),
                 cli::KitSkillAction::Categories { format } => {
                     kit::cmd_kit_skill_categories(config_path, format)
                 }

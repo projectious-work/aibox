@@ -32,7 +32,15 @@ fn run_in(dir: &std::path::Path, args: &[&str]) -> std::process::Output {
 fn init_project(dir: &std::path::Path, name: &str) {
     let output = run_in(
         dir,
-        &["init", "--name", name, "--base", "debian", "--process", "managed"],
+        &[
+            "init",
+            "--name",
+            name,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
     );
     assert!(
         output.status.success(),
@@ -121,10 +129,8 @@ fn yazi_toml_has_plugin_section() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "preview-plugin-section");
 
-    let yazi_toml = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/yazi/yazi.toml"),
-    )
-    .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
+    let yazi_toml = fs::read_to_string(dir.path().join(".aibox-home/.config/yazi/yazi.toml"))
+        .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
 
     assert!(
         yazi_toml.contains("[plugin]"),
@@ -142,10 +148,8 @@ fn yazi_toml_svg_previewer_entry() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "preview-svg-entry");
 
-    let yazi_toml = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/yazi/yazi.toml"),
-    )
-    .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
+    let yazi_toml = fs::read_to_string(dir.path().join(".aibox-home/.config/yazi/yazi.toml"))
+        .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
 
     assert!(
         yazi_toml.contains("\"*.svg\"") || yazi_toml.contains("'*.svg'"),
@@ -164,10 +168,8 @@ fn yazi_toml_eps_previewer_entry() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "preview-eps-entry");
 
-    let yazi_toml = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/yazi/yazi.toml"),
-    )
-    .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
+    let yazi_toml = fs::read_to_string(dir.path().join(".aibox-home/.config/yazi/yazi.toml"))
+        .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
 
     assert!(
         yazi_toml.contains("\"*.eps\"") || yazi_toml.contains("'*.eps'"),
@@ -187,10 +189,8 @@ fn yazi_toml_svg_and_eps_precede_builtin_previewers() {
     let dir = tempfile::tempdir().unwrap();
     init_project(dir.path(), "preview-order");
 
-    let yazi_toml = fs::read_to_string(
-        dir.path().join(".aibox-home/.config/yazi/yazi.toml"),
-    )
-    .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
+    let yazi_toml = fs::read_to_string(dir.path().join(".aibox-home/.config/yazi/yazi.toml"))
+        .unwrap_or_else(|e| panic!("failed to read yazi.toml: {}", e));
 
     let svg_pos = yazi_toml
         .find("\"*.svg\"")
@@ -228,10 +228,14 @@ fn yazi_toml_svg_and_eps_precede_builtin_previewers() {
 /// The sample SVG fixture starts with an <svg> or <?xml ...> declaration.
 #[test]
 fn fixture_sample_svg_is_valid_xml() {
-    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/e2e/fixtures/sample.svg");
+    let fixture =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/e2e/fixtures/sample.svg");
 
-    assert!(fixture.exists(), "sample.svg fixture should exist at {}", fixture.display());
+    assert!(
+        fixture.exists(),
+        "sample.svg fixture should exist at {}",
+        fixture.display()
+    );
 
     let content = fs::read_to_string(&fixture)
         .unwrap_or_else(|e| panic!("failed to read sample.svg fixture: {}", e));
@@ -245,10 +249,14 @@ fn fixture_sample_svg_is_valid_xml() {
 /// The sample EPS fixture starts with the standard %!PS-Adobe EPS header.
 #[test]
 fn fixture_sample_eps_has_eps_header() {
-    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/e2e/fixtures/sample.eps");
+    let fixture =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/e2e/fixtures/sample.eps");
 
-    assert!(fixture.exists(), "sample.eps fixture should exist at {}", fixture.display());
+    assert!(
+        fixture.exists(),
+        "sample.eps fixture should exist at {}",
+        fixture.display()
+    );
 
     let content = fs::read_to_string(&fixture)
         .unwrap_or_else(|e| panic!("failed to read sample.eps fixture: {}", e));

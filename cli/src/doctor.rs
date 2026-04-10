@@ -175,12 +175,7 @@ pub fn cmd_doctor(config_path: &Option<String>) -> Result<()> {
 }
 
 /// Check that mount source directories exist for configured features.
-fn check_mount_sources(
-    root: &Path,
-    root_label: &str,
-    config: &AiboxConfig,
-    diag: &mut DiagResult,
-) {
+fn check_mount_sources(root: &Path, root_label: &str, config: &AiboxConfig, diag: &mut DiagResult) {
     // AI providers — check the .aibox-home/<provider>/ persistence dir
     // for the in-container CLI tools that have one. Cursor is the only
     // provider with no container CLI binary (host-side IDE extension only).

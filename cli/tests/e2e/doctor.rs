@@ -35,7 +35,18 @@ fn doctor_after_init_reports_healthy() {
     let test = "doctor-healthy";
     runner.cleanup(test);
 
-    runner.aibox(test, &["init", "--name", test, "--base", "debian", "--process", "managed"]);
+    runner.aibox(
+        test,
+        &[
+            "init",
+            "--name",
+            test,
+            "--base",
+            "debian",
+            "--process",
+            "managed",
+        ],
+    );
 
     let output = runner.aibox(test, &["doctor"]);
     assert!(output.status.success());
@@ -47,7 +58,10 @@ fn doctor_after_init_reports_healthy() {
     );
     // After init, most checks should pass (except container runtime if not available)
     assert!(
-        combined.contains("ok") || combined.contains("OK") || combined.contains("✓") || combined.contains("pass"),
+        combined.contains("ok")
+            || combined.contains("OK")
+            || combined.contains("✓")
+            || combined.contains("pass"),
         "doctor should report some healthy checks after init"
     );
 

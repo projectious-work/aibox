@@ -25,14 +25,46 @@ pub struct CompatEntry {
 /// If your aibox version is not listed, use the entry for the closest
 /// older listed version.
 pub static COMPAT_TABLE: &[CompatEntry] = &[
-    CompatEntry { aibox_version: "0.16.0", processkit_version: "v0.4.0", note: "initial processkit integration" },
-    CompatEntry { aibox_version: "0.16.1", processkit_version: "v0.4.0", note: "sync auto-install added" },
-    CompatEntry { aibox_version: "0.17.0", processkit_version: "v0.5.0", note: "aibox.lock sectioned format (DEC-037)" },
-    CompatEntry { aibox_version: "0.17.2", processkit_version: "v0.6.0", note: "core skill enforcement, processkit v0.6.0 compat" },
-    CompatEntry { aibox_version: "0.17.3", processkit_version: "v0.6.0", note: "Claude Code slash-command adapters (aibox#37)" },
-    CompatEntry { aibox_version: "0.17.4", processkit_version: "v0.6.0", note: "content migration documents (pending/in-progress/applied)" },
-    CompatEntry { aibox_version: "0.17.5", processkit_version: "v0.8.0", note: "processkit v0.8.0 GrandLily src/ restructure" },
-    CompatEntry { aibox_version: "0.17.6", processkit_version: "v0.8.0", note: "migration briefing overhaul, structured logging, compat matrix" },
+    CompatEntry {
+        aibox_version: "0.16.0",
+        processkit_version: "v0.4.0",
+        note: "initial processkit integration",
+    },
+    CompatEntry {
+        aibox_version: "0.16.1",
+        processkit_version: "v0.4.0",
+        note: "sync auto-install added",
+    },
+    CompatEntry {
+        aibox_version: "0.17.0",
+        processkit_version: "v0.5.0",
+        note: "aibox.lock sectioned format (DEC-037)",
+    },
+    CompatEntry {
+        aibox_version: "0.17.2",
+        processkit_version: "v0.6.0",
+        note: "core skill enforcement, processkit v0.6.0 compat",
+    },
+    CompatEntry {
+        aibox_version: "0.17.3",
+        processkit_version: "v0.6.0",
+        note: "Claude Code slash-command adapters (aibox#37)",
+    },
+    CompatEntry {
+        aibox_version: "0.17.4",
+        processkit_version: "v0.6.0",
+        note: "content migration documents (pending/in-progress/applied)",
+    },
+    CompatEntry {
+        aibox_version: "0.17.5",
+        processkit_version: "v0.8.0",
+        note: "processkit v0.8.0 GrandLily src/ restructure",
+    },
+    CompatEntry {
+        aibox_version: "0.17.6",
+        processkit_version: "v0.8.0",
+        note: "migration briefing overhaul, structured logging, compat matrix",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
@@ -42,13 +74,11 @@ pub fn min_processkit_for(aibox_version: &str) -> Option<&'static CompatEntry> {
     // Versions are semver strings — parse them for comparison.
     let target = parse_semver(aibox_version)?;
 
-    COMPAT_TABLE
-        .iter()
-        .rfind(|e| {
-            parse_semver(e.aibox_version)
-                .map(|v| v <= target)
-                .unwrap_or(false)
-        })
+    COMPAT_TABLE.iter().rfind(|e| {
+        parse_semver(e.aibox_version)
+            .map(|v| v <= target)
+            .unwrap_or(false)
+    })
 }
 
 /// Parse a semver string like "0.17.5" or "v0.17.5" into (major, minor, patch).

@@ -155,8 +155,8 @@ pub fn read_lock(project_root: &Path) -> Result<Option<AiboxLock>> {
     if !path.exists() {
         return Ok(None);
     }
-    let body = fs::read_to_string(&path)
-        .with_context(|| format!("failed to read {}", path.display()))?;
+    let body =
+        fs::read_to_string(&path).with_context(|| format!("failed to read {}", path.display()))?;
 
     // Try new sectioned shape first.
     if let Ok(parsed) = toml::from_str::<AiboxLock>(&body) {
@@ -164,8 +164,12 @@ pub fn read_lock(project_root: &Path) -> Result<Option<AiboxLock>> {
     }
 
     // Fall back to legacy v0.16.x flat shape.
-    let legacy: LegacyFlatLock = toml::from_str(&body)
-        .with_context(|| format!("failed to parse {} as TOML (neither new nor legacy shape)", path.display()))?;
+    let legacy: LegacyFlatLock = toml::from_str(&body).with_context(|| {
+        format!(
+            "failed to parse {} as TOML (neither new nor legacy shape)",
+            path.display()
+        )
+    })?;
 
     // Read the sibling `.aibox-version` to recover the CLI version that
     // last touched this project. If absent (very rare — fresh init that
@@ -335,10 +339,7 @@ pub fn group_for_path(rel_path: &Path) -> Option<String> {
         let sub = &parts[1];
 
         // 2. context/skills/_lib/...  → "lib"
-        if sub == pk::src::SKILLS
-            && parts.len() >= 3
-            && parts[2] == pk::src::LIB_SEGMENT
-        {
+        if sub == pk::src::SKILLS && parts.len() >= 3 && parts[2] == pk::src::LIB_SEGMENT {
             return Some("lib".to_string());
         }
 
@@ -379,8 +380,7 @@ pub fn group_for_path(rel_path: &Path) -> Option<String> {
     // 9, 10, 11. primitives/...
     if parts[0] == pk::src::LEGACY_PRIMITIVES {
         if parts.len() >= 3
-            && (parts[1] == pk::src::LEGACY_SCHEMAS
-                || parts[1] == pk::src::LEGACY_STATE_MACHINES)
+            && (parts[1] == pk::src::LEGACY_SCHEMAS || parts[1] == pk::src::LEGACY_STATE_MACHINES)
         {
             let leaf = strip_known_ext(&parts[2]);
             return Some(format!("primitives/{}/{}", parts[1], leaf));
@@ -452,9 +452,8 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         let mut pk = sample_pk();
         pk.resolved_commit = None;
-        pk.release_asset_sha256 = Some(
-            "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567abc890def123".to_string(),
-        );
+        pk.release_asset_sha256 =
+            Some("abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567abc890def123".to_string());
         let lock = AiboxLock {
             aibox: AiboxLockSection {
                 cli_version: "0.16.5".to_string(),
@@ -545,10 +544,7 @@ mod tests {
             path_to_forward_slash(Path::new("skills/event-log/SKILL.md")),
             "skills/event-log/SKILL.md"
         );
-        assert_eq!(
-            path_to_forward_slash(Path::new("a")),
-            "a"
-        );
+        assert_eq!(path_to_forward_slash(Path::new("a")), "a");
     }
 
     // -- Group heuristic — shared --------------------------------------------

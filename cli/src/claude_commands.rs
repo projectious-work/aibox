@@ -79,12 +79,8 @@ pub fn sync_claude_commands(project_root: &Path, config: &AiboxConfig) -> Result
 
     // Step 3: ensure .claude/commands/ exists.
     let claude_commands_dir = project_root.join(".claude").join("commands");
-    fs::create_dir_all(&claude_commands_dir).with_context(|| {
-        format!(
-            "failed to create {}",
-            claude_commands_dir.display()
-        )
-    })?;
+    fs::create_dir_all(&claude_commands_dir)
+        .with_context(|| format!("failed to create {}", claude_commands_dir.display()))?;
 
     let mut added = 0usize;
     let mut removed = 0usize;
@@ -249,12 +245,7 @@ mod tests {
     use super::*;
     use std::fs;
 
-    fn make_skill_commands(
-        skills_dir: &Path,
-        skill: &str,
-        commands: &[&str],
-        content: &str,
-    ) {
+    fn make_skill_commands(skills_dir: &Path, skill: &str, commands: &[&str], content: &str) {
         let cmd_dir = skills_dir.join(skill).join("commands");
         fs::create_dir_all(&cmd_dir).unwrap();
         for name in commands {
@@ -264,9 +255,8 @@ mod tests {
 
     fn config_with_pk_version(version: &str) -> AiboxConfig {
         use crate::config::{
-            AddonsSection, AiSection, AiboxConfig, AiboxSection, AudioSection,
-            ContainerSection, ContextSection, CustomizationSection, ProcessKitSection,
-            SkillsSection,
+            AddonsSection, AiSection, AiboxConfig, AiboxSection, AudioSection, ContainerSection,
+            ContextSection, CustomizationSection, ProcessKitSection, SkillsSection,
         };
         AiboxConfig {
             aibox: AiboxSection {
@@ -301,10 +291,27 @@ mod tests {
     fn collect_command_filenames_returns_all_md_files() {
         let tmp = tempfile::tempdir().unwrap();
         let skills = tmp.path().join("skills");
-        make_skill_commands(&skills, "session-handover", &["session-handover-write.md", "session-handover-read.md"], "body");
-        make_skill_commands(&skills, "morning-briefing", &["morning-briefing-run.md"], "body");
+        make_skill_commands(
+            &skills,
+            "session-handover",
+            &["session-handover-write.md", "session-handover-read.md"],
+            "body",
+        );
+        make_skill_commands(
+            &skills,
+            "morning-briefing",
+            &["morning-briefing-run.md"],
+            "body",
+        );
         // Non-.md file should be ignored
-        fs::write(skills.join("session-handover").join("commands").join("ignore.txt"), "x").unwrap();
+        fs::write(
+            skills
+                .join("session-handover")
+                .join("commands")
+                .join("ignore.txt"),
+            "x",
+        )
+        .unwrap();
 
         let set = collect_command_filenames(&skills);
         assert_eq!(set.len(), 3);
@@ -318,7 +325,12 @@ mod tests {
     fn collect_live_commands_maps_filename_to_path() {
         let tmp = tempfile::tempdir().unwrap();
         let skills = tmp.path().join("skills");
-        make_skill_commands(&skills, "note-management", &["note-management-capture.md"], "content");
+        make_skill_commands(
+            &skills,
+            "note-management",
+            &["note-management-capture.md"],
+            "content",
+        );
 
         let map = collect_live_commands(&skills);
         assert!(map.contains_key("note-management-capture.md"));
@@ -331,8 +343,7 @@ mod tests {
         let project = tmp.path();
 
         // Mirror: knows about two commands from two skills (v0.8.0 layout)
-        let mirror = project
-            .join("context/templates/processkit/v0.8.0/context/skills");
+        let mirror = project.join("context/templates/processkit/v0.8.0/context/skills");
         make_skill_commands(&mirror, "skill-a", &["skill-a-run.md"], "body");
         make_skill_commands(&mirror, "skill-b", &["skill-b-run.md"], "body");
 
@@ -353,13 +364,19 @@ mod tests {
 
         // skill-a-run.md was added
         assert!(claude_cmds.join("skill-a-run.md").exists());
-        assert_eq!(fs::read_to_string(claude_cmds.join("skill-a-run.md")).unwrap(), "# command");
+        assert_eq!(
+            fs::read_to_string(claude_cmds.join("skill-a-run.md")).unwrap(),
+            "# command"
+        );
 
         // skill-b-run.md was removed (in universe, not in wanted)
         assert!(!claude_cmds.join("skill-b-run.md").exists());
 
         // my-custom.md was left alone (not in universe)
-        assert_eq!(fs::read_to_string(claude_cmds.join("my-custom.md")).unwrap(), "mine");
+        assert_eq!(
+            fs::read_to_string(claude_cmds.join("my-custom.md")).unwrap(),
+            "mine"
+        );
     }
 
     #[test]

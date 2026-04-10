@@ -35,14 +35,16 @@ impl MockRuntime {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
         let infra_dir = Path::new(manifest_dir).join("tests/e2e/infra");
 
-        for (script, name) in &[
-            ("mock-docker.sh", "docker"),
-            ("mock-podman.sh", "podman"),
-        ] {
+        for (script, name) in &[("mock-docker.sh", "docker"), ("mock-podman.sh", "podman")] {
             let src = infra_dir.join(script);
             let dst = bin_dir.join(name);
             fs::copy(&src, &dst).unwrap_or_else(|e| {
-                panic!("failed to copy {} to {}: {}", src.display(), dst.display(), e)
+                panic!(
+                    "failed to copy {} to {}: {}",
+                    src.display(),
+                    dst.display(),
+                    e
+                )
             });
             let mut perms = fs::metadata(&dst).unwrap().permissions();
             perms.set_mode(0o755);

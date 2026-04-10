@@ -82,9 +82,7 @@ fn record_themed_session(runner: &E2eRunner, test_name: &str, theme: &str) -> St
     let workspace = format!("/workspaces/{}", test_name);
 
     // Clean up any leftover zellij sessions
-    runner.exec(
-        "pkill -9 -x zellij 2>/dev/null; rm -rf /tmp/zellij-* 2>/dev/null; sleep 0.5",
-    );
+    runner.exec("pkill -9 -x zellij 2>/dev/null; rm -rf /tmp/zellij-* 2>/dev/null; sleep 0.5");
 
     // Write driver script that launches zellij with the generated config
     let driver_path = format!("{}/driver.sh", workspace);
@@ -238,9 +236,7 @@ fn visual_yazi_renders_in_zellij() {
     runner.write_file(test_name, "project-files/README.md", "# Test\n");
     runner.write_file(test_name, "project-files/main.rs", "fn main() {}\n");
 
-    runner.exec(
-        "pkill -9 -x zellij 2>/dev/null; rm -rf /tmp/zellij-* 2>/dev/null; sleep 0.5",
-    );
+    runner.exec("pkill -9 -x zellij 2>/dev/null; rm -rf /tmp/zellij-* 2>/dev/null; sleep 0.5");
 
     // Create a layout that runs yazi pointing at the test files
     runner.write_file(

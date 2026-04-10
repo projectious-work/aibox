@@ -410,7 +410,9 @@ mod tests {
         assert!(within("context/migrations"));
         assert!(within("context/migrations/0.13.0-to-0.14.0.md"));
         assert!(within("context/migrations/pending/MIG-20260407T120000.md"));
-        assert!(within("context/migrations/aibox-processkit-section-added.md"));
+        assert!(within(
+            "context/migrations/aibox-processkit-section-added.md"
+        ));
     }
 
     #[test]
@@ -437,7 +439,9 @@ mod tests {
         assert!(within(".cursor/mcp.json"));
         assert!(within(".gemini/settings.json"));
         assert!(within(".codex/config.toml"));
-        assert!(within(".continue/mcpServers/processkit-workitem-management.json"));
+        assert!(within(
+            ".continue/mcpServers/processkit-workitem-management.json"
+        ));
     }
 
     #[test]
@@ -446,8 +450,12 @@ mod tests {
         // context/templates/processkit/<version>/ and is the baseline
         // the three-way diff compares against.
         assert!(within("context/templates"));
-        assert!(within("context/templates/processkit/v0.6.0/skills/event-log/SKILL.md"));
-        assert!(within("context/templates/processkit/v0.6.0/PROVENANCE.toml"));
+        assert!(within(
+            "context/templates/processkit/v0.6.0/skills/event-log/SKILL.md"
+        ));
+        assert!(within(
+            "context/templates/processkit/v0.6.0/PROVENANCE.toml"
+        ));
     }
 
     // -- Files explicitly OUT of perimeter ---------------------------------
@@ -699,7 +707,8 @@ mod tests {
         let tmp = tempfile::TempDir::new().unwrap();
         let tw = Tripwire::snapshot(Some(tmp.path()));
         std::fs::write(tmp.path().join("AGENTS.md"), "installed\n").unwrap();
-        tw.verify().expect("AGENTS.md is no longer a tripwire sentinel");
+        tw.verify()
+            .expect("AGENTS.md is no longer a tripwire sentinel");
     }
 
     #[test]
@@ -733,19 +742,11 @@ mod tests {
         // started targeting those paths.
         let tmp = tempfile::TempDir::new().unwrap();
         std::fs::create_dir_all(tmp.path().join("context/skills/event-log")).unwrap();
-        std::fs::write(
-            tmp.path().join("context/skills/event-log/SKILL.md"),
-            "v1\n",
-        )
-        .unwrap();
+        std::fs::write(tmp.path().join("context/skills/event-log/SKILL.md"), "v1\n").unwrap();
         let tw = Tripwire::snapshot(Some(tmp.path()));
         // Modifying a deeply-nested file does NOT fire the file-only
         // tripwire — by design.
-        std::fs::write(
-            tmp.path().join("context/skills/event-log/SKILL.md"),
-            "v2\n",
-        )
-        .unwrap();
+        std::fs::write(tmp.path().join("context/skills/event-log/SKILL.md"), "v2\n").unwrap();
         tw.verify().unwrap();
     }
 }

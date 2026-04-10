@@ -103,19 +103,13 @@ pub fn generate_builder_stage(
     tools: &HashMap<String, ToolConfig>,
 ) -> Option<String> {
     let addon = addon_loader::get_addon(addon_name)?;
-    addon_loader::render_builder(addon, tools)
-        .ok()
-        .flatten()
+    addon_loader::render_builder(addon, tools).ok().flatten()
 }
 
 /// Returns Dockerfile `RUN` commands for the runtime stage of a given add-on.
-pub fn generate_runtime_commands(
-    addon_name: &str,
-    tools: &HashMap<String, ToolConfig>,
-) -> String {
+pub fn generate_runtime_commands(addon_name: &str, tools: &HashMap<String, ToolConfig>) -> String {
     match addon_loader::get_addon(addon_name) {
-        Some(addon) => addon_loader::render_runtime(addon, tools)
-            .unwrap_or_default(),
+        Some(addon) => addon_loader::render_runtime(addon, tools).unwrap_or_default(),
         None => String::new(),
     }
 }
@@ -160,7 +154,11 @@ mod tests {
     fn all_addons_returns_all_entries() {
         ensure_loaded();
         let addons = all_addons();
-        assert!(addons.len() >= 21, "expected at least 21 add-ons, got {}", addons.len());
+        assert!(
+            addons.len() >= 21,
+            "expected at least 21 add-ons, got {}",
+            addons.len()
+        );
     }
 
     #[test]
@@ -222,7 +220,10 @@ mod tests {
         let stage = generate_builder_stage("rust", &tools);
         assert!(stage.is_some());
         let stage = stage.unwrap();
-        assert!(stage.contains("rust-builder"), "missing rust-builder in:\n{stage}");
+        assert!(
+            stage.contains("rust-builder"),
+            "missing rust-builder in:\n{stage}"
+        );
         assert!(stage.contains("1.87"), "missing version 1.87 in:\n{stage}");
     }
 
@@ -240,8 +241,14 @@ mod tests {
         ensure_loaded();
         let tools = tc(&[("python", true, "3.13"), ("uv", true, "0.7")]);
         let cmds = generate_runtime_commands("python", &tools);
-        assert!(cmds.contains("python3.13") || cmds.contains("python3"), "missing python in:\n{cmds}");
-        assert!(cmds.contains("uv:0.7") || cmds.contains("uv"), "missing uv in:\n{cmds}");
+        assert!(
+            cmds.contains("python3.13") || cmds.contains("python3"),
+            "missing python in:\n{cmds}"
+        );
+        assert!(
+            cmds.contains("uv:0.7") || cmds.contains("uv"),
+            "missing uv in:\n{cmds}"
+        );
     }
 
     #[test]
@@ -257,7 +264,10 @@ mod tests {
         ensure_loaded();
         let tools = tc(&[("rustc", true, "1.87")]);
         let cmds = generate_runtime_commands("rust", &tools);
-        assert!(cmds.contains("COPY --from=rust-builder"), "missing COPY in:\n{cmds}");
+        assert!(
+            cmds.contains("COPY --from=rust-builder"),
+            "missing COPY in:\n{cmds}"
+        );
     }
 
     // ── Default-enabled / default-disabled ──────────────────────────────
@@ -287,7 +297,10 @@ mod tests {
         ensure_loaded();
         let tools = tc(&[("claude", true, "")]);
         let cmds = generate_runtime_commands("ai-claude", &tools);
-        assert!(cmds.contains("claude.ai/install.sh"), "should use native installer: {cmds}");
+        assert!(
+            cmds.contains("claude.ai/install.sh"),
+            "should use native installer: {cmds}"
+        );
     }
 
     #[test]
@@ -295,6 +308,9 @@ mod tests {
         ensure_loaded();
         let tools = tc(&[("claude", true, "1.0.58")]);
         let cmds = generate_runtime_commands("ai-claude", &tools);
-        assert!(cmds.contains("bash -s 1.0.58"), "should pin version: {cmds}");
+        assert!(
+            cmds.contains("bash -s 1.0.58"),
+            "should pin version: {cmds}"
+        );
     }
 }

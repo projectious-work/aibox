@@ -82,9 +82,7 @@ pub(crate) fn render(template: &str, vars: &HashMap<&'static str, String>) -> St
 /// survive `render()` unchanged.
 ///
 /// See DEC-032 for the design and the full rationale.
-pub(crate) fn build_substitution_map(
-    config: &AiboxConfig,
-) -> HashMap<&'static str, String> {
+pub(crate) fn build_substitution_map(config: &AiboxConfig) -> HashMap<&'static str, String> {
     let mut m: HashMap<&'static str, String> = HashMap::new();
 
     // 1. PROJECT_NAME — the container name doubles as the project name.
@@ -108,9 +106,7 @@ pub(crate) fn build_substitution_map(
     m.insert("PROCESSKIT_SOURCE", config.processkit.source.clone());
 
     // 7. PROCESSKIT_VERSION — pinned tag, or empty string when unset.
-    let pk_version = if config.processkit.version
-        == crate::config::PROCESSKIT_VERSION_UNSET
-    {
+    let pk_version = if config.processkit.version == crate::config::PROCESSKIT_VERSION_UNSET {
         String::new()
     } else {
         config.processkit.version.clone()
@@ -129,16 +125,12 @@ pub(crate) fn build_substitution_map(
     m.insert("ADDONS", addon_names.join(", "));
 
     // 10. AI_PROVIDERS — sorted, comma-separated [ai].providers.
-    let mut providers: Vec<String> =
-        config.ai.providers.iter().map(|p| p.to_string()).collect();
+    let mut providers: Vec<String> = config.ai.providers.iter().map(|p| p.to_string()).collect();
     providers.sort();
     m.insert("AI_PROVIDERS", providers.join(", "));
 
     // 11. CONTEXT_PACKAGES — comma-separated [context].packages.
-    m.insert(
-        "CONTEXT_PACKAGES",
-        config.context.packages.join(", "),
-    );
+    m.insert("CONTEXT_PACKAGES", config.context.packages.join(", "));
 
     m
 }
@@ -546,8 +538,7 @@ pub fn check_gitignore_entries() -> Vec<String> {
 
     // Either `.aibox-home/` or the legacy `.root/` is acceptable.
     if !lines.contains(&".aibox-home/") && !lines.contains(&".root/") {
-        warnings
-            .push(".gitignore missing '.aibox-home/' (persisted config directory)".to_string());
+        warnings.push(".gitignore missing '.aibox-home/' (persisted config directory)".to_string());
     }
 
     if !lines.contains(&".aibox-local.toml") {
@@ -586,10 +577,7 @@ mod tests {
     #[test]
     fn render_replaces_known_class_a_placeholder() {
         let v = vars(&[("PROJECT_NAME", "my-app")]);
-        assert_eq!(
-            render("Hello {{PROJECT_NAME}}!", &v),
-            "Hello my-app!"
-        );
+        assert_eq!(render("Hello {{PROJECT_NAME}}!", &v), "Hello my-app!");
     }
 
     #[test]
@@ -611,10 +599,7 @@ mod tests {
             "{{PROJECT_NAME}} — {{PROJECT_DESCRIPTION}} ({{BUILD_COMMAND}})",
             &v,
         );
-        assert_eq!(
-            out,
-            "foo — {{PROJECT_DESCRIPTION}} ({{BUILD_COMMAND}})"
-        );
+        assert_eq!(out, "foo — {{PROJECT_DESCRIPTION}} ({{BUILD_COMMAND}})");
     }
 
     #[test]
@@ -764,7 +749,10 @@ mod tests {
             // Default test_config has Claude as a provider.
             config.container.name = "scaffold-test".to_string();
             scaffold_context(&config).unwrap();
-            assert!(!Path::new(".aibox-version").exists(), ".aibox-version must not be created");
+            assert!(
+                !Path::new(".aibox-version").exists(),
+                ".aibox-version must not be created"
+            );
             assert!(Path::new("context").is_dir());
             assert!(Path::new(".gitignore").exists());
         });

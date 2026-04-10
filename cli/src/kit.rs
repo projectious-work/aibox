@@ -25,7 +25,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::Serialize;
 
 use crate::cli::OutputFormat;
@@ -33,10 +33,9 @@ use crate::config::AiboxConfig;
 use crate::lock;
 use crate::output;
 use crate::processkit_vocab::{
-    self as processkit_vocab, mirror_processes_dir, mirror_skills_dir,
-    parse_skill_frontmatter, DESCRIPTION_DISPLAY_MAX, INDEX_FILENAME,
-    LIVE_PROCESSES_DIR, LIVE_SCHEMAS_DIR, LIVE_SKILLS_DIR, LIVE_STATE_MACHINES_DIR,
-    SKILL_FILENAME,
+    self as processkit_vocab, DESCRIPTION_DISPLAY_MAX, INDEX_FILENAME, LIVE_PROCESSES_DIR,
+    LIVE_SCHEMAS_DIR, LIVE_SKILLS_DIR, LIVE_STATE_MACHINES_DIR, SKILL_FILENAME,
+    mirror_processes_dir, mirror_skills_dir, parse_skill_frontmatter,
 };
 
 // ---------------------------------------------------------------------------
@@ -90,7 +89,10 @@ pub struct SkillEntry {
 
 /// Walk a skills directory (either live or templates mirror) and return skill entries.
 /// `installed_names` is used to set the `installed` flag for each entry.
-fn walk_skills_dir(dir: &Path, installed_names: &std::collections::HashSet<String>) -> Vec<SkillEntry> {
+fn walk_skills_dir(
+    dir: &Path,
+    installed_names: &std::collections::HashSet<String>,
+) -> Vec<SkillEntry> {
     let mut skills = Vec::new();
 
     let Ok(entries) = std::fs::read_dir(dir) else {
@@ -124,7 +126,11 @@ fn walk_skills_dir(dir: &Path, installed_names: &std::collections::HashSet<Strin
         // Compute category and description before consuming fm.name.
         let category = fm.category().to_string();
         let description = fm.description.clone();
-        let name = if fm.name.is_empty() { dir_name.clone() } else { fm.name };
+        let name = if fm.name.is_empty() {
+            dir_name.clone()
+        } else {
+            fm.name
+        };
         let installed = installed_names.contains(&dir_name);
 
         skills.push(SkillEntry {
@@ -178,9 +184,14 @@ pub struct ProcessEntry {
     pub installed: bool,
 }
 
-fn walk_processes_dir(dir: &Path, installed_names: &std::collections::HashSet<String>) -> Vec<ProcessEntry> {
+fn walk_processes_dir(
+    dir: &Path,
+    installed_names: &std::collections::HashSet<String>,
+) -> Vec<ProcessEntry> {
     let mut processes = Vec::new();
-    let Ok(entries) = std::fs::read_dir(dir) else { return processes };
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return processes;
+    };
 
     for entry in entries.flatten() {
         let path = entry.path();
@@ -200,7 +211,11 @@ fn walk_processes_dir(dir: &Path, installed_names: &std::collections::HashSet<St
         let description = extract_process_description(&path).unwrap_or_default();
         let installed = installed_names.contains(&stem);
 
-        processes.push(ProcessEntry { name: stem, description, installed });
+        processes.push(ProcessEntry {
+            name: stem,
+            description,
+            installed,
+        });
     }
 
     processes.sort_by(|a, b| a.name.cmp(&b.name));
@@ -218,7 +233,10 @@ fn installed_process_names(root: &Path) -> std::collections::HashSet<String> {
         .flatten()
         .filter(|e| {
             e.path().extension().and_then(|x| x.to_str()) == Some("md")
-                && e.file_name().to_str().map(|n| n != INDEX_FILENAME).unwrap_or(false)
+                && e.file_name()
+                    .to_str()
+                    .map(|n| n != INDEX_FILENAME)
+                    .unwrap_or(false)
         })
         .filter_map(|e| {
             e.path()
@@ -254,7 +272,11 @@ fn extract_process_description(path: &Path) -> Result<String> {
         }
         // Return first content paragraph
         let desc: String = trimmed.chars().take(120).collect();
-        return Ok(if desc.len() < trimmed.len() { format!("{}…", desc) } else { desc });
+        return Ok(if desc.len() < trimmed.len() {
+            format!("{}…", desc)
+        } else {
+            desc
+        });
     }
     Ok(String::new())
 }
@@ -292,7 +314,10 @@ fn collect_schema_entries(root: &Path) -> Vec<SchemaEntry> {
             if name.is_empty() || name == "INDEX" {
                 continue;
             }
-            entries.push(SchemaEntry { name, kind: kind.to_string() });
+            entries.push(SchemaEntry {
+                name,
+                kind: kind.to_string(),
+            });
         }
     }
 
@@ -317,18 +342,30 @@ pub fn cmd_kit_list(config_path: &Option<String>, format: OutputFormat) -> Resul
     // Count all-available from templates mirror
     let available_skills = templates_skills_dir(&root).as_deref().and_then(|d| {
         std::fs::read_dir(d).ok().map(|entries| {
-            entries.flatten()
-                .filter(|e| e.path().is_dir() && e.path().join(SKILL_FILENAME).exists()
-                    && !e.file_name().to_str().map(|n| n.starts_with('_')).unwrap_or(false))
+            entries
+                .flatten()
+                .filter(|e| {
+                    e.path().is_dir()
+                        && e.path().join(SKILL_FILENAME).exists()
+                        && !e
+                            .file_name()
+                            .to_str()
+                            .map(|n| n.starts_with('_'))
+                            .unwrap_or(false)
+                })
                 .count()
         })
     });
     let available_processes = templates_processes_dir(&root).as_deref().and_then(|d| {
         std::fs::read_dir(d).ok().map(|entries| {
-            entries.flatten()
+            entries
+                .flatten()
                 .filter(|e| {
                     e.path().extension().and_then(|x| x.to_str()) == Some("md")
-                        && e.file_name().to_str().map(|n| n != INDEX_FILENAME).unwrap_or(false)
+                        && e.file_name()
+                            .to_str()
+                            .map(|n| n != INDEX_FILENAME)
+                            .unwrap_or(false)
                 })
                 .count()
         })
@@ -365,8 +402,14 @@ pub fn cmd_kit_list(config_path: &Option<String>, format: OutputFormat) -> Resul
             let proc_avail = available_processes
                 .map(|n| format!("{} available", n))
                 .unwrap_or_else(|| "templates not installed".to_string());
-            println!("  Skills       {:>4} installed  ({})", installed_skills, skill_avail);
-            println!("  Processes    {:>4} installed  ({})", installed_processes, proc_avail);
+            println!(
+                "  Skills       {:>4} installed  ({})",
+                installed_skills, skill_avail
+            );
+            println!(
+                "  Processes    {:>4} installed  ({})",
+                installed_processes, proc_avail
+            );
             println!("  Schemas      {:>4}", schema_count);
             println!("  State machines {:>2}", state_machine_count);
             println!();
@@ -416,10 +459,7 @@ pub fn cmd_kit_skill_list(
         OutputFormat::Table => {
             if skills.is_empty() {
                 if let Some(cat) = filter_category {
-                    output::warn(&format!(
-                        "No skills found in category '{}'.",
-                        cat
-                    ));
+                    output::warn(&format!("No skills found in category '{}'.", cat));
                 } else {
                     output::warn(
                         "No skills installed. Run 'aibox init' or 'aibox sync' to install processkit content.",
@@ -428,32 +468,77 @@ pub fn cmd_kit_skill_list(
                 return Ok(());
             }
 
-            let name_w = skills.iter().map(|s| s.name.len()).max().unwrap_or(5).max(5);
-            let desc_w = skills.iter().map(|s| s.description.len().min(DESCRIPTION_DISPLAY_MAX)).max().unwrap_or(11).max(11);
+            let name_w = skills
+                .iter()
+                .map(|s| s.name.len())
+                .max()
+                .unwrap_or(5)
+                .max(5);
+            let desc_w = skills
+                .iter()
+                .map(|s| s.description.len().min(DESCRIPTION_DISPLAY_MAX))
+                .max()
+                .unwrap_or(11)
+                .max(11);
 
             let mut cur_cat = "";
             for s in &skills {
                 if s.category != cur_cat {
-                    if !cur_cat.is_empty() { println!(); }
+                    if !cur_cat.is_empty() {
+                        println!();
+                    }
                     println!("  \x1b[1m{}\x1b[0m", s.category);
                     if all {
-                        println!("  {:<nw$}  {:<dw$}  STATUS", "SKILL", "DESCRIPTION", nw = name_w, dw = desc_w);
+                        println!(
+                            "  {:<nw$}  {:<dw$}  STATUS",
+                            "SKILL",
+                            "DESCRIPTION",
+                            nw = name_w,
+                            dw = desc_w
+                        );
                     } else {
-                        println!("  {:<nw$}  {:<dw$}", "SKILL", "DESCRIPTION", nw = name_w, dw = desc_w);
+                        println!(
+                            "  {:<nw$}  {:<dw$}",
+                            "SKILL",
+                            "DESCRIPTION",
+                            nw = name_w,
+                            dw = desc_w
+                        );
                     }
                     cur_cat = &s.category;
                 }
-                let desc_trunc: String = s.description.chars().take(DESCRIPTION_DISPLAY_MAX).collect();
+                let desc_trunc: String = s
+                    .description
+                    .chars()
+                    .take(DESCRIPTION_DISPLAY_MAX)
+                    .collect();
                 let desc_display = if s.description.len() > DESCRIPTION_DISPLAY_MAX {
                     format!("{}…", desc_trunc)
                 } else {
                     s.description.clone()
                 };
                 if all {
-                    let status = if s.installed { "installed" } else { "available" };
-                    println!("  {:<nw$}  {:<dw$}  {}", s.name, desc_display, status, nw = name_w, dw = desc_w);
+                    let status = if s.installed {
+                        "installed"
+                    } else {
+                        "available"
+                    };
+                    println!(
+                        "  {:<nw$}  {:<dw$}  {}",
+                        s.name,
+                        desc_display,
+                        status,
+                        nw = name_w,
+                        dw = desc_w
+                    );
                 } else {
-                    println!("  {:<nw$}  {:<dw$}", s.name, desc_display, nw = name_w, dw = desc_w);
+                    println!(
+                        "  {:<nw$}  {:<dw$}",
+                        s.name,
+                        desc_display,
+                        nw = name_w,
+                        dw = desc_w
+                    );
                 }
             }
         }
@@ -478,7 +563,9 @@ pub fn cmd_kit_skill_categories(config_path: &Option<String>, format: OutputForm
     for s in &skills {
         let e = counts.entry(s.category.clone()).or_insert((0, 0));
         e.0 += 1;
-        if s.installed { e.1 += 1; }
+        if s.installed {
+            e.1 += 1;
+        }
     }
 
     // Sort by category order
@@ -498,11 +585,14 @@ pub fn cmd_kit_skill_categories(config_path: &Option<String>, format: OutputForm
         installed: usize,
     }
 
-    let serializable: Vec<CatRow> = rows.iter().map(|(c, t, i)| CatRow {
-        category: c.clone(),
-        total: *t,
-        installed: *i,
-    }).collect();
+    let serializable: Vec<CatRow> = rows
+        .iter()
+        .map(|(c, t, i)| CatRow {
+            category: c.clone(),
+            total: *t,
+            installed: *i,
+        })
+        .collect();
 
     match format {
         OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&serializable)?),
@@ -519,7 +609,11 @@ pub fn cmd_kit_skill_categories(config_path: &Option<String>, format: OutputForm
 }
 
 /// `aibox kit skill info <name> [--format]`
-pub fn cmd_kit_skill_info(config_path: &Option<String>, name: &str, format: OutputFormat) -> Result<()> {
+pub fn cmd_kit_skill_info(
+    config_path: &Option<String>,
+    name: &str,
+    format: OutputFormat,
+) -> Result<()> {
     let root = project_root(config_path);
     let installed_names = installed_skill_names(&root);
 
@@ -563,7 +657,11 @@ pub fn cmd_kit_skill_info(config_path: &Option<String>, name: &str, format: Outp
     }
 
     let detail = SkillDetail {
-        name: if fm.name.is_empty() { name.to_string() } else { fm.name },
+        name: if fm.name.is_empty() {
+            name.to_string()
+        } else {
+            fm.name
+        },
         description: fm.description,
         category,
         version,
@@ -579,7 +677,10 @@ pub fn cmd_kit_skill_info(config_path: &Option<String>, name: &str, format: Outp
             if !detail.version.is_empty() {
                 println!("  Version:     {}", detail.version);
             }
-            println!("  Installed:   {}", if detail.installed { "yes" } else { "no" });
+            println!(
+                "  Installed:   {}",
+                if detail.installed { "yes" } else { "no" }
+            );
             println!();
             if !detail.description.is_empty() {
                 println!("  {}", detail.description);
@@ -614,10 +715,16 @@ pub fn cmd_kit_skill_install(config_path: &Option<String>, name: &str) -> Result
     if !config.skills.exclude.is_empty() {
         // We're in exclude-mode: remove name from exclude list
         if !config.skills.exclude.contains(&name.to_string()) {
-            output::warn(&format!("Skill '{}' is already in the active set (not in exclude list).", name));
+            output::warn(&format!(
+                "Skill '{}' is already in the active set (not in exclude list).",
+                name
+            ));
             return Ok(());
         }
-        let new_exclude: Vec<&str> = config.skills.exclude.iter()
+        let new_exclude: Vec<&str> = config
+            .skills
+            .exclude
+            .iter()
             .filter(|s| s.as_str() != name)
             .map(|s| s.as_str())
             .collect();
@@ -637,7 +744,7 @@ pub fn cmd_kit_skill_install(config_path: &Option<String>, name: &str) -> Result
         output::warn(
             "All skills are already installed (no [skills] filter active). \
              Use 'aibox kit skill uninstall' to exclude a skill, then \
-             install to re-include it."
+             install to re-include it.",
         );
         return Ok(());
     }
@@ -673,10 +780,16 @@ pub fn cmd_kit_skill_uninstall(config_path: &Option<String>, name: &str) -> Resu
     if !config.skills.include.is_empty() {
         // In include-mode: remove name from include list
         if !config.skills.include.contains(&name.to_string()) {
-            output::warn(&format!("Skill '{}' is not in [skills].include — already excluded.", name));
+            output::warn(&format!(
+                "Skill '{}' is not in [skills].include — already excluded.",
+                name
+            ));
             return Ok(());
         }
-        let new_include: Vec<&str> = config.skills.include.iter()
+        let new_include: Vec<&str> = config
+            .skills
+            .include
+            .iter()
             .filter(|s| s.as_str() != name)
             .map(|s| s.as_str())
             .collect();
@@ -744,24 +857,73 @@ pub fn cmd_kit_process_list(
         OutputFormat::Yaml => print!("{}", serde_yaml::to_string(&processes)?),
         OutputFormat::Table => {
             if processes.is_empty() {
-                output::warn("No processes installed. Run 'aibox init' or 'aibox sync' to install processkit content.");
+                output::warn(
+                    "No processes installed. Run 'aibox init' or 'aibox sync' to install processkit content.",
+                );
                 return Ok(());
             }
-            let name_w = processes.iter().map(|p| p.name.len()).max().unwrap_or(5).max(5);
-            let desc_w = processes.iter().map(|p| p.description.len().min(DESCRIPTION_DISPLAY_MAX)).max().unwrap_or(11).max(11);
+            let name_w = processes
+                .iter()
+                .map(|p| p.name.len())
+                .max()
+                .unwrap_or(5)
+                .max(5);
+            let desc_w = processes
+                .iter()
+                .map(|p| p.description.len().min(DESCRIPTION_DISPLAY_MAX))
+                .max()
+                .unwrap_or(11)
+                .max(11);
             if all {
-                println!("  {:<nw$}  {:<dw$}  STATUS", "PROCESS", "DESCRIPTION", nw = name_w, dw = desc_w);
+                println!(
+                    "  {:<nw$}  {:<dw$}  STATUS",
+                    "PROCESS",
+                    "DESCRIPTION",
+                    nw = name_w,
+                    dw = desc_w
+                );
             } else {
-                println!("  {:<nw$}  {:<dw$}", "PROCESS", "DESCRIPTION", nw = name_w, dw = desc_w);
+                println!(
+                    "  {:<nw$}  {:<dw$}",
+                    "PROCESS",
+                    "DESCRIPTION",
+                    nw = name_w,
+                    dw = desc_w
+                );
             }
             for p in &processes {
-                let desc_trunc: String = p.description.chars().take(DESCRIPTION_DISPLAY_MAX).collect();
-                let desc_display = if p.description.len() > DESCRIPTION_DISPLAY_MAX { format!("{}…", desc_trunc) } else { p.description.clone() };
-                if all {
-                    let status = if p.installed { "installed" } else { "available" };
-                    println!("  {:<nw$}  {:<dw$}  {}", p.name, desc_display, status, nw = name_w, dw = desc_w);
+                let desc_trunc: String = p
+                    .description
+                    .chars()
+                    .take(DESCRIPTION_DISPLAY_MAX)
+                    .collect();
+                let desc_display = if p.description.len() > DESCRIPTION_DISPLAY_MAX {
+                    format!("{}…", desc_trunc)
                 } else {
-                    println!("  {:<nw$}  {:<dw$}", p.name, desc_display, nw = name_w, dw = desc_w);
+                    p.description.clone()
+                };
+                if all {
+                    let status = if p.installed {
+                        "installed"
+                    } else {
+                        "available"
+                    };
+                    println!(
+                        "  {:<nw$}  {:<dw$}  {}",
+                        p.name,
+                        desc_display,
+                        status,
+                        nw = name_w,
+                        dw = desc_w
+                    );
+                } else {
+                    println!(
+                        "  {:<nw$}  {:<dw$}",
+                        p.name,
+                        desc_display,
+                        nw = name_w,
+                        dw = desc_w
+                    );
                 }
             }
         }
@@ -771,7 +933,11 @@ pub fn cmd_kit_process_list(
 }
 
 /// `aibox kit process info <name> [--format]`
-pub fn cmd_kit_process_info(config_path: &Option<String>, name: &str, format: OutputFormat) -> Result<()> {
+pub fn cmd_kit_process_info(
+    config_path: &Option<String>,
+    name: &str,
+    format: OutputFormat,
+) -> Result<()> {
     let root = project_root(config_path);
 
     let live_file = root.join(LIVE_PROCESSES_DIR).join(format!("{}.md", name));
@@ -783,10 +949,16 @@ pub fn cmd_kit_process_info(config_path: &Option<String>, name: &str, format: Ou
         if t.exists() {
             (t.clone(), false)
         } else {
-            bail!("Process '{}' not found. Run 'aibox kit process list' to see available processes.", name);
+            bail!(
+                "Process '{}' not found. Run 'aibox kit process list' to see available processes.",
+                name
+            );
         }
     } else {
-        bail!("Process '{}' not found. Run 'aibox kit process list' to see available processes.", name);
+        bail!(
+            "Process '{}' not found. Run 'aibox kit process list' to see available processes.",
+            name
+        );
     };
 
     let description = extract_process_description(&path)?;
@@ -809,7 +981,10 @@ pub fn cmd_kit_process_info(config_path: &Option<String>, name: &str, format: Ou
         OutputFormat::Yaml => print!("{}", serde_yaml::to_string(&detail)?),
         OutputFormat::Table => {
             println!("  Process:    {}", detail.name);
-            println!("  Installed:  {}", if detail.installed { "yes" } else { "no" });
+            println!(
+                "  Installed:  {}",
+                if detail.installed { "yes" } else { "no" }
+            );
             if !detail.description.is_empty() {
                 println!();
                 println!("  {}", detail.description);

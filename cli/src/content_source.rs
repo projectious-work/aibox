@@ -185,10 +185,7 @@ fn parse_org_name(host: &str, path: &str) -> Result<ParsedSource> {
     let cleaned = cleaned.strip_suffix(".git").unwrap_or(cleaned);
     let segments: Vec<&str> = cleaned.split('/').filter(|s| !s.is_empty()).collect();
     if segments.len() < 2 {
-        bail!(
-            "source URL path needs at least <org>/<name>, got: {}",
-            path
-        );
+        bail!("source URL path needs at least <org>/<name>, got: {}", path);
     }
     let name = segments[segments.len() - 1].to_string();
     let org = segments[segments.len() - 2].to_string();
@@ -252,8 +249,8 @@ pub fn cache_dir(source: &str, version: &str) -> Result<PathBuf> {
 
 /// Root of all aibox processkit caches: `~/.cache/aibox/processkit/`.
 fn base_cache_dir() -> Result<PathBuf> {
-    let cache_home = dirs::cache_dir()
-        .ok_or_else(|| anyhow!("could not determine user cache directory"))?;
+    let cache_home =
+        dirs::cache_dir().ok_or_else(|| anyhow!("could not determine user cache directory"))?;
     Ok(cache_home.join("aibox").join("processkit"))
 }
 
@@ -459,13 +456,11 @@ pub fn fetch(
     // Make a clean target directory. If a previous attempt left a
     // half-populated directory behind, wipe it before retrying.
     if cache_root.exists() {
-        fs::remove_dir_all(&cache_root).with_context(|| {
-            format!("failed to clean stale cache dir {}", cache_root.display())
-        })?;
+        fs::remove_dir_all(&cache_root)
+            .with_context(|| format!("failed to clean stale cache dir {}", cache_root.display()))?;
     }
-    fs::create_dir_all(&cache_root).with_context(|| {
-        format!("failed to create cache dir {}", cache_root.display())
-    })?;
+    fs::create_dir_all(&cache_root)
+        .with_context(|| format!("failed to create cache dir {}", cache_root.display()))?;
 
     let mut resolved_commit: Option<String> = None;
     let mut release_asset_sha256: Option<String> = None;
@@ -479,12 +474,9 @@ pub fn fetch(
         ));
         resolved_commit = Some(git_clone(source, Some(b), &cache_root)?);
         strategy = "git clone";
-    } else if let Some(asset_url) = build_release_asset_url(
-        source,
-        &parsed,
-        version,
-        release_asset_url_template,
-    ) {
+    } else if let Some(asset_url) =
+        build_release_asset_url(source, &parsed, version, release_asset_url_template)
+    {
         // 2. Release-asset tarball.
         output::info(&format!(
             "Downloading release asset {} -> {}",
@@ -527,8 +519,7 @@ pub fn fetch(
                                 fs::remove_dir_all(&cache_root)?;
                             }
                             fs::create_dir_all(&cache_root)?;
-                            resolved_commit =
-                                Some(git_clone(source, Some(version), &cache_root)?);
+                            resolved_commit = Some(git_clone(source, Some(version), &cache_root)?);
                             strategy = "git clone";
                         }
                     }
@@ -587,7 +578,11 @@ pub fn fetch(
     // Write the marker LAST. Body encodes the resolved_commit (if any)
     // and the release_asset_sha256 (if any) so subsequent idempotent
     // calls can echo them.
-    write_marker(&marker, resolved_commit.as_deref(), release_asset_sha256.as_deref())?;
+    write_marker(
+        &marker,
+        resolved_commit.as_deref(),
+        release_asset_sha256.as_deref(),
+    )?;
 
     output::ok(&format!(
         "Fetched content source {} via {} into {}",
@@ -872,7 +867,10 @@ fn fetch_text_optional(url: &str) -> Result<Option<String>> {
 ///   - `sha256sum`-style line (`abc123...  filename`)
 ///   - leading/trailing whitespace
 fn parse_sha256_checksum(body: &str) -> Result<String> {
-    let first_line = body.lines().next().ok_or_else(|| anyhow!("empty checksum file"))?;
+    let first_line = body
+        .lines()
+        .next()
+        .ok_or_else(|| anyhow!("empty checksum file"))?;
     let token = first_line
         .split_whitespace()
         .next()
@@ -931,9 +929,7 @@ fn extract_tar_gz_auto(bytes: &[u8], dest: &Path) -> Result<()> {
                 let mut comps = raw_path.components();
                 let first = comps.next();
                 match first {
-                    Some(std::path::Component::Normal(s))
-                        if s.to_string_lossy() == *prefix =>
-                    {
+                    Some(std::path::Component::Normal(s)) if s.to_string_lossy() == *prefix => {
                         comps.collect()
                     }
                     _ => raw_path.clone(),
@@ -1165,11 +1161,7 @@ mod tests {
 
     #[test]
     fn cache_dir_parses_github_https_url() {
-        let p = cache_dir(
-            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
-            "v0.4.0",
-        )
-        .unwrap();
+        let p = cache_dir(crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, "v0.4.0").unwrap();
         let s = p.to_string_lossy();
         assert!(
             s.ends_with("aibox/processkit/github.com/projectious-work/processkit/v0.4.0"),
@@ -1223,11 +1215,7 @@ mod tests {
         assert_eq!(sanitize_component("a/b"), "a_b");
         // Versions with `/` in them get neutralized, so the cache path
         // remains a single component.
-        let p = cache_dir(
-            "https://github.com/foo/bar.git",
-            "release/v1.0",
-        )
-        .unwrap();
+        let p = cache_dir("https://github.com/foo/bar.git", "release/v1.0").unwrap();
         let last = p.file_name().unwrap().to_string_lossy().to_string();
         assert_eq!(last, "release_v1.0");
     }
@@ -1270,7 +1258,8 @@ mod tests {
 
     #[test]
     fn release_asset_url_custom_template() {
-        let template = "https://gitea.acme.com/{org}/{name}/releases/download/{version}/payload.tar.gz";
+        let template =
+            "https://gitea.acme.com/{org}/{name}/releases/download/{version}/payload.tar.gz";
         let url = build_release_asset_url(
             "https://gitea.acme.com/platform/processkit-acme.git",
             &parsed_for("https://gitea.acme.com/platform/processkit-acme.git"),
@@ -1302,7 +1291,8 @@ mod tests {
     fn release_asset_url_works_for_non_http_source_when_template_avoids_source_placeholder() {
         // A user-provided template that doesn't reference {source} can
         // still build a URL for a scp-like git URL.
-        let template = "https://github.com/{org}/{name}/releases/download/{version}/{name}-{version}.tar.gz";
+        let template =
+            "https://github.com/{org}/{name}/releases/download/{version}/{name}-{version}.tar.gz";
         let url = build_release_asset_url(
             "git@github.com:foo/bar.git",
             &parsed_for("git@github.com:foo/bar.git"),
@@ -1326,8 +1316,7 @@ mod tests {
 
     #[test]
     fn parse_sha256_sha256sum_style() {
-        let body =
-            "abc123def456abc123def456abc123def456abc123def456abc123def456abcd  processkit-v0.5.1.tar.gz\n";
+        let body = "abc123def456abc123def456abc123def456abc123def456abc123def456abcd  processkit-v0.5.1.tar.gz\n";
         let parsed = parse_sha256_checksum(body).unwrap();
         assert_eq!(
             parsed,
@@ -1575,11 +1564,8 @@ mod tests {
             std::env::set_var("XDG_CACHE_HOME", tmp.path());
         }
 
-        let cache_root = cache_dir(
-            crate::processkit_vocab::PROCESSKIT_GIT_SOURCE,
-            "v0.4.0",
-        )
-        .unwrap();
+        let cache_root =
+            cache_dir(crate::processkit_vocab::PROCESSKIT_GIT_SOURCE, "v0.4.0").unwrap();
         // Synthesize the cache contents.
         let src = cache_root.join("src");
         fs::create_dir_all(src.join("skills/event-log")).unwrap();

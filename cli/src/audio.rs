@@ -153,7 +153,9 @@ pub fn cmd_audio_setup(port: Option<u16>) -> Result<()> {
 
     // 2. Configure TCP module persistence
     let pa_conf = user_pa_config_path();
-    let tcp_line = format!("load-module module-native-protocol-tcp port={port} auth-ip-acl=127.0.0.1;172.16.0.0/12;10.0.0.0/8;192.168.0.0/16");
+    let tcp_line = format!(
+        "load-module module-native-protocol-tcp port={port} auth-ip-acl=127.0.0.1;172.16.0.0/12;10.0.0.0/8;192.168.0.0/16"
+    );
 
     if let Ok(content) = std::fs::read_to_string(&pa_conf) {
         if content.contains(&format!("port={port}"))
