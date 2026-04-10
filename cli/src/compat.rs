@@ -85,6 +85,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.8.0",
         note: "fix: validate() rejected \"latest\" in [aibox].version (regression from v0.17.9)",
     },
+    CompatEntry {
+        aibox_version: "0.17.11",
+        processkit_version: "v0.8.0",
+        note: "fix: [aibox].version = \"latest\" resolved to concrete image tag before Dockerfile generation",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

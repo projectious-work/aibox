@@ -64,7 +64,7 @@ fn ghcr_get_json<T: serde::de::DeserializeOwned>(url: &str) -> Result<T> {
 
 /// Query the GHCR tags list for the given image flavor and return the highest
 /// semver version found.
-fn fetch_latest_image_version(flavor: &str) -> Result<semver::Version> {
+pub(crate) fn fetch_latest_image_version(flavor: &str) -> Result<semver::Version> {
     let url = "https://ghcr.io/v2/projectious-work/aibox/tags/list";
     let tags_list: TagsList = ghcr_get_json(url)?;
 

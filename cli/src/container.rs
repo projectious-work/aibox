@@ -1105,6 +1105,32 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         }
     }
 
+    // Resolve [aibox].version = "latest" to a concrete image tag before
+    // Dockerfile generation. "latest" is never a valid Docker image tag in
+    // our registry (tags are base-<flavor>-v<semver>); we must resolve it to
+    // a concrete version so the generated Dockerfile references a real image.
+    if config.aibox.version == "latest" {
+        let flavor = config.aibox.base.to_string();
+        match crate::update::fetch_latest_image_version(&flavor) {
+            Ok(v) => {
+                let resolved = format!("{}.{}.{}", v.major, v.minor, v.patch);
+                output::info(&format!(
+                    "Resolved aibox image 'latest' \u{2192} v{}",
+                    resolved
+                ));
+                config.aibox.version = resolved;
+            }
+            Err(e) => {
+                crate::output::warn(&format!(
+                    "[aibox].version = \"latest\" but image version resolution failed: {}. \
+                     Dockerfile will reference a concrete version if one was previously resolved, \
+                     or may fail. Consider setting an explicit version in aibox.toml.",
+                    e
+                ));
+            }
+        }
+    }
+
     // Warn if running CLI version differs from the pinned target version.
     // Skip when version = "latest" (user explicitly opts out of pinning).
     let aibox_version_pin = &config.aibox.version;
