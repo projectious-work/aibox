@@ -1722,13 +1722,13 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
     }
 
     // Claude Code keybindings — disable Ctrl+g (reserved for zellij leader key).
-    if providers.contains(&crate::config::AiProvider::Claude) {
-        if force_seed_file(
+    if providers.contains(&crate::config::AiProvider::Claude)
+        && force_seed_file(
             &root.join(".claude").join("keybindings.json"),
             DEFAULT_CLAUDE_KEYBINDINGS,
-        )? {
-            updated.push(".claude/keybindings.json".to_string());
-        }
+        )?
+    {
+        updated.push(".claude/keybindings.json".to_string());
     }
 
     Ok(updated)

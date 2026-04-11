@@ -58,6 +58,7 @@ pub const MANDATORY_MCP_SKILLS: &[&str] = &[
 /// the entity layer for teams that opt into governance or advisory features.
 ///
 /// Values are skill directory names under `context/skills/`.
+#[allow(dead_code)]
 pub const TIER_SPECIFIC_MCP_SKILLS: &[&str] = &[
     "actor-profile",
     "binding-management",

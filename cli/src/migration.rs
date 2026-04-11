@@ -298,7 +298,6 @@ fn format_migration_doc(
     // When aibox.toml says "latest", show the actually installed version from the
     // lock (the concrete tag that was last synced) rather than the sentinel string.
     let config_is_latest = config_pk_version
-        .as_deref()
         .map(|v| v == crate::config::PROCESSKIT_VERSION_LATEST)
         .unwrap_or(false);
     let effective_pk_version = if config_is_latest {
