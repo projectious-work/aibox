@@ -261,7 +261,9 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
     // that has no `mcp/mcp-config.json` in the templates mirror means the
     // processkit version installed is too old or is broken — warn the user so
     // they know entity-layer coverage is incomplete.
-    if let Some(skills_dir) = crate::processkit_vocab::mirror_skills_dir(project_root, &config.processkit.version) {
+    if let Some(skills_dir) =
+        crate::processkit_vocab::mirror_skills_dir(project_root, &config.processkit.version)
+    {
         let registered_names: std::collections::HashSet<&str> =
             specs.iter().map(|s| s.name.as_str()).collect();
         for &skill in crate::processkit_vocab::MANDATORY_MCP_SKILLS {

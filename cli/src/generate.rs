@@ -177,8 +177,7 @@ fn generate_docker_compose(
             .iter()
             .map(|(k, v)| format!("{}={}\n", k, v))
             .collect();
-        fs::write(".aibox-local.env", &env_content)
-            .context("Failed to write .aibox-local.env")?;
+        fs::write(".aibox-local.env", &env_content).context("Failed to write .aibox-local.env")?;
     }
 
     // Extra volumes from aibox.toml + .aibox-local.toml

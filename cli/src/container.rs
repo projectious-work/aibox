@@ -1112,14 +1112,10 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
                 let absolute_latest = versions[0].clone();
 
                 let resolved = if let Some(ref tag) = installed_tag {
-                    let installed_sv =
-                        crate::content_source::parse_loose_semver(tag);
-                    let latest_sv =
-                        crate::content_source::parse_loose_semver(&absolute_latest);
+                    let installed_sv = crate::content_source::parse_loose_semver(tag);
+                    let latest_sv = crate::content_source::parse_loose_semver(&absolute_latest);
                     match (installed_sv, latest_sv) {
-                        (Some(installed), Some(latest))
-                            if latest.major > installed.major =>
-                        {
+                        (Some(installed), Some(latest)) if latest.major > installed.major => {
                             // Major upgrade: block and find best within current major.
                             crate::output::warn(&format!(
                                 "processkit 'latest' ({}) would be a major upgrade from \

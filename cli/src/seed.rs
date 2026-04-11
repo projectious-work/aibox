@@ -1204,10 +1204,12 @@ require("git"):setup {}
 "#;
 
 /// git.yazi plugin main — shows git status signs next to file names.
-const DEFAULT_YAZI_PLUGIN_GIT_MAIN: &str = include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/main.lua");
+const DEFAULT_YAZI_PLUGIN_GIT_MAIN: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/main.lua");
 
 /// git.yazi plugin types — type annotations for the git plugin.
-const DEFAULT_YAZI_PLUGIN_GIT_TYPES: &str = include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/types.lua");
+const DEFAULT_YAZI_PLUGIN_GIT_TYPES: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/types.lua");
 
 /// Default yazi keymap.
 const DEFAULT_YAZI_KEYMAP: &str = r#"[mgr]

@@ -591,11 +591,17 @@ pub fn check_gitignore_entries() -> Vec<String> {
     // MCP client configs — gitignored because they embed personal server
     // definitions from .aibox-local.toml alongside team ones.
     let mcp_entries = [
-        (".mcp.json", "generated MCP config (merges team + personal servers)"),
+        (
+            ".mcp.json",
+            "generated MCP config (merges team + personal servers)",
+        ),
         (".cursor/mcp.json", "generated Cursor MCP config"),
         (".gemini/settings.json", "generated Gemini MCP config"),
         (".codex/config.toml", "generated Codex MCP config"),
-        (".continue/mcpServers/", "generated Continue MCP server directory"),
+        (
+            ".continue/mcpServers/",
+            "generated Continue MCP server directory",
+        ),
     ];
     for (entry, desc) in &mcp_entries {
         if !lines.contains(entry) {
