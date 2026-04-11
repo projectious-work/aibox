@@ -324,6 +324,11 @@ pub(crate) fn update_gitignore(addons: &AddonsSection) -> Result<()> {
     content.push_str(".root/\n");
     content.push_str(".aibox/\n");
     content.push_str(".aibox-env/\n");
+    // Personal overlays — never committed.
+    content.push_str(".aibox-local.toml\n");
+    // Generated from .aibox-local.toml by `aibox sync`; contains credentials
+    // in KEY=VALUE format for docker-compose env_file injection.
+    content.push_str(".aibox-local.env\n");
     // Runtime cache for fetched processkit / aibox content. Reproducible
     // from aibox.lock; never tracked.
     content.push_str("context/.cache/\n\n");
@@ -463,6 +468,9 @@ fn ensure_aibox_entries(gitignore_path: &Path) -> Result<()> {
         // Personal overlay with credentials and per-developer mounts.
         // Never committed — secrets live here.
         ".aibox-local.toml",
+        // Generated from .aibox-local.toml by `aibox sync` — contains the same
+        // credentials in KEY=VALUE format for docker-compose env_file injection.
+        ".aibox-local.env",
         // Runtime cache for fetched processkit / aibox content.
         // Reproducible from aibox.lock; never tracked.
         "context/.cache/",
@@ -553,6 +561,12 @@ pub fn check_gitignore_entries() -> Vec<String> {
     if !lines.contains(&".aibox-local.toml") {
         warnings.push(
             ".gitignore missing '.aibox-local.toml' (personal credential overlay)".to_string(),
+        );
+    }
+
+    if !lines.contains(&".aibox-local.env") {
+        warnings.push(
+            ".gitignore missing '.aibox-local.env' (generated credential env file)".to_string(),
         );
     }
 

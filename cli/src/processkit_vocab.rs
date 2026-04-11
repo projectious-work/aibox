@@ -27,6 +27,46 @@ use serde::Deserialize;
 /// Update if the repository is ever moved.
 pub const PROCESSKIT_GIT_SOURCE: &str = "https://github.com/projectious-work/processkit.git";
 
+// ---------------------------------------------------------------------------
+// Mandatory MCP server sets (processkit v0.11.1+)
+// ---------------------------------------------------------------------------
+
+/// Skills whose MCP servers are mandatory in every processkit install, regardless
+/// of package tier. These skills back entity-layer invariants — schema validation,
+/// state-machine enforcement, and index sync are tool-side guarantees that cannot
+/// be replicated by hand-editing files. A minimal-tier install that omits any of
+/// these breaks entity-layer correctness silently.
+///
+/// Values are skill *directory names* (e.g. `"index-management"`) as they appear
+/// under `context/skills/` in the templates mirror. The MCP server name shipped
+/// in each skill's `mcp/mcp-config.json` follows the `processkit-{skill}` convention.
+///
+/// Mirrors the mandatory set formalised in processkit v0.11.1. Update here when
+/// processkit adds or removes a mandatory server.
+pub const MANDATORY_MCP_SKILLS: &[&str] = &[
+    "decision-record",
+    "discussion-management",
+    "event-log",
+    "id-management",
+    "index-management",
+    "workitem-management",
+];
+
+/// Skills whose MCP servers are registered only when the matching tier package is
+/// installed (present in `[context].packages`). Unlike the mandatory set, these
+/// are not required for entity-layer correctness on every install — they extend
+/// the entity layer for teams that opt into governance or advisory features.
+///
+/// Values are skill directory names under `context/skills/`.
+pub const TIER_SPECIFIC_MCP_SKILLS: &[&str] = &[
+    "actor-profile",
+    "binding-management",
+    "gate-management",
+    "model-recommender",
+    "role-management",
+    "scope-management",
+];
+
 /// The processkit release recommended for new projects created by `aibox init`.
 /// Updated here on each processkit release; `resolve_processkit_section` in
 /// `container.rs` queries GitHub at init-time and falls back to "unset" — this
@@ -37,7 +77,7 @@ pub const PROCESSKIT_GIT_SOURCE: &str = "https://github.com/projectious-work/pro
 /// constant serves as the canonical reference for tests and documentation.
 // Used in #[cfg(test)] blocks across multiple modules and in documentation.
 #[allow(dead_code)]
-pub const PROCESSKIT_DEFAULT_VERSION: &str = "v0.8.0";
+pub const PROCESSKIT_DEFAULT_VERSION: &str = "v0.12.0";
 
 // ---------------------------------------------------------------------------
 // Processkit source-tree directory segments

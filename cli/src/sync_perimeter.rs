@@ -631,13 +631,17 @@ mod tests {
             ".aibox-home/.config/zellij/layouts/focus.kdl",
             ".aibox-home/.config/zellij/layouts/cowork.kdl",
             ".aibox-home/.config/zellij/layouts/ai.kdl",
+            ".aibox-home/.config/yazi/init.lua",
             ".aibox-home/.config/yazi/yazi.toml",
             ".aibox-home/.config/yazi/keymap.toml",
             ".aibox-home/.config/yazi/theme.toml",
+            ".aibox-home/.config/yazi/plugins/git.yazi/main.lua",
+            ".aibox-home/.config/yazi/plugins/git.yazi/types.lua",
             ".aibox-home/.config/lazygit/config.yml",
             ".aibox-home/.bashrc",
             ".aibox-home/.config/starship.toml",
             ".aibox-home/.asoundrc",
+            ".aibox-home/.claude/keybindings.json",
             // content_diff::write_migration_document
             "context/migrations/pending/MIG-20260407T120000.md",
             // content_init::install_content_source (v0.16.1+ sync auto-install)

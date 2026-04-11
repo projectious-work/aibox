@@ -77,6 +77,14 @@ nnoremap <End>  $
 vnoremap <Home> ^
 vnoremap <End>  $
 
+" ── Scratch pad auto-save ───────────────────────────────────────────────────
+" When vim opens /home/aibox/.scratch.md (the zellij floating scratch pane),
+" save on every text change so `:q!` can never lose edits.
+augroup scratch_autosave
+  autocmd!
+  autocmd TextChanged,TextChangedI /home/aibox/.scratch.md silent! write
+augroup END
+
 set background=AIBOX_VIM_BG
 set termguicolors
 colorscheme AIBOX_VIM_COLORSCHEME
@@ -105,27 +113,36 @@ rounded_corners true
 simplified_ui false
 pane_frames true
 
-// Leader: Ctrl+b (press Ctrl+b, release, then press the action key)
+// Leader: Ctrl+g (press Ctrl+g, release, then press the action key)
 // Quick reference:
-//   Ctrl+b → h/j/k/l    Navigate panes
-//   Ctrl+b → n/d/r       New pane / split down / split right
-//   Ctrl+b → x           Close pane
-//   Ctrl+b → f           Toggle fullscreen
-//   Ctrl+b → z           Toggle pane frames
-//   Ctrl+b → t/w         New tab / close tab
-//   Ctrl+b → [/]         Previous/next tab
-//   Ctrl+b → 1-5         Jump to tab
-//   Ctrl+b → s           Strider file picker
-//   Ctrl+b → u           Scroll mode
-//   Ctrl+b → /           Search scrollback
+//   Alt+h/j/k/l          Navigate panes (no leader needed; always shown in status bar)
+//   Ctrl+g → h/j/k/l    Navigate panes (leader variant)
+//   Ctrl+g → n/d/r       New pane / split down / split right
+//   Ctrl+g → x           Close pane
+//   Ctrl+g → f           Toggle fullscreen
+//   Ctrl+g → z           Toggle pane frames
+//   Ctrl+g → p           Toggle scratch notepad (vim floating pane)
+//   Ctrl+g → t/w         New tab / close tab
+//   Ctrl+g → [/]         Previous/next tab
+//   Ctrl+g → 1-5         Jump to tab
+//   Ctrl+g → s           Strider file picker
+//   Ctrl+g → u           Scroll mode
+//   Ctrl+g → /           Search scrollback
 //   Ctrl+q               Quit zellij
 keybinds clear-defaults=true {
     normal {
-        bind "Ctrl b" { SwitchToMode "Tmux"; }
+        bind "Ctrl g" { SwitchToMode "Tmux"; }
         bind "Ctrl q" { Quit; }
+        // Direct pane navigation — no leader needed; always visible in status bar.
+        // Alt+Arrow keys are intentionally NOT bound here: terminal apps (bash
+        // readline, vim, Claude Code) rely on Alt+Left/Right for word navigation.
+        bind "Alt h" { MoveFocus "Left"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+        bind "Alt l" { MoveFocus "Right"; }
     }
     tmux {
-        bind "Ctrl b" { SwitchToMode "Normal"; }
+        bind "Ctrl g" { SwitchToMode "Normal"; }
         bind "Esc" { SwitchToMode "Normal"; }
         bind "h" "Left"  { MoveFocus "Left"; SwitchToMode "Normal"; }
         bind "j" "Down"  { MoveFocus "Down"; SwitchToMode "Normal"; }
@@ -138,6 +155,7 @@ keybinds clear-defaults=true {
         bind "f"     { ToggleFocusFullscreen; SwitchToMode "Normal"; }
         bind "z"     { TogglePaneFrames; SwitchToMode "Normal"; }
         bind "e"     { TogglePaneEmbedOrFloating; SwitchToMode "Normal"; }
+        bind "p"     { ToggleFloatingPanes; SwitchToMode "Normal"; }
         bind "=" { Resize "Increase"; }
         bind "-" { Resize "Decrease"; }
         bind "t"     { NewTab; SwitchToMode "Normal"; }
@@ -170,7 +188,7 @@ keybinds clear-defaults=true {
         bind "q" { Quit; }
     }
     scroll {
-        bind "Ctrl b" { SwitchToMode "Normal"; }
+        bind "Ctrl g" { SwitchToMode "Normal"; }
         bind "Ctrl c" "Esc" "q" { SwitchToMode "Normal"; }
         bind "j" "Down"  { ScrollDown; }
         bind "k" "Up"    { ScrollUp; }
@@ -183,7 +201,7 @@ keybinds clear-defaults=true {
         bind "/"         { SwitchToMode "EnterSearch"; SearchInput 0; }
     }
     search {
-        bind "Ctrl b" { SwitchToMode "Normal"; }
+        bind "Ctrl g" { SwitchToMode "Normal"; }
         bind "Ctrl c" "Esc" { SwitchToMode "Normal"; }
         bind "n"     { Search "down"; }
         bind "N"     { Search "up"; }
@@ -265,6 +283,13 @@ fn generate_dev_layout(providers: &[crate::config::AiProvider]) -> String {
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -311,6 +336,13 @@ fn generate_focus_layout(providers: &[crate::config::AiProvider]) -> String {
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -355,6 +387,13 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
         return r#"layout {
     default_tab_template {
         children
+        floating_panes {
+            pane name="scratch" {
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }
+        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
@@ -394,6 +433,13 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -467,6 +513,13 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
         return r#"layout {
     default_tab_template {
         children
+        floating_panes {
+            pane name="scratch" {
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }
+        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
@@ -504,6 +557,13 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -560,6 +620,13 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
         return r#"layout {
     default_tab_template {
         children
+        floating_panes {
+            pane name="scratch" {
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }
+        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
@@ -599,6 +666,13 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -655,6 +729,13 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
         return r#"layout {
     default_tab_template {
         children
+        floating_panes {
+            pane name="scratch" {
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }
+        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
@@ -694,6 +775,13 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
         r#"layout {{
     default_tab_template {{
         children
+        floating_panes {{
+            pane name="scratch" {{
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }}
+        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
@@ -756,6 +844,10 @@ image_delay = 30
 image_filter = "nearest"
 
 [plugin]
+prepend_fetchers = [
+    { id = "git", url = "*",  run = "git" },
+    { id = "git", url = "*/", run = "git" },
+]
 prepend_previewers = [
     { name = "*.svg",  run = "svg" },
     { name = "*.eps",  run = "eps" },
@@ -881,6 +973,23 @@ return {
 }
 "#;
 
+/// Yazi init.lua — registers plugins that need setup on every startup.
+const DEFAULT_YAZI_INIT: &str = r#"-- =============================================================================
+-- Yazi init.lua — aibox defaults
+-- Runs on every Yazi startup. Register plugins that need setup here.
+-- =============================================================================
+
+-- git.yazi: show git status (modified/untracked/staged) in file list.
+-- Fetcher registration is in yazi.toml [plugin.prepend_fetchers].
+require("git"):setup {}
+"#;
+
+/// git.yazi plugin main — shows git status signs next to file names.
+const DEFAULT_YAZI_PLUGIN_GIT_MAIN: &str = include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/main.lua");
+
+/// git.yazi plugin types — type annotations for the git plugin.
+const DEFAULT_YAZI_PLUGIN_GIT_TYPES: &str = include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/types.lua");
+
 /// Default yazi keymap.
 const DEFAULT_YAZI_KEYMAP: &str = r#"[mgr]
 prepend_keymap = [
@@ -893,21 +1002,23 @@ prepend_keymap = [
 /// Quick reference cheatsheet.
 const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference
   ───────────────────────────────────────────────
-  ZELLIJ (leader: Ctrl+b)    YAZI (file manager)
-  Ctrl+b h/j/k/l  Move       h/j/k/l  Navigate
-  Ctrl+b [/]       Prev/next  Enter    Open in vim
-  Ctrl+b 1-5       Jump tab   q        Quit yazi
-  Ctrl+b f         Fullscreen /        Search
-  Ctrl+b x         Close pane .        Hidden files
-  Ctrl+b n/d/r     New pane   Space    Select
-  Ctrl+b t/w       Tab +/-
-  Ctrl+b s         Strider
-  Ctrl+b u         Scroll
-  Ctrl+b /         Search
-  Ctrl+b q         QUIT (or Ctrl+q)
+  ZELLIJ (leader: Ctrl+g)    YAZI (file manager)
+  Alt+h/j/k/l     Move pane  h/j/k/l  Navigate
+  Ctrl+g h/j/k/l  Move pane  Enter    Open in vim
+  Ctrl+g [/]      Prev/next  q        Quit yazi
+  Ctrl+g 1-5      Jump tab   /        Search
+  Ctrl+g f        Fullscreen .        Hidden files
+  Ctrl+g x        Close pane Space    Select
+  Ctrl+g n/d/r    New pane
+  Ctrl+g t/w      Tab +/-
+  Ctrl+g p        Scratch pad (vim)
+  Ctrl+g s        Strider
+  Ctrl+g u        Scroll
+  Ctrl+g /        Search
+  Ctrl+q          QUIT (or Ctrl+g q)
 
   LAYOUTS: aibox start --layout dev|focus|cowork|cowork-swap|browse|ai
-  TABS: Ctrl+b 1 dev  2 git  3 shell  4 help
+  TABS: Ctrl+g 1 dev  2 git  3 shell
 "#;
 
 /// Default .asoundrc for PulseAudio over TCP.
@@ -917,6 +1028,15 @@ const DEFAULT_ASOUNDRC: &str = r#"pcm.!default {
 ctl.!default {
     type pulse
 }
+"#;
+
+/// Claude Code keybindings — disables Ctrl+g (reserved for zellij leader key).
+const DEFAULT_CLAUDE_KEYBINDINGS: &str = r#"[
+  {
+    "key": "ctrl+g",
+    "command": null
+  }
+]
 "#;
 
 /// Seed the .root/ directory structure and default config files.
@@ -942,6 +1062,10 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
             .join("yazi")
             .join("plugins")
             .join("svg.yazi"),
+        root.join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("git.yazi"),
         root.join(".config").join("git"),
         root.join(".config").join("lazygit"),
     ];
@@ -1081,6 +1205,11 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
         &root.join(".config").join("yazi").join("theme.toml"),
         crate::themes::yazi_theme(theme),
     )?;
+    // Yazi init.lua — register plugins on startup
+    seed_file(
+        &root.join(".config").join("yazi").join("init.lua"),
+        DEFAULT_YAZI_INIT,
+    )?;
     // Yazi plugins — custom previewers for EPS and SVG
     seed_file(
         &root
@@ -1099,6 +1228,25 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
             .join("svg.yazi")
             .join("init.lua"),
         DEFAULT_YAZI_PLUGIN_SVG,
+    )?;
+    // Yazi git plugin — shows git status in file list
+    seed_file(
+        &root
+            .join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("git.yazi")
+            .join("main.lua"),
+        DEFAULT_YAZI_PLUGIN_GIT_MAIN,
+    )?;
+    seed_file(
+        &root
+            .join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("git.yazi")
+            .join("types.lua"),
+        DEFAULT_YAZI_PLUGIN_GIT_TYPES,
     )?;
 
     // Cheatsheet
@@ -1124,6 +1272,19 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
     // Audio config
     if config.audio.enabled {
         seed_file(&root.join(".asoundrc"), DEFAULT_ASOUNDRC)?;
+    }
+
+    // Claude Code keybindings — disable Ctrl+g (reserved for zellij leader key).
+    // Only seeded when Claude is configured as a provider.
+    if config
+        .ai
+        .providers
+        .contains(&crate::config::AiProvider::Claude)
+    {
+        seed_file(
+            &root.join(".claude").join("keybindings.json"),
+            DEFAULT_CLAUDE_KEYBINDINGS,
+        )?;
     }
 
     // Warn if .ssh/ is empty
@@ -1337,6 +1498,16 @@ pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
         &starship_content,
     )? {
         updated.push(".config/starship.toml".to_string());
+    }
+
+    // Claude Code keybindings — disable Ctrl+g (reserved for zellij leader key).
+    if providers.contains(&crate::config::AiProvider::Claude) {
+        if force_seed_file(
+            &root.join(".claude").join("keybindings.json"),
+            DEFAULT_CLAUDE_KEYBINDINGS,
+        )? {
+            updated.push(".claude/keybindings.json".to_string());
+        }
     }
 
     Ok(updated)

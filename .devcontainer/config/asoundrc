@@ -1,8 +1,0 @@
-# PulseAudio over TCP — used for Claude Code voice in containers
-# PULSE_SERVER env var must be set (default: tcp:host.docker.internal:4714)
-pcm.!default {
-    type pulse
-}
-ctl.!default {
-    type pulse
-}

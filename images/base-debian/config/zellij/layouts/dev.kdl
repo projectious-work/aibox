@@ -21,6 +21,13 @@ layout {
 
     default_tab_template {
         children
+        floating_panes {
+            pane name="scratch" {
+                command "bash"
+                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
+                cwd "/workspace"
+            }
+        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }

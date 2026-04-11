@@ -44,3 +44,11 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# aibox generated
+.aibox-env/
+.aibox-local.toml
+.aibox-local.env
+context/.cache/
+context/private/
+context/**/private/

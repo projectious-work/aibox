@@ -1079,14 +1079,88 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     // Resolve [processkit].version = "latest" to a concrete tag before any
     // further processing. The lock always stores a concrete version; "latest"
     // is an aibox.toml-only convenience that is never written to the lock.
+    //
+    // Semver-aware upgrade policy:
+    //   - Fresh install (no lock): take absolute latest unconditionally.
+    //   - Patch or minor upgrade (same major): apply automatically.
+    //   - Major upgrade: block and warn; take best available within current major.
+    //     User must pin an explicit version in aibox.toml to cross a major boundary.
     if config.processkit.version == crate::config::PROCESSKIT_VERSION_LATEST {
         match crate::content_source::list_versions(&config.processkit.source) {
             Ok(versions) if !versions.is_empty() => {
-                let resolved = versions[0].clone();
-                output::info(&format!(
-                    "Resolved processkit 'latest' \u{2192} {}",
-                    resolved
-                ));
+                // Read the currently installed version tag from the lock file.
+                let installed_tag: Option<String> =
+                    crate::lock::read_lock(std::path::Path::new("."))
+                        .ok()
+                        .flatten()
+                        .and_then(|lock| lock.processkit)
+                        .map(|pk| pk.version.clone());
+
+                let absolute_latest = versions[0].clone();
+
+                let resolved = if let Some(ref tag) = installed_tag {
+                    let installed_sv =
+                        crate::content_source::parse_loose_semver(tag);
+                    let latest_sv =
+                        crate::content_source::parse_loose_semver(&absolute_latest);
+                    match (installed_sv, latest_sv) {
+                        (Some(installed), Some(latest))
+                            if latest.major > installed.major =>
+                        {
+                            // Major upgrade: block and find best within current major.
+                            crate::output::warn(&format!(
+                                "processkit 'latest' ({}) would be a major upgrade from \
+                                 the installed version ({}). Major version upgrades are \
+                                 not applied automatically — pin an explicit version in \
+                                 aibox.toml to upgrade. Staying on the latest v{}.x release.",
+                                absolute_latest, tag, installed.major
+                            ));
+                            let best_in_major = versions
+                                .iter()
+                                .filter_map(|v| {
+                                    crate::content_source::parse_loose_semver(v)
+                                        .map(|sv| (sv, v.clone()))
+                                })
+                                .filter(|(sv, _)| sv.major == installed.major)
+                                .max_by_key(|(sv, _)| sv.clone())
+                                .map(|(_, v)| v);
+                            match best_in_major {
+                                Some(v) => {
+                                    output::info(&format!(
+                                        "Resolved processkit 'latest' \u{2192} {} \
+                                         (latest v{}.x)",
+                                        v, installed.major
+                                    ));
+                                    v
+                                }
+                                None => {
+                                    // No releases in current major — keep installed.
+                                    output::info(&format!(
+                                        "No v{}.x releases found; keeping installed \
+                                         version {}.",
+                                        installed.major, tag
+                                    ));
+                                    tag.clone()
+                                }
+                            }
+                        }
+                        _ => {
+                            // Same or lower major, or unparseable: auto-apply latest.
+                            output::info(&format!(
+                                "Resolved processkit 'latest' \u{2192} {} (upgrade from {})",
+                                absolute_latest, tag
+                            ));
+                            absolute_latest
+                        }
+                    }
+                } else {
+                    // Fresh install (no lock): take absolute latest unconditionally.
+                    output::info(&format!(
+                        "Resolved processkit 'latest' \u{2192} {} (fresh install)",
+                        absolute_latest
+                    ));
+                    absolute_latest
+                };
                 config.processkit.version = resolved;
             }
             Ok(_) => {

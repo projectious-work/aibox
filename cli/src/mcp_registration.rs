@@ -112,12 +112,19 @@ struct RawServerEntry {
 /// is `None` (tests, or callers that haven't activated skill filtering),
 /// every skill that has an `mcp/mcp-config.json` is included.
 ///
+/// `force_include` is a list of skill directory names that always bypass
+/// the `effective_skills` filter, even when a filter is active. Pass
+/// [`crate::processkit_vocab::MANDATORY_MCP_SKILLS`] here to ensure the
+/// six mandatory entity-layer servers are always registered regardless of
+/// the package tier.
+///
 /// Returns `Ok(vec![])` if the templates mirror doesn't exist yet
 /// (e.g. processkit version is "unset" — no install has happened).
 pub fn collect_processkit_mcp_specs(
     project_root: &Path,
     processkit_version: &str,
     effective_skills: Option<&HashSet<String>>,
+    force_include: &[&str],
 ) -> Result<Vec<McpServerSpec>> {
     if processkit_version == crate::config::PROCESSKIT_VERSION_UNSET {
         return Ok(Vec::new());
@@ -148,8 +155,11 @@ pub fn collect_processkit_mcp_specs(
             continue;
         }
         // Apply effective-set filter if provided.
+        // Skills in `force_include` always bypass this filter — they are
+        // mandatory regardless of package tier (see MANDATORY_MCP_SKILLS).
         if let Some(set) = effective_skills
             && !set.contains(&skill_name)
+            && !force_include.contains(&skill_name.as_str())
         {
             continue;
         }
@@ -210,13 +220,43 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
     let effective = crate::content_init::build_effective_skill_set(project_root, config)
         .ok()
         .flatten();
-    let specs =
-        collect_processkit_mcp_specs(project_root, &config.processkit.version, effective.as_ref())?;
+    let specs = collect_processkit_mcp_specs(
+        project_root,
+        &config.processkit.version,
+        effective.as_ref(),
+        crate::processkit_vocab::MANDATORY_MCP_SKILLS,
+    )?;
 
     if specs.is_empty() {
         // No processkit MCP servers to register. Don't bother writing
         // empty config files; the user can add their own later.
         return Ok(());
+    }
+
+    // Validate that all mandatory MCP servers were collected. A mandatory skill
+    // that has no `mcp/mcp-config.json` in the templates mirror means the
+    // processkit version installed is too old or is broken — warn the user so
+    // they know entity-layer coverage is incomplete.
+    if let Some(skills_dir) = crate::processkit_vocab::mirror_skills_dir(project_root, &config.processkit.version) {
+        let registered_names: std::collections::HashSet<&str> =
+            specs.iter().map(|s| s.name.as_str()).collect();
+        for &skill in crate::processkit_vocab::MANDATORY_MCP_SKILLS {
+            // Convention: the server name shipped in mcp-config.json is
+            // `processkit-{skill}`. Check whether any registered spec
+            // matches; fall back to checking the mcp-config.json file
+            // exists so we catch cases where the naming convention changes.
+            let expected_server = format!("processkit-{skill}");
+            let config_path = skills_dir.join(skill).join("mcp").join("mcp-config.json");
+            if !registered_names.contains(expected_server.as_str()) && !config_path.is_file() {
+                output::warn(&format!(
+                    "mandatory processkit MCP skill '{skill}' has no mcp/mcp-config.json \
+                     in the {} templates mirror — its server will not be registered. \
+                     Entity-layer coverage is incomplete. Run `aibox sync` after \
+                     upgrading processkit to a version that includes this skill.",
+                    &config.processkit.version,
+                ));
+            }
+        }
     }
 
     let managed = managed_set(&specs);
@@ -615,9 +655,13 @@ mod tests {
     #[test]
     fn collect_skips_when_version_is_unset() {
         let tmp = TempDir::new().unwrap();
-        let specs =
-            collect_processkit_mcp_specs(tmp.path(), crate::config::PROCESSKIT_VERSION_UNSET, None)
-                .unwrap();
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::config::PROCESSKIT_VERSION_UNSET,
+            None,
+            &[],
+        )
+        .unwrap();
         assert!(specs.is_empty());
     }
 
@@ -628,6 +672,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         assert!(specs.is_empty());
@@ -663,6 +708,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         assert_eq!(specs.len(), 1);
@@ -704,6 +750,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         assert_eq!(specs.len(), 1);
@@ -733,6 +780,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
@@ -766,6 +814,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         assert_eq!(specs.len(), 1);
@@ -793,10 +842,69 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             Some(&filter),
+            &[],
         )
         .unwrap();
         let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
         assert_eq!(names, vec!["scope-management", "workitem-management"]);
+    }
+
+    #[test]
+    fn collect_force_include_bypasses_effective_skills_filter() {
+        // Mandatory skills must be collected even when they are not in the
+        // effective-skills set (i.e. the package tier doesn't include them).
+        let tmp = TempDir::new().unwrap();
+        for skill in &["workitem-management", "decision-record", "scope-management"] {
+            write_synth_skill_mcp(
+                tmp.path(),
+                crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+                skill,
+                &format!(
+                    r#"{{"mcpServers":{{"{}":{{"command":"uv","args":[]}}}}}}"#,
+                    skill
+                ),
+            );
+        }
+        // Filter excludes decision-record, but it's force-included as mandatory.
+        let mut filter = HashSet::new();
+        filter.insert("workitem-management".to_string());
+        filter.insert("scope-management".to_string());
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            Some(&filter),
+            &["decision-record"], // force-include bypasses the filter
+        )
+        .unwrap();
+        let names: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
+        assert_eq!(
+            names,
+            vec!["decision-record", "scope-management", "workitem-management"],
+            "force-included skill must appear even when absent from effective set"
+        );
+    }
+
+    #[test]
+    fn collect_force_include_no_op_when_no_filter() {
+        // When effective_skills is None (no filter), force_include has no effect.
+        let tmp = TempDir::new().unwrap();
+        write_synth_skill_mcp(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            "workitem-management",
+            r#"{"mcpServers":{"workitem-management":{"command":"uv","args":[]}}}"#,
+        );
+        let specs = collect_processkit_mcp_specs(
+            tmp.path(),
+            crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
+            None,
+            &["decision-record"], // force-include of a skill that isn't in the mirror
+        )
+        .unwrap();
+        // Only the skill that exists should appear; force_include of a non-existent
+        // skill is a no-op (the file simply won't be found).
+        assert_eq!(specs.len(), 1);
+        assert_eq!(specs[0].name, "workitem-management");
     }
 
     #[test]
@@ -817,6 +925,7 @@ mod tests {
             tmp.path(),
             crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION,
             None,
+            &[],
         )
         .unwrap();
         assert!(specs.is_empty());

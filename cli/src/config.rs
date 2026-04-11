@@ -763,6 +763,13 @@ pub struct AiboxConfig {
     /// Legacy [process] section — if present, packages are merged into [context].
     #[serde(default, skip_serializing)]
     pub(crate) process: Option<LegacyProcessSection>,
+
+    /// Environment variables from `.aibox-local.toml` only — tracked separately
+    /// so `generate.rs` can write them to `.aibox-local.env` rather than
+    /// embedding literal credential values in `docker-compose.yml`.
+    /// Not part of the TOML schema; populated programmatically at load time.
+    #[serde(skip)]
+    pub local_env: HashMap<String, String>,
 }
 
 impl AiboxConfig {
@@ -822,6 +829,9 @@ impl AiboxConfig {
                 std::fs::read_to_string(&local_path).context("Failed to read .aibox-local.toml")?;
             let local: AiboxLocalConfig =
                 toml::from_str(&local_content).context("Failed to parse .aibox-local.toml")?;
+            // Capture local env vars before merging so generate.rs can write
+            // them to .aibox-local.env instead of embedding them in compose.
+            config.local_env = local.container.environment.clone();
             // Environment: local wins on key conflicts.
             config
                 .container
@@ -1192,7 +1202,7 @@ node = { version = "22" }
 pnpm = { version = "10" }
 
 [addons.rust.tools]
-rustc = { version = "1.87" }
+rustc = { version = "1.89" }
 clippy = {}
 rustfmt = {}
 

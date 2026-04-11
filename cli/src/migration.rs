@@ -295,11 +295,21 @@ fn format_migration_doc(
     };
 
     // Determine the effective processkit version to display.
-    // Prefer the config's target version (what sync will install) over the lock's
-    // old installed version. If both are available and differ, note both.
-    let effective_pk_version = config_pk_version
-        .or_else(|| pk.map(|p| p.version.as_str()))
-        .unwrap_or("not configured");
+    // When aibox.toml says "latest", show the actually installed version from the
+    // lock (the concrete tag that was last synced) rather than the sentinel string.
+    let config_is_latest = config_pk_version
+        .as_deref()
+        .map(|v| v == crate::config::PROCESSKIT_VERSION_LATEST)
+        .unwrap_or(false);
+    let effective_pk_version = if config_is_latest {
+        // Show the installed (concrete) version from the lock when config uses "latest".
+        pk.map(|p| p.version.as_str())
+            .unwrap_or("not yet installed")
+    } else {
+        config_pk_version
+            .or_else(|| pk.map(|p| p.version.as_str()))
+            .unwrap_or("not configured")
+    };
     let effective_pk_version = effective_pk_version.trim_start_matches('v');
 
     // Previous processkit version (from lock) — used to guide template diffing.
@@ -332,9 +342,26 @@ fn format_migration_doc(
     let processkit_state_section = match pk {
         Some(p) => {
             let source = &p.source;
+            let version_line = if config_is_latest {
+                format!(
+                    "processkit is tracking `version = \"latest\"` — installed: \
+                     `v{effective_pk_version}`{pk_version_note} (source: `{source}`).\n\
+                     \n\
+                     **Upgrade policy for `version = \"latest\"`:**\n\
+                     `aibox sync` resolves `latest` at run time using a semver-aware policy:\n\
+                     - **Patch / minor upgrades** (same major): applied automatically.\n\
+                     - **Major upgrades**: blocked — a warning is shown and sync stays on the\n\
+                       latest release within the current major. To cross a major boundary, pin\n\
+                       an explicit version in `aibox.toml` (e.g. `version = \"v2.0.0\"`)."
+                )
+            } else {
+                format!(
+                    "processkit is pinned to `v{effective_pk_version}`{pk_version_note} \
+                     (source: `{source}`)."
+                )
+            };
             format!(
-                "processkit is pinned to `v{effective_pk_version}`{pk_version_note} \
-                 (source: `{source}`).\n\
+                "{version_line}\n\
                  \n\
                  **Check for pending processkit content migrations:**\n\
                  Look in `/workspace/context/migrations/pending/` — `aibox sync` deposits\n\
@@ -353,7 +380,15 @@ fn format_migration_doc(
         }
         None => {
             // No processkit info from lock, but we may have it from config.
-            if let Some(cfg_v) = config_pk_version {
+            if config_is_latest {
+                "processkit is set to `version = \"latest\"` in aibox.toml \
+                 (lock not yet written — fresh install).\n\
+                 `aibox sync` will resolve `latest` to the newest available release \
+                 and install it.\n\
+                 Check `/workspace/context/migrations/pending/` after sync for any \
+                 content migration files."
+                    .to_string()
+            } else if let Some(cfg_v) = config_pk_version {
                 let v = cfg_v.trim_start_matches('v');
                 format!(
                     "processkit is pinned to `v{v}` (source: aibox.toml; lock not yet written).\n\

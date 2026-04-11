@@ -147,10 +147,13 @@ fn generate_docker_compose(
         format!("{}/.config/git/config", container_home),
     );
 
-    // Merge user-defined environment variables (from aibox.toml and .aibox-local.toml).
-    // User vars are inserted after the system vars so they can override if needed.
+    // Merge user-defined environment variables from aibox.toml (shared, safe to
+    // commit). Variables from .aibox-local.toml (credentials) are handled
+    // separately below — they go to .aibox-local.env, not into docker-compose.yml.
     for (k, v) in &config.container.environment {
-        env_vars.insert(k.clone(), v.clone());
+        if !config.local_env.contains_key(k) {
+            env_vars.insert(k.clone(), v.clone());
+        }
     }
 
     // Escape values for YAML double-quoted strings
@@ -163,6 +166,20 @@ fn generate_docker_compose(
         .collect();
 
     let env_keys: Vec<String> = escaped_env.keys().cloned().collect();
+
+    // Write .aibox-local.env for credentials from .aibox-local.toml.
+    // docker-compose.yml references this file via env_file so the literal
+    // values never appear in the committed compose file.
+    let has_local_env = !config.local_env.is_empty();
+    if has_local_env {
+        let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
+        let env_content: String = local_env_sorted
+            .iter()
+            .map(|(k, v)| format!("{}={}\n", k, v))
+            .collect();
+        fs::write(".aibox-local.env", &env_content)
+            .context("Failed to write .aibox-local.env")?;
+    }
 
     // Extra volumes from aibox.toml + .aibox-local.toml
     let extra_volumes = &config.container.extra_volumes;
@@ -188,6 +205,7 @@ fn generate_docker_compose(
             env_vals => escaped_env,
             extra_volumes => extra_volumes,
             has_rust => has_rust,
+            has_local_env => has_local_env,
         })
         .context("Failed to render docker-compose template")?;
 

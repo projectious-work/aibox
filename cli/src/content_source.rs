@@ -383,7 +383,7 @@ fn filter_and_sort_semver_tags(tags: Vec<String>) -> Vec<String> {
 }
 
 /// Parse a tag string as semver, allowing an optional leading `v`.
-fn parse_loose_semver(tag: &str) -> Option<semver::Version> {
+pub(crate) fn parse_loose_semver(tag: &str) -> Option<semver::Version> {
     let stripped = tag.strip_prefix('v').unwrap_or(tag);
     semver::Version::parse(stripped).ok()
 }

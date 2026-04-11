@@ -84,6 +84,15 @@ desc    = {}
 hovered = { bg = "#3c3836", bold = true }
 footer  = { fg = "#3c3836", bg = "#d5c4a1" }
 
+[git]
+# git.yazi plugin — gruvbox dark color mapping for git status in file list.
+modified  = { fg = "#d79921" }  # yellow
+untracked = { fg = "#b16286" }  # magenta
+added     = { fg = "#98971a" }  # green
+deleted   = { fg = "#cc241d" }  # red
+updated   = { fg = "#d65d0e" }  # orange
+ignored   = { fg = "#928374" }  # gray
+
 [filetype]
 rules = [
     # Directories
