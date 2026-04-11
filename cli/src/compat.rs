@@ -100,6 +100,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.8.0",
         note: "fix: mandatory MCP server enforcement (closes #40); Rust addon linker + x86_64 cross-compile support; Zellij leader Ctrl+g; yazi git status indicators; zellij scratch pad",
     },
+    CompatEntry {
+        aibox_version: "0.17.14",
+        processkit_version: "v0.8.0",
+        note: "fix: docs-docusaurus addon installs @docusaurus/core (closes #41); pin default version to 3.8 (closes #42)",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

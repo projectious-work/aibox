@@ -1,5 +1,5 @@
 name: docs-docusaurus
-version: "1.0.0"
+version: "1.1.0"
 description: "Docusaurus static docs site (React/MDX)"
 requires:
   - node
@@ -12,11 +12,11 @@ builder_weight: null
 tools:
   - name: docusaurus
     default_enabled: true
-    default_version: "3"
-    supported_versions: ["3"]
+    default_version: "3.8"
+    supported_versions: ["3.8"]
 
 builder: null
 
 runtime: |
   # Addon: docs-docusaurus
-  RUN npm install -g create-docusaurus@latest
+  RUN npm install -g @docusaurus/core@{{ tools.docusaurus.version }}
