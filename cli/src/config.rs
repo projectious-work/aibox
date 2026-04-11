@@ -1348,7 +1348,7 @@ name = "my-project"
         // Check specific tool versions
         assert_eq!(config.addons.tool_version("python", "python"), Some("3.13"));
         assert_eq!(config.addons.tool_version("python", "uv"), Some("0.7"));
-        assert_eq!(config.addons.tool_version("rust", "rustc"), Some("1.87"));
+        assert_eq!(config.addons.tool_version("rust", "rustc"), Some("1.89"));
         assert_eq!(config.addons.tool_version("rust", "clippy"), None);
         assert_eq!(config.addons.tool_version("rust", "rustfmt"), None);
         assert!(config.addons.has_tool("kubernetes", "kubectl"));
