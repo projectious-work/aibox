@@ -11,4 +11,10 @@ prepend_keymap = [
     { on = "e",       run = "shell 'open-in-editor \"$1\"' --confirm", desc = "Open in vim pane" },
     # O: interactive opener selection
     { on = "O",       run = "open --interactive", desc = "Open interactively" },
+    # g s: repo-level git summary (branch + totals)
+    { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
+    # g c: detailed changed-files view for the current repository
+    { on = [ "g", "c" ], run = "shell 'git -c color.status=always status --short --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Show git changes" },
+    # g r: refresh the current directory so git badges update on demand
+    { on = [ "g", "r" ], run = "cd .", desc = "Refresh directory" },
 ]

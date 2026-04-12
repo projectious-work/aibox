@@ -992,8 +992,16 @@ const DEFAULT_YAZI_INIT: &str = r#"-- ==========================================
 -- Runs on every Yazi startup. Register plugins that need setup here.
 -- =============================================================================
 
--- git.yazi: show git status (modified/untracked/staged) in file list.
+-- git.yazi: show git status in the file list with explicit, visible signs.
 -- Fetcher registration is in yazi.toml [plugin.prepend_fetchers].
+th.git = th.git or {}
+th.git.modified_sign = "M"
+th.git.added_sign = "A"
+th.git.deleted_sign = "D"
+th.git.updated_sign = "U"
+th.git.untracked_sign = "?"
+th.git.ignored_sign = "I"
+
 require("git"):setup {}
 "#;
 
@@ -1011,6 +1019,9 @@ prepend_keymap = [
     { on = "<Enter>", run = "open", desc = "Edit in-place" },
     { on = "e", run = "shell 'open-in-editor \"$1\"'", desc = "Open in vim pane" },
     { on = "O", run = "open --interactive", desc = "Open interactively" },
+    { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
+    { on = [ "g", "c" ], run = "shell 'git -c color.status=always status --short --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Show git changes" },
+    { on = [ "g", "r" ], run = "cd .", desc = "Refresh directory" },
 ]
 "#;
 
@@ -1020,9 +1031,9 @@ const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference
   ZELLIJ (leader: Ctrl+g)    YAZI (file manager)
   Alt+h/j/k/l     Move pane  h/j/k/l  Navigate
   Ctrl+g h/j/k/l  Move pane  Enter    Open in vim
-  Ctrl+g [/]      Prev/next  q        Quit yazi
-  Ctrl+g 1-5      Jump tab   /        Search
-  Ctrl+g f        Fullscreen .        Hidden files
+  Ctrl+g [/]      Prev/next  g s      Git summary
+  Ctrl+g 1-5      Jump tab   g c      Git changes
+  Ctrl+g f        Fullscreen g r      Refresh git
   Ctrl+g x        Close pane Space    Select
   Ctrl+g n/d/r    New pane
   Ctrl+g t/w      Tab +/-
