@@ -120,6 +120,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.13.0",
         note: "fix: ai-openai addon npm install -g ran as USER aibox causing EACCES; fix: broken ai-codex link in ai-mistral docs",
     },
+    CompatEntry {
+        aibox_version: "0.17.19",
+        processkit_version: "v0.13.0",
+        note: "fix: rust addon COPY --from=rust-builder left .cargo/.rustup owned by root; add chown before USER aibox switch",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

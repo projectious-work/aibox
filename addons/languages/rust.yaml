@@ -61,6 +61,9 @@ runtime: |
   COPY --from=rust-builder /home/aibox/.cargo /home/aibox/.cargo
   COPY --from=rust-builder /home/aibox/.rustup /home/aibox/.rustup
 
+  # COPY runs as root, so fix ownership before switching to the aibox user.
+  RUN chown -R aibox:aibox /home/aibox/.cargo /home/aibox/.rustup
+
   ENV PATH="/home/aibox/.cargo/bin:${PATH}"
 
   # The builder stage has build-essential, but only the toolchain is copied to
