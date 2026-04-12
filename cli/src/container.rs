@@ -794,11 +794,7 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
                                 }
                             })
                             .collect();
-                        out.push_str(&format!(
-                            "# {}: {}\n",
-                            tool.name,
-                            versions.join(" | ")
-                        ));
+                        out.push_str(&format!("# {}: {}\n", tool.name, versions.join(" | ")));
                     } else if tool.default_enabled {
                         // No curated version list — version can still be pinned freely.
                         out.push_str(&format!(
