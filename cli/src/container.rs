@@ -449,7 +449,7 @@ pub fn cmd_start(config_path: &Option<String>, layout: &str) -> Result<()> {
     let runtime = Runtime::detect()?;
     let name = &config.container.name;
 
-    seed::seed_root_dir(&config)?;
+    seed::ensure_runtime_dirs(&config)?;
     generate::generate_all(&config)?;
 
     let state = runtime.container_status(name)?;
@@ -1136,6 +1136,11 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     // The tripwire is verified at the end of cmd_sync.
     let tripwire =
         crate::sync_perimeter::Tripwire::snapshot(std::env::current_dir().ok().as_deref());
+    let pre_sync_cli_version = crate::lock::read_lock(std::path::Path::new("."))
+        .ok()
+        .flatten()
+        .map(|lock| lock.aibox.cli_version)
+        .filter(|v| !v.is_empty());
 
     // Check for version migration before any other sync steps
     crate::migration::check_and_generate_migration()?;
@@ -1297,18 +1302,8 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         ));
     }
 
-    output::info("Syncing config files...");
-    let updated = seed::sync_theme_files(&config)?;
-
-    if updated.is_empty() {
-        output::ok("All config files already up to date");
-    } else {
-        for file in &updated {
-            output::ok(&format!("Updated {}", file));
-        }
-    }
-
-    seed::seed_root_dir(&config)?;
+    output::info("Scaffolding missing runtime directories...");
+    seed::ensure_runtime_dirs(&config)?;
     generate::generate_all(&config)?;
 
     // Skills, AGENTS.md, and the universal baseline are owned by
@@ -1397,6 +1392,40 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         if let Err(e) = crate::claude_commands::sync_claude_commands(&cwd, &config) {
             output::warn(&format!("Claude command sync failed: {}", e));
         }
+    }
+
+    // Three-way runtime diff for managed .aibox-home files.
+    match std::env::current_dir() {
+        Ok(cwd) => {
+            let current_cli_version = env!("CARGO_PKG_VERSION");
+            match crate::runtime_sync::run_runtime_sync(
+                &cwd,
+                pre_sync_cli_version.as_deref(),
+                current_cli_version,
+                &config,
+            ) {
+                Ok(report) => {
+                    if report.summary.has_user_relevant_changes() {
+                        output::info(&format!(
+                            ".aibox-home changes detected: {} upstream-only, {} conflicts, {} new, {} removed",
+                            report.summary.changed_upstream_only,
+                            report.summary.conflict,
+                            report.summary.new_upstream,
+                            report.summary.removed_upstream,
+                        ));
+                        if let Some(path) = report.migration_document_path {
+                            output::ok(&format!("Wrote migration document: {}", path.display()));
+                        }
+                    } else {
+                        output::ok(
+                            "Managed .aibox-home runtime files are in sync — no migration needed",
+                        );
+                    }
+                }
+                Err(e) => output::warn(&format!("Runtime config diff failed: {}", e)),
+            }
+        }
+        Err(e) => output::warn(&format!("Failed to determine working directory: {}", e)),
     }
 
     // Three-way processkit diff (A6).

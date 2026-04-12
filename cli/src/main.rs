@@ -34,6 +34,7 @@ mod output;
 mod processkit_vocab;
 mod reset;
 mod runtime;
+mod runtime_sync;
 mod seed;
 mod sync_perimeter;
 mod themes;

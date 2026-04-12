@@ -1065,15 +1065,11 @@ const DEFAULT_CLAUDE_KEYBINDINGS: &str = r#"[
 ]
 "#;
 
-/// Seed the .root/ directory structure and default config files.
-/// Never overwrites existing files.
-pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
+/// Create the managed `.aibox-home/` directory structure without writing files.
+/// Safe to call on every sync/start because it only scaffolds missing directories.
+pub fn ensure_runtime_dirs(config: &AiboxConfig) -> Result<()> {
     let root = config.host_root_dir();
 
-    let root_display = root.display();
-    output::info(&format!("Seeding {} directory...", root_display));
-
-    // Create directory structure — base dirs always needed
     let mut dirs = vec![
         root.join(".ssh"),
         root.join(".vim").join("undo"),
@@ -1096,35 +1092,15 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
         root.join(".config").join("lazygit"),
     ];
 
-    // AI provider directories — only create what's configured
     for provider in &config.ai.providers {
         match provider {
-            crate::config::AiProvider::Claude => {
-                dirs.push(root.join(".claude"));
-            }
-            crate::config::AiProvider::Aider => {
-                // Aider uses ~/.aider for config
-                dirs.push(root.join(".aider"));
-            }
-            crate::config::AiProvider::Gemini => {
-                // Gemini CLI uses ~/.gemini for config
-                dirs.push(root.join(".gemini"));
-            }
-            crate::config::AiProvider::Mistral => {
-                dirs.push(root.join(".mistral"));
-            }
-            crate::config::AiProvider::OpenAI => {
-                dirs.push(root.join(".codex"));
-            }
-            crate::config::AiProvider::Continue => {
-                dirs.push(root.join(".continue"));
-            }
-            crate::config::AiProvider::Copilot => {
-                dirs.push(root.join(".copilot"));
-            }
-            // Cursor is a host-side IDE extension only — no in-container
-            // persistence directory. MCP registration files for all providers
-            // are written by mcp_registration.rs at the project root.
+            crate::config::AiProvider::Claude => dirs.push(root.join(".claude")),
+            crate::config::AiProvider::Aider => dirs.push(root.join(".aider")),
+            crate::config::AiProvider::Gemini => dirs.push(root.join(".gemini")),
+            crate::config::AiProvider::Mistral => dirs.push(root.join(".mistral")),
+            crate::config::AiProvider::OpenAI => dirs.push(root.join(".codex")),
+            crate::config::AiProvider::Continue => dirs.push(root.join(".continue")),
+            crate::config::AiProvider::Copilot => dirs.push(root.join(".copilot")),
             crate::config::AiProvider::Cursor => {}
         }
     }
@@ -1134,183 +1110,136 @@ pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
             .with_context(|| format!("Failed to create directory: {}", dir.display()))?;
     }
 
-    // Seed config files (never overwrite)
+    Ok(())
+}
+
+/// Return the managed runtime files that aibox generates inside `.aibox-home/`.
+pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, String)> {
     let theme = &config.customization.theme;
-    let vimrc = DEFAULT_VIMRC
-        .replace(
-            "AIBOX_VIM_COLORSCHEME",
-            crate::themes::vim_colorscheme(theme),
-        )
-        .replace("AIBOX_VIM_BG", crate::themes::vim_background(theme));
-    seed_file(&root.join(".vim").join("vimrc"), &vimrc)?;
-    seed_file(
-        &root.join(".config").join("git").join("config"),
-        DEFAULT_GITCONFIG,
-    )?;
-
-    // Zellij config — apply selected theme and default layout
-    let zellij_config = DEFAULT_ZELLIJ_CONFIG
-        .replace("AIBOX_THEME", &theme.to_string())
-        .replace("AIBOX_LAYOUT", &config.customization.layout.to_string());
-    seed_file(
-        &root.join(".config").join("zellij").join("config.kdl"),
-        &zellij_config,
-    )?;
-
-    // Zellij theme file — seed the selected theme
-    let theme_filename = format!("{}.kdl", &theme.to_string());
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("themes")
-            .join(&theme_filename),
-        crate::themes::zellij_theme(theme),
-    )?;
-    // Zellij layouts — generated dynamically based on AI providers
     let providers = &config.ai.providers;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("dev.kdl"),
-        &generate_dev_layout(providers),
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("focus.kdl"),
-        &generate_focus_layout(providers),
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("cowork.kdl"),
-        &generate_cowork_layout(providers),
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("browse.kdl"),
-        &generate_browse_layout(providers),
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("ai.kdl"),
-        &generate_ai_layout(providers),
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("zellij")
-            .join("layouts")
-            .join("cowork-swap.kdl"),
-        &generate_cowork_swap_layout(providers),
-    )?;
+    let mut files = vec![
+        (
+            std::path::PathBuf::from(".vim/vimrc"),
+            DEFAULT_VIMRC
+                .replace(
+                    "AIBOX_VIM_COLORSCHEME",
+                    crate::themes::vim_colorscheme(theme),
+                )
+                .replace("AIBOX_VIM_BG", crate::themes::vim_background(theme)),
+        ),
+        (
+            std::path::PathBuf::from(".config/git/config"),
+            DEFAULT_GITCONFIG.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/config.kdl"),
+            DEFAULT_ZELLIJ_CONFIG
+                .replace("AIBOX_THEME", &theme.to_string())
+                .replace("AIBOX_LAYOUT", &config.customization.layout.to_string()),
+        ),
+        (
+            std::path::PathBuf::from(format!(".config/zellij/themes/{}.kdl", theme)),
+            crate::themes::zellij_theme(theme).to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/dev.kdl"),
+            generate_dev_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/focus.kdl"),
+            generate_focus_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/cowork.kdl"),
+            generate_cowork_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/browse.kdl"),
+            generate_browse_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/ai.kdl"),
+            generate_ai_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/zellij/layouts/cowork-swap.kdl"),
+            generate_cowork_swap_layout(providers),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/yazi.toml"),
+            DEFAULT_YAZI_CONFIG.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/keymap.toml"),
+            DEFAULT_YAZI_KEYMAP.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/theme.toml"),
+            crate::themes::yazi_theme(theme).to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/init.lua"),
+            DEFAULT_YAZI_INIT.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/eps.yazi/init.lua"),
+            DEFAULT_YAZI_PLUGIN_EPS.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/svg.yazi/init.lua"),
+            DEFAULT_YAZI_PLUGIN_SVG.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/git.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_GIT_MAIN.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/git.yazi/types.lua"),
+            DEFAULT_YAZI_PLUGIN_GIT_TYPES.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/cheatsheet.txt"),
+            DEFAULT_CHEATSHEET.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/starship.toml"),
+            crate::themes::starship_config(&config.customization.prompt, theme),
+        ),
+        (
+            std::path::PathBuf::from(".config/lazygit/config.yml"),
+            crate::themes::lazygit_theme(theme).to_string(),
+        ),
+    ];
 
-    // Yazi config + theme
-    seed_file(
-        &root.join(".config").join("yazi").join("yazi.toml"),
-        DEFAULT_YAZI_CONFIG,
-    )?;
-    seed_file(
-        &root.join(".config").join("yazi").join("keymap.toml"),
-        DEFAULT_YAZI_KEYMAP,
-    )?;
-    seed_file(
-        &root.join(".config").join("yazi").join("theme.toml"),
-        crate::themes::yazi_theme(theme),
-    )?;
-    // Yazi init.lua — register plugins on startup
-    seed_file(
-        &root.join(".config").join("yazi").join("init.lua"),
-        DEFAULT_YAZI_INIT,
-    )?;
-    // Yazi plugins — custom previewers for EPS and SVG
-    seed_file(
-        &root
-            .join(".config")
-            .join("yazi")
-            .join("plugins")
-            .join("eps.yazi")
-            .join("init.lua"),
-        DEFAULT_YAZI_PLUGIN_EPS,
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("yazi")
-            .join("plugins")
-            .join("svg.yazi")
-            .join("init.lua"),
-        DEFAULT_YAZI_PLUGIN_SVG,
-    )?;
-    // Yazi git plugin — shows git status in file list
-    seed_file(
-        &root
-            .join(".config")
-            .join("yazi")
-            .join("plugins")
-            .join("git.yazi")
-            .join("main.lua"),
-        DEFAULT_YAZI_PLUGIN_GIT_MAIN,
-    )?;
-    seed_file(
-        &root
-            .join(".config")
-            .join("yazi")
-            .join("plugins")
-            .join("git.yazi")
-            .join("types.lua"),
-        DEFAULT_YAZI_PLUGIN_GIT_TYPES,
-    )?;
-
-    // Cheatsheet
-    seed_file(
-        &root.join(".config").join("cheatsheet.txt"),
-        DEFAULT_CHEATSHEET,
-    )?;
-
-    // Starship prompt config
-    let prompt = &config.customization.prompt;
-    let starship_content = crate::themes::starship_config(prompt, theme);
-    seed_file(
-        &root.join(".config").join("starship.toml"),
-        &starship_content,
-    )?;
-
-    // lazygit theme config
-    seed_file(
-        &root.join(".config").join("lazygit").join("config.yml"),
-        crate::themes::lazygit_theme(theme),
-    )?;
-
-    // Audio config
     if config.audio.enabled {
-        seed_file(&root.join(".asoundrc"), DEFAULT_ASOUNDRC)?;
+        files.push((
+            std::path::PathBuf::from(".asoundrc"),
+            DEFAULT_ASOUNDRC.to_string(),
+        ));
     }
 
-    // Claude Code keybindings — disable Ctrl+g (reserved for zellij leader key).
-    // Only seeded when Claude is configured as a provider.
-    if config
-        .ai
-        .providers
-        .contains(&crate::config::AiProvider::Claude)
-    {
-        seed_file(
-            &root.join(".claude").join("keybindings.json"),
-            DEFAULT_CLAUDE_KEYBINDINGS,
-        )?;
+    if providers.contains(&crate::config::AiProvider::Claude) {
+        files.push((
+            std::path::PathBuf::from(".claude/keybindings.json"),
+            DEFAULT_CLAUDE_KEYBINDINGS.to_string(),
+        ));
+    }
+
+    files
+}
+
+/// Seed the .root/ directory structure and default config files.
+/// Never overwrites existing files.
+pub fn seed_root_dir(config: &AiboxConfig) -> Result<()> {
+    let root = config.host_root_dir();
+
+    let root_display = root.display();
+    output::info(&format!("Seeding {} directory...", root_display));
+
+    ensure_runtime_dirs(config)?;
+
+    for (rel_path, content) in managed_runtime_files(config) {
+        seed_file(&root.join(rel_path), &content)?;
     }
 
     // Warn if .ssh/ is empty
@@ -1336,6 +1265,7 @@ fn seed_file(path: &Path, content: &str) -> Result<()> {
 
 /// Write content to a file, overwriting if content differs.
 /// Returns true if the file changed, false if content was already identical.
+#[allow(dead_code)]
 pub fn force_seed_file(path: &Path, content: &str) -> Result<bool> {
     crate::context::write_if_changed(path, content)
 }
@@ -1353,6 +1283,7 @@ pub fn force_seed_file(path: &Path, content: &str) -> Result<bool> {
 ///
 /// Returns Ok(true) if the file was modified, Ok(false) otherwise (file
 /// missing or no `[manager]` line found).
+#[allow(dead_code)]
 pub fn migrate_yazi_section(path: &Path) -> Result<bool> {
     if !path.is_file() {
         return Ok(false);
@@ -1381,6 +1312,7 @@ pub fn migrate_yazi_section(path: &Path) -> Result<bool> {
 
 /// Force-seed all theme-dependent and AI-provider-dependent config files.
 /// Overwrites existing files when content has changed. Used by `aibox sync`.
+#[allow(dead_code)]
 pub fn sync_theme_files(config: &AiboxConfig) -> Result<Vec<String>> {
     let root = config.host_root_dir();
     let theme = &config.customization.theme;
@@ -1574,6 +1506,23 @@ mod tests {
         assert!(root.join(".config").join("yazi").is_dir());
         assert!(root.join(".config").join("git").is_dir());
         assert!(root.join(".claude").is_dir());
+
+        unsafe {
+            std::env::remove_var("AIBOX_HOST_ROOT");
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn seed_root_dir_creates_codex_directory_when_openai_enabled() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let mut config = make_config(false, root.clone());
+        config.ai.providers = vec![AiProvider::OpenAI];
+        seed_root_dir(&config).unwrap();
+
+        assert!(root.join(".codex").is_dir());
+        assert!(!root.join(".claude").exists());
 
         unsafe {
             std::env::remove_var("AIBOX_HOST_ROOT");
