@@ -110,6 +110,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libc6-dev \
     pkg-config \
     libssl-dev \
+    openssh-client \
     gcc-x86-64-linux-gnu \
     libc6-dev-amd64-cross \
     && rm -rf /var/lib/apt/lists/*

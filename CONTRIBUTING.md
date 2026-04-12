@@ -30,7 +30,7 @@ cd cli && cargo fmt -- --check
 ### E2E Tier 2 (full container lifecycle tests)
 
 Requires the `aibox-e2e-testrunner` companion service running alongside the devcontainer.
-Rebuild the devcontainer once if needed (or when `Dockerfile.e2e` changes).
+The repo devcontainer also needs an SSH client (`openssh-client`) because Tier 2 tests deploy to the companion via SSH/SCP; rebuild the devcontainer after pulling changes that touch `.devcontainer/Dockerfile.local`.
 
 ```bash
 # 1. Build the CLI binary

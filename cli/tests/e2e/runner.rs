@@ -27,6 +27,26 @@ pub struct E2eRunner {
 }
 
 impl E2eRunner {
+    fn command_exists(bin: &str) -> bool {
+        Command::new(bin).arg("-V").output().is_ok()
+    }
+
+    fn assert_local_prereqs(&self) {
+        assert!(
+            Self::command_exists("ssh"),
+            "missing local prerequisite: `ssh` not found on PATH. For this repo, rebuild the devcontainer so its repo-only test layer installs `openssh-client`, or install an SSH client manually."
+        );
+        assert!(
+            Self::command_exists("scp"),
+            "missing local prerequisite: `scp` not found on PATH. For this repo, rebuild the devcontainer so its repo-only test layer installs `openssh-client`, or install an SSH client manually."
+        );
+        assert!(
+            Path::new(&self.ssh_key).exists(),
+            "missing local prerequisite: E2E SSH key not found at {}. The repo expects the pre-seeded key under `.aibox-e2e-runner-home/.ssh/`.",
+            self.ssh_key
+        );
+    }
+
     /// Create a runner pointing at the companion container.
     ///
     /// By default, connects to `aibox-e2e-testrunner:22` using the pre-seeded test SSH key.
@@ -62,6 +82,7 @@ impl E2eRunner {
 
     /// Execute a raw command on the companion container via SSH.
     pub fn exec(&self, cmd: &str) -> Output {
+        self.assert_local_prereqs();
         let mut args = self.ssh_opts();
         args.extend([
             "-p".to_string(),
@@ -77,6 +98,7 @@ impl E2eRunner {
 
     /// Copy a local file to the companion container via SCP.
     fn scp(&self, local_path: &str, remote_path: &str) {
+        self.assert_local_prereqs();
         let mut args = self.ssh_opts();
         args.extend([
             "-P".to_string(),
@@ -99,6 +121,7 @@ impl E2eRunner {
 
     /// Recursively copy a local directory to the companion via SCP.
     fn scp_recursive(&self, local_path: &str, remote_path: &str) {
+        self.assert_local_prereqs();
         let mut args = self.ssh_opts();
         args.extend([
             "-r".to_string(),

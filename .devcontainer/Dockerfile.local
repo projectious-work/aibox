@@ -5,14 +5,8 @@
 # The generated base image is available as the "aibox" stage:
 #   FROM ghcr.io/projectious-work/aibox:<image>-v<version> AS aibox
 #
-# Simple usage — add layers directly:
-#   RUN apt-get update && apt-get install -y some-package
-#   RUN npx playwright install --with-deps chromium
-#
-# Advanced usage — multi-stage build referencing the aibox stage:
-#   FROM node:20 AS builder
-#   RUN npm ci && npm run build
-#
-#   FROM aibox
-#   COPY --from=builder /app/dist /workspace/dist
-
+# Repo-only devcontainer layers. These are for developing aibox itself and are
+# not shipped in downstream images.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*

@@ -22,7 +22,11 @@ const MANAGED_ITEMS: &[(&str, bool)] = &[
     // ── Core aibox files ────────────────────────────────────────────────
     ("aibox.toml", true),
     ("aibox.lock", true),
-    (".devcontainer", true),
+    (".devcontainer/Dockerfile", true),
+    (".devcontainer/docker-compose.yml", true),
+    (".devcontainer/devcontainer.json", true),
+    (".devcontainer/Dockerfile.local", true),
+    (".devcontainer/docker-compose.override.yml", true),
     (".aibox-home", true),
     ("context", true),
     ("CLAUDE.md", true),
@@ -199,6 +203,21 @@ pub fn delete_item(path: &Path) -> Result<()> {
         fs::remove_file(path)
             .with_context(|| format!("Failed to remove file: {}", path.display()))?;
     }
+    Ok(())
+}
+
+fn remove_dir_if_empty(path: &Path) -> Result<()> {
+    if !path.is_dir() {
+        return Ok(());
+    }
+
+    let mut entries = fs::read_dir(path)
+        .with_context(|| format!("Failed to read directory: {}", path.display()))?;
+    if entries.next().is_none() {
+        fs::remove_dir(path)
+            .with_context(|| format!("Failed to remove directory: {}", path.display()))?;
+    }
+
     Ok(())
 }
 
@@ -390,6 +409,8 @@ pub fn cmd_reset(
             output::ok(&format!("Deleted {}", item.path.display()));
         }
     }
+
+    remove_dir_if_empty(Path::new(".devcontainer"))?;
 
     output::ok("Reset complete. Project is back to pre-aibox state.");
     if let Some(bp) = &backup_path {
@@ -607,5 +628,133 @@ name = "test-project"
             fs::read_to_string(dst.join("sub/nested.txt")).unwrap(),
             "world"
         );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn reset_backup_preserves_user_edited_generated_and_local_files() {
+        let dir = TempDir::new().unwrap();
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(dir.path()).unwrap();
+
+        setup_project(dir.path());
+
+        fs::write(
+            dir.path().join("aibox.toml"),
+            "[aibox]\nversion = \"0.3.8\"\n# user edit\n\n[container]\nname = \"test-project\"\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join("aibox.lock"),
+            "version = \"0.3.8\"\n# user edit\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/Dockerfile"),
+            "FROM debian\n# user edit\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/docker-compose.yml"),
+            "services:\n  app:\n    image: test\n# user edit\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/devcontainer.json"),
+            "{\n  \"name\": \"test\"\n}\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/Dockerfile.local"),
+            "RUN echo local-user-layer\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/docker-compose.override.yml"),
+            "services:\n  db:\n    image: postgres:16\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join(".devcontainer/local-secrets.txt"),
+            "token=super-secret\n",
+        )
+        .unwrap();
+        fs::create_dir_all(dir.path().join(".aibox-home/.config/yazi")).unwrap();
+        fs::write(
+            dir.path().join(".aibox-home/.config/yazi/keymap.toml"),
+            "# user tweak\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join("context/DECISIONS.md"),
+            "# Decisions\nuser note\n",
+        )
+        .unwrap();
+        fs::write(dir.path().join("CLAUDE.md"), "# Project\nuser note\n").unwrap();
+        fs::write(dir.path().join("AGENTS.md"), "# Agents\nuser note\n").unwrap();
+        fs::write(
+            dir.path().join(".gitignore"),
+            ".aibox-home/\n# user tweak\n",
+        )
+        .unwrap();
+
+        cmd_reset(&None, false, false, true).unwrap();
+
+        let backup_root = dir.path().join(BACKUP_DIR);
+        assert!(backup_root.is_dir(), "backup root should exist");
+        let backup_dir = fs::read_dir(&backup_root)
+            .unwrap()
+            .next()
+            .expect("expected one backup directory")
+            .unwrap()
+            .path();
+
+        let assert_backup = |rel: &str, expected: &str| {
+            let path = backup_dir.join(rel);
+            assert!(path.exists(), "backup should contain {}", rel);
+            let content = fs::read_to_string(&path).unwrap();
+            assert!(
+                content.contains(expected),
+                "backup for {} should preserve user content; got: {}",
+                rel,
+                content
+            );
+        };
+
+        assert_backup("aibox.toml", "# user edit");
+        assert_backup("aibox.lock", "# user edit");
+        assert_backup(".devcontainer/Dockerfile", "# user edit");
+        assert_backup(".devcontainer/docker-compose.yml", "# user edit");
+        assert_backup(".devcontainer/devcontainer.json", "\"name\": \"test\"");
+        assert_backup(".devcontainer/Dockerfile.local", "local-user-layer");
+        assert_backup(".devcontainer/docker-compose.override.yml", "postgres:16");
+        assert!(
+            !backup_dir.join(".devcontainer/local-secrets.txt").exists(),
+            "backup should not copy arbitrary local .devcontainer files"
+        );
+        assert_backup(".aibox-home/.config/yazi/keymap.toml", "user tweak");
+        assert_backup("context/DECISIONS.md", "user note");
+        assert_backup("CLAUDE.md", "user note");
+        assert_backup("AGENTS.md", "user note");
+        assert_backup(".gitignore", "user tweak");
+
+        assert!(!dir.path().join("aibox.toml").exists());
+        assert!(!dir.path().join(".devcontainer/Dockerfile").exists());
+        assert!(!dir.path().join(".devcontainer/docker-compose.yml").exists());
+        assert!(!dir.path().join(".devcontainer/devcontainer.json").exists());
+        assert!(!dir.path().join(".devcontainer/Dockerfile.local").exists());
+        assert!(
+            !dir.path()
+                .join(".devcontainer/docker-compose.override.yml")
+                .exists()
+        );
+        assert!(
+            dir.path().join(".devcontainer/local-secrets.txt").exists(),
+            "unknown local .devcontainer files should be left in place"
+        );
+        assert!(!dir.path().join(".aibox-home").exists());
+        assert!(dir.path().join(".gitignore").exists());
+
+        std::env::set_current_dir(original_dir).unwrap();
     }
 }
