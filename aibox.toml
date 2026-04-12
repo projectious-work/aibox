@@ -64,12 +64,15 @@ packages = ["product"]
 
 [addons.ai-claude.tools]
 
-[addons.docs-docusaurus.tools]
-docusaurus = { version = "3" }
-
 [addons.node.tools]
 node = { version = "22" }
 pnpm = { version = "10" }
+
+[addons.ai-openai.tools]
+
+
+[addons.docs-docusaurus.tools]
+docusaurus = { version = "3" }
 
 [addons.python.tools]
 python = { version = "3.13" }

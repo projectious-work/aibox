@@ -1,57 +1,61 @@
-# aibox v0.17.12
+# aibox v0.17.17
 
-Feature release: Yazi git status integration, complete OS gitignore entries, and
-improved processkit migration guidance for agents.
-No processkit version change — still compatible with v0.8.0.
+Feature release. Two quality-of-life improvements to `aibox init` / `aibox sync`,
+plus a dependency-declaration fix for the OpenAI addon.
 
-## Yazi git status integration (`git.yazi`)
+## New features
 
-Yazi now shows git file status (modified, untracked, ignored, staged, deleted)
-inline in the file list — similar to VS Code's file explorer. The official
-`git.yazi` plugin from `yazi-rs/plugins` is bundled directly in the base image.
+### `aibox.toml` — inline addon documentation
 
-Signs displayed next to file names:
-- ` ` modified
-- ` ` added/staged
-- ` ` deleted
-- `? ` untracked
-- ` ` ignored (dimmed)
+`aibox.toml` now includes a block of inline comments above each
+`[addons.<name>.tools]` section, generated from the addon definition:
 
-Status propagates up to parent directories automatically. No configuration
-needed — enabled by default in all aibox containers.
-
-## Complete OS-specific gitignore entries
-
-New `.gitignore` files created by `aibox init` now include entries for all
-three major OS families:
-
-**Linux** (new): `.Trash-*/`, `.fuse_tmp*`, `.directory`, `.nfs*`
-**Windows** (expanded): added `Desktop.ini`, `$RECYCLE.BIN/`
-**macOS**: unchanged
-
-Existing `.gitignore` files are not modified (OS entries are informational
-defaults, not enforced aibox entries).
-
-## Template-snapshot diff guidance in migration documents
-
-Migration briefings now explicitly instruct agents to diff the **old processkit
-template snapshot** against the **new one** when reviewing template changes
-(e.g. `AGENTS.md`), rather than diffing the customized installed file against
-the new template.
-
-Comparing installed (customized) vs new template produces noise from project
-customizations that hides real upstream changes. The correct workflow:
-
-```
-diff context/templates/processkit/v{old}/AGENTS.md \
-     context/templates/processkit/v{new}/AGENTS.md
+```toml
+# OpenAI Codex CLI
+# codex: pin with codex = { version = "x.y.z" }
+[addons.ai-openai.tools]
 ```
 
-Then apply only the upstream delta onto the customized installed file.
+For addons with a curated version list, available versions are shown with the
+default marked:
 
-## AGENTS.md: runtime artifacts for agents
+```toml
+# Python
+# python: 3.11 | 3.12 | 3.13 (default)
+# uv: pin with uv = { version = "x.y.z" }
+[addons.python.tools]
+python = { version = "3.13" }
+```
 
-Added a "Runtime artifacts for agents" section documenting `.aibox/aibox.log`
-(NDJSON structured log of every aibox command), `aibox.lock`, and
-`context/migrations/` — with explicit guidance for agents to read the log to
-understand recent aibox activity.
+Tools that are disabled by default also get a hint comment so users know they
+exist and can be enabled.
+
+### `aibox init` — AI provider addons included in transitive `requires` expansion
+
+AI provider addons were previously excluded from the transitive dependency pass
+during `aibox init`, causing their `requires` entries to be silently ignored.
+For example, `ai-openai` requires `node` (Codex CLI is an npm package), but
+`node` was never pulled in automatically.
+
+The init flow now combines user-selected addons with AI provider addons before
+expanding `requires`, so:
+
+```
+aibox init --ai openai
+```
+
+correctly adds `node` (and any other transitively required addons) without
+the user having to specify them manually.
+
+## Bug fix
+
+### `ai-openai.yaml` — declare `requires: [node]`
+
+The `ai-openai` addon now formally declares `requires: [node]` in its addon
+definition. This declaration is what enables the transitive expansion fix above.
+Projects that already have `node` in their `aibox.toml` are unaffected.
+
+## Housekeeping
+
+- This project's own devcontainer (`aibox.lock`, `aibox.toml`,
+  `.devcontainer/`) synced to aibox v0.17.16.

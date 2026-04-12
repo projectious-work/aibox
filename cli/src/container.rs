@@ -772,7 +772,51 @@ fn serialize_config_with_comments(config: &AiboxConfig) -> String {
         addon_names.sort();
         for addon_name in addon_names {
             let addon_tools = &config.addons.addons[addon_name];
-            out.push_str(&format!("\n[addons.{}.tools]\n", addon_name));
+            out.push('\n');
+
+            // Inline comments from the addon definition: description and
+            // the full tool roster (versions, defaults, disabled tools).
+            if let Some(def) = crate::addon_loader::get_addon(addon_name) {
+                if !def.description.is_empty() {
+                    out.push_str(&format!("# {}\n", def.description));
+                }
+                for tool in &def.tools {
+                    if !tool.supported_versions.is_empty() {
+                        // Show available versions, marking the default.
+                        let versions: Vec<String> = tool
+                            .supported_versions
+                            .iter()
+                            .map(|v| {
+                                if *v == tool.default_version {
+                                    format!("{} (default)", v)
+                                } else {
+                                    v.clone()
+                                }
+                            })
+                            .collect();
+                        out.push_str(&format!(
+                            "# {}: {}\n",
+                            tool.name,
+                            versions.join(" | ")
+                        ));
+                    } else if tool.default_enabled {
+                        // No curated version list — version can still be pinned freely.
+                        out.push_str(&format!(
+                            "# {}: pin with {} = {{ version = \"x.y.z\" }}\n",
+                            tool.name, tool.name
+                        ));
+                    }
+                    // Tools that are disabled by default: hint they exist but are off.
+                    if !tool.default_enabled {
+                        out.push_str(&format!(
+                            "# {} — disabled by default; add to enable\n",
+                            tool.name
+                        ));
+                    }
+                }
+            }
+
+            out.push_str(&format!("[addons.{}.tools]\n", addon_name));
             let mut tool_names: Vec<_> = addon_tools.tools.keys().collect();
             tool_names.sort();
             for tool_name in tool_names {
@@ -938,6 +982,11 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
     let container_user = params.user.unwrap_or_else(|| "aibox".to_string());
     let ai_providers = params.ai.unwrap_or_else(|| vec![AiProvider::Claude]);
 
+    // Collect AI provider addon names before they're moved into the config
+    // struct so we can include them in the dependency expansion and tool
+    // population below.
+    let ai_addon_names: Vec<String> = ai_providers.iter().map(|p| format!("ai-{}", p)).collect();
+
     let mut config = AiboxConfig {
         aibox: AiboxSection {
             version: env!("CARGO_PKG_VERSION").to_string(),
@@ -961,17 +1010,24 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
         },
         process: None,
         addons: {
-            // Build the addon section in three steps:
-            //   1. Transitively expand `requires` so that picking
-            //      `docs-docusaurus` automatically pulls in `node`.
-            //   2. Parse the repeated --addon-tool flag values into a
+            // Build the addon section in four steps:
+            //   1. Combine user-selected addons with AI provider addons so
+            //      their `requires` deps (e.g. ai-openai → node) are pulled
+            //      in transitively alongside the rest.
+            //   2. Transitively expand `requires` on the combined list.
+            //   3. Parse the repeated --addon-tool flag values into a
             //      nested map (addon → tool → version).
-            //   3. For each (now-complete) addon, populate its tools
+            //   4. For each (now-complete) addon, populate its tools
             //      sub-table with default-enabled tools at the right
             //      version (CLI override > interactive pick > default).
-            let expanded_addons = expand_addon_requires(&addon_names);
+            let all_initial: Vec<String> = addon_names
+                .iter()
+                .chain(ai_addon_names.iter())
+                .cloned()
+                .collect();
+            let expanded_addons = expand_addon_requires(&all_initial);
             for added in &expanded_addons {
-                if !addon_names.contains(added) {
+                if !all_initial.contains(added) {
                     output::info(&format!(
                         "Adding addon '{}' (transitively required by your selection)",
                         added
