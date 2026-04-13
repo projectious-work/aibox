@@ -877,6 +877,8 @@ prepend_fetchers = [
     { id = "git", url = "*/", run = "git" },
 ]
 prepend_previewers = [
+    # Directory preview: eza with git status, permissions, size, and date columns
+    { name = "*/", run = "piper -- eza -la --git --color=always --icons=always --group-directories-first --no-quotes --no-time \"$1\"" },
     { name = "*.svg",  run = "svg" },
     { name = "*.eps",  run = "eps" },
     { name = "*.jpg",  run = "image" },
@@ -1001,6 +1003,80 @@ return {
 }
 "#;
 
+/// piper.yazi plugin — pipe shell command output as a previewer.
+/// Source: https://github.com/yazi-rs/plugins/tree/main/piper.yazi (MIT)
+const DEFAULT_YAZI_PLUGIN_PIPER: &str = r#"--- @since 26.1.22
+
+local M = {}
+
+local function fail(job, s) ya.preview_widget(job, ui.Text.parse(s):area(job.area):wrap(ui.Wrap.YES)) end
+
+function M:peek(job)
+	local child, err = Command("sh")
+		:arg({ "-c", job.args[1], "sh", tostring(job.file.path) })
+		:env("w", job.area.w)
+		:env("h", job.area.h)
+		:stdout(Command.PIPED)
+		:stderr(Command.PIPED)
+		:spawn()
+
+	if not child then
+		return fail(job, "sh: " .. err)
+	end
+
+	local limit = job.area.h
+	local i, outs, errs = 0, {}, {}
+	repeat
+		local next, event = child:read_line()
+		if event == 1 then
+			errs[#errs + 1] = next
+		elseif event ~= 0 then
+			break
+		end
+
+		i = i + 1
+		if i > job.skip then
+			outs[#outs + 1] = next
+		end
+	until i >= job.skip + limit
+
+	child:start_kill()
+	if #errs > 0 then
+		fail(job, table.concat(errs, ""))
+	elseif job.skip > 0 and i < job.skip + limit then
+		ya.emit("peek", { math.max(0, i - limit), only_if = job.file.url, upper_bound = true })
+	else
+		ya.preview_widget(job, M.format(job, outs))
+	end
+end
+
+function M:seek(job) require("code"):seek(job) end
+
+function M.format(job, lines)
+	local format = job.args.format
+	if format ~= "url" then
+		local s = table.concat(lines, ""):gsub("\t", string.rep(" ", rt.preview.tab_size))
+		return ui.Text.parse(s):area(job.area)
+	end
+
+	for i = 1, #lines do
+		lines[i] = lines[i]:gsub("[\r\n]+$", "")
+
+		local icon = File({
+			url = Url(lines[i]),
+			cha = Cha { mode = tonumber(lines[i]:sub(-1) == "/" and "40700" or "100644", 8) },
+		}):icon()
+
+		if icon then
+			lines[i] = ui.Line { ui.Span(" " .. icon.text .. " "):style(icon.style), lines[i] }
+		end
+	end
+	return ui.Text(lines):area(job.area)
+end
+
+return M
+"#;
+
 /// Yazi init.lua — registers plugins that need setup on every startup.
 const DEFAULT_YAZI_INIT: &str = r#"-- =============================================================================
 -- Yazi init.lua — aibox defaults
@@ -1105,6 +1181,10 @@ pub fn ensure_runtime_dirs(config: &AiboxConfig) -> Result<()> {
             .join("yazi")
             .join("plugins")
             .join("git.yazi"),
+        root.join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("piper.yazi"),
         root.join(".config").join("git"),
         root.join(".config").join("lazygit"),
     ];
@@ -1206,6 +1286,10 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         (
             std::path::PathBuf::from(".config/yazi/plugins/git.yazi/types.lua"),
             DEFAULT_YAZI_PLUGIN_GIT_TYPES.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/piper.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_PIPER.to_string(),
         ),
         (
             std::path::PathBuf::from(".config/cheatsheet.txt"),
