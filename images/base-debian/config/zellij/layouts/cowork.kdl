@@ -21,19 +21,12 @@ layout {
 
     default_tab_template {
         children
-        floating_panes {
-            pane name="scratch" {
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }
-        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
     }
 
-    tab name="cowork" focus=true hide_floating_panes=true {
+    tab name="cowork" focus=true {
         pane split_direction="vertical" {
             pane size="50%" split_direction="horizontal" {
                 pane size="40%" name="files" focus=true {
@@ -54,14 +47,14 @@ layout {
         }
     }
 
-    tab name="git" hide_floating_panes=true {
+    tab name="git" {
         pane name="lazygit" {
             command "lazygit"
             cwd "/workspace"
         }
     }
 
-    tab name="shell" hide_floating_panes=true {
+    tab name="shell" {
         pane name="bash" {
             command "bash"
             cwd "/workspace"

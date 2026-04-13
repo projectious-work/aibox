@@ -182,14 +182,6 @@ local function setup(st, opts)
 		[CODES.updated] = t.updated_sign or " ",
 		[CODES.clean] = t.clean_sign or "",
 	}
-	-- Dimmer styles for directories with inherited (bubbled-up) status
-	local styles_dim = {
-		[CODES.untracked] = ui.Style():fg("magenta"):dim(),
-		[CODES.modified] = ui.Style():fg("yellow"):dim(),
-		[CODES.added] = ui.Style():fg("green"):dim(),
-		[CODES.deleted] = ui.Style():fg("red"):dim(),
-		[CODES.updated] = ui.Style():fg("yellow"):dim(),
-	}
 
 	Linemode:children_add(function(self)
 		if not self._file.in_current then
@@ -205,40 +197,12 @@ local function setup(st, opts)
 
 		if signs[code] == "" then
 			return ""
-		end
-
-		-- Directories with non-ignored status use lowercase sign + dimmer color
-		local is_inherited = self._file.cha.is_dir and code ~= CODES.ignored and code ~= CODES.clean and code ~= CODES.unknown
-		local sign = is_inherited and signs[code]:lower() or signs[code]
-		local style = is_inherited and styles_dim[code] or styles[code]
-
-		if self._file.is_hovered then
-			return ui.Line { " ", sign }
+		elseif self._file.is_hovered then
+			return ui.Line { " ", signs[code] }
 		else
-			return ui.Line { " ", ui.Span(sign):style(style) }
+			return ui.Line { " ", ui.Span(signs[code]):style(styles[code]) }
 		end
 	end, opts.order)
-
-	-- Dim the entire row (icon + filename) for gitignored files
-	-- Uses the theme's ignored style from th.git rather than a hardcoded color
-	-- Preserves hover highlight when the file is selected
-	local ignored_style = styles[CODES.ignored]
-	local orig_style = Entity.style
-	Entity.style = function(self)
-		local s = orig_style(self)
-		if self._file.is_hovered then return s end
-		local url = self._file.url
-		local repo = st.dirs[tostring(url.base or url.parent)]
-		if repo and repo ~= CODES.excluded then
-			local code = st.repos[repo][tostring(url):sub(#repo + 2)]
-			if code == CODES.ignored then
-				return ignored_style
-			end
-		elseif repo == CODES.excluded then
-			return ignored_style
-		end
-		return s
-	end
 end
 
 ---@type UnstableFetcher

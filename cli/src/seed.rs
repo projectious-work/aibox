@@ -77,14 +77,6 @@ nnoremap <End>  $
 vnoremap <Home> ^
 vnoremap <End>  $
 
-" ── Scratch pad auto-save ───────────────────────────────────────────────────
-" When vim opens /home/aibox/.scratch.md (the zellij floating scratch pane),
-" save on every text change so `:q!` can never lose edits.
-augroup scratch_autosave
-  autocmd!
-  autocmd TextChanged,TextChangedI /home/aibox/.scratch.md silent! write
-augroup END
-
 set background=AIBOX_VIM_BG
 set termguicolors
 colorscheme AIBOX_VIM_COLORSCHEME
@@ -116,7 +108,7 @@ pane_frames true
 // Leader: Ctrl+g (press Ctrl+g, release, then press the action key)
 // Quick reference:
 //   Alt+h/j/k/l          Navigate panes (no leader needed; shown in status bar)
-//   Alt+p               Toggle scratch notepad
+//   Alt+p               Toggle floating panes
 //   Alt+[/]             Previous/next tab
 //   Alt+1-5             Jump to tab (see top tab bar for names per layout)
 //   Ctrl+g → h/j/k/l    Navigate panes (leader variant)
@@ -124,7 +116,7 @@ pane_frames true
 //   Ctrl+g → x           Close pane
 //   Ctrl+g → f           Toggle fullscreen
 //   Ctrl+g → z           Toggle pane frames
-//   Ctrl+g → p           Toggle scratch notepad (vim floating pane)
+//   Ctrl+g → p           Toggle floating panes
 //   Ctrl+g → t/w         New tab / close tab
 //   Ctrl+g → [/]         Previous/next tab
 //   Ctrl+g → ,/.         Previous/next stacked pane
@@ -311,18 +303,11 @@ fn generate_dev_layout(providers: &[crate::config::AiProvider]) -> String {
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="dev" focus=true hide_floating_panes=true {{
+    tab name="dev" focus=true {{
         pane split_direction="vertical" {{
             pane size="40%" name="files" focus=true {{
                 command "yazi"
@@ -334,13 +319,13 @@ fn generate_dev_layout(providers: &[crate::config::AiProvider]) -> String {
             }}
         }}
     }}{ai_section}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -364,38 +349,31 @@ fn generate_focus_layout(providers: &[crate::config::AiProvider]) -> String {
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="files" focus=true hide_floating_panes=true {{
+    tab name="files" focus=true {{
         pane name="yazi" {{
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec yazi"
             cwd "/workspace"
         }}
     }}
-    tab name="editor" hide_floating_panes=true {{
+    tab name="editor" {{
         pane name="vim" {{
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }}
     }}{ai_section}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -415,18 +393,11 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
         return r##"layout {
     default_tab_template {
         children
-        floating_panes {
-            pane name="scratch" {
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }
-        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
     }
-    tab name="cowork" focus=true hide_floating_panes=true {
+    tab name="cowork" focus=true {
         pane split_direction="vertical" {
             pane size="40%" name="files" focus=true {
                 command "bash"
@@ -440,13 +411,13 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
             }
         }
     }
-    tab name="git" hide_floating_panes=true {
+    tab name="git" {
         pane name="lazygit" {
             command "lazygit"
             cwd "/workspace"
         }
     }
-    tab name="shell" hide_floating_panes=true {
+    tab name="shell" {
         pane name="bash" {
             command "bash"
             cwd "/workspace"
@@ -461,18 +432,11 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="cowork" focus=true hide_floating_panes=true {{
+    tab name="cowork" focus=true {{
         pane split_direction="vertical" {{
             pane size="50%" split_direction="horizontal" {{
                 pane size="40%" name="files" focus=true {{
@@ -491,13 +455,13 @@ fn generate_cowork_layout(providers: &[crate::config::AiProvider]) -> String {
             }}
         }}
     }}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -541,18 +505,11 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
         return r##"layout {
     default_tab_template {
         children
-        floating_panes {
-            pane name="scratch" {
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }
-        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
     }
-    tab name="cowork-swap" focus=true hide_floating_panes=true {
+    tab name="cowork-swap" focus=true {
         pane split_direction="vertical" {
             pane size="40%" name="files" focus=true {
                 command "yazi"
@@ -564,13 +521,13 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
             }
         }
     }
-    tab name="git" hide_floating_panes=true {
+    tab name="git" {
         pane name="lazygit" {
             command "lazygit"
             cwd "/workspace"
         }
     }
-    tab name="shell" hide_floating_panes=true {
+    tab name="shell" {
         pane name="bash" {
             command "bash"
             cwd "/workspace"
@@ -585,18 +542,11 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="cowork-swap" focus=true hide_floating_panes=true {{
+    tab name="cowork-swap" focus=true {{
         pane split_direction="vertical" {{
             pane size="40%" split_direction="horizontal" {{
                 pane size="40%" name="files" focus=true {{
@@ -613,13 +563,13 @@ fn generate_cowork_swap_layout(providers: &[crate::config::AiProvider]) -> Strin
             }}
         }}
     }}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -648,38 +598,31 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
         return r##"layout {
     default_tab_template {
         children
-        floating_panes {
-            pane name="scratch" {
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }
-        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
     }
-    tab name="ai" focus=true hide_floating_panes=true {
+    tab name="ai" focus=true {
         pane name="files" {
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec yazi"
             cwd "/workspace"
         }
     }
-    tab name="editor" hide_floating_panes=true {
+    tab name="editor" {
         pane name="vim" {
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }
     }
-    tab name="git" hide_floating_panes=true {
+    tab name="git" {
         pane name="lazygit" {
             command "lazygit"
             cwd "/workspace"
         }
     }
-    tab name="shell" hide_floating_panes=true {
+    tab name="shell" {
         pane name="bash" {
             command "bash"
             cwd "/workspace"
@@ -694,18 +637,11 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="ai" focus=true hide_floating_panes=true {{
+    tab name="ai" focus=true {{
         pane split_direction="vertical" {{
             pane size="50%" name="files" focus=true {{
                 command "bash"
@@ -717,20 +653,20 @@ fn generate_ai_layout(providers: &[crate::config::AiProvider]) -> String {
             }}
         }}
     }}
-    tab name="editor" hide_floating_panes=true {{
+    tab name="editor" {{
         pane name="vim" {{
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }}
     }}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -757,38 +693,31 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
         return r##"layout {
     default_tab_template {
         children
-        floating_panes {
-            pane name="scratch" {
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }
-        }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"
         }
     }
-    tab name="browse" focus=true hide_floating_panes=true {
+    tab name="browse" focus=true {
         pane name="files" focus=true {
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec yazi"
             cwd "/workspace"
         }
     }
-    tab name="editor" hide_floating_panes=true {
+    tab name="editor" {
         pane name="vim" {
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }
     }
-    tab name="git" hide_floating_panes=true {
+    tab name="git" {
         pane name="lazygit" {
             command "lazygit"
             cwd "/workspace"
         }
     }
-    tab name="shell" hide_floating_panes=true {
+    tab name="shell" {
         pane name="bash" {
             command "bash"
             cwd "/workspace"
@@ -803,18 +732,11 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
         r##"layout {{
     default_tab_template {{
         children
-        floating_panes {{
-            pane name="scratch" {{
-                command "bash"
-                args "-c" "while true; do vim -c 'startinsert' /home/aibox/.scratch.md; done"
-                cwd "/workspace"
-            }}
-        }}
         pane size=1 borderless=true {{
             plugin location="zellij:status-bar"
         }}
     }}
-    tab name="browse" focus=true hide_floating_panes=true {{
+    tab name="browse" focus=true {{
         pane split_direction="horizontal" {{
             pane size="60%" name="files" focus=true {{
                 command "bash"
@@ -826,20 +748,20 @@ fn generate_browse_layout(providers: &[crate::config::AiProvider]) -> String {
             }}
         }}
     }}
-    tab name="editor" hide_floating_panes=true {{
+    tab name="editor" {{
         pane name="vim" {{
             command "bash"
             args "-c" "AIBOX_EDITOR_DIR=tab exec vim-loop"
             cwd "/workspace"
         }}
     }}
-    tab name="git" hide_floating_panes=true {{
+    tab name="git" {{
         pane name="lazygit" {{
             command "lazygit"
             cwd "/workspace"
         }}
     }}
-    tab name="shell" hide_floating_panes=true {{
+    tab name="shell" {{
         pane name="bash" {{
             command "bash"
             cwd "/workspace"
@@ -875,21 +797,22 @@ image_filter = "nearest"
 prepend_fetchers = [
     { id = "git", url = "*",  run = "git" },
     { id = "git", url = "*/", run = "git" },
+    { id = "status-git", url = "*", run = "status-git" },
 ]
 prepend_previewers = [
-    # Directory preview: eza with git status, permissions, size, and date columns
-    { name = "*/", run = "piper -- eza -la --git --color=always --icons=always --group-directories-first --no-quotes --no-time \"$1\"" },
-    { name = "*.svg",  run = "svg" },
-    { name = "*.eps",  run = "eps" },
-    { name = "*.jpg",  run = "image" },
-    { name = "*.jpeg", run = "image" },
-    { name = "*.png",  run = "image" },
-    { name = "*.gif",  run = "image" },
-    { name = "*.webp", run = "image" },
-    { name = "*.bmp",  run = "image" },
-    { name = "*.tiff", run = "image" },
-    { name = "*.tif",  run = "image" },
-    { name = "*.pdf",  run = "pdf" },
+    # Directory preview: columnar listing with git status, size, date, owner, permissions
+    { url = "*/", run = "dir-preview" },
+    { url = "*.svg",  run = "svg" },
+    { url = "*.eps",  run = "eps" },
+    { url = "*.jpg",  run = "image" },
+    { url = "*.jpeg", run = "image" },
+    { url = "*.png",  run = "image" },
+    { url = "*.gif",  run = "image" },
+    { url = "*.webp", run = "image" },
+    { url = "*.bmp",  run = "image" },
+    { url = "*.tiff", run = "image" },
+    { url = "*.tif",  run = "image" },
+    { url = "*.pdf",  run = "pdf" },
 ]
 
 [opener]
@@ -1003,79 +926,159 @@ return {
 }
 "#;
 
-/// piper.yazi plugin — pipe shell command output as a previewer.
-/// Source: https://github.com/yazi-rs/plugins/tree/main/piper.yazi (MIT)
-const DEFAULT_YAZI_PLUGIN_PIPER: &str = r#"--- @since 26.1.22
+/// dir-preview.yazi plugin — columnar directory preview with git status.
+/// Columns: git | icon+name | size | date | owner | permissions
+/// Uses yazi's Lua fs API for metadata (no shell), one git command for status.
+const DEFAULT_YAZI_PLUGIN_DIR_PREVIEW: &str = r##"--- @since 26.1.22
+-- dir-preview.yazi — columnar directory preview with git status
+-- Columns: git | icon+name | size | date | owner | permissions
 
 local M = {}
 
-local function fail(job, s) ya.preview_widget(job, ui.Text.parse(s):area(job.area):wrap(ui.Wrap.YES)) end
+local function uid_map()
+	local map = {}
+	local f = io.open("/etc/passwd")
+	if f then
+		for line in f:lines() do
+			local name, uid = line:match("^([^:]+):[^:]*:(%d+)")
+			if uid then map[tonumber(uid)] = name end
+		end
+		f:close()
+	end
+	return map
+end
+
+local function git_status(dir)
+	local map = {}
+	-- Get the directory's path relative to the repo root
+	local prefix_out = Command("git"):cwd(tostring(dir))
+		:arg({ "rev-parse", "--show-prefix" }):output()
+	local prefix = prefix_out and prefix_out.stdout:gsub("%s+$", "") or ""
+	local out = Command("git"):cwd(tostring(dir))
+		:arg({ "--no-optional-locks", "-c", "core.quotePath=",
+		       "status", "--porcelain", "-unormal", "--no-renames", "--ignored=matching", "--", "." })
+		:output()
+	if not out then return map end
+	for line in out.stdout:gmatch("[^\r\n]+") do
+		local signs, path = line:sub(1, 2), line:sub(4):gsub('"', ""):gsub("/$", "")
+		-- Strip the repo-relative prefix to get paths relative to this directory
+		if prefix ~= "" and path:sub(1, #prefix) == prefix then
+			path = path:sub(#prefix + 1)
+		end
+		local base = path:match("^([^/]+)")
+		if base and not map[base] then map[base] = signs end
+	end
+	return map
+end
+
+-- Map porcelain two-char codes to single-char signs matching the main list
+local GIT_SIGNS = {
+	["!!"] = "I", ["??"] = "?",
+	["A "] = "A", ["AM"] = "A",
+	[" M"] = "M", ["M "] = "M", ["MM"] = "M",
+	[" D"] = "D", ["D "] = "D",
+	["UU"] = "U",
+}
+-- Read theme git colors (set by yazi theme.toml [git] section)
+local t = th.git or {}
+-- Direct status (files): theme-aware styles
+local GIT_STYLES = {
+	["?"] = t.untracked or ui.Style():fg("magenta"),
+	["I"] = t.ignored or ui.Style():fg("darkgray"),
+	["A"] = t.added or ui.Style():fg("green"),
+	["M"] = t.modified or ui.Style():fg("yellow"),
+	["D"] = t.deleted or ui.Style():fg("red"),
+	["U"] = t.updated or ui.Style():fg("yellow"),
+}
+-- Inherited status (directories): same styles but dimmed
+local GIT_STYLES_DIM = {
+	["?"] = (t.untracked or ui.Style():fg("magenta")):dim(),
+	["I"] = t.ignored or ui.Style():fg("darkgray"),
+	["A"] = (t.added or ui.Style():fg("green")):dim(),
+	["M"] = (t.modified or ui.Style():fg("yellow")):dim(),
+	["D"] = (t.deleted or ui.Style():fg("red")):dim(),
+	["U"] = (t.updated or ui.Style():fg("yellow")):dim(),
+}
+
+local function fmt_size(n)
+	local s
+	if not n or n < 0 then s = "-"
+	elseif n < 1024 then s = string.format("%d", n)
+	elseif n < 1048576 then s = string.format("%.0fK", n / 1024)
+	elseif n < 1073741824 then s = string.format("%.1fM", n / 1048576)
+	else s = string.format("%.1fG", n / 1073741824)
+	end
+	return string.format("%6s", s)
+end
+
+local function pad(s, w) return s .. string.rep(" ", math.max(0, w - #s)) end
+local function trunc(s, w) return #s <= w and s or s:sub(1, w - 1) .. "~" end
 
 function M:peek(job)
-	local child, err = Command("sh")
-		:arg({ "-c", job.args[1], "sh", tostring(job.file.path) })
-		:env("w", job.area.w)
-		:env("h", job.area.h)
-		:stdout(Command.PIPED)
-		:stderr(Command.PIPED)
-		:spawn()
-
-	if not child then
-		return fail(job, "sh: " .. err)
+	local files, err = fs.read_dir(job.file.url, { resolve = true })
+	if not files then
+		ya.preview_widget(job, ui.Text { ui.Line(tostring(err or "empty")) }:area(job.area))
+		return
 	end
 
-	local limit = job.area.h
-	local i, outs, errs = 0, {}, {}
-	repeat
-		local next, event = child:read_line()
-		if event == 1 then
-			errs[#errs + 1] = next
-		elseif event ~= 0 then
-			break
-		end
+	table.sort(files, function(a, b)
+		if a.cha.is_dir ~= b.cha.is_dir then return a.cha.is_dir end
+		return a.name:lower() < b.name:lower()
+	end)
 
-		i = i + 1
-		if i > job.skip then
-			outs[#outs + 1] = next
-		end
-	until i >= job.skip + limit
+	local git = git_status(job.file.url)
+	local owners = uid_map()
+	local total, limit = #files, job.area.h
+	-- fixed: git(2) + spc(1) + icon(2) + spc(1) + size(6) + spc(1) + date(13) + spc(1) + owner(9) + spc(1) + perm(10) = 47
+	local name_w = math.max(8, job.area.w - 47)
+	local lines = {}
 
-	child:start_kill()
-	if #errs > 0 then
-		fail(job, table.concat(errs, ""))
-	elseif job.skip > 0 and i < job.skip + limit then
-		ya.emit("peek", { math.max(0, i - limit), only_if = job.file.url, upper_bound = true })
+	for i = job.skip + 1, math.min(total, job.skip + limit) do
+		local f = files[i]
+		local c = f.cha
+		local name = f.name .. (c.is_dir and "/" or "")
+		local raw = git[f.name] or ""
+		local gs = GIT_SIGNS[raw] or ""
+		local is_inherited = c.is_dir and gs ~= "" and gs ~= "I"
+		local gs_style = is_inherited and GIT_STYLES_DIM[gs] or GIT_STYLES[gs]
+		local ignored = gs == "I"
+		gs = is_inherited and (gs:lower() .. " ") or (gs ~= "" and (gs .. " ") or "  ")
+		local icon = f:icon()
+		local size
+		if c.is_dir then
+			local children = fs.read_dir(f.url, {})
+			local n = children and #children or 0
+			size = string.format("%6s", "[" .. n .. "]")
+		else
+			size = fmt_size(c.len)
+		end
+		local date = c.mtime and os.date("%b %d %H:%M", math.floor(c.mtime)) or "            "
+		local owner = pad(trunc(owners[c.uid] or tostring(c.uid or "?"), 8), 8)
+		local perm = c:perm() or "----------"
+		local ign = ignored and GIT_STYLES["I"] or nil
+
+		lines[#lines + 1] = ui.Line {
+			gs_style and ui.Span(gs):style(gs_style) or ui.Span(gs), ui.Span(" "),
+			icon and (ign and ui.Span(icon.text .. " "):style(ign) or ui.Span(icon.text .. " "):style(icon.style)) or ui.Span("  "),
+			ign and ui.Span(pad(trunc(name, name_w), name_w)):style(ign) or ui.Span(pad(trunc(name, name_w), name_w)),
+			ui.Span(" " .. size):style(ign or ui.Style():fg("green")),
+			ui.Span(" " .. date):style(ign or ui.Style():fg("cyan")),
+			ui.Span(" " .. owner):style(ign or ui.Style():fg("yellow")),
+			ui.Span(" " .. perm):dim(),
+		}
+	end
+
+	if job.skip > 0 and total <= job.skip then
+		ya.emit("peek", { math.max(0, total - limit), only_if = job.file.url, upper_bound = true })
 	else
-		ya.preview_widget(job, M.format(job, outs))
+		ya.preview_widget(job, ui.Text(lines):area(job.area))
 	end
 end
 
 function M:seek(job) require("code"):seek(job) end
 
-function M.format(job, lines)
-	local format = job.args.format
-	if format ~= "url" then
-		local s = table.concat(lines, ""):gsub("\t", string.rep(" ", rt.preview.tab_size))
-		return ui.Text.parse(s):area(job.area)
-	end
-
-	for i = 1, #lines do
-		lines[i] = lines[i]:gsub("[\r\n]+$", "")
-
-		local icon = File({
-			url = Url(lines[i]),
-			cha = Cha { mode = tonumber(lines[i]:sub(-1) == "/" and "40700" or "100644", 8) },
-		}):icon()
-
-		if icon then
-			lines[i] = ui.Line { ui.Span(" " .. icon.text .. " "):style(icon.style), lines[i] }
-		end
-	end
-	return ui.Text(lines):area(job.area)
-end
-
 return M
-"#;
+"##;
 
 /// Yazi init.lua — registers plugins that need setup on every startup.
 const DEFAULT_YAZI_INIT: &str = r#"-- =============================================================================
@@ -1094,6 +1097,10 @@ th.git.untracked_sign = "?"
 th.git.ignored_sign = "I"
 
 require("git"):setup {}
+
+-- status-git.yazi: git branch + summary (left) and disk free (right) in status bar.
+-- Data refresh is triggered via the fetcher registered in yazi.toml.
+require("status-git"):setup()
 "#;
 
 /// git.yazi plugin main — shows git status signs next to file names.
@@ -1103,6 +1110,10 @@ const DEFAULT_YAZI_PLUGIN_GIT_MAIN: &str =
 /// git.yazi plugin types — type annotations for the git plugin.
 const DEFAULT_YAZI_PLUGIN_GIT_TYPES: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/git.yazi/types.lua");
+
+/// status-git.yazi plugin — git branch/summary + disk free in status bar.
+const DEFAULT_YAZI_PLUGIN_STATUS_GIT: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/status-git.yazi/main.lua");
 
 /// Default yazi keymap.
 const DEFAULT_YAZI_KEYMAP: &str = r#"[mgr]
@@ -1129,7 +1140,7 @@ const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference
   Ctrl+g x         Close pane
   Ctrl+g n/d/r     New pane
   Ctrl+g t/w       Tab +/-
-  Ctrl+g p         Float pane (scratch vim)
+  Ctrl+g p         Toggle float panes
   Ctrl+g R         Resize mode (h/j/k/l)
   Ctrl+g s         Strider
   Ctrl+g u         Scroll
@@ -1184,7 +1195,11 @@ pub fn ensure_runtime_dirs(config: &AiboxConfig) -> Result<()> {
         root.join(".config")
             .join("yazi")
             .join("plugins")
-            .join("piper.yazi"),
+            .join("dir-preview.yazi"),
+        root.join(".config")
+            .join("yazi")
+            .join("plugins")
+            .join("status-git.yazi"),
         root.join(".config").join("git"),
         root.join(".config").join("lazygit"),
     ];
@@ -1288,8 +1303,12 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
             DEFAULT_YAZI_PLUGIN_GIT_TYPES.to_string(),
         ),
         (
-            std::path::PathBuf::from(".config/yazi/plugins/piper.yazi/main.lua"),
-            DEFAULT_YAZI_PLUGIN_PIPER.to_string(),
+            std::path::PathBuf::from(".config/yazi/plugins/dir-preview.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".config/yazi/plugins/status-git.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_STATUS_GIT.to_string(),
         ),
         (
             std::path::PathBuf::from(".config/cheatsheet.txt"),
