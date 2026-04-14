@@ -187,6 +187,47 @@ on this project — coordinate through the entity layer
 (`workitem-management`, `event-log`, `discussion-management`) rather than
 assuming you are alone.
 
+### Team
+
+This project operates with a permanent 8-role AI-agent team defined as
+processkit entities. The owner is the sole human approver; the
+**project-manager** role is the single agent that speaks to the owner and
+routes work to the rest of the team.
+
+| Role | Model tier | Purpose |
+|---|---|---|
+| project-manager | Opus | Owner-facing lead: intake, strategy, routing, review, devil's advocate |
+| senior-architect | Opus | Large features, complex bugs, cross-cutting design |
+| junior-architect | Sonnet | Small/medium design, architectural questions (default architect) |
+| developer | Sonnet | Implementation from plans (default execution role) |
+| senior-researcher | Opus | Deep research with synthesis and judgement |
+| junior-researcher | Sonnet | Bounded research and lookups (default researcher) |
+| junior-developer | Haiku | Mechanical edits, bulk patterns, simple fixes |
+| assistant | Haiku | Secretary: briefings, summaries, indexing, handovers |
+
+Target orientation mix (task count, not hard budget): **~5% Opus / ~85% Sonnet
+/ ~10% Haiku.** Opus costs roughly 5× Sonnet per equivalent output, so the
+same mix is closer to ~20%/75%/5% by budget. PM watches actual usage and
+escalates to the owner if the Opus share creeps up.
+
+Team members are cloneable on demand (default cap 5 per role; owner approves
+beyond). Clones get fresh IDs and bindings; template actor IDs are never
+reused. See:
+
+- `context/roles/` — Role responsibilities and `spec.x_aibox.model_tier`
+- `context/actors/` — Template Actors (`type: agent`) with `spec.x_aibox.model`
+- `context/bindings/` — Template role assignments
+- `context/processes/team-task-distribution.md` — How PM routes work
+- `context/decisions/DEC-20260414_1100-NobleStag-team-composition-and-model-mix.md`
+  — Decision record, rationale, and alternatives considered
+
+**Schema note:** the `spec.x_aibox.*` fields (`model_tier`, `model`,
+`is_template`, `role_ref`, `clone_of`, `default_clone_cap`) are a
+project-local extension pending processkit's canonical team schema. A
+Migration will lift them into their canonical equivalents when that schema
+ships; do not rename these fields manually.
+
+
 **Commit to actions immediately.** If you decide to create an entity
 (WorkItem, DecisionRecord, etc.), call the tool in the same turn. Do
 not say "I'll track that" and move on — deferred commitments are
