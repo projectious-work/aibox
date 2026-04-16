@@ -9,7 +9,9 @@ metadata:
     type: bug
 spec:
   title: aibox sync records wrong from_version, masks real diff on upgrade
-  state: backlog
+  state: resolved
+  resolved_at: '2026-04-15T10:30:00Z'
+  resolution: Fixed in commit 02174db — sync now captures pre-install lock before computing diff
   type: bug
   priority: high
   description: |
