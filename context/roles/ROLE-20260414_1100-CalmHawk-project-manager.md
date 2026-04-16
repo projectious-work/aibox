@@ -27,11 +27,11 @@ spec:
     - session-handover
     - owner-profiling
   default_scope: permanent
+  primary_contact: true
+  clone_cap: 1
+  cap_escalation: owner
   x_aibox:
     model_tier: opus
-    default_clone_cap: 1
-    escalate_cap_to: owner
-    schema_note: "Project-local extension fields; migrate to processkit canonical team schema when available."
 ---
 
 ## Intent

@@ -19,11 +19,10 @@ spec:
     - workitem-management
     - scope-management
   default_scope: permanent
+  clone_cap: 5
+  cap_escalation: owner
   x_aibox:
     model_tier: sonnet
-    default_clone_cap: 5
-    escalate_cap_to: owner
-    schema_note: "Project-local extension fields; migrate to processkit canonical team schema when available."
 ---
 
 ## Intent

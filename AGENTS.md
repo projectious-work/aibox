@@ -1,5 +1,40 @@
 # AGENTS.md
 
+<!-- pk-compliance-contract v1 BEGIN -->
+<!-- pk-compliance v1 -->
+
+## processkit Compliance Contract
+
+Call `route_task(task_description)` before any `create_*`,
+`transition_*`, `link_*`, `record_*`, or `open_*` tool call.
+
+If there is even a 1% chance a processkit skill applies to the current
+task, consult `skill-finder` (or call `find_skill`) before acting.
+
+When you decide to create a WorkItem, DecisionRecord, Note, or Artifact,
+call the tool in the same turn — deferred entity creation is lost.
+
+Write entities through MCP tools, not by hand-editing files under
+`context/` — hand edits bypass schema validation, state-machine
+enforcement, and the event-log auto-entry.
+
+Read entities through `index-management` (`query_entities`,
+`get_entity`, `search_entities`) — do not use `ls`, `grep`, or raw
+filesystem walks under `context/`.
+
+Log an event after any state change that an MCP write did not already
+produce automatically.
+
+After a cross-cutting recommendation is accepted, call `record_decision`
+in the same turn.
+
+Do not edit any file under `context/templates/` — it is a read-only
+upstream mirror used as a diff baseline.
+
+Do not hand-edit the generated harness MCP config — edit the per-skill
+`mcp-config.json` and let the installer re-merge.
+<!-- pk-compliance-contract v1 END -->
+
 This file is the canonical, provider-neutral entry point for any AI coding
 agent (or human collaborator) working on **aibox**. It follows
 the [agents.md](https://agents.md) open standard.
@@ -103,7 +138,7 @@ Config overrides in `context/skills/id-management/config/settings.toml`:
 ## How this project is organized: processkit content
 
 This project uses **[processkit](https://github.com/projectious-work/processkit.git)**, pinned at
-`v0.13.0`, package tier(s) `product`, to manage
+`v0.16.0`, package tier(s) `product`, to manage
 process content (skills, primitives, processes, schemas). All
 processkit-installed material lives under `context/`:
 
@@ -187,6 +222,18 @@ on this project — coordinate through the entity layer
 (`workitem-management`, `event-log`, `discussion-management`) rather than
 assuming you are alone.
 
+### Session orientation
+
+At the start of each session:
+
+1. Call `morning_briefing` (or read `context/skills/morning-briefing/`) —
+   it surfaces open work items, pending migrations, and overnight events.
+2. Check `context/migrations/pending/` for any outstanding migrations and
+   address them before starting new work.
+3. Read `context/INDEX.md` (Level 1) before loading any deeper directory.
+   Do not slurp `context/skills/` or other large directories at session
+   start — load specific files only when the task demands it.
+
 ### Team
 
 This project operates with a permanent 8-role AI-agent team defined as
@@ -221,11 +268,17 @@ reused. See:
 - `context/decisions/DEC-20260414_1100-NobleStag-team-composition-and-model-mix.md`
   — Decision record, rationale, and alternatives considered
 
-**Schema note:** the `spec.x_aibox.*` fields (`model_tier`, `model`,
-`is_template`, `role_ref`, `clone_of`, `default_clone_cap`) are a
-project-local extension pending processkit's canonical team schema. A
-Migration will lift them into their canonical equivalents when that schema
-ships; do not rename these fields manually.
+**Schema note (applied — MIG-20260415T093853):** the canonical processkit
+team schema fields now live at the top level of `spec.*`:
+- `spec.is_template` — marks a role-template actor (never reused; clones get fresh IDs)
+- `spec.templated_from` — ID of the template actor a clone was created from (null for templates)
+- `spec.clone_cap` — maximum simultaneous clones for this role
+- `spec.cap_escalation` — escalation path when clone_cap is reached
+- `spec.primary_contact` — marks the role that speaks directly to the owner (one per team)
+
+Only `model_tier`, `model`, and `role_ref` remain under `spec.x_aibox` as
+aibox-local extensions with no canonical equivalent yet. Do not move these
+manually — they will be lifted when the upstream schema adds them.
 
 
 **Commit to actions immediately.** If you decide to create an entity
@@ -389,4 +442,4 @@ When an AI agent is working inside a project that uses aibox:
 
 ---
 
-<sub>Scaffolded by processkit `v0.13.0` on `2026-04-12`. Re-rendered on each installer sync.</sub>
+<sub>Scaffolded by processkit `v0.16.0` on `2026-04-15`. Re-rendered on each installer sync.</sub>

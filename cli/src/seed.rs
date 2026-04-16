@@ -802,6 +802,7 @@ prepend_fetchers = [
 prepend_previewers = [
     # Directory preview: columnar listing with git status, size, date, owner, permissions
     { url = "*/", run = "dir-preview" },
+AIBOX_YAZI_EXTRA_PREVIEWERS
     { url = "*.svg",  run = "svg" },
     { url = "*.eps",  run = "eps" },
     { url = "*.jpg",  run = "image" },
@@ -1101,7 +1102,41 @@ require("git"):setup {}
 -- status-git.yazi: git branch + summary (left) and disk free (right) in status bar.
 -- Data refresh is triggered via the fetcher registered in yazi.toml.
 require("status-git"):setup()
+AIBOX_YAZI_EXTRA_SETUPS
 "#;
+
+fn generate_yazi_config(config: &AiboxConfig) -> String {
+    let extra_previewers = if config.addons.has_addon("preview-enhanced") {
+        r#"    # Rich terminal preview for docs/data files (requires rich-cli from preview-enhanced)
+    { url = "*.md",       run = "rich-preview" },
+    { url = "*.markdown", run = "rich-preview" },
+    { url = "*.rst",      run = "rich-preview" },
+    { url = "*.csv",      run = "rich-preview" },
+    { url = "*.tsv",      run = "rich-preview" },
+    { url = "*.json",     run = "rich-preview" },
+    { url = "*.ipynb",    run = "rich-preview" },
+"#
+    } else {
+        ""
+    };
+
+    DEFAULT_YAZI_CONFIG.replace("AIBOX_YAZI_EXTRA_PREVIEWERS\n", extra_previewers)
+}
+
+fn generate_yazi_init(config: &AiboxConfig) -> String {
+    let extra_setups = if config.addons.has_addon("yazi-omp") {
+        r#"
+-- omp.yazi: show an Oh My Posh prompt in Yazi's header when enabled.
+require("omp"):setup({
+    config = os.getenv("HOME") .. "/.config/yazi/yazi-prompt.omp.json",
+})
+"#
+    } else {
+        ""
+    };
+
+    DEFAULT_YAZI_INIT.replace("AIBOX_YAZI_EXTRA_SETUPS\n", extra_setups)
+}
 
 /// git.yazi plugin main — shows git status signs next to file names.
 const DEFAULT_YAZI_PLUGIN_GIT_MAIN: &str =
@@ -1115,12 +1150,33 @@ const DEFAULT_YAZI_PLUGIN_GIT_TYPES: &str =
 const DEFAULT_YAZI_PLUGIN_STATUS_GIT: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/status-git.yazi/main.lua");
 
+/// toggle-pane.yazi plugin — hide/maximize Yazi panes while preserving the base ratio.
+const DEFAULT_YAZI_PLUGIN_TOGGLE_PANE: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/toggle-pane.yazi/main.lua");
+
+/// rich-preview.yazi plugin — terminal-rich preview for markdown and data files.
+const DEFAULT_YAZI_PLUGIN_RICH_PREVIEW: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/rich-preview.yazi/main.lua");
+
+/// omp.yazi plugin — render an Oh My Posh prompt in Yazi's header.
+const DEFAULT_YAZI_PLUGIN_OMP: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/omp.yazi/main.lua");
+
+/// Default OMP config used by omp.yazi when the addon is enabled.
+const DEFAULT_YAZI_OMP_CONFIG: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/omp.yazi/yazi-prompt.omp.json");
+
 /// Default yazi keymap.
 const DEFAULT_YAZI_KEYMAP: &str = r#"[mgr]
 prepend_keymap = [
     { on = "<Enter>", run = "open", desc = "Edit in-place" },
     { on = "e", run = "shell 'open-in-editor \"$1\"'", desc = "Open in vim pane" },
     { on = "O", run = "open --interactive", desc = "Open interactively" },
+    { on = [ "z", "h" ], run = "plugin toggle-pane min-parent", desc = "Toggle parent pane" },
+    { on = [ "z", "l" ], run = "plugin toggle-pane min-preview", desc = "Toggle preview pane" },
+    { on = [ "z", "m" ], run = "plugin toggle-pane max-preview", desc = "Maximize preview pane" },
+    { on = [ "z", "c" ], run = "plugin toggle-pane max-current", desc = "Maximize current pane" },
+    { on = [ "z", "0" ], run = "plugin toggle-pane", desc = "Reset pane layout" },
     { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
     { on = [ "g", "c" ], run = "shell 'git -c color.status=always status --short --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Show git changes" },
     { on = [ "g", "r" ], run = "cd .", desc = "Refresh directory" },
@@ -1272,7 +1328,7 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".config/yazi/yazi.toml"),
-            DEFAULT_YAZI_CONFIG.to_string(),
+            generate_yazi_config(config),
         ),
         (
             std::path::PathBuf::from(".config/yazi/keymap.toml"),
@@ -1284,7 +1340,7 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".config/yazi/init.lua"),
-            DEFAULT_YAZI_INIT.to_string(),
+            generate_yazi_init(config),
         ),
         (
             std::path::PathBuf::from(".config/yazi/plugins/eps.yazi/init.lua"),
@@ -1311,6 +1367,10 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
             DEFAULT_YAZI_PLUGIN_STATUS_GIT.to_string(),
         ),
         (
+            std::path::PathBuf::from(".config/yazi/plugins/toggle-pane.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.to_string(),
+        ),
+        (
             std::path::PathBuf::from(".config/cheatsheet.txt"),
             DEFAULT_CHEATSHEET.to_string(),
         ),
@@ -1335,6 +1395,24 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         files.push((
             std::path::PathBuf::from(".claude/keybindings.json"),
             DEFAULT_CLAUDE_KEYBINDINGS.to_string(),
+        ));
+    }
+
+    if config.addons.has_addon("preview-enhanced") {
+        files.push((
+            std::path::PathBuf::from(".config/yazi/plugins/rich-preview.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.to_string(),
+        ));
+    }
+
+    if config.addons.has_addon("yazi-omp") {
+        files.push((
+            std::path::PathBuf::from(".config/yazi/plugins/omp.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_OMP.to_string(),
+        ));
+        files.push((
+            std::path::PathBuf::from(".config/yazi/yazi-prompt.omp.json"),
+            DEFAULT_YAZI_OMP_CONFIG.to_string(),
         ));
     }
 
@@ -2161,6 +2239,64 @@ mod tests {
         assert!(
             !DEFAULT_YAZI_CONFIG.contains("[manager]"),
             "default yazi config must not use deprecated [manager] section"
+        );
+    }
+
+    #[test]
+    fn yazi_toggle_pane_keybindings_seeded() {
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains("plugin toggle-pane max-preview"),
+            "default yazi keymap should expose toggle-pane maximize binding"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains("plugin toggle-pane min-preview"),
+            "default yazi keymap should expose toggle-pane preview toggle binding"
+        );
+    }
+
+    #[test]
+    fn rich_preview_entries_only_enabled_with_preview_enhanced_addon() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let mut config = make_config(false, root);
+
+        let without = generate_yazi_config(&config);
+        assert!(
+            !without.contains("rich-preview"),
+            "rich previewers should not be enabled without preview-enhanced"
+        );
+
+        config
+            .addons
+            .addons
+            .insert("preview-enhanced".to_string(), AddonToolsSection::default());
+        let with = generate_yazi_config(&config);
+        assert!(
+            with.contains(r#"{ url = "*.md",       run = "rich-preview" }"#),
+            "rich previewers should be enabled when preview-enhanced is configured"
+        );
+    }
+
+    #[test]
+    fn omp_setup_only_enabled_with_yazi_omp_addon() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let mut config = make_config(false, root);
+
+        let without = generate_yazi_init(&config);
+        assert!(
+            !without.contains(r#"require("omp"):setup"#),
+            "omp setup should be absent by default"
+        );
+
+        config
+            .addons
+            .addons
+            .insert("yazi-omp".to_string(), AddonToolsSection::default());
+        let with = generate_yazi_init(&config);
+        assert!(
+            with.contains(r#"require("omp"):setup"#),
+            "omp setup should be present when the addon is configured"
         );
     }
 

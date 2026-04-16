@@ -459,7 +459,7 @@ pub struct ToolEntry {
 }
 
 /// The `tools` sub-table of an addon, e.g. `[addons.python.tools]`.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct AddonToolsSection {
     #[serde(default)]
     pub tools: HashMap<String, ToolEntry>,

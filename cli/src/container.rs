@@ -1457,34 +1457,21 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     seed::ensure_runtime_dirs(&config)?;
     generate::generate_all(&config)?;
 
-    // Skills, AGENTS.md, and the universal baseline are owned by
-    // processkit since v0.16.0. The first time we see a real
-    // [processkit].version (i.e. not the "unset" sentinel) we install
-    // the content here so the user can pin a version after the initial
-    // `aibox init` and have `aibox sync` materialize it. The install is
-    // skipped when the lock already pins the same (source, version)
-    // pair as aibox.toml — the existing three-way diff path further
-    // down handles drift detection in that case.
+    // Capture the pre-install lock before installing so the three-way diff
+    // below uses the OLD snapshot as its reference baseline. Reading the lock
+    // again after install_content_source would return the new version, making
+    // the diff compare new-against-new and recording from_version == to_version.
+    let pre_install_processkit_lock: Option<crate::lock::ProcessKitLockSection> =
+        std::env::current_dir()
+            .ok()
+            .and_then(|cwd| crate::lock::read_lock(&cwd).ok().flatten())
+            .and_then(|lock| lock.processkit);
+
     match std::env::current_dir() {
         Ok(cwd) => {
-            let lock_pair = match crate::lock::read_lock(&cwd) {
-                // Only the [processkit] section is relevant for the
-                // re-install gating decision. Locks without a
-                // [processkit] section (e.g. fresh init that has not
-                // installed any content yet) are treated as None.
-                Ok(Some(lock)) => lock
-                    .processkit
-                    .as_ref()
-                    .map(|pk| (pk.source.clone(), pk.version.clone())),
-                Ok(None) => None,
-                Err(e) => {
-                    output::warn(&format!(
-                        "Failed to read aibox.lock; will re-install processkit: {}",
-                        e
-                    ));
-                    None
-                }
-            };
+            let lock_pair = pre_install_processkit_lock
+                .as_ref()
+                .map(|pk| (pk.source.clone(), pk.version.clone()));
             if sync_should_install_processkit(
                 &config.processkit.version,
                 &config.processkit.source,
@@ -1586,42 +1573,31 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     // "unset"), skip — there's nothing to compare against. Any failure is
     // warned-and-continued so a network glitch doesn't break the rest of
     // sync's work.
-    match std::env::current_dir() {
-        Ok(cwd) => match crate::lock::read_lock(&cwd) {
-            Ok(Some(lock)) => match lock.processkit.as_ref() {
-                None => {
-                    // No processkit section yet — nothing to diff.
-                }
-                Some(pk) => {
-                    output::info("Comparing processkit cache against project...");
-                    match crate::content_diff::run_content_sync(&cwd, pk, &config) {
-                        Ok(report) => {
-                            if report.summary.has_user_relevant_changes() {
-                                output::info(&format!(
-                                    "Processkit changes detected: {} upstream-only, {} conflicts, {} new, {} removed",
-                                    report.summary.changed_upstream_only,
-                                    report.summary.conflict,
-                                    report.summary.new_upstream,
-                                    report.summary.removed_upstream,
-                                ));
-                                if let Some(path) = report.migration_document_path {
-                                    output::ok(&format!(
-                                        "Wrote migration document: {}",
-                                        path.display()
-                                    ));
-                                }
-                            } else {
-                                output::ok("Processkit cache is in sync — no migration needed");
-                            }
+    match (std::env::current_dir(), pre_install_processkit_lock) {
+        (Ok(cwd), Some(from_pk)) => {
+            output::info("Comparing processkit cache against project...");
+            match crate::content_diff::run_content_sync(&cwd, &from_pk, &config) {
+                Ok(report) => {
+                    if report.summary.has_user_relevant_changes() {
+                        output::info(&format!(
+                            "Processkit changes detected: {} upstream-only, {} conflicts, {} new, {} removed",
+                            report.summary.changed_upstream_only,
+                            report.summary.conflict,
+                            report.summary.new_upstream,
+                            report.summary.removed_upstream,
+                        ));
+                        if let Some(path) = report.migration_document_path {
+                            output::ok(&format!("Wrote migration document: {}", path.display()));
                         }
-                        Err(e) => output::warn(&format!("Processkit diff failed: {}", e)),
+                    } else {
+                        output::ok("Processkit cache is in sync — no migration needed");
                     }
-                } // Some(pk)
-            },
-            Ok(None) => { /* No lock file yet — nothing to diff against. */ }
-            Err(e) => output::warn(&format!("Failed to read processkit lock: {}", e)),
-        },
-        Err(e) => output::warn(&format!("Failed to determine working directory: {}", e)),
+                }
+                Err(e) => output::warn(&format!("Processkit diff failed: {}", e)),
+            }
+        }
+        (Ok(_), None) => { /* No pre-install processkit lock — nothing to diff against. */ }
+        (Err(e), _) => output::warn(&format!("Failed to determine working directory: {}", e)),
     }
 
     // Verify the perimeter tripwire BEFORE the (potentially long) image

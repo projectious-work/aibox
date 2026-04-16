@@ -612,31 +612,40 @@ fn parse_yaml_scalar_value(s: &str) -> String {
 
 /// Run the full content-source sync-diff flow:
 ///
-/// 1. Fetch the cache for the version pinned in the lock (idempotent).
-/// 2. Resolve the templates reference dir for that version.
-/// 3. Three-way diff against cache + templates + live.
+/// 1. Fetch the cache for `config.processkit.version` (idempotent; the
+///    install step that precedes this call has already populated the cache).
+/// 2. Use `from_pk.version` to locate the on-disk reference snapshot
+///    (`context/templates/processkit/<from_pk.version>/`).
+/// 3. Three-way diff against cache + reference snapshot + live.
 /// 4. If there are user-relevant changes, write a Migration document.
 /// 5. Return a `SyncReport` summarizing the outcome.
 ///
-/// `config` is read for the current `release_asset_url_template` so a
-/// user who has updated their template (e.g. switched from a fork URL
-/// to a different host) gets the new template applied immediately
-/// without having to re-init.
+/// `from_pk` must be the lock section captured **before** the install step.
+/// Passing the post-install lock would make both the fetch version and the
+/// reference dir point at the same new snapshot, yielding an empty diff and
+/// a migration with `from_version == to_version` (BACK-20260415_0938).
+///
+/// `config` is read for `release_asset_url_template` so a user who has
+/// updated their template gets the new template applied immediately.
 pub fn run_content_sync(
     project_root: &Path,
-    pk: &crate::lock::ProcessKitLockSection,
+    from_pk: &crate::lock::ProcessKitLockSection,
     config: &crate::config::AiboxConfig,
 ) -> Result<SyncReport> {
+    // Fetch the version that config (and the just-updated lock) targets.
+    // The cache is already populated by install_content_source; this fetch
+    // is idempotent (returns the cached entry without a network round-trip).
     let fetched = crate::content_source::fetch(
-        &pk.source,
-        &pk.version,
-        pk.branch.as_deref(),
-        &pk.src_path,
+        &from_pk.source,
+        &config.processkit.version,
+        from_pk.branch.as_deref(),
+        &from_pk.src_path,
         config.processkit.release_asset_url_template.as_deref(),
     )
     .with_context(|| "failed to fetch content-source cache".to_string())?;
 
-    let templates_dir = templates_dir_for_version(project_root, &pk.version);
+    // Reference dir is the OLD on-disk snapshot so the diff sees real changes.
+    let templates_dir = templates_dir_for_version(project_root, &from_pk.version);
 
     let (diffs, _groups) = three_way_diff(project_root, &fetched.src_path, &templates_dir)?;
     let summary = DiffSummary::from_diffs(&diffs);
@@ -644,7 +653,7 @@ pub fn run_content_sync(
     let migration_document_path = if summary.has_user_relevant_changes() {
         write_migration_document(
             project_root,
-            pk,
+            from_pk,
             &fetched.version,
             fetched.resolved_commit.as_deref(),
             &summary,
@@ -1076,5 +1085,83 @@ mod tests {
         let out =
             write_migration_document(tmp.path(), &lock, "v1.0.1", None, &summary, &diffs).unwrap();
         assert!(out.is_none(), "should be no-op due to in-progress match");
+    }
+
+    // -- Regression: upgrade scenario records correct from_version ----------
+    //
+    // Simulates the BACK-20260415_0938 bug: sync vA → vB must record
+    // from_version: vA (not vB) and must detect non-zero changed files
+    // when vA and vB have different content.
+
+    /// Build a vA cache with one content file, install it into project,
+    /// snapshot it as the vA reference, then build a vB cache where that
+    /// file has changed.  Run the three-way diff (vB cache vs vA reference)
+    /// and write the migration, asserting:
+    ///   - from_version is the vA tag, not the vB tag.
+    ///   - At least one file is classified as ChangedUpstreamOnly.
+    #[test]
+    fn upgrade_migration_records_from_version_correctly() {
+        let tmp = TempDir::new().unwrap();
+        let project = tmp.path().join("project");
+        fs::create_dir_all(&project).unwrap();
+
+        // Build vA cache: one schema file.
+        let cache_va = tmp.path().join("cache-va/src");
+        fs::create_dir_all(cache_va.join("primitives/schemas")).unwrap();
+        fs::write(
+            cache_va.join("primitives/schemas/workitem.yaml"),
+            "name: workitem-va\n",
+        )
+        .unwrap();
+
+        // Install vA and snapshot as the reference baseline.
+        install_files_from_cache(&cache_va, &project).unwrap();
+        copy_templates_from_cache(&cache_va, &project, "va").unwrap();
+        let reference_dir = templates_dir_for_version(&project, "va");
+
+        // Build vB cache: the same schema file with changed content.
+        let cache_vb = tmp.path().join("cache-vb/src");
+        fs::create_dir_all(cache_vb.join("primitives/schemas")).unwrap();
+        fs::write(
+            cache_vb.join("primitives/schemas/workitem.yaml"),
+            "name: workitem-vb\n",
+        )
+        .unwrap();
+
+        // Diff vB cache against vA reference (as run_content_sync does after fix).
+        let (diffs, _) = three_way_diff(&project, &cache_vb, &reference_dir).unwrap();
+        let summary = DiffSummary::from_diffs(&diffs);
+
+        assert!(
+            summary.changed_upstream_only > 0,
+            "expected at least one changed-upstream-only file when vA != vB content; got {:?}",
+            summary,
+        );
+
+        // Write the migration using vA as from_pk (the pre-install lock).
+        let from_lock = crate::lock::ProcessKitLockSection {
+            source: "https://github.com/example/processkit.git".to_string(),
+            version: "va".to_string(),
+            src_path: "src".to_string(),
+            branch: None,
+            resolved_commit: None,
+            release_asset_sha256: None,
+            installed_at: "2026-04-15T00:00:00Z".to_string(),
+        };
+        let written = write_migration_document(&project, &from_lock, "vb", None, &summary, &diffs)
+            .unwrap()
+            .expect("expected a migration document to be written");
+
+        let body = fs::read_to_string(&written).unwrap();
+        assert!(
+            body.contains("from_version: va"),
+            "migration must record from_version: va but got:\n{}",
+            body
+        );
+        assert!(
+            body.contains("to_version: vb"),
+            "migration must record to_version: vb but got:\n{}",
+            body
+        );
     }
 }
