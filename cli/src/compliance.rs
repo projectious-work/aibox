@@ -178,9 +178,7 @@ pub fn write_aider_compliance_conf(config: &AiboxConfig, project_root: &Path) ->
 
     fs::write(&conf_path, &yaml_str).with_context(|| format!("writing {}", conf_path.display()))?;
 
-    output::ok(&format!(
-        "Updated .aider.conf.yml with compliance contract read: entries"
-    ));
+    output::ok("Updated .aider.conf.yml with compliance contract read: entries");
 
     Ok(())
 }
