@@ -116,6 +116,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         note: "fix: zellij --layout flag position; Rust x86_64 target added in builder stage; rename ai provider 'codex' → 'openai' (BREAKING: update providers = [\"openai\"] in aibox.toml); add ai-openai addon to install.sh",
     },
     CompatEntry {
+        aibox_version: "0.17.17",
+        processkit_version: "v0.13.0",
+        note: "aibox.toml inline addon documentation; ai-openai addon dep fix",
+    },
+    CompatEntry {
         aibox_version: "0.17.18",
         processkit_version: "v0.13.0",
         note: "fix: ai-openai addon npm install -g ran as USER aibox causing EACCES; fix: broken ai-codex link in ai-mistral docs",
@@ -126,9 +131,34 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         note: "fix: rust addon COPY --from=rust-builder left .cargo/.rustup owned by root; add chown before USER aibox switch",
     },
     CompatEntry {
+        aibox_version: "0.17.20",
+        processkit_version: "v0.13.0",
+        note: "runtime migration id collisions fix; codex auth persistence; preserve .aibox-home via runtime migrations; narrow reset backups; yazi/lazygit theme fixes",
+    },
+    CompatEntry {
+        aibox_version: "0.18.0",
+        processkit_version: "v0.13.0",
+        note: "harness/provider split ([ai].harnesses + [ai].model_providers); theme auto-apply + WCAG audit; version resolution fixes; backward-compat for legacy [ai].providers",
+    },
+    CompatEntry {
         aibox_version: "0.18.1",
         processkit_version: "v0.13.0",
         note: "fix: rename ai-openai addon → ai-codex to match AiHarness::Codex addon_name(); add backward compat migration for [addons.ai-openai.tools]",
+    },
+    CompatEntry {
+        aibox_version: "0.18.2",
+        processkit_version: "v0.14.0",
+        note: "yazi dir preview, git status signs, status bar, scratch pad removal",
+    },
+    CompatEntry {
+        aibox_version: "0.18.3",
+        processkit_version: "v0.17.0",
+        note: "bump default processkit to v0.17.0; sync baseline-snapshot ordering fix; restore v0.14.0 baseline; 8-role AI-agent team scaffolding",
+    },
+    CompatEntry {
+        aibox_version: "0.18.4",
+        processkit_version: "v0.17.0",
+        note: "clippy/fmt cleanup; Cargo.lock bump; no runtime changes vs 0.18.3",
     },
 ];
 
@@ -166,5 +196,80 @@ pub fn processkit_meets_minimum(installed: &str, minimum: &str) -> bool {
     match (parse_semver(installed), parse_semver(minimum)) {
         (Some(inst), Some(min)) => inst >= min,
         _ => true, // if we can't parse, don't warn
+    }
+}
+
+/// Return the slice of `COMPAT_TABLE` entries whose `aibox_version` is
+/// strictly greater than `from_excl` and less than or equal to `to_incl`.
+/// Used by the migration document generator to enumerate every released
+/// intermediate when a project jumps across multiple CLI versions.
+///
+/// If either bound fails to parse as semver, falls back to `&[]` (callers
+/// downgrade to the generic target-only rendering).
+pub fn entries_in_range(from_excl: &str, to_incl: &str) -> Vec<&'static CompatEntry> {
+    let (Some(from_v), Some(to_v)) = (parse_semver(from_excl), parse_semver(to_incl)) else {
+        return Vec::new();
+    };
+    if from_v >= to_v {
+        return Vec::new();
+    }
+    COMPAT_TABLE
+        .iter()
+        .filter(|e| match parse_semver(e.aibox_version) {
+            Some(v) => v > from_v && v <= to_v,
+            None => false,
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Release hygiene: every time the CLI version bumps, a corresponding
+    /// `COMPAT_TABLE` entry must be added. This test fails the release if
+    /// the table is out of date, so the omission is caught before ship.
+    #[test]
+    fn cargo_pkg_version_has_compat_entry() {
+        let cargo = env!("CARGO_PKG_VERSION");
+        let found = COMPAT_TABLE.iter().any(|e| e.aibox_version == cargo);
+        assert!(
+            found,
+            "CARGO_PKG_VERSION = {cargo} has no entry in COMPAT_TABLE              (cli/src/compat.rs) — add one alongside the version bump"
+        );
+    }
+
+    #[test]
+    fn entries_in_range_basic() {
+        let got: Vec<&str> = entries_in_range("0.17.9", "0.17.12")
+            .iter()
+            .map(|e| e.aibox_version)
+            .collect();
+        assert_eq!(got, vec!["0.17.10", "0.17.11", "0.17.12"]);
+    }
+
+    #[test]
+    fn entries_in_range_cross_minor() {
+        let got: Vec<&str> = entries_in_range("0.17.20", "0.18.2")
+            .iter()
+            .map(|e| e.aibox_version)
+            .collect();
+        // 0.18.0, 0.18.1, 0.18.2 all must appear.
+        assert_eq!(got, vec!["0.18.0", "0.18.1", "0.18.2"]);
+    }
+
+    #[test]
+    fn entries_in_range_same_version_is_empty() {
+        assert!(entries_in_range("0.18.3", "0.18.3").is_empty());
+    }
+
+    #[test]
+    fn entries_in_range_descending_is_empty() {
+        assert!(entries_in_range("0.18.3", "0.17.10").is_empty());
+    }
+
+    #[test]
+    fn entries_in_range_bad_input_is_empty() {
+        assert!(entries_in_range("bogus", "0.18.3").is_empty());
     }
 }

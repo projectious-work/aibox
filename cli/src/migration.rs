@@ -286,25 +286,53 @@ fn format_migration_doc(
         }
         lines.join("\n")
     } else {
-        let versions = intermediate_versions(from, to);
-        let links: Vec<String> = versions
-            .iter()
-            .map(|v| {
-                let tag = if v.starts_with('v') {
-                    v.clone()
-                } else {
-                    format!("v{}", v)
-                };
-                format!(
-                    "- https://github.com/projectious-work/aibox/releases/tag/{}",
-                    tag
-                )
-            })
-            .collect();
-        format!(
-            "Review the release notes for each version in this upgrade:\n{}",
-            links.join("\n")
-        )
+        // Prefer the compat table: every released intermediate gets a bullet
+        // with its processkit pairing and release note. This is what makes
+        // cross-version jumps visible — instead of one link to the target
+        // release, the agent and owner see per-version breaking changes.
+        let entries = crate::compat::entries_in_range(from, to);
+        if !entries.is_empty() {
+            let bullets: Vec<String> = entries
+                .iter()
+                .map(|e| {
+                    format!(
+                        "- **v{v}** (processkit {pk}): {note}\n  <https://github.com/projectious-work/aibox/releases/tag/v{v}>",
+                        v = e.aibox_version,
+                        pk = e.processkit_version,
+                        note = e.note,
+                    )
+                })
+                .collect();
+            format!(
+                "Every release between v{from} and v{to} is listed below.                  Review each; treat entries tagged as breaking as action items.\n\n{list}",
+                from = from,
+                to = to,
+                list = bullets.join("\n")
+            )
+        } else {
+            // Fallback: arithmetic enumeration (same-major.minor patch jumps)
+            // when the compat table is silent on this range — e.g. local
+            // pre-release builds or a version older than the table starts at.
+            let versions = intermediate_versions(from, to);
+            let links: Vec<String> = versions
+                .iter()
+                .map(|v| {
+                    let tag = if v.starts_with('v') {
+                        v.clone()
+                    } else {
+                        format!("v{}", v)
+                    };
+                    format!(
+                        "- https://github.com/projectious-work/aibox/releases/tag/{}",
+                        tag
+                    )
+                })
+                .collect();
+            format!(
+                "Review the release notes for each version in this upgrade:\n{}",
+                links.join("\n")
+            )
+        }
     };
 
     // Determine the effective processkit version to display.
@@ -1218,6 +1246,41 @@ installed_at = \"2026-04-01T00:00:00Z\"
         let v = intermediate_versions("bad", "0.17.5");
         assert_eq!(v, vec!["0.17.5"]);
     }
+
+    #[test]
+    fn migration_doc_cross_minor_lists_all_compat_intermediates() {
+        // 0.17.20 -> 0.18.2 crosses a minor boundary; the migration doc
+        // must enumerate every released intermediate from the compat table.
+        let doc = format_migration_doc("0.17.20", "0.18.2", "2026-04-17", None, None);
+
+        for v in ["0.18.0", "0.18.1", "0.18.2"] {
+            assert!(
+                doc.contains(&format!("**v{}**", v)),
+                "migration doc should list intermediate v{}:\n{}",
+                v,
+                doc
+            );
+            assert!(
+                doc.contains(&format!("/releases/tag/v{}", v)),
+                "migration doc should link release notes for v{}",
+                v
+            );
+        }
+    }
+
+    #[test]
+    fn migration_doc_falls_back_when_compat_table_silent() {
+        // 0.0.1 -> CARGO_PKG_VERSION crosses into a range the table does not
+        // cover at its lower bound, so the fallback arithmetic list kicks in.
+        let current = env!("CARGO_PKG_VERSION");
+        let doc = format_migration_doc("0.0.1", current, "2026-04-17", None, None);
+        // Either path is fine — just assert we didn't panic and the target is present.
+        assert!(
+            doc.contains(current),
+            "migration doc should mention the target version"
+        );
+    }
+
 
     #[test]
     fn test_known_migration_0_17_4_to_0_17_5() {

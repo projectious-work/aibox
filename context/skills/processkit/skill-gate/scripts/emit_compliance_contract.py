@@ -56,6 +56,20 @@ def _is_claude_code() -> bool:
     return any(os.environ.get(var) for var in _CLAUDE_CODE_ENV_INDICATORS)
 
 
+def _read_hook_event_name():
+    # Claude Code 2.1+ sends a JSON payload on stdin whose `hook_event_name`
+    # must be echoed back inside `hookSpecificOutput.hookEventName` — otherwise
+    # it rejects the envelope and drops input.
+    if sys.stdin.isatty():
+        return None
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+    except (json.JSONDecodeError, ValueError):
+        return None
+    name = payload.get("hook_event_name")
+    return name if isinstance(name, str) and name else None
+
+
 def main() -> int:
     if not _CONTRACT_PATH.exists():
         print(
@@ -69,12 +83,12 @@ def main() -> int:
 
     if _is_claude_code():
         # Claude Code 2.1.0+ preferred form: JSON envelope.
+        hook_specific = {"additionalContext": contract_text}
+        event_name = _read_hook_event_name()
+        if event_name:
+            hook_specific["hookEventName"] = event_name
         output = json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "additionalContext": contract_text,
-                }
-            },
+            {"hookSpecificOutput": hook_specific},
             ensure_ascii=False,
         )
         print(output)

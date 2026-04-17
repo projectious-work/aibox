@@ -117,13 +117,25 @@ pub fn run_runtime_sync(
     }
 
     let summary = summarize(&diffs);
-    let migration_document_path = if summary.has_user_relevant_changes() {
+
+    // For cross-version jumps, enumerate every intermediate snapshot on disk
+    // and compute hop-by-hop deltas against the NEXT step (so the reviewer
+    // can see what each release introduced, even if later releases reverted
+    // it). Empty when no intermediates are on disk or versions don't parse.
+    let intermediate_hops: Vec<IntermediateHop> = if let Some(from_version) = from_version {
+        build_intermediate_hops(project_root, from_version, to_version)
+    } else {
+        Vec::new()
+    };
+
+    let migration_document_path = if summary.has_user_relevant_changes() || !intermediate_hops.is_empty() {
         write_migration_document(
             project_root,
             from_version.unwrap_or("unknown"),
             to_version,
             &summary,
             &diffs,
+            &intermediate_hops,
         )?
     } else {
         None
@@ -187,6 +199,139 @@ fn three_way_diff(
     Ok(diffs)
 }
 
+fn parse_semver_triple(s: &str) -> Option<(u32, u32, u32)> {
+    let s = s.trim_start_matches('v');
+    let parts: Vec<&str> = s.split('.').collect();
+    if parts.len() < 3 {
+        return None;
+    }
+    Some((
+        parts[0].parse().ok()?,
+        parts[1].parse().ok()?,
+        parts[2].parse().ok()?,
+    ))
+}
+
+/// List snapshot dirs under `context/templates/aibox-home/` whose directory
+/// name is strictly greater than `from` and strictly less than `to` (both
+/// exclusive). Returns them in ascending semver order.
+///
+/// Used by [`run_runtime_sync`] to compute per-intermediate deltas when a
+/// project jumps across multiple aibox CLI versions in one sync.
+fn intermediate_snapshots(project_root: &Path, from: &str, to: &str) -> Vec<(String, PathBuf)> {
+    let base = project_root.join(RUNTIME_TEMPLATES_DIR);
+    let (Some(from_v), Some(to_v)) = (parse_semver_triple(from), parse_semver_triple(to)) else {
+        return Vec::new();
+    };
+    if from_v >= to_v {
+        return Vec::new();
+    }
+    let Ok(read) = fs::read_dir(&base) else {
+        return Vec::new();
+    };
+    let mut found: Vec<((u32, u32, u32), String, PathBuf)> = Vec::new();
+    for entry in read.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let Some(v) = parse_semver_triple(name) else {
+            continue;
+        };
+        if v > from_v && v < to_v {
+            found.push((v, name.to_string(), path));
+        }
+    }
+    found.sort_by_key(|(v, _, _)| *v);
+    found.into_iter().map(|(_, n, p)| (n, p)).collect()
+}
+
+/// Count how many files differ by content hash between two template
+/// snapshot directories. Missing-in-either-side also counts as a change.
+/// Returns (changed_count, total_files_considered).
+fn snapshot_hop_delta(a_dir: &Path, b_dir: &Path) -> (usize, usize) {
+    fn walk(root: &Path) -> BTreeMap<String, String> {
+        let mut out = BTreeMap::new();
+        let mut stack = vec![root.to_path_buf()];
+        while let Some(dir) = stack.pop() {
+            let Ok(read) = fs::read_dir(&dir) else {
+                continue;
+            };
+            for entry in read.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    stack.push(path);
+                } else if path.is_file()
+                    && let Ok(rel) = path.strip_prefix(root)
+                    && let Ok(sha) = crate::lock::sha256_of_file(&path)
+                {
+                    let key = rel.to_string_lossy().replace('\\', "/");
+                    out.insert(key, sha);
+                }
+            }
+        }
+        out
+    }
+
+    let a = walk(a_dir);
+    let b = walk(b_dir);
+    let mut keys: BTreeSet<&String> = a.keys().collect();
+    keys.extend(b.keys());
+    let total = keys.len();
+    let mut changed = 0usize;
+    for k in keys {
+        if a.get(k) != b.get(k) {
+            changed += 1;
+        }
+    }
+    (changed, total)
+}
+
+#[derive(Debug, Clone)]
+pub struct IntermediateHop {
+    pub from: String,
+    pub to: String,
+    pub changed: usize,
+    pub total: usize,
+}
+
+fn build_intermediate_hops(project_root: &Path, from: &str, to: &str) -> Vec<IntermediateHop> {
+    let mut hops: Vec<IntermediateHop> = Vec::new();
+    let base = project_root.join(RUNTIME_TEMPLATES_DIR);
+    let from_dir = base.join(from);
+    let to_dir = base.join(to);
+
+    // Collect every version dir on disk between from and to (exclusive both).
+    let mids = intermediate_snapshots(project_root, from, to);
+
+    // Build ordered waypoints: from -> m1 -> m2 -> ... -> to. Skip hops whose
+    // endpoints are missing on disk so we never compare nonexistent dirs.
+    let mut waypoints: Vec<(String, PathBuf)> = Vec::new();
+    if from_dir.is_dir() {
+        waypoints.push((from.to_string(), from_dir));
+    }
+    waypoints.extend(mids);
+    if to_dir.is_dir() {
+        waypoints.push((to.to_string(), to_dir));
+    }
+
+    for pair in waypoints.windows(2) {
+        let (a_name, a_dir) = &pair[0];
+        let (b_name, b_dir) = &pair[1];
+        let (changed, total) = snapshot_hop_delta(a_dir, b_dir);
+        hops.push(IntermediateHop {
+            from: a_name.clone(),
+            to: b_name.clone(),
+            changed,
+            total,
+        });
+    }
+    hops
+}
+
 fn summarize(diffs: &[RuntimeFileDiff]) -> DiffSummary {
     let mut summary = DiffSummary::default();
     for diff in diffs {
@@ -242,6 +387,7 @@ fn write_migration_document(
     to_version: &str,
     summary: &DiffSummary,
     diffs: &[RuntimeFileDiff],
+    intermediate_hops: &[IntermediateHop],
 ) -> Result<Option<PathBuf>> {
     let pending_dir = project_root.join("context/migrations/pending");
     let in_progress_dir = project_root.join("context/migrations/in-progress");
@@ -338,6 +484,20 @@ fn write_migration_document(
             .entry(diff.classification.label())
             .or_default()
             .push(diff);
+    }
+
+    if !intermediate_hops.is_empty() {
+        body.push_str("## Per-intermediate review\n\n");
+        body.push_str(
+            "Every released version between `from_version` and `to_version` whose              template snapshot is present on disk is listed below, with the number              of files that changed between consecutive snapshots. Useful for              catching scaffolding changes that were introduced and later reverted              across the span of a multi-version upgrade.\n\n",
+        );
+        for hop in intermediate_hops {
+            body.push_str(&format!(
+                "- `{}` → `{}`: {} file(s) changed of {}\n",
+                hop.from, hop.to, hop.changed, hop.total
+            ));
+        }
+        body.push('\n');
     }
 
     if by_group.is_empty() {
@@ -440,4 +600,79 @@ fn yaml_scalar(s: &str) -> String {
     }
     let escaped = s.replace('\\', "\\\\").replace('"', "\\\"");
     format!("\"{}\"", escaped)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    fn write_snapshot(base: &Path, version: &str, files: &[(&str, &str)]) {
+        let dir = base.join(RUNTIME_TEMPLATES_DIR).join(version);
+        fs::create_dir_all(&dir).unwrap();
+        for (rel, body) in files {
+            let target = dir.join(rel);
+            if let Some(parent) = target.parent() {
+                fs::create_dir_all(parent).unwrap();
+            }
+            fs::write(&target, body).unwrap();
+        }
+    }
+
+    #[test]
+    fn intermediate_snapshots_orders_ascending_and_excludes_endpoints() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+        for v in ["0.17.20", "0.18.0", "0.18.1", "0.18.2", "0.18.3"] {
+            write_snapshot(root, v, &[(".vim/vimrc", v)]);
+        }
+        let got: Vec<String> = intermediate_snapshots(root, "0.17.20", "0.18.3")
+            .into_iter()
+            .map(|(n, _)| n)
+            .collect();
+        assert_eq!(got, vec!["0.18.0", "0.18.1", "0.18.2"]);
+    }
+
+    #[test]
+    fn build_intermediate_hops_counts_changed_files_per_hop() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+
+        // from: 1 file. 0.18.0 changes the file. 0.18.1 adds a new file. to: removes the new file again.
+        write_snapshot(root, "0.17.20", &[(".vim/vimrc", "A")]);
+        write_snapshot(root, "0.18.0",  &[(".vim/vimrc", "B")]);
+        write_snapshot(root, "0.18.1",  &[(".vim/vimrc", "B"), (".asoundrc", "X")]);
+        write_snapshot(root, "0.18.2",  &[(".vim/vimrc", "B")]);
+
+        let hops = build_intermediate_hops(root, "0.17.20", "0.18.2");
+        // Expected hops: 0.17.20 -> 0.18.0 (1 changed), 0.18.0 -> 0.18.1 (1 added), 0.18.1 -> 0.18.2 (1 removed).
+        let summary: Vec<(String, String, usize)> = hops
+            .iter()
+            .map(|h| (h.from.clone(), h.to.clone(), h.changed))
+            .collect();
+        assert_eq!(
+            summary,
+            vec![
+                ("0.17.20".to_string(), "0.18.0".to_string(), 1),
+                ("0.18.0".to_string(),  "0.18.1".to_string(), 1),
+                ("0.18.1".to_string(),  "0.18.2".to_string(), 1),
+            ]
+        );
+    }
+
+    #[test]
+    fn build_intermediate_hops_empty_when_no_snapshots_on_disk() {
+        let tmp = TempDir::new().unwrap();
+        let hops = build_intermediate_hops(tmp.path(), "0.17.20", "0.18.2");
+        assert!(hops.is_empty());
+    }
+
+    #[test]
+    fn build_intermediate_hops_empty_for_bad_versions() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+        write_snapshot(root, "0.18.0", &[(".vim/vimrc", "A")]);
+        let hops = build_intermediate_hops(root, "bogus", "0.18.2");
+        assert!(hops.is_empty());
+    }
 }
