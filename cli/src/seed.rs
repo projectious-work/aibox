@@ -1396,6 +1396,10 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
             std::path::PathBuf::from(".claude/keybindings.json"),
             DEFAULT_CLAUDE_KEYBINDINGS.to_string(),
         ));
+        // Pre-create an empty .claude.json so the bind mount succeeds on first
+        // build. Claude Code rewrites it during auth; seed_file is write-if-missing,
+        // so a real logged-in state is never clobbered.
+        files.push((std::path::PathBuf::from(".claude.json"), "{}\n".to_string()));
     }
 
     if config.addons.has_addon("preview-enhanced") {

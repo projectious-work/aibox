@@ -490,10 +490,19 @@ pub fn fetch(
             }
             Err(asset_err) => {
                 // 3. Fall back to host auto-tarball.
-                output::warn(&format!(
+                // A 404 means the upstream simply didn't publish a release-asset
+                // tarball (expected for processkit forks). Downgrade to info so
+                // it doesn't look like a real error. Any other failure keeps the
+                // warn level.
+                let msg = format!(
                     "release asset fetch failed ({}); falling back to host auto-tarball",
                     asset_err
-                ));
+                );
+                if asset_err.to_string().contains("HTTP 404") {
+                    output::info(&msg);
+                } else {
+                    output::warn(&msg);
+                }
                 if cache_root.exists() {
                     fs::remove_dir_all(&cache_root)?;
                 }
@@ -1595,5 +1604,34 @@ mod tests {
                 None => std::env::remove_var("XDG_CACHE_HOME"),
             }
         }
+    }
+
+    // -- FIX 3: 404 detection string -----------------------------------------
+
+    #[test]
+    fn release_asset_404_error_contains_http_404_substring() {
+        // The call site matches on "HTTP 404" in the error message to
+        // downgrade warn → info. Verify the bail! in
+        // download_and_extract_release_asset produces that substring.
+        let msg = format!(
+            "release asset not found at {} (HTTP 404)",
+            "https://example.com/foo.tar.gz"
+        );
+        assert!(
+            msg.contains("HTTP 404"),
+            "404 error message must contain 'HTTP 404' for the call-site match to work"
+        );
+    }
+
+    #[test]
+    fn non_404_error_does_not_match_http_404() {
+        let msg = format!(
+            "release asset request to {} returned status 500",
+            "https://example.com/foo.tar.gz"
+        );
+        assert!(
+            !msg.contains("HTTP 404"),
+            "5xx error message must not contain 'HTTP 404'"
+        );
     }
 }

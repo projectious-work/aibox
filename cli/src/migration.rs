@@ -55,8 +55,6 @@ pub fn migrate_legacy_lock_files(root: &Path) -> Result<()> {
 /// Check for version mismatch and generate migration document if needed.
 /// Operates relative to the given `root` directory.
 fn check_and_generate_migration_in(root: &Path) -> Result<()> {
-    let current_version = env!("CARGO_PKG_VERSION");
-
     // Read aibox.lock — if absent this is a fresh project, no migration needed.
     let lock = match crate::lock::read_lock(root)? {
         Some(l) => l,
@@ -64,6 +62,25 @@ fn check_and_generate_migration_in(root: &Path) -> Result<()> {
     };
 
     let stored_version = lock.aibox.cli_version.clone();
+
+    // Load aibox.toml once; extract both the target CLI version and the
+    // processkit version. Falls back gracefully if the file is absent.
+    let config = crate::config::AiboxConfig::load(&root.join("aibox.toml")).ok();
+
+    // Prefer the version declared in aibox.toml when it is a concrete semver
+    // (not "latest", "unset", or empty). This handles repos where maintain.sh
+    // release skipped the Cargo.toml bump.
+    let current_version: String = {
+        let toml_ver = config
+            .as_ref()
+            .map(|c| c.aibox.version.as_str())
+            .unwrap_or("");
+        if toml_ver.is_empty() || toml_ver == "latest" || toml_ver == "unset" {
+            env!("CARGO_PKG_VERSION").to_string()
+        } else {
+            toml_ver.to_string()
+        }
+    };
 
     // Empty means the lock was just promoted from legacy without a recoverable
     // cli_version — treat as "no known version", skip migration this cycle.
@@ -78,24 +95,20 @@ fn check_and_generate_migration_in(root: &Path) -> Result<()> {
 
     // Read the desired processkit version from aibox.toml (what sync will install).
     // The lock holds the old installed version; the config holds the target.
-    // Falls back to None if aibox.toml can't be read.
-    let config_pk_version: Option<String> =
-        crate::config::AiboxConfig::load(&root.join("aibox.toml"))
-            .ok()
-            .and_then(|c| {
-                let v = c.processkit.version;
-                if v.is_empty() || v == "unset" {
-                    None
-                } else {
-                    Some(v)
-                }
-            });
+    let config_pk_version: Option<String> = config.and_then(|c| {
+        let v = c.processkit.version;
+        if v.is_empty() || v == "unset" {
+            None
+        } else {
+            Some(v)
+        }
+    });
 
     // Generate migration document, passing processkit info for context.
     generate_migration_doc(
         root,
         &stored_version,
-        current_version,
+        &current_version,
         lock.processkit.as_ref(),
         config_pk_version.as_deref(),
     )?;
@@ -103,7 +116,7 @@ fn check_and_generate_migration_in(root: &Path) -> Result<()> {
     // Update lock with new cli_version. synced_at is left unchanged here;
     // cmd_sync updates it when it writes the full lock after install.
     let mut updated_lock = lock;
-    updated_lock.aibox.cli_version = current_version.to_string();
+    updated_lock.aibox.cli_version = current_version;
     crate::lock::write_lock(root, &updated_lock)
         .context("Failed to update aibox.lock after migration check")?;
 
@@ -1602,5 +1615,92 @@ packages = ["managed"]
             assert_eq!(&date[4..5], "-", "should have dash at pos 4");
             assert_eq!(&date[7..8], "-", "should have dash at pos 7");
         }
+    }
+
+    // -- FIX 1: aibox.toml version takes precedence over CARGO_PKG_VERSION ---
+
+    fn write_aibox_toml_with_version(dir: &std::path::Path, version: &str) {
+        let content = format!(
+            "[aibox]\nversion = \"{}\"\n[container]\nname = \"test\"\n",
+            version
+        );
+        fs::write(dir.join("aibox.toml"), content).unwrap();
+    }
+
+    #[test]
+    fn migration_uses_aibox_toml_version_when_concrete() {
+        let tmp = TempDir::new().unwrap();
+        // Lock records an old version different from both CARGO_PKG_VERSION and
+        // the aibox.toml version so we can observe which one becomes `to`.
+        write_sample_lock(tmp.path(), "0.0.1");
+        write_aibox_toml_with_version(tmp.path(), "99.99.99");
+
+        check_and_generate_migration_in(tmp.path()).unwrap();
+
+        let migrations_dir = tmp.path().join("context/migrations");
+        let entries: Vec<_> = fs::read_dir(&migrations_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        // The migration filename must use the aibox.toml version as the `to` version.
+        let found = entries.iter().any(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .ends_with("0.0.1-to-99.99.99.md")
+        });
+        assert!(
+            found,
+            "migration doc should use aibox.toml version (99.99.99) as to_version, not CARGO_PKG_VERSION"
+        );
+    }
+
+    #[test]
+    fn migration_falls_back_to_cargo_version_when_aibox_toml_says_latest() {
+        let tmp = TempDir::new().unwrap();
+        write_sample_lock(tmp.path(), "0.0.1");
+        write_aibox_toml_with_version(tmp.path(), "latest");
+
+        check_and_generate_migration_in(tmp.path()).unwrap();
+
+        let migrations_dir = tmp.path().join("context/migrations");
+        let cargo_ver = env!("CARGO_PKG_VERSION");
+        let suffix = format!("0.0.1-to-{}.md", cargo_ver);
+        let entries: Vec<_> = fs::read_dir(&migrations_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        let found = entries
+            .iter()
+            .any(|e| e.file_name().to_string_lossy().ends_with(&suffix));
+        assert!(
+            found,
+            "when aibox.toml says 'latest', should fall back to CARGO_PKG_VERSION ({})",
+            cargo_ver
+        );
+    }
+
+    #[test]
+    fn migration_falls_back_to_cargo_version_when_no_aibox_toml() {
+        let tmp = TempDir::new().unwrap();
+        write_sample_lock(tmp.path(), "0.0.1");
+        // No aibox.toml at all.
+
+        check_and_generate_migration_in(tmp.path()).unwrap();
+
+        let migrations_dir = tmp.path().join("context/migrations");
+        let cargo_ver = env!("CARGO_PKG_VERSION");
+        let suffix = format!("0.0.1-to-{}.md", cargo_ver);
+        let entries: Vec<_> = fs::read_dir(&migrations_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        let found = entries
+            .iter()
+            .any(|e| e.file_name().to_string_lossy().ends_with(&suffix));
+        assert!(
+            found,
+            "without aibox.toml should fall back to CARGO_PKG_VERSION ({})",
+            cargo_ver
+        );
     }
 }

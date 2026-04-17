@@ -673,9 +673,8 @@ version = "unset"
             pre_tool[0]["description"].as_str().unwrap(),
             "processkit: block context/ writes without route_task"
         );
-        assert_eq!(
-            pre_tool[0]["alwaysApprove"].as_bool().unwrap(),
-            false,
+        assert!(
+            !pre_tool[0]["alwaysApprove"].as_bool().unwrap(),
             "alwaysApprove must be false so exit code 2 blocks the tool"
         );
 
@@ -696,7 +695,7 @@ version = "unset"
             before_mcp[0]["description"].as_str().unwrap(),
             "processkit: gate MCP execution"
         );
-        assert_eq!(before_mcp[0]["alwaysApprove"].as_bool().unwrap(), false);
+        assert!(!before_mcp[0]["alwaysApprove"].as_bool().unwrap());
 
         // sessionStart must NOT be written (Cursor bug CUR-BUG-001).
         assert!(
@@ -816,9 +815,8 @@ version = "unset"
             "processkit: block context/ writes without route_task",
             "fresh description present"
         );
-        assert_eq!(
-            pre_tool[0]["alwaysApprove"].as_bool().unwrap(),
-            false,
+        assert!(
+            !pre_tool[0]["alwaysApprove"].as_bool().unwrap(),
             "alwaysApprove reset to false"
         );
     }

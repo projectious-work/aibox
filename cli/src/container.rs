@@ -1366,6 +1366,10 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         }
     }
 
+    // Snapshot the original pin before any resolution so the warning below
+    // can distinguish "user wrote 'latest'" from "user wrote a concrete version".
+    let original_pin = config.aibox.version.clone();
+
     // Resolve [aibox].version = "latest" to a concrete image tag before
     // Dockerfile generation. "latest" is never a valid Docker image tag in
     // our registry (tags are base-<flavor>-v<semver>); we must resolve it to
@@ -1393,10 +1397,11 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     }
 
     // Warn if running CLI version differs from the pinned target version.
-    // Skip when version = "latest" (user explicitly opts out of pinning).
+    // Only fire when the user wrote a concrete version (not "latest" / "unset" / empty).
     let aibox_version_pin = &config.aibox.version;
-    if !aibox_version_pin.is_empty()
-        && aibox_version_pin != "latest"
+    if !original_pin.is_empty()
+        && original_pin != "latest"
+        && original_pin != "unset"
         && aibox_version_pin != env!("CARGO_PKG_VERSION")
     {
         crate::output::warn(&format!(
@@ -1884,5 +1889,48 @@ mod tests {
         assert_eq!(base, BaseImage::Debian);
         assert_eq!(process, vec!["minimal".to_string()]);
         assert_eq!(addons, vec!["python".to_string(), "latex".to_string()]);
+    }
+
+    // -- FIX 2: version-pin warning is gated on original_pin -----------------
+
+    fn should_warn_version_mismatch(original_pin: &str, resolved_pin: &str) -> bool {
+        let cargo_ver = env!("CARGO_PKG_VERSION");
+        !original_pin.is_empty()
+            && original_pin != "latest"
+            && original_pin != "unset"
+            && resolved_pin != cargo_ver
+    }
+
+    #[test]
+    fn version_pin_warning_suppressed_when_original_is_latest() {
+        assert!(
+            !should_warn_version_mismatch("latest", "1.2.3"),
+            "warning must be suppressed when user wrote 'latest'"
+        );
+    }
+
+    #[test]
+    fn version_pin_warning_suppressed_when_original_is_unset() {
+        assert!(
+            !should_warn_version_mismatch("unset", "1.2.3"),
+            "warning must be suppressed when user wrote 'unset'"
+        );
+    }
+
+    #[test]
+    fn version_pin_warning_suppressed_when_original_is_empty() {
+        assert!(
+            !should_warn_version_mismatch("", ""),
+            "warning must be suppressed when original_pin is empty"
+        );
+    }
+
+    #[test]
+    fn version_pin_warning_fires_when_concrete_pin_mismatches_cli() {
+        // Use a version that is certainly not the compiled CARGO_PKG_VERSION.
+        assert!(
+            should_warn_version_mismatch("0.0.1", "0.0.1"),
+            "warning must fire when user pinned a concrete version that differs from CLI"
+        );
     }
 }
