@@ -52,6 +52,29 @@ pub const MANDATORY_MCP_SKILLS: &[&str] = &[
     "workitem-management",
 ];
 
+/// The 8 kernel MCP skills that are force-included in every harness config when
+/// any per-skill `mcp/mcp-config.json` fails to parse. These are the essential
+/// servers that underpin entity-layer correctness, governance, and skill
+/// discovery. When a corrupt config is detected, aibox logs a warning and
+/// falls back to this set so that the remaining working skills are still
+/// registered and harness configs are not left empty.
+///
+/// This is a superset of [`MANDATORY_MCP_SKILLS`] — it adds `skill-finder`,
+/// `skill-gate`, and `task-router` which are always needed for team operation
+/// even though they are not strictly entity-layer invariants.
+///
+/// Values are skill directory names under `context/skills/`.
+pub const KERNEL_MCP_SKILLS: &[&str] = &[
+    "decision-record",
+    "event-log",
+    "id-management",
+    "index-management",
+    "skill-finder",
+    "skill-gate",
+    "task-router",
+    "workitem-management",
+];
+
 /// Skills whose MCP servers are registered only when the matching tier package is
 /// installed (present in `[context].packages`). Unlike the mandatory set, these
 /// are not required for entity-layer correctness on every install — they extend

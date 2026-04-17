@@ -134,6 +134,7 @@ pub fn collect_processkit_mcp_specs(
     };
 
     let mut specs: Vec<McpServerSpec> = Vec::new();
+    let mut any_parse_error = false;
 
     for entry in fs::read_dir(&mirror_skills_dir).with_context(|| {
         format!(
@@ -173,8 +174,17 @@ pub fn collect_processkit_mcp_specs(
 
         let body = fs::read_to_string(&config_path)
             .with_context(|| format!("failed to read {}", config_path.display()))?;
-        let parsed: PerSkillConfig = serde_json::from_str(&body)
-            .with_context(|| format!("failed to parse JSON from {}", config_path.display()))?;
+        let parsed: PerSkillConfig = match serde_json::from_str(&body) {
+            Ok(p) => p,
+            Err(e) => {
+                output::warn(&format!(
+                    "skill '{skill_name}': failed to parse mcp/mcp-config.json — {e}. \
+                     Skipping this skill; kernel fallback will be applied.",
+                ));
+                any_parse_error = true;
+                continue;
+            }
+        };
 
         for (name, raw) in parsed.mcp_servers {
             specs.push(McpServerSpec {
@@ -183,6 +193,42 @@ pub fn collect_processkit_mcp_specs(
                 args: raw.args,
                 env: raw.env,
             });
+        }
+    }
+
+    // If any per-skill config failed to parse, force-include the 8 kernel
+    // skills so the harness config is never left missing critical servers.
+    // Skills already collected continue to contribute; we only add kernel
+    // entries for skills that are present in the mirror but weren't yet
+    // collected (either because they failed or weren't visited yet).
+    if any_parse_error {
+        let already_visited: HashSet<String> = specs.iter().map(|s| s.name.clone()).collect();
+        for &kernel_skill in crate::processkit_vocab::KERNEL_MCP_SKILLS {
+            let kernel_config = mirror_skills_dir
+                .join(kernel_skill)
+                .join("mcp")
+                .join("mcp-config.json");
+            if !kernel_config.is_file() {
+                continue;
+            }
+            // Re-read and parse; ignore errors for kernel skills too
+            // (we already warned about the corrupt ones above).
+            let Ok(body) = fs::read_to_string(&kernel_config) else {
+                continue;
+            };
+            let Ok(parsed) = serde_json::from_str::<PerSkillConfig>(&body) else {
+                continue;
+            };
+            for (name, raw) in parsed.mcp_servers {
+                if !already_visited.contains(&name) {
+                    specs.push(McpServerSpec {
+                        name,
+                        command: raw.command,
+                        args: raw.args,
+                        env: raw.env,
+                    });
+                }
+            }
         }
     }
 
@@ -1203,6 +1249,102 @@ args = ["server.js"]
         assert!(
             !dir.join("old-server.json").exists(),
             "stale managed file removed"
+        );
+    }
+
+    // ── corrupt per-skill config graceful degradation ───────────────────
+
+    #[test]
+    fn collect_corrupt_skill_config_does_not_error_and_includes_valid_skill() {
+        // Arrange: one valid skill and one corrupt skill alongside it.
+        let tmp = TempDir::new().unwrap();
+        let version = crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION;
+
+        // Valid skill: workitem-management.
+        write_synth_skill_mcp(
+            tmp.path(),
+            version,
+            "workitem-management",
+            r#"{"mcpServers":{"workitem-management":{"command":"uv","args":[]}}}"#,
+        );
+
+        // Corrupt skill: decision-record has invalid JSON.
+        write_synth_skill_mcp(
+            tmp.path(),
+            version,
+            "decision-record",
+            r#"{ NOT VALID JSON "#,
+        );
+
+        // Act: must NOT return an error — graceful degradation.
+        let result = collect_processkit_mcp_specs(tmp.path(), version, None, &[]);
+        assert!(
+            result.is_ok(),
+            "corrupt per-skill config must not propagate an error; got: {:?}",
+            result.err()
+        );
+
+        let specs = result.unwrap();
+
+        // The valid skill's server must be present.
+        let names: Vec<&str> = specs.iter().map(|s| s.name.as_str()).collect();
+        assert!(
+            names.contains(&"workitem-management"),
+            "valid skill's server must be in the result; got names: {:?}",
+            names
+        );
+    }
+
+    #[test]
+    fn collect_corrupt_config_triggers_kernel_fallback_for_missing_kernel_skills() {
+        // Arrange: a corrupt skill plus a valid kernel skill (index-management)
+        // that is NOT the same as the valid skill used above. When the corrupt
+        // file is encountered the kernel fallback path re-reads the kernel
+        // skills' configs from the mirror and includes them.
+        let tmp = TempDir::new().unwrap();
+        let version = crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION;
+
+        // Valid kernel skill that will be discovered via kernel fallback.
+        write_synth_skill_mcp(
+            tmp.path(),
+            version,
+            "index-management",
+            r#"{"mcpServers":{"index-management":{"command":"uv","args":[]}}}"#,
+        );
+
+        // Another valid kernel skill.
+        write_synth_skill_mcp(
+            tmp.path(),
+            version,
+            "id-management",
+            r#"{"mcpServers":{"id-management":{"command":"uv","args":[]}}}"#,
+        );
+
+        // Corrupt skill triggers the fallback path.
+        write_synth_skill_mcp(
+            tmp.path(),
+            version,
+            "event-log",
+            r#"{ CORRUPT "#,
+        );
+
+        let result = collect_processkit_mcp_specs(tmp.path(), version, None, &[]);
+        assert!(result.is_ok(), "must not error on corrupt config");
+
+        let specs = result.unwrap();
+        let names: Vec<&str> = specs.iter().map(|s| s.name.as_str()).collect();
+
+        // Both valid kernel skills must appear — they were force-included
+        // by the kernel fallback after the parse error was detected.
+        assert!(
+            names.contains(&"index-management"),
+            "kernel fallback must include index-management; got: {:?}",
+            names
+        );
+        assert!(
+            names.contains(&"id-management"),
+            "kernel fallback must include id-management; got: {:?}",
+            names
         );
     }
 }

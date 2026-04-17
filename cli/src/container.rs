@@ -1210,6 +1210,20 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             {
                 output::warn(&format!("MCP registration failed: {}", e));
             }
+            // Wire processkit enforcement hooks into harness config files.
+            // Best-effort: a hook-registration failure must not abort init.
+            if let Err(e) =
+                crate::hook_registration::regenerate_hook_configs(&config, &project_root)
+            {
+                output::warn(&format!("Hook registration failed: {}", e));
+            }
+            // Surface the processkit compliance contract to each harness.
+            // Best-effort.
+            if let Err(e) =
+                crate::compliance::regenerate_compliance_configs(&config, &project_root)
+            {
+                output::warn(&format!("Compliance config generation failed: {}", e));
+            }
             // Sync processkit command adapter files to .claude/commands/
             // so Claude Code can tab-complete them. Best-effort.
             if let Err(e) = crate::claude_commands::sync_claude_commands(&project_root, &config) {
@@ -1524,6 +1538,16 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
     if let Ok(cwd) = std::env::current_dir() {
         if let Err(e) = crate::mcp_registration::regenerate_mcp_configs(&config, &cwd) {
             output::warn(&format!("MCP registration failed: {}", e));
+        }
+        // Wire processkit enforcement hooks into harness config files.
+        // Best-effort: a hook-registration failure must not abort sync.
+        if let Err(e) = crate::hook_registration::regenerate_hook_configs(&config, &cwd) {
+            output::warn(&format!("Hook registration failed: {}", e));
+        }
+        // Surface the processkit compliance contract to each harness
+        // (drift check, Cursor rules, Aider conf). Best-effort.
+        if let Err(e) = crate::compliance::regenerate_compliance_configs(&config, &cwd) {
+            output::warn(&format!("Compliance config generation failed: {}", e));
         }
         // Sync processkit command adapter files to .claude/commands/
         // so Claude Code can tab-complete them. Best-effort.

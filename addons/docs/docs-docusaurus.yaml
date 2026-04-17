@@ -12,8 +12,8 @@ builder_weight: null
 tools:
   - name: docusaurus
     default_enabled: true
-    default_version: "3.8"
-    supported_versions: ["3.8"]
+    default_version: "3.7.0"
+    supported_versions: ["3.7.0"]
 
 builder: null
 

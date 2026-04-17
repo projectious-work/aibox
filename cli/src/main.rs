@@ -11,6 +11,7 @@ mod audio;
 mod audit;
 mod claude_commands;
 mod cli;
+mod compliance;
 mod config;
 mod container;
 #[allow(dead_code)]
@@ -28,6 +29,7 @@ mod generate;
 #[allow(dead_code)]
 mod lock;
 mod log;
+mod hook_registration;
 mod mcp_registration;
 mod migration;
 mod output;
