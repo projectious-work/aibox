@@ -96,7 +96,12 @@ do_run() {
   which aibox
 
   step "step 1 — aibox init (fresh project at $project_dir)"
-  ( cd "$project_dir" && aibox init --name canary ) || log "WARN: aibox init failed"
+  ( cd "$project_dir" && aibox init \
+      --name canary \
+      --yes \
+      --ai claude \
+      --process managed \
+      --processkit-version "$FROM_PK_VERSION" ) || log "WARN: aibox init failed"
   ls -la "$project_dir"
 
   step "step 2 — pin baseline: aibox=${FROM_VERSION}, processkit=${FROM_PK_VERSION}"
