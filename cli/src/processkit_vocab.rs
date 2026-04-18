@@ -37,6 +37,10 @@ pub const PROCESSKIT_GIT_SOURCE: &str = "https://github.com/projectious-work/pro
 /// be replicated by hand-editing files. A minimal-tier install that omits any of
 /// these breaks entity-layer correctness silently.
 ///
+/// Includes `skill-gate` (the PreToolUse compliance gate) so that
+/// `acknowledge_contract()` is reachable in every harness session by force,
+/// not just when the user explicitly enables the skill-gate package tier.
+///
 /// Values are skill *directory names* (e.g. `"index-management"`) as they appear
 /// under `context/skills/` in the templates mirror. The MCP server name shipped
 /// in each skill's `mcp/mcp-config.json` follows the `processkit-{skill}` convention.
@@ -49,19 +53,21 @@ pub const MANDATORY_MCP_SKILLS: &[&str] = &[
     "event-log",
     "id-management",
     "index-management",
+    "skill-gate",
     "workitem-management",
 ];
 
-/// The 8 kernel MCP skills that are force-included in every harness config when
+/// The kernel MCP skills that are force-included in every harness config when
 /// any per-skill `mcp/mcp-config.json` fails to parse. These are the essential
 /// servers that underpin entity-layer correctness, governance, and skill
 /// discovery. When a corrupt config is detected, aibox logs a warning and
 /// falls back to this set so that the remaining working skills are still
 /// registered and harness configs are not left empty.
 ///
-/// This is a superset of [`MANDATORY_MCP_SKILLS`] — it adds `skill-finder`,
-/// `skill-gate`, and `task-router` which are always needed for team operation
-/// even though they are not strictly entity-layer invariants.
+/// This is a superset of [`MANDATORY_MCP_SKILLS`] — it adds `skill-finder`
+/// and `task-router` which are always needed for team operation even though
+/// they are not strictly entity-layer invariants. `skill-gate` is now in
+/// [`MANDATORY_MCP_SKILLS`] so it is present here implicitly via that set.
 ///
 /// Values are skill directory names under `context/skills/`.
 pub const KERNEL_MCP_SKILLS: &[&str] = &[

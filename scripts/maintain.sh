@@ -270,6 +270,9 @@ cmd_docs_serve() {
 
 cmd_docs_deploy() {
   local dry_run=false
+  # Bug (b): declare tmpdir early so the EXIT trap below never sees an unbound
+  # variable under set -u if the function exits before reaching mktemp -d.
+  local tmpdir=""
   [[ "${1:-}" == "--dry-run" ]] && dry_run=true
 
   command -v npx &>/dev/null    || die "npx not found. Install Node.js."
@@ -296,9 +299,9 @@ cmd_docs_deploy() {
     return 0
   fi
 
-  local tmpdir
   tmpdir=$(mktemp -d)
-  trap 'rm -rf "${tmpdir}"' EXIT
+  # Bug (b): use ${tmpdir:-} so trap is safe even if mktemp never ran (set -u).
+  trap '[[ -n "${tmpdir:-}" ]] && rm -rf "${tmpdir}"' EXIT
 
   cp -r build/* "${tmpdir}/"
   touch "${tmpdir}/.nojekyll"
@@ -308,7 +311,13 @@ cmd_docs_deploy() {
   git init -q
   git checkout -q -b gh-pages
   git add -A
-  git commit -q -m "${commit_msg}"
+  # Bug (a): fresh worktree has no user identity; devcontainer git has none by
+  # default. Read from the project git config; fall back to a release-bot identity.
+  local git_user git_email
+  git_user=$(git -C "${PROJECT_ROOT}" config user.name  2>/dev/null || echo "aibox-release-bot")
+  git_email=$(git -C "${PROJECT_ROOT}" config user.email 2>/dev/null || echo "release@aibox.local")
+  git -c "user.name=${git_user}" -c "user.email=${git_email}" \
+    commit -q -m "${commit_msg}"
   git push --force "${remote_url}" gh-pages:gh-pages
   cd "${PROJECT_ROOT}"
   ok "Deployed to gh-pages branch"

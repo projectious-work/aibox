@@ -34,7 +34,8 @@
 //!
 //! See projectious-work/aibox#37 for the full spec.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 
@@ -130,47 +131,106 @@ pub fn sync_claude_commands(project_root: &Path, config: &AiboxConfig) -> Result
     Ok(())
 }
 
-/// Walk `skills_dir/*/commands/*.md` and return a set of all command
-/// filenames (basenames only). Used to build the universe from the
+/// Walk `skills_dir/<category>/<skill>/commands/*.md` and return a set of all
+/// command filenames (basenames only). Used to build the universe from the
 /// templates mirror.
+///
+/// The layout is two levels deep: `skills_dir/<category>/<skill>/commands/`.
+/// Top-level non-directory entries (e.g. `INDEX.md`) are skipped gracefully.
+///
+/// Emits a warning (last-wins) when the same command filename appears in two
+/// different skill directories across categories.
 fn collect_command_filenames(skills_dir: &Path) -> HashSet<String> {
     let mut set = HashSet::new();
-    let Ok(entries) = fs::read_dir(skills_dir) else {
+    // Collision guard: filename → category/skill path of first occurrence.
+    let mut seen: HashMap<String, std::path::PathBuf> = HashMap::new();
+    let Ok(categories) = fs::read_dir(skills_dir) else {
         return set;
     };
-    for entry in entries.flatten() {
-        let commands_dir = entry.path().join("commands");
-        let Ok(cmd_entries) = fs::read_dir(&commands_dir) else {
+    for category in categories.flatten() {
+        if !category.path().is_dir() {
+            continue;
+        }
+        let Ok(skills) = fs::read_dir(category.path()) else {
             continue;
         };
-        for cmd in cmd_entries.flatten() {
-            let name = cmd.file_name();
-            let Some(s) = name.to_str() else { continue };
-            if s.ends_with(".md") {
-                set.insert(s.to_string());
+        for skill in skills.flatten() {
+            let commands_dir = skill.path().join("commands");
+            let Ok(cmd_entries) = fs::read_dir(&commands_dir) else {
+                continue;
+            };
+            for cmd in cmd_entries.flatten() {
+                let name = cmd.file_name();
+                let Some(s) = name.to_str() else { continue };
+                if s.ends_with(".md") {
+                    if let Some(prev) = seen.get(s)
+                        && prev != &skill.path()
+                    {
+                        crate::output::warn(&format!(
+                            "duplicate command filename '{s}' found in \
+                             '{prev}' and '{cur}' — last-wins; \
+                             '{cur}' takes precedence. \
+                             Disambiguate upstream to silence this warning.",
+                            prev = prev.display(),
+                            cur = skill.path().display(),
+                        ));
+                    }
+                    seen.insert(s.to_string(), skill.path());
+                    set.insert(s.to_string());
+                }
             }
         }
     }
     set
 }
 
-/// Walk `skills_dir/*/commands/*.md` and return a map of filename → source
-/// path. Used to build the wanted set from the live installed skills.
+/// Walk `skills_dir/<category>/<skill>/commands/*.md` and return a map of
+/// filename → source path. Used to build the wanted set from the live
+/// installed skills.
+///
+/// The layout is two levels deep: `skills_dir/<category>/<skill>/commands/`.
+/// Top-level non-directory entries (e.g. `INDEX.md`) are skipped gracefully.
+///
+/// Emits a warning (last-wins) when the same command filename appears in two
+/// different skill directories across categories.
 fn collect_live_commands(skills_dir: &Path) -> HashMap<String, std::path::PathBuf> {
-    let mut map = HashMap::new();
-    let Ok(entries) = fs::read_dir(skills_dir) else {
+    let mut map: HashMap<String, std::path::PathBuf> = HashMap::new();
+    // Collision guard: filename → skill path of first occurrence.
+    let mut seen_skill: HashMap<String, std::path::PathBuf> = HashMap::new();
+    let Ok(categories) = fs::read_dir(skills_dir) else {
         return map;
     };
-    for entry in entries.flatten() {
-        let commands_dir = entry.path().join("commands");
-        let Ok(cmd_entries) = fs::read_dir(&commands_dir) else {
+    for category in categories.flatten() {
+        if !category.path().is_dir() {
+            continue;
+        }
+        let Ok(skills) = fs::read_dir(category.path()) else {
             continue;
         };
-        for cmd in cmd_entries.flatten() {
-            let name = cmd.file_name();
-            let Some(s) = name.to_str() else { continue };
-            if s.ends_with(".md") {
-                map.insert(s.to_string(), cmd.path());
+        for skill in skills.flatten() {
+            let commands_dir = skill.path().join("commands");
+            let Ok(cmd_entries) = fs::read_dir(&commands_dir) else {
+                continue;
+            };
+            for cmd in cmd_entries.flatten() {
+                let name = cmd.file_name();
+                let Some(s) = name.to_str() else { continue };
+                if s.ends_with(".md") {
+                    if let Some(prev) = seen_skill.get(s)
+                        && prev != &skill.path()
+                    {
+                        crate::output::warn(&format!(
+                            "duplicate command filename '{s}' found in \
+                             '{prev}' and '{cur}' — last-wins; \
+                             '{cur}' takes precedence. \
+                             Disambiguate upstream to silence this warning.",
+                            prev = prev.display(),
+                            cur = skill.path().display(),
+                        ));
+                    }
+                    seen_skill.insert(s.to_string(), skill.path());
+                    map.insert(s.to_string(), cmd.path());
+                }
             }
         }
     }
@@ -245,8 +305,16 @@ mod tests {
     use super::*;
     use std::fs;
 
-    fn make_skill_commands(skills_dir: &Path, skill: &str, commands: &[&str], content: &str) {
-        let cmd_dir = skills_dir.join(skill).join("commands");
+    /// Create `skills_dir/<category>/<skill>/commands/<name>` entries.
+    /// The two-level layout matches the real processkit skills tree.
+    fn make_skill_commands(
+        skills_dir: &Path,
+        category: &str,
+        skill: &str,
+        commands: &[&str],
+        content: &str,
+    ) {
+        let cmd_dir = skills_dir.join(category).join(skill).join("commands");
         fs::create_dir_all(&cmd_dir).unwrap();
         for name in commands {
             fs::write(cmd_dir.join(name), content).unwrap();
@@ -296,12 +364,14 @@ mod tests {
         let skills = tmp.path().join("skills");
         make_skill_commands(
             &skills,
+            "processkit",
             "session-handover",
             &["session-handover-write.md", "session-handover-read.md"],
             "body",
         );
         make_skill_commands(
             &skills,
+            "processkit",
             "morning-briefing",
             &["morning-briefing-run.md"],
             "body",
@@ -309,12 +379,15 @@ mod tests {
         // Non-.md file should be ignored
         fs::write(
             skills
+                .join("processkit")
                 .join("session-handover")
                 .join("commands")
                 .join("ignore.txt"),
             "x",
         )
         .unwrap();
+        // Top-level non-directory file should be ignored gracefully
+        fs::write(skills.join("INDEX.md"), "index").unwrap();
 
         let set = collect_command_filenames(&skills);
         assert_eq!(set.len(), 3);
@@ -330,6 +403,7 @@ mod tests {
         let skills = tmp.path().join("skills");
         make_skill_commands(
             &skills,
+            "processkit",
             "note-management",
             &["note-management-capture.md"],
             "content",
@@ -345,14 +419,14 @@ mod tests {
         let tmp = tempfile::tempdir().unwrap();
         let project = tmp.path();
 
-        // Mirror: knows about two commands from two skills (v0.8.0 layout)
+        // Mirror: knows about two commands from two skills (two-level layout)
         let mirror = project.join("context/templates/processkit/v0.8.0/context/skills");
-        make_skill_commands(&mirror, "skill-a", &["skill-a-run.md"], "body");
-        make_skill_commands(&mirror, "skill-b", &["skill-b-run.md"], "body");
+        make_skill_commands(&mirror, "cat-a", "skill-a", &["skill-a-run.md"], "body");
+        make_skill_commands(&mirror, "cat-b", "skill-b", &["skill-b-run.md"], "body");
 
         // Live: only skill-a is installed (skill-b was removed from effective set)
         let live = project.join("context/skills");
-        make_skill_commands(&live, "skill-a", &["skill-a-run.md"], "# command");
+        make_skill_commands(&live, "cat-a", "skill-a", &["skill-a-run.md"], "# command");
 
         // Pre-place a stale skill-b command that was previously installed
         let claude_cmds = project.join(".claude/commands");
@@ -387,11 +461,11 @@ mod tests {
         let tmp = tempfile::tempdir().unwrap();
         let project = tmp.path();
 
-        let mirror = project.join("context/templates/processkit/v0.7.0/skills");
-        make_skill_commands(&mirror, "skill-a", &["skill-a-run.md"], "body");
+        let mirror = project.join("context/templates/processkit/v0.8.0/context/skills");
+        make_skill_commands(&mirror, "cat-a", "skill-a", &["skill-a-run.md"], "body");
 
         let live = project.join("context/skills");
-        make_skill_commands(&live, "skill-a", &["skill-a-run.md"], "body");
+        make_skill_commands(&live, "cat-a", "skill-a", &["skill-a-run.md"], "body");
 
         let claude_cmds = project.join(".claude/commands");
         fs::create_dir_all(&claude_cmds).unwrap();
@@ -402,7 +476,7 @@ mod tests {
             .modified()
             .unwrap();
 
-        let config = config_with_pk_version("v0.7.0");
+        let config = config_with_pk_version("v0.8.0");
 
         sync_claude_commands(project, &config).unwrap();
 
@@ -422,5 +496,108 @@ mod tests {
         // Should not create .claude/commands/ or touch anything
         sync_claude_commands(tmp.path(), &config).unwrap();
         assert!(!tmp.path().join(".claude/commands").exists());
+    }
+
+    /// Regression test for the two-level skills layout bug.
+    ///
+    /// Before the fix, `collect_command_filenames` and `collect_live_commands`
+    /// only walked one level deep (`skills/<skill>/commands/`), so they found
+    /// nothing in the real two-level layout (`skills/<category>/<skill>/commands/`).
+    /// This caused `sync_claude_commands` to early-exit and never create
+    /// `.claude/commands/`.
+    /// Test 9 (aibox#53 Q2): duplicate command basename across categories emits
+    /// a warning and exactly one source path wins (last-wins semantics).
+    #[test]
+    fn collect_warns_on_duplicate_command_basename_across_categories() {
+        let tmp = tempfile::tempdir().unwrap();
+        let skills = tmp.path().join("skills");
+        // Two skills in different categories both ship pk-foo.md.
+        make_skill_commands(
+            &skills,
+            "engineering",
+            "bar",
+            &["pk-foo.md"],
+            "# engineering",
+        );
+        make_skill_commands(&skills, "devops", "baz", &["pk-foo.md"], "# devops");
+
+        // collect_command_filenames: filename set must contain pk-foo.md (once).
+        let set = collect_command_filenames(&skills);
+        assert!(
+            set.contains("pk-foo.md"),
+            "pk-foo.md must be in the universe set; got: {:?}",
+            set
+        );
+        assert_eq!(set.len(), 1, "only one entry for the duplicate filename");
+
+        // collect_live_commands: map must contain pk-foo.md (once, last-wins).
+        let map = collect_live_commands(&skills);
+        assert!(
+            map.contains_key("pk-foo.md"),
+            "pk-foo.md must be in the live map; got: {:?}",
+            map
+        );
+        assert_eq!(map.len(), 1, "only one entry for the duplicate filename");
+    }
+
+    #[test]
+    fn sync_two_level_layout_copies_pk_commands() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+
+        // Mirror: two-level layout matching real processkit tree
+        let mirror = project.join("context/templates/processkit/v0.18.1/context/skills");
+        make_skill_commands(
+            &mirror,
+            "processkit",
+            "note-management",
+            &["pk-note.md"],
+            "# pk-note mirror",
+        );
+        make_skill_commands(
+            &mirror,
+            "devops",
+            "release-semver",
+            &["pk-release.md"],
+            "# pk-release mirror",
+        );
+
+        // Live: same two-level layout
+        let live = project.join("context/skills");
+        make_skill_commands(
+            &live,
+            "processkit",
+            "note-management",
+            &["pk-note.md"],
+            "# pk-note content",
+        );
+        make_skill_commands(
+            &live,
+            "devops",
+            "release-semver",
+            &["pk-release.md"],
+            "# pk-release content",
+        );
+
+        let config = config_with_pk_version("v0.18.1");
+        sync_claude_commands(project, &config).unwrap();
+
+        let claude_cmds = project.join(".claude/commands");
+        assert!(
+            claude_cmds.join("pk-note.md").exists(),
+            ".claude/commands/pk-note.md should have been created"
+        );
+        assert!(
+            claude_cmds.join("pk-release.md").exists(),
+            ".claude/commands/pk-release.md should have been created"
+        );
+        assert_eq!(
+            fs::read_to_string(claude_cmds.join("pk-note.md")).unwrap(),
+            "# pk-note content"
+        );
+        assert_eq!(
+            fs::read_to_string(claude_cmds.join("pk-release.md")).unwrap(),
+            "# pk-release content"
+        );
     }
 }
