@@ -398,6 +398,16 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
         }
     }
 
+    // Hard-fail safety rail (v0.18.7): every script path referenced by a
+    // merged MCP server must exist on disk. Caught aibox#NN where 12/16
+    // processkit per-skill mcp-config.json files shipped paths missing the
+    // `processkit/` category prefix introduced in v0.17.0 — sync wrote a
+    // `.mcp.json` that named files that didn't exist, so harnesses logged
+    // an opaque "MCP startup failed: connection closed" for two releases
+    // before anyone noticed. Failing here is loud and actionable; silently
+    // emitting a broken config is the failure mode we never want again.
+    validate_script_paths(&specs, project_root)?;
+
     let managed = managed_set(&specs);
     let providers: HashSet<&AiProvider> = config.ai.harnesses.iter().collect();
 
@@ -480,6 +490,55 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
     }
 
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Safety rail: validate emitted script paths
+// ---------------------------------------------------------------------------
+
+/// Verify every script path referenced in `specs` exists on disk.
+///
+/// Scans each spec's `args` for entries that look like a project-root-relative
+/// path to a Python MCP server script under `context/`. If any are missing,
+/// aggregates them into a single error so the operator sees the full picture
+/// at once instead of fixing them one-at-a-time. Failing here means the
+/// merge has produced a `.mcp.json` (or equivalent) that would point at
+/// non-existent scripts — strictly better to fail at sync time than to ship
+/// a broken config and have the harness emit opaque connection-closed errors.
+fn validate_script_paths(specs: &[McpServerSpec], project_root: &Path) -> Result<()> {
+    let mut missing: Vec<(String, String)> = Vec::new();
+    for spec in specs {
+        for arg in &spec.args {
+            // Only validate entries that look like project-root-relative
+            // paths to a shipped Python MCP server script.
+            if !arg.ends_with(".py") || !arg.starts_with("context/") {
+                continue;
+            }
+            if !project_root.join(arg).is_file() {
+                missing.push((spec.name.clone(), arg.clone()));
+            }
+        }
+    }
+    if missing.is_empty() {
+        return Ok(());
+    }
+    for (name, path) in &missing {
+        output::error(&format!(
+            "MCP server '{name}' references script '{path}' which does not exist \
+             under the project root. The per-skill mcp-config.json likely has a \
+             stale path (e.g. missing the `processkit/` category prefix introduced \
+             in processkit v0.17.0). Fix upstream and re-run `aibox sync`."
+        ));
+    }
+    Err(anyhow::anyhow!(
+        "MCP script-path validation failed: {} server(s) reference missing scripts: {}",
+        missing.len(),
+        missing
+            .iter()
+            .map(|(n, p)| format!("{n} -> {p}"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    ))
 }
 
 // ---------------------------------------------------------------------------
@@ -789,6 +848,23 @@ mod tests {
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("mcp-config.json");
         fs::write(&path, json_body).unwrap();
+
+        // v0.18.7 safety rail: regenerate_mcp_configs validates that every
+        // script path referenced by a merged spec exists under the project
+        // root. In production both the templates mirror and the live skills
+        // tree are populated by sync; in tests we only build the mirror, so
+        // also touch a stub at the conventional project-root-relative path
+        // so regenerate_mcp_configs doesn't reject the test fixture as
+        // "stale path."
+        let live_skill_dir = mirror_root
+            .join(crate::processkit_vocab::src::CONTEXT_DIR)
+            .join(crate::processkit_vocab::src::SKILLS)
+            .join(category)
+            .join(skill)
+            .join("mcp");
+        fs::create_dir_all(&live_skill_dir).unwrap();
+        fs::write(live_skill_dir.join("server.py"), "# test stub\n").unwrap();
+
         path
     }
 
@@ -1699,5 +1775,67 @@ args = ["server.js"]
              not in effective filter; got: {:?}",
             names
         );
+    }
+
+    // ── safety rail tests (v0.18.7) ──────────────────────────────────────
+
+    fn spec_with_args(name: &str, args: Vec<&str>) -> McpServerSpec {
+        McpServerSpec {
+            name: name.to_string(),
+            command: "uv".to_string(),
+            args: args.into_iter().map(String::from).collect(),
+            env: BTreeMap::new(),
+        }
+    }
+
+    #[test]
+    fn validate_script_paths_passes_when_all_exist() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+        let script_rel = "context/skills/processkit/foo/mcp/server.py";
+        let script_abs = root.join(script_rel);
+        fs::create_dir_all(script_abs.parent().unwrap()).unwrap();
+        fs::write(&script_abs, "# fake server\n").unwrap();
+
+        let specs = vec![spec_with_args("processkit-foo", vec!["run", script_rel])];
+        validate_script_paths(&specs, root).expect("all paths exist; should pass");
+    }
+
+    #[test]
+    fn validate_script_paths_fails_with_offending_server_in_error() {
+        let tmp = TempDir::new().unwrap();
+        let specs = vec![spec_with_args(
+            "processkit-broken",
+            vec!["run", "context/skills/broken/mcp/server.py"],
+        )];
+        let err = validate_script_paths(&specs, tmp.path())
+            .expect_err("missing path; should fail");
+        let msg = format!("{err}");
+        assert!(
+            msg.contains("processkit-broken"),
+            "error must name the offending server: {msg}"
+        );
+        assert!(
+            msg.contains("context/skills/broken/mcp/server.py"),
+            "error must include the missing path: {msg}"
+        );
+    }
+
+    #[test]
+    fn validate_script_paths_skips_specs_without_script_path_args() {
+        // Servers whose args don't reference a context/*.py path (e.g. a
+        // user-added npx-based MCP server) should be ignored — the safety
+        // rail targets shipped Python scripts only.
+        let tmp = TempDir::new().unwrap();
+        let specs = vec![
+            McpServerSpec {
+                name: "user-thing".to_string(),
+                command: "npx".to_string(),
+                args: vec!["-y".to_string(), "@example/mcp-server".to_string()],
+                env: BTreeMap::new(),
+            },
+            spec_with_args("no-args", vec![]),
+        ];
+        validate_script_paths(&specs, tmp.path()).expect("non-script specs should be ignored");
     }
 }

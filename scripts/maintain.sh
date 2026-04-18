@@ -322,13 +322,21 @@ cmd_docs_deploy() {
   cd "${PROJECT_ROOT}"
   ok "Deployed to gh-pages branch"
 
-  # Configure GitHub Pages if gh is available
+  # Configure GitHub Pages if gh is available. Probe-first: only POST when
+  # Pages doesn't exist yet. Avoids the spurious "Could not configure"
+  # warning we used to print on every release because PUT 422s when Pages
+  # is already managed by an Actions workflow or already pinned to gh-pages
+  # with identical settings.
   if command -v gh &>/dev/null && [[ -n "${repo_slug}" ]]; then
-    info "Configuring GitHub Pages for ${repo_slug}..."
-    gh api --method PUT "repos/${repo_slug}/pages" \
-      -f "source[branch]=gh-pages" -f "source[path]=/" \
-      --silent 2>/dev/null && ok "GitHub Pages configured" \
-      || warn "Could not configure Pages automatically"
+    if gh api "repos/${repo_slug}/pages" --silent 2>/dev/null; then
+      ok "GitHub Pages already configured (skipping)"
+    elif gh api --method POST "repos/${repo_slug}/pages" \
+           -f "source[branch]=gh-pages" -f "source[path]=/" \
+           --silent 2>/dev/null; then
+      ok "GitHub Pages configured"
+    else
+      warn "Pages auto-config skipped (likely managed by an Actions workflow — non-fatal)"
+    fi
   fi
 
   echo ""

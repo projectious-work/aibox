@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "run",
-        "context/skills/model-recommender/mcp/server.py"
+        "context/skills/processkit/model-recommender/mcp/server.py"
       ],
       "env": {}
     }

@@ -33,10 +33,22 @@ use crate::output;
 const COMPLIANCE_CONTRACT_REL: &str =
     "context/skills/processkit/skill-gate/assets/compliance-contract.md";
 
-/// BEGIN marker for the embedded block in AGENTS.md (v1).
-const AGENTS_BLOCK_BEGIN: &str = "<!-- pk-compliance-contract v1 BEGIN -->";
-/// END marker for the embedded block in AGENTS.md (v1).
-const AGENTS_BLOCK_END: &str = "<!-- pk-compliance-contract v1 END -->";
+/// BEGIN/END markers for the embedded block in AGENTS.md.
+///
+/// processkit ships two contract revisions in the wild as of v0.18.1:
+///   v1 — the original contract (what skill-gate's hook still emits).
+///   v2 — adds the `skip_decision_record` clause (template ships this,
+///        but the matching MCP tool isn't released upstream yet).
+///
+/// We accept either version so the drift checker doesn't false-alarm on
+/// projects whose AGENTS.md template was synced from a v2-flavored
+/// processkit release while the canonical contract source is still v1.
+/// When upstream reconciles (and ships `skip_decision_record`), drop the
+/// v1 entries and re-pin to v2 only.
+const AGENTS_BLOCK_BEGIN_V1: &str = "<!-- pk-compliance-contract v1 BEGIN -->";
+const AGENTS_BLOCK_END_V1: &str = "<!-- pk-compliance-contract v1 END -->";
+const AGENTS_BLOCK_BEGIN_V2: &str = "<!-- pk-compliance-contract v2 BEGIN -->";
+const AGENTS_BLOCK_END_V2: &str = "<!-- pk-compliance-contract v2 END -->";
 
 // ---------------------------------------------------------------------------
 // Issue #46 — drift detection
@@ -64,13 +76,19 @@ pub fn check_compliance_contract_drift(project_root: &Path) -> Result<()> {
     let agents_content = fs::read_to_string(&agents_path)
         .with_context(|| format!("reading AGENTS.md: {}", agents_path.display()))?;
 
-    let embedded = extract_block(&agents_content, AGENTS_BLOCK_BEGIN, AGENTS_BLOCK_END);
+    // Try v1 markers first (matches the canonical source); fall back to v2.
+    // If the embedded block uses v2 markers but the canonical is v1, we treat
+    // the structural mismatch as expected (transitional state) and emit only
+    // an info-level note instead of a drift warning — the contract texts are
+    // a strict superset, so behavioral guarantees still hold.
+    let embedded_v1 = extract_block(&agents_content, AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1);
+    let embedded_v2 = extract_block(&agents_content, AGENTS_BLOCK_BEGIN_V2, AGENTS_BLOCK_END_V2);
 
-    match embedded {
-        None => {
+    match (embedded_v1, embedded_v2) {
+        (None, None) => {
             // Block markers not present — nothing to compare.
         }
-        Some(block) => {
+        (Some(block), _) => {
             if block.trim() != canonical.trim() {
                 output::warn(
                     "Compliance contract in AGENTS.md differs from the canonical source at \
@@ -78,6 +96,16 @@ pub fn check_compliance_contract_drift(project_root: &Path) -> Result<()> {
                 );
                 output::warn("Run `aibox sync --fix-compliance-contract` to update AGENTS.md.");
             }
+        }
+        (None, Some(_)) => {
+            // AGENTS.md uses v2 markers; canonical is still v1. Transitional —
+            // skip-tolerant comparison until upstream ships `skip_decision_record`
+            // and reconciles skill-gate to v2. See aibox CHANGELOG v0.18.7.
+            output::info(
+                "AGENTS.md ships pk-compliance v2 markers; canonical source is still v1. \
+                 Drift check skipped (v2 is a strict superset of v1). Will re-pin once \
+                 upstream processkit reconciles skill-gate to v2.",
+            );
         }
     }
 
@@ -252,7 +280,7 @@ mod tests {
         // Write AGENTS.md with a stale embedded block.
         let agents = format!(
             "{}\nstale content\n{}",
-            AGENTS_BLOCK_BEGIN, AGENTS_BLOCK_END
+            AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1
         );
         fs::write(root.join("AGENTS.md"), agents).unwrap();
 
@@ -271,7 +299,7 @@ mod tests {
 
         let agents = format!(
             "{}\ncanonical content\n{}",
-            AGENTS_BLOCK_BEGIN, AGENTS_BLOCK_END
+            AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1
         );
         fs::write(root.join("AGENTS.md"), agents).unwrap();
 

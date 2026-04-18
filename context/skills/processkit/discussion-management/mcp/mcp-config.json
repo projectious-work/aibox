@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "run",
-        "context/skills/discussion-management/mcp/server.py"
+        "context/skills/processkit/discussion-management/mcp/server.py"
       ],
       "env": {}
     }

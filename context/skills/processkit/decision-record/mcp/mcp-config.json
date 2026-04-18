@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "run",
-        "context/skills/decision-record/mcp/server.py"
+        "context/skills/processkit/decision-record/mcp/server.py"
       ],
       "env": {}
     }

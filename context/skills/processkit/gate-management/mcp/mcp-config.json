@@ -4,7 +4,7 @@
       "command": "uv",
       "args": [
         "run",
-        "context/skills/gate-management/mcp/server.py"
+        "context/skills/processkit/gate-management/mcp/server.py"
       ],
       "env": {}
     }

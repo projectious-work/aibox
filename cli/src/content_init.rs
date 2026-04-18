@@ -341,29 +341,67 @@ pub fn install_content_source(project_root: &Path, config: &AiboxConfig) -> Resu
     )
     .context("failed to copy cache to templates dir")?;
 
-    // 5. Write the top-level aibox.lock (always — fresh timestamps every run).
-    //    The [aibox] section captures the CLI version that performed this
-    //    install (DEC-037 — absorbs the legacy .aibox-version). The
-    //    [processkit] section captures the install state of processkit.
-    let now = Utc::now().to_rfc3339();
-    // Preserve existing addons lock section (resolved tool versions).
-    let existing_addons = lock::read_lock(project_root)
-        .ok()
-        .flatten()
-        .and_then(|l| l.addons);
+    // 5. Write the top-level aibox.lock — but only when something actually
+    //    changed. v0.18.7: previously this regenerated `synced_at` and
+    //    `installed_at` on every sync, so a clean container rebuild dirtied
+    //    `git status` even when no code/template/version had moved. Now we
+    //    read the existing lock first, build the prospective lock with the
+    //    OLD timestamps, and only mint fresh ones if any other field would
+    //    change. The lock then accurately records *when state last changed*,
+    //    not *when sync last ran*.
+    let existing_lock = lock::read_lock(project_root).ok().flatten();
+    let existing_addons = existing_lock.as_ref().and_then(|l| l.addons.clone());
+
+    let prospective_pk = lock::ProcessKitLockSection {
+        source: pk.source.clone(),
+        version: pk.version.clone(),
+        src_path: pk.src_path.clone(),
+        branch: pk.branch.clone(),
+        resolved_commit: fetched.resolved_commit.clone(),
+        release_asset_sha256: fetched.release_asset_sha256.clone(),
+        // Filled in below — either reused from existing lock (no-change case)
+        // or set to `now` (change case).
+        installed_at: String::new(),
+    };
+
+    let cli_version = env!("CARGO_PKG_VERSION").to_string();
+
+    // Compare ignoring timestamps: would anything else differ?
+    let unchanged = existing_lock.as_ref().is_some_and(|prev| {
+        prev.aibox.cli_version == cli_version
+            && prev.processkit.as_ref().is_some_and(|p| {
+                p.source == prospective_pk.source
+                    && p.version == prospective_pk.version
+                    && p.src_path == prospective_pk.src_path
+                    && p.branch == prospective_pk.branch
+                    && p.resolved_commit == prospective_pk.resolved_commit
+                    && p.release_asset_sha256 == prospective_pk.release_asset_sha256
+            })
+            && prev.addons == existing_addons
+    });
+
+    let (synced_at, installed_at) = if unchanged {
+        let prev = existing_lock.as_ref().unwrap();
+        (
+            prev.aibox.synced_at.clone(),
+            prev.processkit
+                .as_ref()
+                .map(|p| p.installed_at.clone())
+                .unwrap_or_default(),
+        )
+    } else {
+        let now = Utc::now().to_rfc3339();
+        (now.clone(), now)
+    };
+
     let aibox_lock = AiboxLock {
         aibox: lock::AiboxLockSection {
-            cli_version: env!("CARGO_PKG_VERSION").to_string(),
-            synced_at: now.clone(),
+            cli_version,
+            synced_at,
         },
         processkit: Some(lock::ProcessKitLockSection {
-            source: pk.source.clone(),
-            version: pk.version.clone(),
-            src_path: pk.src_path.clone(),
-            branch: pk.branch.clone(),
-            resolved_commit: fetched.resolved_commit.clone(),
-            release_asset_sha256: fetched.release_asset_sha256.clone(),
-            installed_at: now,
+            installed_at,
+            ..prospective_pk
         }),
         addons: existing_addons,
     };

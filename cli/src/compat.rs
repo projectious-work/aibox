@@ -170,6 +170,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.18.1",
         note: "MCP-merge release: fixes the flat one-level walker bug in mcp_registration.rs and claude_commands.rs that prevented .mcp.json and .claude/commands/ from being populated against the category-nested skills tree (aibox#53); promotes skill-gate to MANDATORY_MCP_SKILLS so acknowledge_contract() is reachable on every harness session and the PreToolUse compliance gate is satisfiable out of the box; adds collision guard for duplicate skill basenames across categories; repairs cmd_docs_deploy (gh-pages worktree git identity + tmpdir unbound trap).",
     },
+    CompatEntry {
+        aibox_version: "0.18.7",
+        processkit_version: "v0.18.1",
+        note: "MCP safety + ergonomics release: hard-fail safety rail in mcp_registration.rs validates every merged MCP script path exists on disk (caught the 12 stale processkit-side mcp-config.json paths reported as processkit#8); compliance contract drift checker now tolerant of v1 OR v2 markers (Option C — bridges the transitional state where AGENTS.md template ships v2 but skill-gate's contract source is still v1); devcontainer drift fix — generated file headers no longer stamp the live CLI version, and aibox.lock preserves prior synced_at / installed_at when nothing else changed (clean container rebuild is now a true no-op for git status); gh-pages auto-config probe-first (eliminates the spurious 'Could not configure Pages automatically' warning on every release when Pages is already managed); ships .opencode/plugins/processkit-gate.ts to enforce the compliance contract on OpenCode sessions (closes aibox#51, requires upstream sst/opencode#2319 and #5894 — both shipped).",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
