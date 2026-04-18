@@ -128,18 +128,19 @@ pub fn run_runtime_sync(
         Vec::new()
     };
 
-    let migration_document_path = if summary.has_user_relevant_changes() || !intermediate_hops.is_empty() {
-        write_migration_document(
-            project_root,
-            from_version.unwrap_or("unknown"),
-            to_version,
-            &summary,
-            &diffs,
-            &intermediate_hops,
-        )?
-    } else {
-        None
-    };
+    let migration_document_path =
+        if summary.has_user_relevant_changes() || !intermediate_hops.is_empty() {
+            write_migration_document(
+                project_root,
+                from_version.unwrap_or("unknown"),
+                to_version,
+                &summary,
+                &diffs,
+                &intermediate_hops,
+            )?
+        } else {
+            None
+        };
 
     copy_runtime_templates(project_root, to_version, config)?;
 
@@ -640,9 +641,9 @@ mod tests {
 
         // from: 1 file. 0.18.0 changes the file. 0.18.1 adds a new file. to: removes the new file again.
         write_snapshot(root, "0.17.20", &[(".vim/vimrc", "A")]);
-        write_snapshot(root, "0.18.0",  &[(".vim/vimrc", "B")]);
-        write_snapshot(root, "0.18.1",  &[(".vim/vimrc", "B"), (".asoundrc", "X")]);
-        write_snapshot(root, "0.18.2",  &[(".vim/vimrc", "B")]);
+        write_snapshot(root, "0.18.0", &[(".vim/vimrc", "B")]);
+        write_snapshot(root, "0.18.1", &[(".vim/vimrc", "B"), (".asoundrc", "X")]);
+        write_snapshot(root, "0.18.2", &[(".vim/vimrc", "B")]);
 
         let hops = build_intermediate_hops(root, "0.17.20", "0.18.2");
         // Expected hops: 0.17.20 -> 0.18.0 (1 changed), 0.18.0 -> 0.18.1 (1 added), 0.18.1 -> 0.18.2 (1 removed).
@@ -654,8 +655,8 @@ mod tests {
             summary,
             vec![
                 ("0.17.20".to_string(), "0.18.0".to_string(), 1),
-                ("0.18.0".to_string(),  "0.18.1".to_string(), 1),
-                ("0.18.1".to_string(),  "0.18.2".to_string(), 1),
+                ("0.18.0".to_string(), "0.18.1".to_string(), 1),
+                ("0.18.1".to_string(), "0.18.2".to_string(), 1),
             ]
         );
     }

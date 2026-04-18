@@ -1,8 +1,10 @@
 # Migrations Index
 
-## Pending (0)
+## Pending (1)
 
-None.
+| Date       | Migration                                                         |
+|------------|-------------------------------------------------------------------|
+| 2026-04-18 | 20260418_0730 -- aibox CLI 0.18.4 -> 0.18.5 (catch-up release)    |
 
 ## In progress (0)
 

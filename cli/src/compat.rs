@@ -158,7 +158,12 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
     CompatEntry {
         aibox_version: "0.18.4",
         processkit_version: "v0.17.0",
-        note: "clippy/fmt cleanup; Cargo.lock bump; no runtime changes vs 0.18.3",
+        note: "INCOMPLETE RELEASE — tag cut before the multi-version-upgrade fixes landed; Cargo.toml was also not bumped so the shipped binary self-reports as 0.18.3. Skip this version; use 0.18.5 or later.",
+    },
+    CompatEntry {
+        aibox_version: "0.18.5",
+        processkit_version: "v0.18.1",
+        note: "catch-up release: completes the 0.18.4 work (multi-version upgrade gaps closed); bumps default processkit to v0.18.1 (hookEventName hotfix + src↔context parity); hook commands now use $CLAUDE_PROJECT_DIR so they work regardless of Claude Code's launch cwd; maintain.sh release now writes Cargo.toml + refreshes Cargo.lock before tagging.",
     },
 ];
 

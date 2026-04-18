@@ -52,13 +52,31 @@ use crate::config::{AiProvider, AiboxConfig};
 use crate::output;
 
 // ---------------------------------------------------------------------------
-// Script paths (project-root-relative, as the harness invokes with cwd = project root)
+// Script paths
+//
+// Each harness invokes hook commands with its own cwd — which is NOT always
+// the project root (e.g. Claude Code's cwd is the directory the IDE / CLI
+// was launched from). Using a bare relative path like `context/...` breaks
+// whenever the harness starts from a subdirectory. We fix that per-harness:
+//
+// - Claude Code: prefix with `$CLAUDE_PROJECT_DIR` (documented env var).
+// - Codex CLI / Cursor: no project-root env var is documented; use
+//   `$(git rev-parse --show-toplevel)` which aibox projects always satisfy
+//   (init/sync run inside a git repo).
 // ---------------------------------------------------------------------------
 
-const COMPLIANCE_SCRIPT: &str =
-    "python3 context/skills/processkit/skill-gate/scripts/emit_compliance_contract.py";
-const ROUTE_GUARD_SCRIPT: &str =
-    "python3 context/skills/processkit/skill-gate/scripts/check_route_task_called.py";
+const COMPLIANCE_SCRIPT_REL: &str =
+    "context/skills/processkit/skill-gate/scripts/emit_compliance_contract.py";
+const ROUTE_GUARD_SCRIPT_REL: &str =
+    "context/skills/processkit/skill-gate/scripts/check_route_task_called.py";
+
+fn claude_cmd(rel: &str) -> String {
+    format!(r#"python3 "$CLAUDE_PROJECT_DIR"/{rel}"#)
+}
+
+fn gitroot_cmd(rel: &str) -> String {
+    format!(r#"python3 "$(git rev-parse --show-toplevel)"/{rel}"#)
+}
 
 /// Marker key injected into each processkit-managed hook entry so we can
 /// identify and replace/remove them on subsequent runs without touching
@@ -207,17 +225,19 @@ fn write_claude_settings_hooks(path: &Path) -> Result<()> {
     }
 
     // Now append the processkit-managed entries for each event.
-    //
+    let compliance_cmd = claude_cmd(COMPLIANCE_SCRIPT_REL);
+    let route_guard_cmd = claude_cmd(ROUTE_GUARD_SCRIPT_REL);
+
     // SessionStart — emit compliance contract on session start/resume.
     {
         let arr = hooks["SessionStart"].as_array_mut().unwrap();
-        arr.push(claude_hook_entry("", COMPLIANCE_SCRIPT));
+        arr.push(claude_hook_entry("", &compliance_cmd));
     }
 
     // UserPromptSubmit — inject compliance contract into every turn.
     {
         let arr = hooks["UserPromptSubmit"].as_array_mut().unwrap();
-        arr.push(claude_hook_entry("", COMPLIANCE_SCRIPT));
+        arr.push(claude_hook_entry("", &compliance_cmd));
     }
 
     // PreToolUse — gate writes under context/ until contract acknowledged.
@@ -226,7 +246,7 @@ fn write_claude_settings_hooks(path: &Path) -> Result<()> {
         arr.push(claude_hook_entry(
             "Write|Edit|MultiEdit|create_workitem|transition_workitem|record_decision|\
              link_entities|open_discussion|create_artifact|log_event|create_note",
-            ROUTE_GUARD_SCRIPT,
+            &route_guard_cmd,
         ));
     }
 
@@ -282,14 +302,16 @@ fn write_codex_hooks_json(path: &Path) -> Result<()> {
         .as_object_mut()
         .ok_or_else(|| anyhow::anyhow!("`hooks` in {} is not a JSON object", path.display()))?;
 
-    // Overwrite the managed event keys.
+    // Overwrite the managed event keys. Codex has no documented project-root
+    // env var, so we anchor to the git repo root at hook invocation time.
+    let compliance_cmd = gitroot_cmd(COMPLIANCE_SCRIPT_REL);
     hooks.insert(
         "session_start".to_string(),
-        serde_json::json!({"command": COMPLIANCE_SCRIPT}),
+        serde_json::json!({"command": compliance_cmd}),
     );
     hooks.insert(
         "user_prompt_submit".to_string(),
-        serde_json::json!({"command": COMPLIANCE_SCRIPT}),
+        serde_json::json!({"command": compliance_cmd}),
     );
 
     if let Some(parent) = path.parent() {
@@ -332,14 +354,16 @@ fn write_codex_hooks_json(path: &Path) -> Result<()> {
 ///   managed; they are removed and replaced on every sync.
 /// - All other entries (user-added) are preserved in their original positions.
 fn write_cursor_hooks_json(path: &Path) -> Result<()> {
-    // The managed entries to write.
+    // The managed entries to write. Cursor has no documented project-root
+    // env var, so we anchor to the git repo root at hook invocation time.
+    let route_guard_cmd = gitroot_cmd(ROUTE_GUARD_SCRIPT_REL);
     let pre_tool_use_entry = serde_json::json!({
-        "command": ROUTE_GUARD_SCRIPT,
+        "command": route_guard_cmd,
         "description": "processkit: block context/ writes without route_task",
         "alwaysApprove": false
     });
     let before_mcp_entry = serde_json::json!({
-        "command": ROUTE_GUARD_SCRIPT,
+        "command": route_guard_cmd,
         "description": "processkit: gate MCP execution",
         "alwaysApprove": false
     });
@@ -483,6 +507,11 @@ version = "unset"
             ss_cmd.contains("emit_compliance_contract.py"),
             "SessionStart command should call emit_compliance_contract.py"
         );
+        assert!(
+            ss_cmd.contains("$CLAUDE_PROJECT_DIR"),
+            "Claude hook command must anchor to $CLAUDE_PROJECT_DIR so it works \
+             when Claude Code is launched from a subdirectory (got: {ss_cmd})"
+        );
         assert_eq!(
             ss[0][MANAGED_MARKER].as_bool(),
             Some(true),
@@ -585,6 +614,11 @@ version = "unset"
         let hooks = parsed["hooks"].as_object().expect("hooks is object");
         let ss = hooks["session_start"]["command"].as_str().unwrap();
         assert!(ss.contains("emit_compliance_contract.py"));
+        assert!(
+            ss.contains("git rev-parse"),
+            "Codex hook command must anchor to git repo root so it works when \
+             Codex CLI is launched from a subdirectory (got: {ss})"
+        );
         let ups = hooks["user_prompt_submit"]["command"].as_str().unwrap();
         assert!(ups.contains("emit_compliance_contract.py"));
         // PreToolUse must NOT be wired for Codex.
@@ -666,7 +700,7 @@ version = "unset"
         assert_eq!(pre_tool.len(), 1, "one preToolUse entry on fresh write");
         assert_eq!(
             pre_tool[0]["command"].as_str().unwrap(),
-            ROUTE_GUARD_SCRIPT,
+            gitroot_cmd(ROUTE_GUARD_SCRIPT_REL),
             "preToolUse command must be the gate script"
         );
         assert_eq!(
@@ -689,7 +723,7 @@ version = "unset"
         );
         assert_eq!(
             before_mcp[0]["command"].as_str().unwrap(),
-            ROUTE_GUARD_SCRIPT
+            gitroot_cmd(ROUTE_GUARD_SCRIPT_REL)
         );
         assert_eq!(
             before_mcp[0]["description"].as_str().unwrap(),
@@ -761,7 +795,7 @@ version = "unset"
         );
         assert_eq!(
             pre_tool[1]["command"].as_str().unwrap(),
-            ROUTE_GUARD_SCRIPT,
+            gitroot_cmd(ROUTE_GUARD_SCRIPT_REL),
             "managed entry appended after user entry"
         );
 

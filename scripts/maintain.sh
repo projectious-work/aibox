@@ -476,6 +476,34 @@ cmd_release() {
     die "processkit_vocab.rs was updated. Review the diff, make any required CLI changes, commit, then re-run release."
   fi
 
+  # ── Step 2b: Bump CLI version ────────────────────────────────────────────
+  # The binary reports CARGO_PKG_VERSION, so Cargo.toml MUST match the tag
+  # being cut. Missing this step once (v0.18.4) shipped a binary that
+  # self-reported as the previous version. We write it here so the tag and
+  # the binary can never disagree again. Cargo.lock is refreshed via a
+  # lightweight `cargo metadata` so the committed lockfile also reflects
+  # the bump.
+  local current_cargo_version
+  current_cargo_version=$(grep -m1 '^version = ' "${CLI_DIR}/Cargo.toml" | sed -E 's/version = "(.+)"/\1/')
+  if [[ "${current_cargo_version}" != "${version}" ]]; then
+    info "Bumping cli/Cargo.toml ${current_cargo_version} → ${version}..."
+    # macOS/BSD sed and GNU sed differ on -i; write atomically via a tmp file.
+    local tmp_cargo
+    tmp_cargo=$(mktemp)
+    sed -E "s/^version = \"${current_cargo_version}\"$/version = \"${version}\"/" \
+      "${CLI_DIR}/Cargo.toml" > "${tmp_cargo}"
+    mv "${tmp_cargo}" "${CLI_DIR}/Cargo.toml"
+    # Refresh Cargo.lock so the new version is locked.
+    (cd "${CLI_DIR}" && cargo metadata --format-version 1 --quiet >/dev/null) \
+      || die "cargo metadata failed after version bump — review Cargo.toml"
+    git add "${CLI_DIR}/Cargo.toml" "${CLI_DIR}/Cargo.lock"
+    git commit -m "chore: bump CLI version to ${version}" \
+      || die "failed to commit Cargo.toml/Cargo.lock bump"
+    ok "Cargo.toml bumped and committed"
+  else
+    ok "Cargo.toml already at ${version}"
+  fi
+
   # ── Step 3: Run tests ──────────────────────────────────────────────────────
   info "Running tests..."
   cmd_test
@@ -508,6 +536,21 @@ cmd_release() {
     built_archives+=("${DIST_DIR}/${binary_name}.tar.gz")
     ok "Built ${binary_name}.tar.gz"
   done
+
+  # ── Step 4b: Smoke-test the binary's self-reported version ───────────────
+  # Run the aarch64 binary under qemu if available, else the native-host
+  # cargo target. We just need to ensure `aibox --version` matches ${version}
+  # — this catches the Cargo.toml-not-bumped class of release bug (v0.18.4).
+  info "Verifying `aibox --version` matches ${version}..."
+  local host_binary="${CLI_DIR}/target/release/aibox"
+  (cd "${CLI_DIR}" && cargo build --release --quiet) \
+    || die "native cargo build failed (needed for --version smoke test)"
+  local reported
+  reported=$("${host_binary}" --version | awk '{print $NF}')
+  if [[ "${reported}" != "${version}" ]]; then
+    die "aibox --version reports '${reported}' but the tag being cut is '${version}'. Fix Cargo.toml before retrying."
+  fi
+  ok "aibox --version = ${reported} (matches tag)"
 
   # ── Step 5: Create and push git tag ──────────────────────────────────────
   info "Tagging and pushing ${tag}..."

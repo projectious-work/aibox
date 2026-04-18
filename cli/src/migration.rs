@@ -1281,7 +1281,6 @@ installed_at = \"2026-04-01T00:00:00Z\"
         );
     }
 
-
     #[test]
     fn test_known_migration_0_17_4_to_0_17_5() {
         let doc = format_migration_doc("0.17.4", "0.17.5", "2026-04-10", None, None);
