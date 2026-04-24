@@ -4,10 +4,10 @@ kind: WorkItem
 metadata:
   id: BACK-20260424_0114-NobleSage-phase-2b-continue-cursor
   created: '2026-04-24T01:14:29+00:00'
-  updated: '2026-04-24T01:16:29+00:00'
+  updated: '2026-04-24T07:12:31+00:00'
 spec:
   title: 'Phase 2b: Continue + Cursor + Aider generators'
-  state: backlog
+  state: done
   type: task
   priority: high
   description: "**Scope:** Implement per-tool permission generators for Continue,\
@@ -23,4 +23,15 @@ spec:
   parent: BACK-20260424_0058-ToughGrove-feature-global-mcp-permissions
   blocked_by:
   - BACK-20260424_0114-JollyStream-phase-1-core-mcp
+  started_at: '2026-04-24T07:12:30+00:00'
+  completed_at: '2026-04-24T07:12:31+00:00'
 ---
+
+## Transition note (2026-04-24T07:12:30+00:00)
+
+Continue, Cursor, and Aider generators implemented with comprehensive test coverage.
+
+
+## Transition note (2026-04-24T07:12:31+00:00)
+
+Phase 2b complete. 591 tests passing. Phase 2c and 2d ready to proceed.

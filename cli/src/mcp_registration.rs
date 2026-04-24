@@ -586,6 +586,128 @@ pub fn generate_aider_permissions(
     Ok(())
 }
 
+/// Generate MCP permissions for Gemini CLI's settings.json.
+/// Uses dual allowlist (includeTools) and blocklist (excludeTools) with intersection semantics.
+/// A tool must be in includeTools AND not in excludeTools to be allowed.
+///
+/// # Arguments
+/// * `project_root` - Project root directory
+/// * `config` - Parsed McpConfig from aibox.toml
+/// * `all_tool_names` - All available MCP tool names
+///
+/// # Returns
+/// Result; logs warnings on individual failures
+#[allow(dead_code)]
+pub fn generate_gemini_permissions(
+    project_root: &Path,
+    config: &McpConfig,
+    all_tool_names: &[String],
+) -> Result<()> {
+    let settings_path = project_root.join(".gemini").join("settings.json");
+
+    // Determine allowed/denied tools
+    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
+    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
+
+    // Read existing settings or create new
+    let mut settings: serde_json::Map<String, serde_json::Value> = if settings_path.is_file() {
+        let body = fs::read_to_string(&settings_path).unwrap_or_default();
+        if body.trim().is_empty() {
+            serde_json::Map::new()
+        } else {
+            serde_json::from_str(&body).unwrap_or_default()
+        }
+    } else {
+        serde_json::Map::new()
+    };
+
+    // Set includeTools (allowlist)
+    settings.insert(
+        "includeTools".to_string(),
+        serde_json::Value::Array(
+            allowed
+                .iter()
+                .map(|t| serde_json::Value::String(t.clone()))
+                .collect(),
+        ),
+    );
+
+    // Set excludeTools (denylist) if present
+    if !denied.is_empty() {
+        settings.insert(
+            "excludeTools".to_string(),
+            serde_json::Value::Array(
+                denied
+                    .iter()
+                    .map(|t| serde_json::Value::String(t.clone()))
+                    .collect(),
+            ),
+        );
+    }
+
+    // Ensure parent dir exists
+    if let Some(parent) = settings_path.parent() {
+        fs::create_dir_all(parent).ok();
+    }
+
+    let formatted = serde_json::to_string_pretty(&settings)?;
+    fs::write(&settings_path, formatted)
+        .with_context(|| format!("failed to write Gemini permissions to {}", settings_path.display()))?;
+
+    Ok(())
+}
+
+/// Generate MCP permissions for GitHub Copilot (CLI flags and environment).
+/// Writes permissions as a shell-sourceable format (KEY=value) that CLI tools can read.
+/// Supports allow and deny patterns via environment variables.
+///
+/// # Arguments
+/// * `project_root` - Project root directory
+/// * `config` - Parsed McpConfig from aibox.toml
+/// * `all_tool_names` - All available MCP tool names
+///
+/// # Returns
+/// Result; logs warnings on individual failures
+#[allow(dead_code)]
+pub fn generate_github_copilot_permissions(
+    project_root: &Path,
+    config: &McpConfig,
+    all_tool_names: &[String],
+) -> Result<()> {
+    let env_path = project_root.join(".copilot-env");
+
+    // Determine allowed/denied tools
+    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
+    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
+
+    // Build environment variable format (shell-sourceable)
+    let mut env_content = String::new();
+    env_content.push_str("# GitHub Copilot MCP permissions (auto-generated)\n");
+    env_content.push_str("# Source this file: source .copilot-env\n\n");
+
+    env_content.push_str(&format!(
+        "export COPILOT_MCP_ALLOW_TOOLS=\"{}\"\n",
+        allowed.join(",")
+    ));
+
+    if !denied.is_empty() {
+        env_content.push_str(&format!(
+            "export COPILOT_MCP_DENY_TOOLS=\"{}\"\n",
+            denied.join(",")
+        ));
+    }
+
+    env_content.push_str(&format!(
+        "export COPILOT_MCP_MODE=\"{}\"\n",
+        config.default_mode
+    ));
+
+    fs::write(&env_path, env_content)
+        .with_context(|| format!("failed to write GitHub Copilot permissions to {}", env_path.display()))?;
+
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 // Walk the templates mirror to compute the managed set
 // ---------------------------------------------------------------------------
@@ -2867,5 +2989,122 @@ args = ["server.js"]
                 Some("Automatic")
             );
         }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Phase 2c: Gemini and GitHub Copilot generator tests
+    // ---------------------------------------------------------------------------
+
+    #[test]
+    fn gemini_permissions_creates_settings_with_include_exclude() {
+        let tmp = TempDir::new().unwrap();
+        let config = McpConfig {
+            default_mode: "allow".to_string(),
+            allow_patterns: vec!["mcp__processkit-*".to_string()],
+            deny_patterns: vec!["mcp__private-*".to_string()],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec![
+            "mcp__processkit-workitem".to_string(),
+            "mcp__private-secret".to_string(),
+        ];
+
+        let result = generate_gemini_permissions(tmp.path(), &config, &tools);
+        assert!(result.is_ok());
+
+        let settings_path = tmp.path().join(".gemini").join("settings.json");
+        assert!(settings_path.is_file());
+
+        let content = fs::read_to_string(&settings_path).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
+
+        // Check includeTools
+        if let Some(include) = parsed.get("includeTools").and_then(|i| i.as_array()) {
+            let include_strs: Vec<_> = include.iter().filter_map(|i| i.as_str()).collect();
+            assert!(include_strs.contains(&"mcp__processkit-workitem"));
+        } else {
+            panic!("includeTools not found");
+        }
+
+        // Check excludeTools
+        if let Some(exclude) = parsed.get("excludeTools").and_then(|e| e.as_array()) {
+            let exclude_strs: Vec<_> = exclude.iter().filter_map(|e| e.as_str()).collect();
+            assert!(exclude_strs.contains(&"mcp__private-secret"));
+        } else {
+            panic!("excludeTools not found");
+        }
+    }
+
+    #[test]
+    fn gemini_permissions_without_deny_patterns() {
+        let tmp = TempDir::new().unwrap();
+        let config = McpConfig {
+            default_mode: "allow".to_string(),
+            allow_patterns: vec!["mcp__processkit-*".to_string()],
+            deny_patterns: vec![],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec!["mcp__processkit-workitem".to_string()];
+
+        generate_gemini_permissions(tmp.path(), &config, &tools).unwrap();
+
+        let settings_path = tmp.path().join(".gemini").join("settings.json");
+        let content = fs::read_to_string(&settings_path).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
+
+        // includeTools should be present
+        assert!(parsed.get("includeTools").is_some());
+
+        // excludeTools should not be present when deny_patterns is empty
+        assert!(parsed.get("excludeTools").is_none());
+    }
+
+    #[test]
+    fn github_copilot_permissions_creates_env_file() {
+        let tmp = TempDir::new().unwrap();
+        let config = McpConfig {
+            default_mode: "allow".to_string(),
+            allow_patterns: vec!["mcp__processkit-*".to_string()],
+            deny_patterns: vec!["mcp__private-*".to_string()],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec![
+            "mcp__processkit-workitem".to_string(),
+            "mcp__private-secret".to_string(),
+        ];
+
+        let result = generate_github_copilot_permissions(tmp.path(), &config, &tools);
+        assert!(result.is_ok());
+
+        let env_path = tmp.path().join(".copilot-env");
+        assert!(env_path.is_file());
+
+        let content = fs::read_to_string(&env_path).unwrap();
+        assert!(content.contains("COPILOT_MCP_ALLOW_TOOLS="));
+        assert!(content.contains("COPILOT_MCP_DENY_TOOLS="));
+        assert!(content.contains("COPILOT_MCP_MODE="));
+        assert!(content.contains("mcp__processkit-workitem"));
+        assert!(content.contains("mcp__private-secret"));
+        assert!(content.contains("allow"));
+    }
+
+    #[test]
+    fn github_copilot_permissions_tool_list_format() {
+        let tmp = TempDir::new().unwrap();
+        let config = McpConfig {
+            default_mode: "ask".to_string(),
+            allow_patterns: vec!["mcp__tool1".to_string(), "mcp__tool2".to_string()],
+            deny_patterns: vec![],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec!["mcp__tool1".to_string(), "mcp__tool2".to_string()];
+
+        generate_github_copilot_permissions(tmp.path(), &config, &tools).unwrap();
+
+        let env_path = tmp.path().join(".copilot-env");
+        let content = fs::read_to_string(&env_path).unwrap();
+
+        // Should be comma-separated
+        assert!(content.contains("mcp__tool1,mcp__tool2") || content.contains("mcp__tool2,mcp__tool1"));
     }
 }
