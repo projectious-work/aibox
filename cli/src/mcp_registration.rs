@@ -302,6 +302,94 @@ pub fn collect_processkit_mcp_specs(
     Ok(specs)
 }
 
+/// Collect MCP server specs from live-installed skills in context/skills/.
+/// This handles the case where processkit ships an incomplete release
+/// (e.g. v0.19.1) where some skills have mcp/mcp-config.json files only
+/// in the live installation, not in the templates mirror.
+///
+/// Returns `Ok(vec![])` if context/skills/ doesn't exist.
+pub fn collect_live_skills_mcp_specs(project_root: &Path) -> Result<Vec<McpServerSpec>> {
+    let skills_dir = project_root.join("context").join("skills");
+    if !skills_dir.is_dir() {
+        return Ok(Vec::new());
+    }
+
+    let mut specs: Vec<McpServerSpec> = Vec::new();
+
+    // Walk the two-level layout: category/skill/
+    for category_entry in fs::read_dir(&skills_dir).with_context(|| {
+        "failed to read context/skills/".to_string()
+    })? {
+        let category_entry = category_entry?;
+        let category_dir = category_entry.path();
+        let category_name = match category_entry.file_name().to_str() {
+            Some(s) => s.to_string(),
+            None => continue,
+        };
+        if category_name.starts_with('_') || category_name.starts_with('.') {
+            continue;
+        }
+        if !category_dir.is_dir() {
+            continue;
+        }
+
+        // Inner loop: skill dirs within category
+        let skill_entries = match fs::read_dir(&category_dir) {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        for skill_entry in skill_entries.flatten() {
+            let skill_dir = skill_entry.path();
+            if !skill_dir.is_dir() {
+                continue;
+            }
+
+            let mcp_config_path = skill_dir.join("mcp").join("mcp-config.json");
+            if !mcp_config_path.is_file() {
+                continue;
+            }
+
+            match fs::read_to_string(&mcp_config_path) {
+                Ok(content) => {
+                    match serde_json::from_str::<PerSkillConfig>(&content) {
+                        Ok(config) => {
+                            for (name, server) in config.mcp_servers {
+                                specs.push(McpServerSpec {
+                                    name,
+                                    command: server.command,
+                                    args: server.args,
+                                    env: server.env,
+                                });
+                            }
+                        }
+                        Err(e) => {
+                            output::warn(&format!(
+                                "Failed to parse {}: {}",
+                                mcp_config_path.display(),
+                                e
+                            ));
+                        }
+                    }
+                }
+                Err(e) => {
+                    output::warn(&format!(
+                        "Failed to read {}: {}",
+                        mcp_config_path.display(),
+                        e
+                    ));
+                }
+            }
+        }
+    }
+
+    // Deduplicate by name (live specs may override template specs)
+    let mut seen = std::collections::HashSet::new();
+    specs.retain(|spec| seen.insert(spec.name.clone()));
+
+    specs.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(specs)
+}
+
 /// Compute the managed set: server names that came from processkit.
 /// The merge writers use this set to decide which entries to remove
 /// from the existing harness config before adding the current ones.
@@ -338,12 +426,23 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
         crate::processkit_vocab::MANDATORY_MCP_SKILLS,
     )?;
 
-    // Build the full spec list: processkit first, then team-shared
+    // Also collect from live-installed skills in context/skills/ to handle
+    // incomplete processkit releases (e.g. v0.19.1) where some skills have
+    // mcp/mcp-config.json files only in the live installation.
+    let live_skills_specs = collect_live_skills_mcp_specs(project_root)?;
+
+    // Build the full spec list: processkit + live skills first, then team-shared
     // (aibox.toml [mcp.servers]), then personal (.aibox-local.toml
     // [mcp.servers]).  All three sources are "aibox-managed" — they
     // are in the managed set and get refreshed on every sync so that
     // removals from any source are reflected immediately.
+    // Live skills specs override processkit specs of the same name.
     let mut specs: Vec<McpServerSpec> = processkit_specs;
+    for spec in live_skills_specs {
+        // Replace any existing spec with the same name
+        specs.retain(|s| s.name != spec.name);
+        specs.push(spec);
+    }
     for s in &config.mcp.servers {
         specs.push(McpServerSpec {
             name: s.name.clone(),
@@ -487,6 +586,16 @@ pub fn regenerate_mcp_configs(config: &AiboxConfig, project_root: &Path) -> Resu
              project root so a Mistral SDK-based CLI tool you build can read MCP \
              server registrations from there.",
         );
+    }
+
+    // 6. Update .claude/settings.local.json with enabled MCP servers.
+    // This ensures Claude Code loads all MCP tools during session startup.
+    let settings_path = project_root.join(".claude/settings.local.json");
+    if let Err(e) = update_enabled_mcp_servers(&specs, &settings_path) {
+        output::warn(&format!(
+            "Failed to update .claude/settings.local.json with enabled MCP servers: {}",
+            e
+        ));
     }
 
     Ok(())
@@ -806,6 +915,47 @@ fn write_continue_mcp_dir(
         fs::write(&file_path, formatted)
             .with_context(|| format!("failed to write {}", file_path.display()))?;
     }
+
+    Ok(())
+}
+
+/// Update .claude/settings.local.json to enable all MCP servers defined
+/// in the provided specs. This ensures Claude Code loads all MCP tools
+/// that are configured in .mcp.json.
+fn update_enabled_mcp_servers(specs: &[McpServerSpec], settings_path: &Path) -> Result<()> {
+    // Read existing settings
+    let mut settings: serde_json::Map<String, serde_json::Value> = if settings_path.is_file() {
+        let body = fs::read_to_string(settings_path)
+            .with_context(|| format!("failed to read {}", settings_path.display()))?;
+        if body.trim().is_empty() {
+            serde_json::Map::new()
+        } else {
+            serde_json::from_str(&body)
+                .with_context(|| format!("failed to parse {}", settings_path.display()))?
+        }
+    } else {
+        serde_json::Map::new()
+    };
+
+    // Build the enabled servers list from the specs
+    let enabled_servers: Vec<String> = specs.iter().map(|s| s.name.clone()).collect();
+
+    // Update or create the enabledMcpjsonServers field
+    settings.insert(
+        "enabledMcpjsonServers".to_string(),
+        serde_json::Value::Array(
+            enabled_servers
+                .iter()
+                .map(|name| serde_json::Value::String(name.clone()))
+                .collect(),
+        ),
+    );
+
+    // Write back the updated settings with pretty formatting
+    let formatted = serde_json::to_string_pretty(&serde_json::Value::Object(settings))
+        .context("failed to serialize settings")?;
+    fs::write(settings_path, formatted)
+        .with_context(|| format!("failed to write {}", settings_path.display()))?;
 
     Ok(())
 }
