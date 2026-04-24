@@ -512,10 +512,27 @@ pub fn cmd_start(config_path: &Option<String>, layout: &str) -> Result<()> {
     }
 
     output::info(&format!("Attaching via zellij (layout: {})...", layout));
-    // Use a named session matching the container name so that `aibox start`
-    // re-attaches to an existing session rather than creating a new one each
-    // time. `--create` makes zellij start a fresh session (with the given
-    // layout) only when no session named `name` exists yet.
+
+    // Kill any existing zellij session with this name to ensure a fresh start
+    // with properly initialized panes. This prevents the "waiting to load" issue
+    // that occurs when reattaching to a session with dead panes (e.g., after
+    // exiting and running `aibox start` again). Best-effort; don't fail if the
+    // session doesn't exist. Run via docker exec outside of Runtime.exec_interactive
+    // to avoid making this step interactive.
+    #[cfg(not(test))]
+    {
+        let docker_cmd = format!(
+            "docker exec {} su -c 'zellij kill-session {} 2>/dev/null || true' {}",
+            name, name, &config.container.user
+        );
+        let _ = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(&docker_cmd)
+            .output();
+    }
+
+    // Use a named session matching the container name. With the session killed
+    // above, `--create` will always create a fresh session with the given layout.
     // `--layout` is a global flag that must come before the subcommand.
     runtime.exec_interactive(
         name,
@@ -1219,7 +1236,8 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             }
             // Surface the processkit compliance contract to each harness.
             // Best-effort.
-            if let Err(e) = crate::compliance::regenerate_compliance_configs(&config, &project_root)
+            if let Err(e) =
+                crate::compliance::regenerate_compliance_configs(&config, &project_root, false)
             {
                 output::warn(&format!("Compliance config generation failed: {}", e));
             }
@@ -1251,7 +1269,12 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
 /// before the sync runs and verifies after that none of them were
 /// touched — providing a runtime guarantee in addition to the static
 /// `is_within_perimeter` check used by sync write helpers.
-pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) -> Result<()> {
+pub fn cmd_sync(
+    config_path: &Option<String>,
+    no_cache: bool,
+    no_build: bool,
+    fix_compliance_contract: bool,
+) -> Result<()> {
     // Snapshot out-of-perimeter sentinels before any sync work runs.
     // The tripwire is verified at the end of cmd_sync.
     let tripwire =
@@ -1550,7 +1573,9 @@ pub fn cmd_sync(config_path: &Option<String>, no_cache: bool, no_build: bool) ->
         }
         // Surface the processkit compliance contract to each harness
         // (drift check, Cursor rules, Aider conf). Best-effort.
-        if let Err(e) = crate::compliance::regenerate_compliance_configs(&config, &cwd) {
+        if let Err(e) =
+            crate::compliance::regenerate_compliance_configs(&config, &cwd, fix_compliance_contract)
+        {
             output::warn(&format!("Compliance config generation failed: {}", e));
         }
         // Sync processkit command adapter files to .claude/commands/
