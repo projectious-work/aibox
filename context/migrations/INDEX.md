@@ -1,36 +1,36 @@
 # Migrations Index
 
-## Pending (0)
+## Pending (4)
+
+- **MIG-20260418T111856** — processkit v0.18.1 → v0.18.1 (generated 2026-04-18)
+  0 changed upstream, 1 conflicts, 0 new, 0 removed (1 groups affected)
+- **MIG-RUNTIME-20260418T175825** — aibox-runtime-home 0.18.6 → 0.18.6 (generated 2026-04-18)
+  0 changed upstream, 0 conflicts, 0 new, 0 removed (2 groups affected)
+- **MIG-20260418T195315** — processkit v0.18.1 → v0.18.2 (generated 2026-04-18)
+  0 changed upstream, 18 conflicts, 0 new, 0 removed (2 groups affected)
+- **MIG-RUNTIME-20260420T054429** — aibox-runtime-home 0.18.7 → 0.18.7 (generated 2026-04-20)
+  0 changed upstream, 0 conflicts, 0 new, 0 removed (2 groups affected)
+
+## In Progress (0)
 
 None.
 
-## In progress (0)
+## Applied (11)
+
+| Date       | Migration                                | Notes |
+|------------|------------------------------------------|-------|
+| 2026-04-13 | MIG-20260412T232624 — processkit v0.13.0 → v0.13.0 | 0 changed upstream, 1 conflicts, 0 new, 0 removed (1 groups affected) |
+| 2026-04-13 | MIG-RUNTIME-20260412T232624 — aibox-runtime-home 0.18.0 → 0.18.0 | 0 changed upstream, 0 conflicts, 23 new, 0 removed (9 groups affected) |
+| 2026-04-13 | MIG-RUNTIME-20260413T000500 — aibox-runtime-home 0.18.0 → 0.18.1 | 1 changed upstream, 0 conflicts, 1 new, 0 removed (2 groups affected) |
+| 2026-04-14 | MIG-20260414T085400 — processkit v0.13.0 → v0.13.0 | 0 changed upstream, 1 conflicts, 0 new, 0 removed (1 groups affected) |
+| 2026-04-14 | MIG-RUNTIME-20260414T085400 — aibox-runtime-home 0.18.1 → 0.18.2 | 9 changed upstream, 3 conflicts, 2 new, 0 removed (5 groups affected) |
+| 2026-04-15 | MIG-20260415T093853 — processkit v0.14.0 → v0.16.0 | 2 version spans (v0.14.0→v0.15.0, v0.15.0→v0.16.0); 8+ changed upstream files, multiple new skills/scripts, AGENTS.md conflicts, canonical team schema additions |
+| 2026-04-17 | MIG-RUNTIME-20260417T142743 — aibox-runtime-home 0.18.2 → 0.18.3 | 1 changed upstream, 0 conflicts, 1 new, 0 removed (2 groups affected) |
+| 2026-04-18 | MIG-20260418T090634 — processkit v0.17.0 → v0.18.1 | 0 changed upstream, 8 conflicts, 49 new, 23 removed (7 groups affected) |
+| 2026-04-18 | MIG-RUNTIME-20260418T090634 — aibox-runtime-home 0.18.3 → 0.18.5 | 0 changed upstream, 0 conflicts, 1 new, 0 removed (2 groups affected) |
+| 2026-04-23 | MIG-20260419T072402 — processkit v0.18.2 → v0.18.2 | 0 changed upstream, 1 conflicts, 0 new, 0 removed (1 groups affected) |
+| 2026-04-23 | MIG-20260423T073837 — processkit v0.18.2 → v0.19.1 | 0 changed upstream, 34 conflicts, 173 new, 6 removed (29 groups affected) |
+
+## Rejected (0)
 
 None.
-
-## Applied (10)
-
-| Date       | Migration                                                                                |
-|------------|------------------------------------------------------------------------------------------|
-| 2026-04-18 | MIG-RUNTIME-20260418T090634 -- aibox runtime 0.18.3 -> 0.18.5 (.claude.json added)       |
-| 2026-04-18 | MIG-20260418T090634 -- processkit v0.17.0 -> v0.18.1 (slash-command rollout, team-creator) |
-| 2026-04-17 | MIG-RUNTIME-20260417T142743 -- aibox runtime 0.18.2 -> 0.18.3 (yazi toggle-pane)         |
-| 2026-04-17 | MIG-20260417T104045 -- processkit v0.16.0 -> v0.17.0                                     |
-| 2026-04-15 | MIG-20260415T093853 -- processkit v0.14.0 -> v0.16.0                                     |
-| 2026-04-14 | MIG-20260414T085400 -- processkit v0.13.0 re-sync (AGENTS.md no-op)                      |
-| 2026-04-14 | MIG-RUNTIME-20260414T085400 -- aibox runtime 0.18.1 -> 0.18.2 (no-op)                    |
-| 2026-04-13 | MIG-RUNTIME-20260413T000500 -- aibox runtime 0.18.0 -> 0.18.1                            |
-| 2026-04-13 | MIG-RUNTIME-20260412T232624 -- aibox runtime 0.18.0 initial seed                         |
-| 2026-04-13 | MIG-20260412T232624 -- processkit v0.13.0 initial install                                |
-
-## CLI version migration briefings
-
-These owner-facing briefings live alongside the entity migrations as `YYYYMMDD_HHMM_X.Y.Z-to-A.B.C.md` files. They summarise breaking changes between consecutive aibox CLI versions and prescribe host-side actions; they are NOT entities and have no state machine — only a `**Status:**` field in the body.
-
-| Date       | Briefing                                  | Status                                                |
-|------------|-------------------------------------------|-------------------------------------------------------|
-| 2026-04-18 | 20260418_1106_0.18.3-to-0.18.5            | completed                                             |
-| 2026-04-18 | 20260418_0730_0.18.4-to-0.18.5            | cancelled (superseded by 20260418_1106)               |
-| 2026-04-17 | 20260417_1627_0.18.2-to-0.18.3            | completed (implicit — superseded by 0.18.5 briefing)  |
-| 2026-04-14 | 20260414_1053_0.18.1-to-0.18.2            | completed (implicit — superseded by 0.18.5 briefing)  |
-| 2026-04-13 | 20260413_0204_0.18.0-to-0.18.1            | completed (implicit — superseded by 0.18.5 briefing)  |

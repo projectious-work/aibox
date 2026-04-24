@@ -1,0 +1,325 @@
+---
+apiVersion: processkit.projectious.work/v1
+kind: DefaultBindingPack
+metadata:
+  id: PACK-default-model-assignments
+  version: "1.0.0"
+  created: 2026-04-22T00:00:00Z
+spec:
+  description: >-
+    Shipped defaults mapping (role, seniority) → Model at rank 1. Each
+    entry is a seed to be instantiated via create_binding during
+    installer/import; seeds are not themselves Binding entities yet.
+
+    Projects override by creating their own bindings (same (subject,
+    seniority) key at a lower rank; or a SCOPE-level binding that vetoes
+    or biases the roster). See DEC-20260422_0234-LoyalComet for the
+    8-layer precedence.
+  # Model-id tier summary (derived from context/models/*.md):
+  #   xxl : claude-opus, claude-sonnet, gpt-5, gpt-5-pro, o3,
+  #         gemini-2-5-pro, gemini-3-1-pro, grok-3-5, grok-3, grok-4,
+  #         grok-4-1, grok-4-heavy, deepseek-r, qwen3-235b,
+  #         mistral-deep-think (close)
+  #   xl  : gpt-4o, o4-mini, codestral, deepseek-v, qwen2-5-coder-32b,
+  #         qwen2-5-72b
+  #   l   : gemini-3-flash, mistral-large, minimax-m, phi
+  #   m   : claude-haiku, gemini-flash, gemini-2-5-flash, gemma-3-27b,
+  #         mistral-medium, llama-3-70b, cohere-command-r-plus,
+  #         minimax-text
+  #   s   : mistral-small
+  #
+  # Junior    → m/l ladder (fast, cheap; enough capability for routine work).
+  # Senior    → xl    ladder (mid-frontier; strong on complex IC work).
+  # Principal → xxl   ladder (frontier flagship; reserved for architecture-
+  #             scale work that justifies the cost).
+  bindings:
+    # ── software-engineer ────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-software-engineer
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior IC coding — fast, cheap, sufficient for routine tickets"
+    - type: model-assignment
+      subject: ROLE-software-engineer
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Senior IC coding — best price-capability ratio for day-to-day work"
+    - type: model-assignment
+      subject: ROLE-software-engineer
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Principal IC coding — reserve for architecture-scale changes"
+
+    # ── solutions-architect ──────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-solutions-architect
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior architect — mid-frontier is enough for scoped design work"
+    - type: model-assignment
+      subject: ROLE-solutions-architect
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Senior architect — frontier reasoning for system-design trade-offs"
+    - type: model-assignment
+      subject: ROLE-solutions-architect
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Principal architect — maximum thinking budget for novel designs"
+
+    # ── product-manager ──────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-product-manager
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior PM — fast iteration on briefs and summaries"
+    - type: model-assignment
+      subject: ROLE-product-manager
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Senior PM — discovery synthesis and roadmap writing"
+    - type: model-assignment
+      subject: ROLE-product-manager
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Principal PM — frontier reasoning for portfolio-scale trade-offs"
+
+    # ── research-scientist ───────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-research-scientist
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Junior researcher — paper reading and hypothesis drafting"
+    - type: model-assignment
+      subject: ROLE-research-scientist
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Senior researcher — rigorous scientific reasoning"
+    - type: model-assignment
+      subject: ROLE-research-scientist
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: extra-high
+        effort_ceiling: max
+        rationale: "Principal researcher — maximum thinking for novel problem spaces"
+
+    # ── ai-research-scientist ────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-ai-research-scientist
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Junior AI researcher — familiar with agentic+tool-use patterns"
+    - type: model-assignment
+      subject: ROLE-ai-research-scientist
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Senior AI researcher — frontier reasoning for novel ML work"
+    - type: model-assignment
+      subject: ROLE-ai-research-scientist
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: extra-high
+        effort_ceiling: max
+        rationale: "Principal AI researcher — deep reasoning on state-of-the-art ML"
+
+    # ── data-scientist ───────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-data-scientist
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior data scientist — cheap SQL and quick analyses"
+    - type: model-assignment
+      subject: ROLE-data-scientist
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Senior data scientist — modelling and notebook work"
+    - type: model-assignment
+      subject: ROLE-data-scientist
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Principal data scientist — methodology design and audits"
+
+    # ── qa-engineer ──────────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-qa-engineer
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior QA — high-volume test-case generation"
+    - type: model-assignment
+      subject: ROLE-qa-engineer
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Senior QA — test-strategy and flaky-test triage"
+    - type: model-assignment
+      subject: ROLE-qa-engineer
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Principal QA — test-architecture for complex systems"
+
+    # ── security-architect ───────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-security-architect
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Junior security architect — threat-model drafting; G:5 required"
+    - type: model-assignment
+      subject: ROLE-security-architect
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: high
+        effort_ceiling: extra-high
+        rationale: "Senior security architect — rigorous threat analysis; G:5"
+    - type: model-assignment
+      subject: ROLE-security-architect
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: extra-high
+        effort_ceiling: max
+        rationale: "Principal security architect — adversarial deep-dive; G:5"
+
+    # ── technical-writer ─────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-technical-writer
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Junior tech writer — fast drafts of routine docs"
+    - type: model-assignment
+      subject: ROLE-technical-writer
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Senior tech writer — style-sensitive long-form authoring"
+    - type: model-assignment
+      subject: ROLE-technical-writer
+      target: MODEL-anthropic-claude-opus
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Principal tech writer — reference docs and API-design prose"
+
+    # ── assistant ────────────────────────────────────────────────────────
+    - type: model-assignment
+      subject: ROLE-assistant
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: junior
+        rank: 1
+        effort_floor: none
+        effort_ceiling: low
+        rationale: "Junior assistant — fast, cheap, low-latency chat"
+    - type: model-assignment
+      subject: ROLE-assistant
+      target: MODEL-anthropic-claude-haiku
+      conditions:
+        seniority: senior
+        rank: 1
+        effort_floor: low
+        effort_ceiling: medium
+        rationale: "Senior assistant — still fast, slightly more thinking budget"
+    - type: model-assignment
+      subject: ROLE-assistant
+      target: MODEL-anthropic-claude-sonnet
+      conditions:
+        seniority: principal
+        rank: 1
+        effort_floor: medium
+        effort_ceiling: high
+        rationale: "Principal assistant — full frontier capabilities when needed"
+---

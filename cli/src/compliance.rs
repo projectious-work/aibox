@@ -57,12 +57,23 @@ const AGENTS_BLOCK_END_V2: &str = "<!-- pk-compliance-contract v2 END -->";
 /// Compare the compliance-contract block in `AGENTS.md` against the canonical
 /// source. Prints a warning if they differ; returns `Ok(())` in all cases
 /// (drift is non-fatal).
-pub fn check_compliance_contract_drift(project_root: &Path) -> Result<()> {
+///
+/// If `fix` is `true` and drift is detected, the embedded block is
+/// rewritten from the canonical source. When the embedded block uses
+/// `v1` markers but the canonical source is `v2`, markers are migrated
+/// to `v2` as part of the fix.
+pub fn check_compliance_contract_drift(project_root: &Path, fix: bool) -> Result<()> {
     let canonical_path = project_root.join(COMPLIANCE_CONTRACT_REL);
     let agents_path = project_root.join("AGENTS.md");
 
     // If either file is absent we can't compare — skip silently.
     if !canonical_path.is_file() || !agents_path.is_file() {
+        if fix {
+            output::warn(
+                "--fix-compliance-contract: AGENTS.md or the canonical contract is missing; \
+                 nothing to rewrite.",
+            );
+        }
         return Ok(());
     }
 
@@ -76,20 +87,50 @@ pub fn check_compliance_contract_drift(project_root: &Path) -> Result<()> {
     let agents_content = fs::read_to_string(&agents_path)
         .with_context(|| format!("reading AGENTS.md: {}", agents_path.display()))?;
 
-    // Try v1 markers first (matches the canonical source); fall back to v2.
-    // If the embedded block uses v2 markers but the canonical is v1, we treat
-    // the structural mismatch as expected (transitional state) and emit only
-    // an info-level note instead of a drift warning — the contract texts are
-    // a strict superset, so behavioral guarantees still hold.
     let embedded_v1 = extract_block(&agents_content, AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1);
     let embedded_v2 = extract_block(&agents_content, AGENTS_BLOCK_BEGIN_V2, AGENTS_BLOCK_END_V2);
+    let canonical_version = detect_contract_version(&canonical);
 
     match (embedded_v1, embedded_v2) {
         (None, None) => {
-            // Block markers not present — nothing to compare.
+            // Block markers not present — nothing to compare or fix.
+            if fix {
+                output::warn(
+                    "--fix-compliance-contract: no pk-compliance-contract markers found in \
+                     AGENTS.md; nothing to rewrite.",
+                );
+            }
         }
-        (Some(block), _) => {
-            if block.trim() != canonical.trim() {
+        (Some(block_v1), None) => {
+            if block_v1.trim() == canonical.trim() {
+                return Ok(());
+            }
+            if fix {
+                // Rewrite the v1 block. If the canonical source is already v2,
+                // migrate the surrounding markers to v2 at the same time so
+                // future comparisons pin cleanly to the new version.
+                let (begin, end) = match canonical_version {
+                    ContractVersion::V2 => (AGENTS_BLOCK_BEGIN_V2, AGENTS_BLOCK_END_V2),
+                    _ => (AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1),
+                };
+                rewrite_block(
+                    &agents_path,
+                    &agents_content,
+                    AGENTS_BLOCK_BEGIN_V1,
+                    AGENTS_BLOCK_END_V1,
+                    begin,
+                    end,
+                    canonical.trim(),
+                )?;
+                output::ok(&format!(
+                    "Rewrote compliance contract in AGENTS.md from canonical source ({}).",
+                    if matches!(canonical_version, ContractVersion::V2) {
+                        "markers migrated v1 → v2"
+                    } else {
+                        "v1 markers preserved"
+                    }
+                ));
+            } else {
                 output::warn(
                     "Compliance contract in AGENTS.md differs from the canonical source at \
                      context/skills/processkit/skill-gate/assets/compliance-contract.md.",
@@ -97,18 +138,90 @@ pub fn check_compliance_contract_drift(project_root: &Path) -> Result<()> {
                 output::warn("Run `aibox sync --fix-compliance-contract` to update AGENTS.md.");
             }
         }
-        (None, Some(_)) => {
-            // AGENTS.md uses v2 markers; canonical is still v1. Transitional —
-            // skip-tolerant comparison until upstream ships `skip_decision_record`
-            // and reconciles skill-gate to v2. See aibox CHANGELOG v0.18.7.
-            output::info(
-                "AGENTS.md ships pk-compliance v2 markers; canonical source is still v1. \
-                 Drift check skipped (v2 is a strict superset of v1). Will re-pin once \
-                 upstream processkit reconciles skill-gate to v2.",
-            );
+        (_, Some(block_v2)) => {
+            if block_v2.trim() == canonical.trim() {
+                return Ok(());
+            }
+            if fix {
+                rewrite_block(
+                    &agents_path,
+                    &agents_content,
+                    AGENTS_BLOCK_BEGIN_V2,
+                    AGENTS_BLOCK_END_V2,
+                    AGENTS_BLOCK_BEGIN_V2,
+                    AGENTS_BLOCK_END_V2,
+                    canonical.trim(),
+                )?;
+                output::ok("Rewrote compliance contract in AGENTS.md from canonical source (v2).");
+            } else {
+                output::warn(
+                    "Compliance contract in AGENTS.md differs from the canonical source at \
+                     context/skills/processkit/skill-gate/assets/compliance-contract.md.",
+                );
+                output::warn("Run `aibox sync --fix-compliance-contract` to update AGENTS.md.");
+            }
         }
     }
 
+    Ok(())
+}
+
+/// Which contract revision a piece of text claims to be. Derived from
+/// the `<!-- pk-compliance vN -->` marker at the top of the canonical
+/// file (or an embedded block).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ContractVersion {
+    V1,
+    V2,
+    Unknown,
+}
+
+fn detect_contract_version(text: &str) -> ContractVersion {
+    if text.contains("<!-- pk-compliance v2 -->") {
+        ContractVersion::V2
+    } else if text.contains("<!-- pk-compliance v1 -->") {
+        ContractVersion::V1
+    } else {
+        ContractVersion::Unknown
+    }
+}
+
+/// Replace the region between `old_begin`..`old_end` in `original` with
+/// `new_begin\n{new_content}\n{new_end}` and write it back to `agents_path`.
+///
+/// `old_begin`/`old_end` locate the existing block to replace;
+/// `new_begin`/`new_end` are the markers to emit (these differ only
+/// when migrating v1 → v2 markers during a fix).
+#[allow(clippy::too_many_arguments)]
+fn rewrite_block(
+    agents_path: &Path,
+    original: &str,
+    old_begin: &str,
+    old_end: &str,
+    new_begin: &str,
+    new_end: &str,
+    new_content: &str,
+) -> Result<()> {
+    let begin_idx = original
+        .find(old_begin)
+        .with_context(|| format!("begin marker '{}' not found in AGENTS.md", old_begin))?;
+    let after_begin = begin_idx + old_begin.len();
+    let end_rel = original[after_begin..]
+        .find(old_end)
+        .with_context(|| format!("end marker '{}' not found in AGENTS.md", old_end))?;
+    let end_idx = after_begin + end_rel + old_end.len();
+
+    let mut rewritten = String::with_capacity(original.len() + new_content.len());
+    rewritten.push_str(&original[..begin_idx]);
+    rewritten.push_str(new_begin);
+    rewritten.push('\n');
+    rewritten.push_str(new_content);
+    rewritten.push('\n');
+    rewritten.push_str(new_end);
+    rewritten.push_str(&original[end_idx..]);
+
+    fs::write(agents_path, &rewritten)
+        .with_context(|| format!("writing {}", agents_path.display()))?;
     Ok(())
 }
 
@@ -217,8 +330,16 @@ pub fn write_aider_compliance_conf(config: &AiboxConfig, project_root: &Path) ->
 
 /// Run all three compliance-contract sync steps. Best-effort: failures in
 /// individual steps are warned-and-continued so they do not abort the sync.
-pub fn regenerate_compliance_configs(config: &AiboxConfig, project_root: &Path) -> Result<()> {
-    if let Err(e) = check_compliance_contract_drift(project_root) {
+///
+/// `fix_compliance_contract` — when true, the drift checker rewrites the
+/// AGENTS.md block from the canonical source instead of emitting a
+/// warning. Wired from `aibox sync --fix-compliance-contract`.
+pub fn regenerate_compliance_configs(
+    config: &AiboxConfig,
+    project_root: &Path,
+    fix_compliance_contract: bool,
+) -> Result<()> {
+    if let Err(e) = check_compliance_contract_drift(project_root, fix_compliance_contract) {
         output::warn(&format!("Compliance drift check failed: {}", e));
     }
     if let Err(e) = write_cursor_compliance_rules(config, project_root) {
@@ -285,7 +406,7 @@ mod tests {
         fs::write(root.join("AGENTS.md"), agents).unwrap();
 
         // Should complete without error (drift is non-fatal).
-        check_compliance_contract_drift(root).expect("should not error");
+        check_compliance_contract_drift(root, false).expect("should not error");
         // The warning is emitted to stderr — we verify the function runs
         // without returning Err and that the comparison logic executes.
     }
@@ -303,7 +424,7 @@ mod tests {
         );
         fs::write(root.join("AGENTS.md"), agents).unwrap();
 
-        check_compliance_contract_drift(root).expect("should not error");
+        check_compliance_contract_drift(root, false).expect("should not error");
     }
 
     #[test]
@@ -313,7 +434,113 @@ mod tests {
 
         // No canonical file — should not error.
         fs::write(root.join("AGENTS.md"), "no markers here").unwrap();
-        check_compliance_contract_drift(root).expect("should not error");
+        check_compliance_contract_drift(root, false).expect("should not error");
+    }
+
+    #[test]
+    fn fix_rewrites_v1_block_and_preserves_surroundings() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+
+        write_canonical(root);
+
+        let prefix = "# AGENTS.md\n\nsome prose before the block.\n\n";
+        let suffix = "\n\nsome prose after the block.\n";
+        let agents = format!(
+            "{prefix}{}\nstale content\n{}{suffix}",
+            AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1
+        );
+        fs::write(root.join("AGENTS.md"), &agents).unwrap();
+
+        check_compliance_contract_drift(root, true).expect("fix should succeed");
+
+        let rewritten = fs::read_to_string(root.join("AGENTS.md")).unwrap();
+        assert!(rewritten.starts_with(prefix), "prefix preserved");
+        assert!(rewritten.ends_with(suffix), "suffix preserved");
+        assert!(
+            rewritten.contains("canonical content"),
+            "canonical content written into block"
+        );
+        assert!(
+            !rewritten.contains("stale content"),
+            "stale content removed"
+        );
+        // Canonical fixture has no version marker → ContractVersion::Unknown →
+        // v1 markers preserved.
+        assert!(rewritten.contains(AGENTS_BLOCK_BEGIN_V1));
+        assert!(rewritten.contains(AGENTS_BLOCK_END_V1));
+    }
+
+    #[test]
+    fn fix_migrates_v1_markers_to_v2_when_canonical_is_v2() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+
+        let canonical_dir = root
+            .join("context")
+            .join("skills")
+            .join("processkit")
+            .join("skill-gate")
+            .join("assets");
+        fs::create_dir_all(&canonical_dir).unwrap();
+        fs::write(
+            canonical_dir.join("compliance-contract.md"),
+            "<!-- pk-compliance v2 -->\n\nnew v2 body\n",
+        )
+        .unwrap();
+
+        let agents = format!(
+            "{}\n<!-- pk-compliance v1 -->\nold v1 body\n{}",
+            AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1
+        );
+        fs::write(root.join("AGENTS.md"), agents).unwrap();
+
+        check_compliance_contract_drift(root, true).expect("fix should succeed");
+
+        let rewritten = fs::read_to_string(root.join("AGENTS.md")).unwrap();
+        assert!(
+            rewritten.contains(AGENTS_BLOCK_BEGIN_V2) && rewritten.contains(AGENTS_BLOCK_END_V2),
+            "v2 markers emitted"
+        );
+        assert!(
+            !rewritten.contains(AGENTS_BLOCK_BEGIN_V1) && !rewritten.contains(AGENTS_BLOCK_END_V1),
+            "v1 markers replaced"
+        );
+        assert!(rewritten.contains("new v2 body"));
+        assert!(!rewritten.contains("old v1 body"));
+    }
+
+    #[test]
+    fn fix_is_idempotent_when_no_drift() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+
+        write_canonical(root);
+
+        let agents = format!(
+            "{}\ncanonical content\n{}",
+            AGENTS_BLOCK_BEGIN_V1, AGENTS_BLOCK_END_V1
+        );
+        fs::write(root.join("AGENTS.md"), &agents).unwrap();
+
+        check_compliance_contract_drift(root, true).expect("should succeed");
+
+        let after = fs::read_to_string(root.join("AGENTS.md")).unwrap();
+        assert_eq!(after, agents, "no rewrite when already in sync");
+    }
+
+    #[test]
+    fn fix_no_op_when_no_markers() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path();
+
+        write_canonical(root);
+        fs::write(root.join("AGENTS.md"), "no markers here\n").unwrap();
+
+        check_compliance_contract_drift(root, true).expect("should not error");
+
+        let after = fs::read_to_string(root.join("AGENTS.md")).unwrap();
+        assert_eq!(after, "no markers here\n", "file untouched when no markers");
     }
 
     // -----------------------------------------------------------------------

@@ -126,9 +126,14 @@ fn dispatch(cli: cli::Cli) -> anyhow::Result<()> {
             );
             result
         }
-        cli::Commands::Sync { no_cache, no_build } => {
+        cli::Commands::Sync {
+            no_cache,
+            no_build,
+            fix_compliance_contract,
+        } => {
             let timer = crate::log::LogTimer::start("sync");
-            let result = container::cmd_sync(config_path, no_cache, no_build);
+            let result =
+                container::cmd_sync(config_path, no_cache, no_build, fix_compliance_contract);
             timer.finish(
                 Path::new("."),
                 if result.is_ok() { 0 } else { 1 },

@@ -72,7 +72,7 @@ or a DecisionRecord — not silently.
 
 When spawning a clone, create a new `Actor` with a fresh ID
 (`ACTOR-<timestamp>-<PascalCaseWord>-<role-slug>-NN`) and a new `Binding` to
-the role. Do not reuse template actor IDs. Mark `spec.x_aibox.clone_of`
+the role. Do not reuse template actor IDs. Mark `spec.templated_from`
 pointing at the template actor.
 
 ## Step 5 — Issue the handoff

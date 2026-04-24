@@ -390,6 +390,17 @@ fn write_migration_document(
     diffs: &[RuntimeFileDiff],
     intermediate_hops: &[IntermediateHop],
 ) -> Result<Option<PathBuf>> {
+    // No-op guard: at `from == to` with no intermediate hops, every
+    // "conflict" is a local-only edit that upstream never touched, so no
+    // migration is actually needed. Only write when upstream itself moved
+    // something or there is a cross-version hop to record.
+    if from_version == to_version
+        && intermediate_hops.is_empty()
+        && !summary.has_upstream_side_changes()
+    {
+        return Ok(None);
+    }
+
     let pending_dir = project_root.join("context/migrations/pending");
     let in_progress_dir = project_root.join("context/migrations/in-progress");
     if existing_migration_matches(&pending_dir, from_version, to_version)?
@@ -675,5 +686,46 @@ mod tests {
         write_snapshot(root, "0.18.0", &[(".vim/vimrc", "A")]);
         let hops = build_intermediate_hops(root, "bogus", "0.18.2");
         assert!(hops.is_empty());
+    }
+
+    #[test]
+    fn write_migration_document_skips_when_same_version_and_only_conflicts() {
+        // Regression guard: a same-version sync with only locally-modified
+        // files (classified as Conflict against unchanged upstream) must
+        // not emit a runtime migration document.
+        let tmp = TempDir::new().unwrap();
+        let summary = DiffSummary {
+            conflict: 2,
+            ..Default::default()
+        };
+        let diffs: Vec<RuntimeFileDiff> = Vec::new();
+        let hops: Vec<IntermediateHop> = Vec::new();
+
+        let written =
+            write_migration_document(tmp.path(), "0.18.6", "0.18.6", &summary, &diffs, &hops)
+                .unwrap();
+        assert!(written.is_none());
+    }
+
+    #[test]
+    fn write_migration_document_still_writes_on_same_version_when_upstream_moved() {
+        // A same-version sync that nevertheless has genuine upstream-side
+        // deltas (e.g. a new runtime file) still produces a migration doc.
+        let tmp = TempDir::new().unwrap();
+        let summary = DiffSummary {
+            new_upstream: 1,
+            ..Default::default()
+        };
+        let diffs = vec![RuntimeFileDiff {
+            rel_path: ".asoundrc".to_string(),
+            project_path: PathBuf::from(".asoundrc"),
+            classification: FileClassification::NewUpstream,
+        }];
+        let hops: Vec<IntermediateHop> = Vec::new();
+
+        let written =
+            write_migration_document(tmp.path(), "0.18.6", "0.18.6", &summary, &diffs, &hops)
+                .unwrap();
+        assert!(written.is_some());
     }
 }

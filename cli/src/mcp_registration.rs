@@ -98,6 +98,171 @@ struct RawServerEntry {
 }
 
 // ---------------------------------------------------------------------------
+// MCP permission configuration from aibox.toml [mcp] section
+// ---------------------------------------------------------------------------
+
+/// Configuration for global MCP permission management across all harnesses.
+/// Parsed from the `[mcp]` section of aibox.toml.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[allow(dead_code)]
+pub struct McpConfig {
+    /// Default permission mode: "allow", "ask", or "deny".
+    /// Used when no pattern matches a tool name.
+    #[serde(default = "default_mode")]
+    pub default_mode: String,
+
+    /// Allow-list patterns (glob-style, e.g., "mcp__processkit-*", "bash").
+    /// Matched against tool names; first match wins.
+    #[serde(default)]
+    pub allow_patterns: Vec<String>,
+
+    /// Deny-list patterns (glob-style, e.g., "mcp__private-*").
+    /// Matched against tool names; first match wins.
+    /// Deny patterns override allow patterns if both match.
+    #[serde(default)]
+    pub deny_patterns: Vec<String>,
+
+    /// Per-harness overrides. Key is harness name (e.g., "claude-code").
+    #[serde(default)]
+    pub harness: BTreeMap<String, HarnessOverride>,
+}
+
+#[allow(dead_code)]
+fn default_mode() -> String {
+    "allow".to_string()
+}
+
+/// Per-harness override configuration.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[allow(dead_code)]
+pub struct HarnessOverride {
+    /// Whether this harness is enabled. Default: true.
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
+    /// Override global mode for this harness.
+    #[serde(default)]
+    pub mode: Option<String>,
+
+    /// Additional allow patterns for this harness only.
+    #[serde(default)]
+    pub extra_patterns: Vec<String>,
+
+    /// Patterns to deny for this harness (override global allow).
+    #[serde(default)]
+    pub deny_patterns: Vec<String>,
+}
+
+#[allow(dead_code)]
+fn default_true() -> bool {
+    true
+}
+
+// ---------------------------------------------------------------------------
+// Pattern matching logic
+// ---------------------------------------------------------------------------
+
+/// Expand glob patterns into concrete tool names.
+/// Patterns like "mcp__processkit-*" match all tools starting with that prefix.
+///
+/// # Arguments
+/// * `patterns` - List of glob-style patterns (e.g., ["mcp__processkit-*", "bash"])
+/// * `available_tools` - All available tool names to match against
+///
+/// # Returns
+/// Sorted list of unique tool names that match any pattern.
+#[allow(dead_code)]
+pub fn expand_mcp_patterns(
+    patterns: &[String],
+    available_tools: &[String],
+) -> Vec<String> {
+    let mut matched = std::collections::HashSet::new();
+
+    for pattern in patterns {
+        for tool in available_tools {
+            if glob_matches(tool, pattern) {
+                matched.insert(tool.clone());
+            }
+        }
+    }
+
+    let mut result: Vec<_> = matched.into_iter().collect();
+    result.sort();
+    result
+}
+
+/// Simple glob pattern matching for "prefix-*" and exact matches.
+/// Supports:
+/// - Exact match: "tool_name"
+/// - Wildcard suffix: "prefix-*" matches "prefix-foo", "prefix-bar", etc.
+/// - Wildcard prefix: "*-suffix" matches "foo-suffix", "bar-suffix", etc.
+#[allow(dead_code)]
+fn glob_matches(tool: &str, pattern: &str) -> bool {
+    if pattern == "*" {
+        return true;
+    }
+    if !pattern.contains('*') {
+        return tool == pattern;
+    }
+    if pattern.starts_with('*') && pattern.ends_with('*') {
+        // Middle match: *foo* matches anything containing foo
+        let middle = &pattern[1..pattern.len() - 1];
+        return tool.contains(middle);
+    }
+    if let Some(prefix) = pattern.strip_suffix('*') {
+        // Prefix match: foo* matches foo, foobar, etc.
+        return tool.starts_with(prefix);
+    }
+    if let Some(suffix) = pattern.strip_prefix('*') {
+        // Suffix match: *foo matches foo, barfoo, etc.
+        return tool.ends_with(suffix);
+    }
+    false
+}
+
+/// Determine if a tool is allowed based on allow/deny patterns.
+/// First-match-wins semantics: the first matching pattern (allow or deny)
+/// determines the result. If no pattern matches, returns the default_mode.
+///
+/// # Arguments
+/// * `tool_name` - Name of the tool to check
+/// * `allow_patterns` - Patterns that permit the tool
+/// * `deny_patterns` - Patterns that forbid the tool
+/// * `default_mode` - What to return if no pattern matches
+///
+/// # Returns
+/// true if the tool is allowed, false if denied
+#[allow(dead_code)]
+pub fn first_match_wins(
+    tool_name: &str,
+    allow_patterns: &[String],
+    deny_patterns: &[String],
+    default_mode: &str,
+) -> bool {
+    // Check deny patterns first for security
+    for pattern in deny_patterns {
+        if glob_matches(tool_name, pattern) {
+            return false;
+        }
+    }
+
+    // Check allow patterns
+    for pattern in allow_patterns {
+        if glob_matches(tool_name, pattern) {
+            return true;
+        }
+    }
+
+    // No pattern matched; use default mode
+    match default_mode {
+        "allow" | "automatic" => true,
+        "ask" => true, // Ask mode still permits the tool, just with prompts
+        "deny" => false,
+        _ => true, // Unknown modes default to allow
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Walk the templates mirror to compute the managed set
 // ---------------------------------------------------------------------------
 
@@ -1986,5 +2151,146 @@ args = ["server.js"]
             spec_with_args("no-args", vec![]),
         ];
         validate_script_paths(&specs, tmp.path()).expect("non-script specs should be ignored");
+    }
+
+    // ---------------------------------------------------------------------------
+    // Pattern matching tests
+    // ---------------------------------------------------------------------------
+
+    #[test]
+    fn glob_matches_exact() {
+        assert!(glob_matches("mcp__foo", "mcp__foo"));
+        assert!(glob_matches("bash", "bash"));
+        assert!(!glob_matches("mcp__foo", "mcp__bar"));
+        assert!(!glob_matches("mcp__foo", "mcp__foo-extra"));
+    }
+
+    #[test]
+    fn glob_matches_suffix_wildcard() {
+        assert!(glob_matches("mcp__processkit-workitem", "mcp__processkit-*"));
+        assert!(glob_matches("mcp__processkit-actor", "mcp__processkit-*"));
+        assert!(!glob_matches("mcp__other-workitem", "mcp__processkit-*"));
+        assert!(!glob_matches("mcp__processkit", "mcp__processkit-*"));
+    }
+
+    #[test]
+    fn glob_matches_prefix_wildcard() {
+        assert!(glob_matches("bar-suffix", "*-suffix"));
+        assert!(glob_matches("foo-suffix", "*-suffix"));
+        assert!(!glob_matches("foo-other", "*-suffix"));
+    }
+
+    #[test]
+    fn glob_matches_middle_wildcard() {
+        assert!(glob_matches("foo_processkit_bar", "*processkit*"));
+        assert!(glob_matches("processkit", "*processkit*"));
+        assert!(!glob_matches("foo_other_bar", "*processkit*"));
+    }
+
+    #[test]
+    fn glob_matches_all_wildcard() {
+        assert!(glob_matches("anything", "*"));
+        assert!(glob_matches("", "*"));
+    }
+
+    #[test]
+    fn expand_patterns_single() {
+        let tools = vec!["mcp__foo".to_string(), "bash".to_string()];
+        let patterns = vec!["bash".to_string()];
+        let result = expand_mcp_patterns(&patterns, &tools);
+        assert_eq!(result, vec!["bash"]);
+    }
+
+    #[test]
+    fn expand_patterns_wildcard() {
+        let tools = vec![
+            "mcp__processkit-workitem".to_string(),
+            "mcp__processkit-actor".to_string(),
+            "mcp__other-tool".to_string(),
+            "bash".to_string(),
+        ];
+        let patterns = vec!["mcp__processkit-*".to_string()];
+        let result = expand_mcp_patterns(&patterns, &tools);
+        assert_eq!(
+            result,
+            vec!["mcp__processkit-actor", "mcp__processkit-workitem"]
+        );
+    }
+
+    #[test]
+    fn expand_patterns_multiple() {
+        let tools = vec![
+            "mcp__processkit-workitem".to_string(),
+            "mcp__other-tool".to_string(),
+            "bash".to_string(),
+        ];
+        let patterns = vec!["mcp__processkit-*".to_string(), "bash".to_string()];
+        let result = expand_mcp_patterns(&patterns, &tools);
+        assert_eq!(
+            result,
+            vec!["bash", "mcp__processkit-workitem"]
+        );
+    }
+
+    #[test]
+    fn expand_patterns_no_match() {
+        let tools = vec!["mcp__foo".to_string(), "bash".to_string()];
+        let patterns = vec!["nomatch".to_string()];
+        let result = expand_mcp_patterns(&patterns, &tools);
+        assert_eq!(result, Vec::<String>::new());
+    }
+
+    #[test]
+    fn first_match_wins_allow_pattern() {
+        let allow = vec!["mcp__processkit-*".to_string()];
+        let deny = vec![];
+        assert!(first_match_wins(
+            "mcp__processkit-workitem",
+            &allow,
+            &deny,
+            "allow"
+        ));
+        assert!(!first_match_wins("other-tool", &allow, &deny, "deny"));
+    }
+
+    #[test]
+    fn first_match_wins_deny_pattern() {
+        let allow = vec!["mcp__*".to_string()];
+        let deny = vec!["mcp__private-*".to_string()];
+        assert!(first_match_wins(
+            "mcp__processkit-workitem",
+            &allow,
+            &deny,
+            "allow"
+        ));
+        assert!(!first_match_wins(
+            "mcp__private-secret",
+            &allow,
+            &deny,
+            "allow"
+        ));
+    }
+
+    #[test]
+    fn first_match_wins_default_mode() {
+        let allow = vec![];
+        let deny = vec![];
+        assert!(first_match_wins("anything", &allow, &deny, "allow"));
+        assert!(!first_match_wins("anything", &allow, &deny, "deny"));
+        assert!(first_match_wins("anything", &allow, &deny, "ask"));
+    }
+
+    #[test]
+    fn first_match_wins_deny_takes_precedence() {
+        // If both allow and deny patterns match the same tool,
+        // deny should win (deny takes precedence for security).
+        let allow = vec!["mcp__*".to_string()];
+        let deny = vec!["mcp__restricted-*".to_string()];
+        assert!(!first_match_wins(
+            "mcp__restricted-tool",
+            &allow,
+            &deny,
+            "allow"
+        ));
     }
 }

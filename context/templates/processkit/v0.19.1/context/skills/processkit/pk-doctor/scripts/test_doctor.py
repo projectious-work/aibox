@@ -1,0 +1,414 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#   "pyyaml>=6.0",
+#   "jsonschema>=4.0",
+# ]
+# ///
+"""test_doctor.py — smoke tests for pk-doctor (Phase 1).
+
+Seeds a tiny context/ + src/context/ tree in a tempdir and asserts:
+- CheckResult shape + severity tallies
+- aggregator exit code (0 if no ERROR, 1 otherwise)
+- stub LogEntry payload shape (emit called exactly once per run)
+
+Run from any directory:
+
+    python3 context/skills/processkit/pk-doctor/scripts/test_doctor.py
+
+or via the uv shebang if PyYAML/jsonschema aren't globally installed.
+
+Exit 0 = all tests passed.
+Exit 1 = at least one test failed.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import textwrap
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+
+# ---------------------------------------------------------------------------
+# Locate files relative to this script, not cwd.
+# ---------------------------------------------------------------------------
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+_DOCTOR = _SCRIPTS_DIR / "doctor.py"
+_REPO_ROOT = Path(__file__).resolve().parents[5]  # skills/processkit/pk-doctor/scripts → repo root
+_SCHEMAS_SRC = _REPO_ROOT / "src" / "context" / "schemas"
+
+PASS = "\033[32mPASS\033[0m"
+FAIL = "\033[31mFAIL\033[0m"
+
+failures: list[str] = []
+
+
+def check(name: str, condition: bool, detail: str = "") -> None:
+    if condition:
+        print(f"  {PASS}  {name}")
+    else:
+        print(f"  {FAIL}  {name}" + (f": {detail}" if detail else ""))
+        failures.append(name)
+
+
+# ---------------------------------------------------------------------------
+# Fixture tree builder
+# ---------------------------------------------------------------------------
+
+def _seed_tree(root: Path) -> None:
+    """Populate a minimal repo layout under `root`."""
+    # Copy live schemas so schema_filename has something to validate against.
+    (root / "src" / "context" / "schemas").mkdir(parents=True)
+    for name in ("workitem.yaml", "logentry.yaml", "migration.yaml"):
+        src = _SCHEMAS_SRC / name
+        if src.is_file():
+            (root / "src" / "context" / "schemas" / name).write_text(
+                src.read_text(encoding="utf-8"), encoding="utf-8"
+            )
+
+    # Stub the drift script — simplest: tree is trivially in-sync.
+    scripts = root / "scripts"
+    scripts.mkdir()
+    drift = scripts / "check-src-context-drift.sh"
+    drift.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+    drift.chmod(0o755)
+
+    # --- one valid workitem -----------------------------------------------
+    ctx = root / "context"
+    (ctx / "workitems").mkdir(parents=True)
+    (ctx / "workitems" / "BACK-20260420_1200-GoodApple-valid-item.md").write_text(
+        textwrap.dedent("""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: WorkItem
+            metadata:
+              id: BACK-20260420_1200-GoodApple-valid-item
+              created: 2026-04-20T12:00:00Z
+            spec:
+              title: Valid test item
+              state: proposed
+              type: task
+            ---
+            body
+            """),
+        encoding="utf-8",
+    )
+
+    # --- one workitem with filename / id mismatch (WARN) ------------------
+    (ctx / "workitems" / "BACK-bad-filename.md").write_text(
+        textwrap.dedent("""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: WorkItem
+            metadata:
+              id: BACK-20260420_1300-BadApple-item
+              created: 2026-04-20T13:00:00Z
+            spec:
+              title: Mismatched filename
+              state: proposed
+            ---
+            """),
+        encoding="utf-8",
+    )
+
+    # --- one mis-sharded log (WARN from sharding) -------------------------
+    (ctx / "logs").mkdir()
+    (ctx / "logs" / "LOG-toplevel-misplaced.md").write_text(
+        textwrap.dedent("""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: LogEntry
+            metadata:
+              id: LOG-toplevel-misplaced
+              created: 2026-04-20T14:00:00Z
+            spec:
+              event_type: test.event
+              actor: ACTOR-test
+              timestamp: 2026-04-20T14:00:00Z
+            ---
+            """),
+        encoding="utf-8",
+    )
+
+    # --- one stale pending migration (WARN from migrations) ---------------
+    (ctx / "migrations" / "pending").mkdir(parents=True)
+    stale_created = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat().replace("+00:00", "Z")
+    (ctx / "migrations" / "pending" / "MIG-20260101T000000.md").write_text(
+        textwrap.dedent(f"""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: Migration
+            metadata:
+              id: MIG-20260101T000000
+              created: {stale_created}
+            spec:
+              source: processkit
+              from_version: v0.0.1
+              to_version: v0.0.2
+              state: pending
+              summary: stale test migration
+            ---
+            """),
+        encoding="utf-8",
+    )
+    # Ensure the other two required state-bucket dirs exist.
+    (ctx / "migrations" / "in-progress").mkdir()
+    (ctx / "migrations" / "applied").mkdir()
+
+
+# ---------------------------------------------------------------------------
+# Run helper
+# ---------------------------------------------------------------------------
+
+def _run_doctor(repo_root: Path, *extra: str, stub_path: Path) -> subprocess.CompletedProcess:
+    env = os.environ.copy()
+    env["PK_DOCTOR_LOGENTRY_STUB"] = str(stub_path)
+    # Use the uv shebang for dep isolation.
+    cmd = [str(_DOCTOR), "--repo-root", str(repo_root), *extra]
+    return subprocess.run(cmd, capture_output=True, text=True, env=env)
+
+
+# ---------------------------------------------------------------------------
+# Test 1: baseline run on seeded fixture
+# ---------------------------------------------------------------------------
+print("\n[1] doctor.py — baseline detect-only run on seeded fixture")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, stub_path=stub)
+
+    check("ran without crash (exit 0 or 1)", result.returncode in (0, 1),
+          f"got {result.returncode}\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}")
+    check("stdout contains report header", "pk-doctor v" in result.stdout)
+    check("schema_filename section present", "## schema_filename" in result.stdout)
+    check("sharding section present", "## sharding" in result.stdout)
+    check("migrations section present", "## migrations" in result.stdout)
+    check("drift section present", "## drift" in result.stdout)
+    check("totals line present", "## totals" in result.stdout)
+    check("stub log payload written", stub.is_file())
+    if stub.is_file():
+        payload = json.loads(stub.read_text())
+        check("payload event_type correct", payload.get("event_type") == "doctor.report")
+        check("payload has categories", isinstance(payload.get("details", {}).get("categories"), dict))
+        check("payload has duration_ms", "duration_ms" in payload.get("details", {}))
+        check("payload has doctor_version", payload.get("details", {}).get("doctor_version") == "1.0.0")
+        # Should see our seeded findings: bad filename WARN, mis-sharded log WARN,
+        # stale migration WARN.
+        findings_blob = json.dumps(payload["details"]["top_findings"])
+        check("top_findings contains filename-id-mismatch",
+              "schema.filename-id-mismatch" in findings_blob,
+              findings_blob[:400])
+        check("top_findings contains sharding.log-wrong-bucket",
+              "sharding.log-wrong-bucket" in findings_blob,
+              findings_blob[:400])
+        check("top_findings contains migration.stale-pending",
+              "migration.stale-pending" in findings_blob,
+              findings_blob[:400])
+
+# ---------------------------------------------------------------------------
+# Test 2: ERROR causes exit 1; INFO-only run exits 0
+# ---------------------------------------------------------------------------
+print("\n[2] doctor.py — exit code reflects ERROR tally")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+    # Inject a broken-schema workitem that will produce an ERROR.
+    (root / "context" / "workitems" / "BACK-20260420_1400-CleanBad-invalid.md").write_text(
+        textwrap.dedent("""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: WorkItem
+            metadata:
+              id: BACK-20260420_1400-CleanBad-invalid
+              created: 2026-04-20T14:00:00Z
+            spec:
+              state: proposed
+            ---
+            """),  # missing required `title`
+        encoding="utf-8",
+    )
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, stub_path=stub)
+    check("exit 1 when ERROR present", result.returncode == 1,
+          f"got {result.returncode}\nstdout:\n{result.stdout[-600:]}")
+    payload = json.loads(stub.read_text())
+    check("ERROR tally non-zero", any(
+        c.get("ERROR", 0) > 0 for c in payload["details"]["categories"].values()
+    ))
+
+# ---------------------------------------------------------------------------
+# Test 3: --category= restricts run
+# ---------------------------------------------------------------------------
+print("\n[3] doctor.py — --category=drift runs only the drift check")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, "--category=drift", stub_path=stub)
+    check("exit 0 (clean drift)", result.returncode == 0,
+          f"got {result.returncode}\nstderr:\n{result.stderr}")
+    check("schema_filename section absent", "## schema_filename" not in result.stdout)
+    check("drift section present", "## drift" in result.stdout)
+    payload = json.loads(stub.read_text())
+    check("only drift category in payload",
+          list(payload["details"]["categories"].keys()) == ["drift"])
+
+# ---------------------------------------------------------------------------
+# Test 4: --fix + --fix-all mutex
+# ---------------------------------------------------------------------------
+print("\n[4] doctor.py — --fix and --fix-all are mutually exclusive")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, "--fix=migrations", "--fix-all", stub_path=stub)
+    # argparse mutex groups exit 2 with error on stderr.
+    check("mutex enforced (exit 2)", result.returncode == 2,
+          f"got {result.returncode}\nstderr:{result.stderr[:200]}")
+
+# ---------------------------------------------------------------------------
+# Test 5: single logentry emitted per run (stub file overwritten, not appended)
+# ---------------------------------------------------------------------------
+print("\n[5] doctor.py — exactly one logentry emission per run")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, stub_path=stub)
+    check("stub exists", stub.is_file())
+    content = stub.read_text()
+    check("stub parses as single JSON object (not JSONL)",
+          content.strip().startswith("{") and content.strip().endswith("}"))
+    # JSON object count — a second run should overwrite, not duplicate.
+    result2 = _run_doctor(root, stub_path=stub)
+    payload2 = json.loads(stub.read_text())
+    check("second run overwrote (still valid JSON object)",
+          isinstance(payload2, dict) and payload2.get("event_type") == "doctor.report")
+
+# ---------------------------------------------------------------------------
+# Test 6: _check_actor_id_pattern unit tests
+# ---------------------------------------------------------------------------
+print("\n[6] _check_actor_id_pattern — actor two-class ID pattern unit tests")
+
+# Import the function under test directly.
+sys.path.insert(0, str(_SCRIPTS_DIR))
+from checks.schema_filename import _check_actor_id_pattern  # noqa: E402
+
+_ALLOWED = [
+    "assistant", "developer", "jr-architect", "jr-developer",
+    "jr-researcher", "pm-claude", "sr-architect", "sr-researcher",
+]
+
+# valid identity-class ID → no error
+check(
+    "identity class OK",
+    _check_actor_id_pattern(
+        "ACTOR-20260421_0144-AmberDawn-legacy-historical-backfill", _ALLOWED
+    ) is None,
+)
+
+# valid role-class ID in allowlist → no error
+check(
+    "role class in allowlist OK",
+    _check_actor_id_pattern("ACTOR-pm-claude", _ALLOWED) is None,
+)
+
+# role-class ID NOT in allowlist → ERROR
+result_not_in_list = _check_actor_id_pattern("ACTOR-hacker", _ALLOWED)
+check(
+    "role class not in allowlist → error",
+    result_not_in_list is not None and "not in x-allowed-role-ids" in result_not_in_list,
+    repr(result_not_in_list),
+)
+
+# malformed (underscores and caps) → ERROR
+result_malformed = _check_actor_id_pattern("ACTOR-Sr_Architect", _ALLOWED)
+check(
+    "malformed ID (caps+underscores) → error",
+    result_malformed is not None,
+    repr(result_malformed),
+)
+
+# empty-slug → ERROR
+result_empty = _check_actor_id_pattern("ACTOR-", _ALLOWED)
+check(
+    "empty slug (ACTOR-) → error",
+    result_empty is not None,
+    repr(result_empty),
+)
+
+# identity class with broken datetime → ERROR
+result_bad_dt = _check_actor_id_pattern("ACTOR-12345-FooBar-x", _ALLOWED)
+check(
+    "broken datetime in identity class → error",
+    result_bad_dt is not None,
+    repr(result_bad_dt),
+)
+
+# ---------------------------------------------------------------------------
+# Test 7: pk-doctor integration — invalid actor ID triggers ERROR
+# ---------------------------------------------------------------------------
+print("\n[7] pk-doctor integration — invalid actor ID emits ERROR")
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    _seed_tree(root)
+
+    # Copy live actor schema into fixture tree.
+    actor_schema_src = _SCHEMAS_SRC / "actor.yaml"
+    if actor_schema_src.is_file():
+        (root / "src" / "context" / "schemas" / "actor.yaml").write_text(
+            actor_schema_src.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
+    # Plant an actor with an ID not in the allowlist.
+    (root / "context" / "actors").mkdir(parents=True)
+    (root / "context" / "actors" / "ACTOR-hacker.md").write_text(
+        textwrap.dedent("""\
+            ---
+            apiVersion: processkit.projectious.work/v1
+            kind: Actor
+            metadata:
+              id: ACTOR-hacker
+              created: 2026-04-21T00:00:00Z
+            spec:
+              type: ai-agent
+              name: Hacker Bot
+              active: true
+            ---
+            """),
+        encoding="utf-8",
+    )
+
+    stub = root / ".doctor-logentry.json"
+    result = _run_doctor(root, stub_path=stub)
+    check("exit 1 for invalid actor ID", result.returncode == 1,
+          f"got {result.returncode}\nstdout:\n{result.stdout[-600:]}")
+    check(
+        "invalid_actor_id_pattern in output",
+        "invalid_actor_id_pattern" in result.stdout,
+        result.stdout[-600:],
+    )
+
+# ---------------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------------
+print()
+if failures:
+    print(f"FAILED ({len(failures)} test(s)):", ", ".join(failures))
+    sys.exit(1)
+else:
+    print("All tests passed.")
+    sys.exit(0)

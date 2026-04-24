@@ -332,6 +332,18 @@ impl DiffSummary {
             || self.new_upstream > 0
             || self.removed_upstream > 0
     }
+
+    /// True when upstream itself introduced at least one file-level change
+    /// (added, removed, or modified-upstream-only). A `conflict` is NOT an
+    /// upstream-side change — it means upstream is unchanged but the local
+    /// copy diverged.
+    ///
+    /// Used to decide whether a `from == to` sync can safely skip emitting
+    /// a migration document: if upstream didn't move, every conflict is a
+    /// local-only edit that no migration can resolve.
+    pub fn has_upstream_side_changes(&self) -> bool {
+        self.changed_upstream_only > 0 || self.new_upstream > 0 || self.removed_upstream > 0
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -361,6 +373,13 @@ pub fn write_migration_document(
     summary: &DiffSummary,
     diffs: &[FileDiff],
 ) -> Result<Option<PathBuf>> {
+    // No-op guard: at `from == to`, every "conflict" is a local-only edit
+    // that upstream never touched, so no migration is actually needed.
+    // Only write when upstream itself moved something.
+    if lock_before.version == cache_version && !summary.has_upstream_side_changes() {
+        return Ok(None);
+    }
+
     let pending_dir = project_root.join("context/migrations/pending");
     let in_progress_dir = project_root.join("context/migrations/in-progress");
 
@@ -980,6 +999,46 @@ mod tests {
         assert!(removed_upstream.has_user_relevant_changes());
     }
 
+    #[test]
+    fn summary_has_upstream_side_changes_excludes_conflict_and_locally_only() {
+        // Conflict alone is NOT an upstream-side change — upstream didn't
+        // move; only the local copy diverged.
+        let conflict_only = DiffSummary {
+            conflict: 3,
+            ..Default::default()
+        };
+        assert!(!conflict_only.has_upstream_side_changes());
+
+        let locally_only = DiffSummary {
+            changed_locally_only: 10,
+            ..Default::default()
+        };
+        assert!(!locally_only.has_upstream_side_changes());
+
+        // Any upstream-side count triggers true.
+        assert!(
+            DiffSummary {
+                changed_upstream_only: 1,
+                ..Default::default()
+            }
+            .has_upstream_side_changes()
+        );
+        assert!(
+            DiffSummary {
+                new_upstream: 1,
+                ..Default::default()
+            }
+            .has_upstream_side_changes()
+        );
+        assert!(
+            DiffSummary {
+                removed_upstream: 1,
+                ..Default::default()
+            }
+            .has_upstream_side_changes()
+        );
+    }
+
     // -- write_migration_document ------------------------------------------
 
     fn sample_lock() -> crate::lock::ProcessKitLockSection {
@@ -1039,6 +1098,68 @@ mod tests {
         assert_eq!(pair.0, "https://github.com/example/processkit.git");
         assert_eq!(pair.1, "v1.0.0");
         assert_eq!(pair.2, "v1.0.1");
+    }
+
+    #[test]
+    fn write_migration_document_skips_when_same_version_and_only_conflicts() {
+        // Regression guard for the walker false-positive: when the project
+        // syncs against the same version it is already on, AGENTS.md (and
+        // any other locally-owned file) will classify as Conflict against
+        // the unchanged upstream. That is NOT a migration.
+        let tmp = TempDir::new().unwrap();
+        let lock = sample_lock(); // version: v1.0.0
+        let diffs = vec![FileDiff {
+            cache_rel_path: "AGENTS.md".to_string(),
+            project_path: Some(PathBuf::from("AGENTS.md")),
+            group: Some("AGENTS".to_string()),
+            classification: FileClassification::Conflict,
+        }];
+        let summary = DiffSummary::from_diffs(&diffs);
+
+        // from_version == cache_version ("v1.0.0")
+        let written =
+            write_migration_document(tmp.path(), &lock, "v1.0.0", Some("dead"), &summary, &diffs)
+                .unwrap();
+
+        assert!(
+            written.is_none(),
+            "no migration doc should be written when from == to and every change is a conflict"
+        );
+        assert!(
+            !tmp.path().join("context/migrations/pending").exists()
+                || tmp
+                    .path()
+                    .join("context/migrations/pending")
+                    .read_dir()
+                    .map(|mut r| r.next().is_none())
+                    .unwrap_or(true),
+            "no file should land in pending/"
+        );
+    }
+
+    #[test]
+    fn write_migration_document_still_writes_when_same_version_but_upstream_moved() {
+        // If upstream truly has deltas (a new file, removed file, or
+        // modified-upstream-only entry), we still want the migration doc
+        // — even at the same from/to version string.
+        let tmp = TempDir::new().unwrap();
+        let lock = sample_lock();
+        let diffs = vec![FileDiff {
+            cache_rel_path: "skills/new-skill/SKILL.md".to_string(),
+            project_path: Some(PathBuf::from("context/skills/new-skill/SKILL.md")),
+            group: Some("skills/new-skill".to_string()),
+            classification: FileClassification::NewUpstream,
+        }];
+        let summary = DiffSummary::from_diffs(&diffs);
+
+        let written =
+            write_migration_document(tmp.path(), &lock, "v1.0.0", Some("dead"), &summary, &diffs)
+                .unwrap();
+
+        assert!(
+            written.is_some(),
+            "upstream-side change must still produce a migration doc"
+        );
     }
 
     #[test]

@@ -191,6 +191,16 @@ pub enum Commands {
         /// Skip the container image build step (config-only sync)
         #[arg(long)]
         no_build: bool,
+
+        /// Rewrite the compliance-contract block in AGENTS.md from the
+        /// canonical source at
+        /// `context/skills/processkit/skill-gate/assets/compliance-contract.md`.
+        /// Used to silence the "compliance contract in AGENTS.md differs
+        /// from the canonical source" warning emitted by sync. If the block
+        /// uses `pk-compliance-contract v1` markers but the canonical
+        /// source is v2, markers are migrated to v2 as part of the fix.
+        #[arg(long)]
+        fix_compliance_contract: bool,
     },
     /// Start container and attach via zellij
     ///
