@@ -43,7 +43,86 @@ use anyhow::{Context, Result};
 
 use crate::config::{AiboxConfig, PROCESSKIT_VERSION_UNSET};
 use crate::output;
-use crate::processkit_vocab::mirror_skills_dir;
+use crate::processkit_vocab::{mirror_skills_dir, parse_skill_frontmatter};
+
+/// Generate missing command adapter files from SKILL.md declarations.
+///
+/// When a skill declares commands in its SKILL.md `metadata.processkit.commands`
+/// but the corresponding `commands/<name>.md` file is absent, this function
+/// generates the file with the standard adapter template. Used to handle
+/// incomplete skill distributions (e.g., processkit v0.19.1 pk-doctor).
+///
+/// Best-effort: logs warnings for individual failures but does not abort.
+fn generate_missing_command_files(live_skills_dir: &Path) {
+    if !live_skills_dir.is_dir() {
+        return;
+    }
+
+    // Walk the two-level <category>/<skill>/ layout.
+    let Ok(categories) = fs::read_dir(live_skills_dir) else {
+        return;
+    };
+
+    for category in categories.flatten() {
+        if !category.path().is_dir() {
+            continue;
+        }
+        let Ok(skills) = fs::read_dir(category.path()) else {
+            continue;
+        };
+
+        for skill in skills.flatten() {
+            let skill_path = skill.path();
+            if !skill_path.is_dir() {
+                continue;
+            }
+
+            let skill_md = skill_path.join("SKILL.md");
+            let Ok(fm) = parse_skill_frontmatter(&skill_md) else {
+                continue;
+            };
+
+            let Some(meta) = fm.processkit_meta() else {
+                continue;
+            };
+
+            for cmd in &meta.commands {
+                let cmd_filename = format!("{}.md", cmd.name);
+                let cmd_file = skill_path.join("commands").join(&cmd_filename);
+
+                if cmd_file.exists() {
+                    continue;
+                }
+
+                // Generate adapter file with standard template
+                let content = format!(
+                    "---\nargument-hint: \"{}\"\nallowed-tools: []\n---\n\n{}\n",
+                    cmd.args, cmd.description
+                );
+
+                if let Some(parent) = cmd_file.parent() {
+                    let _ = fs::create_dir_all(parent);
+                }
+
+                match fs::write(&cmd_file, content) {
+                    Ok(_) => {
+                        output::warn(&format!(
+                            "Generated missing command file {} from SKILL.md declaration",
+                            cmd_file.display()
+                        ));
+                    }
+                    Err(e) => {
+                        output::warn(&format!(
+                            "Failed to generate command file {}: {}",
+                            cmd_file.display(),
+                            e
+                        ));
+                    }
+                }
+            }
+        }
+    }
+}
 
 /// Sync processkit command adapter files to `.claude/commands/`.
 ///
@@ -62,6 +141,9 @@ pub fn sync_claude_commands(project_root: &Path, config: &AiboxConfig) -> Result
     if mirror_skills_dir.is_none() && !live_skills_dir.is_dir() {
         return Ok(());
     }
+
+    // Generate any missing command files from SKILL.md declarations before collecting.
+    generate_missing_command_files(&live_skills_dir);
 
     // Step 1: build the universe of all known processkit command filenames by
     // scanning the templates mirror. Anything in this set that appears in
@@ -599,5 +681,91 @@ mod tests {
             fs::read_to_string(claude_cmds.join("pk-release.md")).unwrap(),
             "# pk-release content"
         );
+    }
+
+    #[test]
+    fn generate_missing_command_files_from_skill_md() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+
+        // Create a skill with SKILL.md that declares commands but no commands/ dir exists yet.
+        let skill_dir = project.join("context/skills/processkit/test-skill");
+        fs::create_dir_all(&skill_dir).unwrap();
+
+        // Write a SKILL.md with commands declaration
+        let skill_md = skill_dir.join("SKILL.md");
+        fs::write(
+            &skill_md,
+            r#"---
+name: test-skill
+metadata:
+  processkit:
+    commands:
+      - name: test-skill-run
+        args: "[--verbose]"
+        description: "Execute the test skill with optional verbosity"
+---
+# Test Skill
+"#,
+        )
+        .unwrap();
+
+        // Do NOT create commands/ dir — test that generation works
+        assert!(!skill_dir.join("commands").exists());
+
+        // Call generate_missing_command_files
+        generate_missing_command_files(&project.join("context/skills"));
+
+        // Assert the command file was created with correct format
+        let cmd_file = skill_dir.join("commands/test-skill-run.md");
+        assert!(cmd_file.exists(), "command file should have been generated");
+
+        let content = fs::read_to_string(&cmd_file).unwrap();
+        assert!(content.contains("argument-hint: \"[--verbose]\""));
+        assert!(content.contains("allowed-tools: []"));
+        assert!(content.contains("Execute the test skill with optional verbosity"));
+    }
+
+    #[test]
+    fn generate_missing_command_files_skips_existing() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+
+        // Create a skill where commands/ dir already exists with a file
+        let skill_dir = project.join("context/skills/processkit/existing-skill");
+        let commands_dir = skill_dir.join("commands");
+        fs::create_dir_all(&commands_dir).unwrap();
+
+        // Write existing command file
+        let existing_cmd = commands_dir.join("existing-skill-run.md");
+        fs::write(&existing_cmd, "# existing content").unwrap();
+
+        // Write SKILL.md that declares the same command
+        let skill_md = skill_dir.join("SKILL.md");
+        fs::write(
+            &skill_md,
+            r#"---
+name: existing-skill
+metadata:
+  processkit:
+    commands:
+      - name: existing-skill-run
+        args: ""
+        description: "Run existing skill"
+---
+# Existing Skill
+"#,
+        )
+        .unwrap();
+
+        let mtime_before = fs::metadata(&existing_cmd).unwrap().modified().unwrap();
+
+        // Call generate_missing_command_files
+        generate_missing_command_files(&project.join("context/skills"));
+
+        let mtime_after = fs::metadata(&existing_cmd).unwrap().modified().unwrap();
+        // File should not have been overwritten
+        assert_eq!(mtime_before, mtime_after);
+        assert_eq!(fs::read_to_string(&existing_cmd).unwrap(), "# existing content");
     }
 }

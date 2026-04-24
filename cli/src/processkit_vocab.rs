@@ -379,6 +379,15 @@ pub struct SkillMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize, Default)]
+pub struct SkillCommand {
+    pub name: String,
+    #[serde(default)]
+    pub args: String,
+    #[serde(default)]
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct SkillProcesskitMeta {
     #[serde(default)]
     pub category: String,
@@ -390,19 +399,12 @@ pub struct SkillProcesskitMeta {
     /// v0.6.0; see processkit/aibox#36.
     #[serde(default)]
     pub core: bool,
-    /// User-invocable command names declared by this skill. Each entry names a
-    /// `commands/<skill>-<workflow>.md` adapter file that ships alongside the
-    /// skill. aibox copies these to `.claude/commands/` during sync so Claude
-    /// Code can tab-complete them. Introduced in processkit v0.7.0; see
-    /// projectious-work/aibox#37.
-    ///
-    /// The actual file discovery uses the filesystem (walking
-    /// `context/skills/*/commands/*.md`) rather than this list, so the field
-    /// is currently read-only metadata. Future uses: `aibox kit skill info`
-    /// command listing, other-harness registration.
+    /// User-invocable command declarations for this skill. Each entry specifies
+    /// a `commands/<name>.md` adapter file that aibox generates (or syncs) to
+    /// `.claude/commands/` during sync so Claude Code can tab-complete them.
+    /// Introduced in processkit v0.7.0; see projectious-work/aibox#37 and #53.
     #[serde(default)]
-    #[allow(dead_code)]
-    pub commands: Vec<String>,
+    pub commands: Vec<SkillCommand>,
 }
 
 // ---------------------------------------------------------------------------
