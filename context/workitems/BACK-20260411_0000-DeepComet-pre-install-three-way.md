@@ -7,6 +7,7 @@ metadata:
   labels:
     old_id: BACK-120
     area: cli
+  updated: '2026-04-25T09:53:30+00:00'
 spec:
   title: Pre-install three-way diff to prevent edit-clobbering on version upgrade
   state: backlog
@@ -20,4 +21,6 @@ spec:
     Touches `content_init`, `content_diff`, `cmd_sync`. Affects all install paths,
     not just templated files. Deferred to v0.17+ as it touches the core install/diff
     ordering. Old ID: BACK-120.'
+  blocks:
+  - BACK-20260411_0000-LoyalSeal-version-upgrade-flows-review
 ---

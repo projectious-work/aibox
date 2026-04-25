@@ -7,12 +7,18 @@ metadata:
   labels:
     old_id: BACK-103
     area: features
+  updated: '2026-04-25T09:53:48+00:00'
 spec:
   title: Docusaurus addon improvements — remove global install, null runtime approach
-  state: backlog
+  state: cancelled
   type: task
   priority: low
   description: 'Review context/research/docusaurus-addon-improvements-2026-03.md.
     Discuss removing global install, null runtime approach, docs-starlight same fix.
     Old ID: BACK-103.'
+  completed_at: '2026-04-25T09:53:48+00:00'
 ---
+
+## Transition note (2026-04-25T09:53:48+00:00)
+
+Docusaurus addon has evolved; global install approach is no longer needed. Null runtime addon design supersedes this. Closing as obsolete.

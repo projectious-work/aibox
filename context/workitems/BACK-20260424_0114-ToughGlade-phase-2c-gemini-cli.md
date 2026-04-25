@@ -4,10 +4,10 @@ kind: WorkItem
 metadata:
   id: BACK-20260424_0114-ToughGlade-phase-2c-gemini-cli
   created: '2026-04-24T01:14:32+00:00'
-  updated: '2026-04-24T01:16:29+00:00'
+  updated: '2026-04-24T07:47:47+00:00'
 spec:
   title: 'Phase 2c: Gemini CLI + GitHub Copilot generators'
-  state: backlog
+  state: done
   type: task
   priority: high
   description: "**Scope:** Implement policy-based generators for Gemini CLI and GitHub\
@@ -23,4 +23,15 @@ spec:
   parent: BACK-20260424_0058-ToughGrove-feature-global-mcp-permissions
   blocked_by:
   - BACK-20260424_0114-JollyStream-phase-1-core-mcp
+  started_at: '2026-04-24T07:47:46+00:00'
+  completed_at: '2026-04-24T07:47:47+00:00'
 ---
+
+## Transition note (2026-04-24T07:47:46+00:00)
+
+Gemini and GitHub Copilot generators implemented with dual allowlist/denylist support.
+
+
+## Transition note (2026-04-24T07:47:47+00:00)
+
+Phase 2c complete. All Phase 2 generators now ready.

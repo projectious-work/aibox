@@ -7,6 +7,7 @@ metadata:
   labels:
     old_id: BACK-092
     area: skills
+  updated: '2026-04-25T09:53:31+00:00'
 spec:
   title: Addon-skill mapping audit review — 31 orphaned skills, tier-3 ai package
     decision
@@ -19,4 +20,6 @@ spec:
     deferring until demand signal. (3) Python/node addon skill validation — fastapi-patterns
     and tailwind forced on all users, should they be opt-in? (4) Missing inter-agent-handover
     template. Old ID: BACK-092.'
+  related_decisions:
+  - BACK-20260411_0000-AmberWren-process-model-retrospective-competitive
 ---

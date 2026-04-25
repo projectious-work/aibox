@@ -7,6 +7,7 @@ metadata:
   labels:
     old_id: BACK-002
     area: security
+  updated: '2026-04-25T09:53:30+00:00'
 spec:
   title: Security review — CLI input validation, container security, supply chain
   state: backlog
@@ -23,4 +24,6 @@ spec:
     (sigstore/cosign for published images); binary checksum verification in base Dockerfile;
     skill hash verification + allowed-tools audit; curl-pipe-bash install script (document
     verification). Old ID: BACK-002.'
+  blocks:
+  - BACK-20260411_0000-LoyalSeal-version-upgrade-flows-review
 ---
