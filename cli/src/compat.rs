@@ -185,6 +185,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.21.0",
         note: "Patch release: applies processkit v0.21.0 migration (564 new files: skills, schemas, roles, bindings, models); updates aibox runtime templates (27 new .aibox-home/* files); all 654 tests passing (unit + integration + E2E).",
     },
+    CompatEntry {
+        aibox_version: "0.19.2",
+        processkit_version: "v0.21.0",
+        note: "Patch release: implements MCP config fingerprint tracking (issue #54) to detect per-skill config drift without version bumps; all 660 tests passing.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
