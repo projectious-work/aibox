@@ -67,6 +67,10 @@ content in place in under 5 minutes.
 Run `pk-resume` before acting. Provider-specific files (`CLAUDE.md`,
 `CODEX.md`, `.cursor/rules`, …) are thin pointers — edit **this** file.
 
+**For structured workflows** (releases, migrations, design reviews, decision records):
+Always check `context/notes/` and `context/work-instructions/` for canonical documented
+procedures before acting. These take precedence over general knowledge or tool defaults.
+
 ## Setup
 
 ```sh
@@ -128,6 +132,7 @@ typecheck: ""
   push, GitHub release, deploy docs. Do not ask permission at each step.
 - **Phase 2 is always the user's job** — macOS host builds and GHCR image pushes
   run via `./scripts/maintain.sh release-host X.Y.Z` on the host, never from the container.
+- **Detailed release procedures:** See [`context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
 - **One big change preferred over many small PRs** for breaking releases. The user
   explicitly said: "make one big change, I'll handle derived project dependencies."
 - **Hold uncommitted changes when the user says "hold"** — leave in working tree,
