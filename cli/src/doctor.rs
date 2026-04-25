@@ -212,7 +212,8 @@ fn check_command_registrations(diag: &mut DiagResult) {
                     if let Ok(cmds) = std::fs::read_dir(&commands_src) {
                         for cmd in cmds.flatten() {
                             let cmd_path = cmd.path();
-                            if let Some(filename) = cmd_path.file_name()
+                            if let Some(filename) = cmd_path
+                                .file_name()
                                 .and_then(|f| f.to_str())
                                 .filter(|s| s.ends_with(".md"))
                             {
@@ -220,7 +221,9 @@ fn check_command_registrations(diag: &mut DiagResult) {
                                 if !registered.exists() {
                                     output::warn(&format!(
                                         "Command file missing: {}/{} exists but {} is not registered",
-                                        commands_src.display(), filename, registered.display()
+                                        commands_src.display(),
+                                        filename,
+                                        registered.display()
                                     ));
                                     diag.warnings += 1;
                                     missing_count += 1;

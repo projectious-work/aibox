@@ -766,6 +766,9 @@ metadata:
         let mtime_after = fs::metadata(&existing_cmd).unwrap().modified().unwrap();
         // File should not have been overwritten
         assert_eq!(mtime_before, mtime_after);
-        assert_eq!(fs::read_to_string(&existing_cmd).unwrap(), "# existing content");
+        assert_eq!(
+            fs::read_to_string(&existing_cmd).unwrap(),
+            "# existing content"
+        );
     }
 }

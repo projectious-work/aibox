@@ -172,10 +172,7 @@ fn default_true() -> bool {
 /// # Returns
 /// Sorted list of unique tool names that match any pattern.
 #[allow(dead_code)]
-pub fn expand_mcp_patterns(
-    patterns: &[String],
-    available_tools: &[String],
-) -> Vec<String> {
+pub fn expand_mcp_patterns(patterns: &[String], available_tools: &[String]) -> Vec<String> {
     let mut matched = std::collections::HashSet::new();
 
     for pattern in patterns {
@@ -325,8 +322,12 @@ pub fn generate_claude_code_permissions(
     }
 
     let formatted = serde_json::to_string_pretty(&settings)?;
-    fs::write(&settings_path, formatted)
-        .with_context(|| format!("failed to write Claude Code permissions to {}", settings_path.display()))?;
+    fs::write(&settings_path, formatted).with_context(|| {
+        format!(
+            "failed to write Claude Code permissions to {}",
+            settings_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -386,8 +387,12 @@ pub fn generate_opencode_permissions(
         fs::create_dir_all(parent).ok();
     }
 
-    fs::write(&config_path, document.to_string())
-        .with_context(|| format!("failed to write OpenCode permissions to {}", config_path.display()))?;
+    fs::write(&config_path, document.to_string()).with_context(|| {
+        format!(
+            "failed to write OpenCode permissions to {}",
+            config_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -446,7 +451,10 @@ pub fn generate_continue_permissions(
             tool.clone(),
             serde_json::Value::Object({
                 let mut tool_config = serde_json::Map::new();
-                tool_config.insert("mode".to_string(), serde_json::Value::String(tool_mode.to_string()));
+                tool_config.insert(
+                    "mode".to_string(),
+                    serde_json::Value::String(tool_mode.to_string()),
+                );
                 tool_config
             }),
         );
@@ -458,8 +466,12 @@ pub fn generate_continue_permissions(
     }
 
     let formatted = serde_json::to_string_pretty(&settings)?;
-    fs::write(&config_path, formatted)
-        .with_context(|| format!("failed to write Continue permissions to {}", config_path.display()))?;
+    fs::write(&config_path, formatted).with_context(|| {
+        format!(
+            "failed to write Continue permissions to {}",
+            config_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -514,8 +526,12 @@ pub fn generate_cursor_permissions(
     }
 
     let formatted = serde_json::to_string_pretty(&settings)?;
-    fs::write(&settings_path, formatted)
-        .with_context(|| format!("failed to write Cursor permissions to {}", settings_path.display()))?;
+    fs::write(&settings_path, formatted).with_context(|| {
+        format!(
+            "failed to write Cursor permissions to {}",
+            settings_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -580,8 +596,12 @@ pub fn generate_aider_permissions(
     }
 
     let formatted = serde_json::to_string_pretty(&permissions)?;
-    fs::write(&config_path, formatted)
-        .with_context(|| format!("failed to write Aider permissions to {}", config_path.display()))?;
+    fs::write(&config_path, formatted).with_context(|| {
+        format!(
+            "failed to write Aider permissions to {}",
+            config_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -651,8 +671,12 @@ pub fn generate_gemini_permissions(
     }
 
     let formatted = serde_json::to_string_pretty(&settings)?;
-    fs::write(&settings_path, formatted)
-        .with_context(|| format!("failed to write Gemini permissions to {}", settings_path.display()))?;
+    fs::write(&settings_path, formatted).with_context(|| {
+        format!(
+            "failed to write Gemini permissions to {}",
+            settings_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -702,8 +726,12 @@ pub fn generate_github_copilot_permissions(
         config.default_mode
     ));
 
-    fs::write(&env_path, env_content)
-        .with_context(|| format!("failed to write GitHub Copilot permissions to {}", env_path.display()))?;
+    fs::write(&env_path, env_content).with_context(|| {
+        format!(
+            "failed to write GitHub Copilot permissions to {}",
+            env_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -757,8 +785,12 @@ pub fn generate_codex_permissions(
         fs::create_dir_all(parent).ok();
     }
 
-    fs::write(&config_path, document.to_string())
-        .with_context(|| format!("failed to write Codex permissions to {}", config_path.display()))?;
+    fs::write(&config_path, document.to_string()).with_context(|| {
+        format!(
+            "failed to write Codex permissions to {}",
+            config_path.display()
+        )
+    })?;
 
     Ok(())
 }
@@ -983,9 +1015,9 @@ pub fn collect_live_skills_mcp_specs(project_root: &Path) -> Result<Vec<McpServe
     let mut specs: Vec<McpServerSpec> = Vec::new();
 
     // Walk the two-level layout: category/skill/
-    for category_entry in fs::read_dir(&skills_dir).with_context(|| {
-        "failed to read context/skills/".to_string()
-    })? {
+    for category_entry in
+        fs::read_dir(&skills_dir).with_context(|| "failed to read context/skills/".to_string())?
+    {
         let category_entry = category_entry?;
         let category_dir = category_entry.path();
         let category_name = match category_entry.file_name().to_str() {
@@ -1016,27 +1048,25 @@ pub fn collect_live_skills_mcp_specs(project_root: &Path) -> Result<Vec<McpServe
             }
 
             match fs::read_to_string(&mcp_config_path) {
-                Ok(content) => {
-                    match serde_json::from_str::<PerSkillConfig>(&content) {
-                        Ok(config) => {
-                            for (name, server) in config.mcp_servers {
-                                specs.push(McpServerSpec {
-                                    name,
-                                    command: server.command,
-                                    args: server.args,
-                                    env: server.env,
-                                });
-                            }
-                        }
-                        Err(e) => {
-                            output::warn(&format!(
-                                "Failed to parse {}: {}",
-                                mcp_config_path.display(),
-                                e
-                            ));
+                Ok(content) => match serde_json::from_str::<PerSkillConfig>(&content) {
+                    Ok(config) => {
+                        for (name, server) in config.mcp_servers {
+                            specs.push(McpServerSpec {
+                                name,
+                                command: server.command,
+                                args: server.args,
+                                env: server.env,
+                            });
                         }
                     }
-                }
+                    Err(e) => {
+                        output::warn(&format!(
+                            "Failed to parse {}: {}",
+                            mcp_config_path.display(),
+                            e
+                        ));
+                    }
+                },
                 Err(e) => {
                     output::warn(&format!(
                         "Failed to read {}: {}",
@@ -1334,28 +1364,19 @@ fn generate_all_harness_permissions(
     if config.ai.harnesses.contains(&AiProvider::Cursor)
         && let Err(e) = generate_cursor_permissions(project_root, mcp_config, &tool_names)
     {
-        output::warn(&format!(
-            "Failed to generate Cursor MCP permissions: {}",
-            e
-        ));
+        output::warn(&format!("Failed to generate Cursor MCP permissions: {}", e));
     }
 
     if config.ai.harnesses.contains(&AiProvider::Aider)
         && let Err(e) = generate_aider_permissions(project_root, mcp_config, &tool_names)
     {
-        output::warn(&format!(
-            "Failed to generate Aider MCP permissions: {}",
-            e
-        ));
+        output::warn(&format!("Failed to generate Aider MCP permissions: {}", e));
     }
 
     if config.ai.harnesses.contains(&AiProvider::Gemini)
         && let Err(e) = generate_gemini_permissions(project_root, mcp_config, &tool_names)
     {
-        output::warn(&format!(
-            "Failed to generate Gemini MCP permissions: {}",
-            e
-        ));
+        output::warn(&format!("Failed to generate Gemini MCP permissions: {}", e));
     }
 
     if config.ai.harnesses.contains(&AiProvider::Copilot)
@@ -1370,10 +1391,7 @@ fn generate_all_harness_permissions(
     if config.ai.harnesses.contains(&AiProvider::Codex)
         && let Err(e) = generate_codex_permissions(project_root, mcp_config, &tool_names)
     {
-        output::warn(&format!(
-            "Failed to generate Codex MCP permissions: {}",
-            e
-        ));
+        output::warn(&format!("Failed to generate Codex MCP permissions: {}", e));
     }
 
     Ok(())
@@ -2780,7 +2798,10 @@ args = ["server.js"]
 
     #[test]
     fn glob_matches_suffix_wildcard() {
-        assert!(glob_matches("mcp__processkit-workitem", "mcp__processkit-*"));
+        assert!(glob_matches(
+            "mcp__processkit-workitem",
+            "mcp__processkit-*"
+        ));
         assert!(glob_matches("mcp__processkit-actor", "mcp__processkit-*"));
         assert!(!glob_matches("mcp__other-workitem", "mcp__processkit-*"));
         assert!(!glob_matches("mcp__processkit", "mcp__processkit-*"));
@@ -2839,10 +2860,7 @@ args = ["server.js"]
         ];
         let patterns = vec!["mcp__processkit-*".to_string(), "bash".to_string()];
         let result = expand_mcp_patterns(&patterns, &tools);
-        assert_eq!(
-            result,
-            vec!["bash", "mcp__processkit-workitem"]
-        );
+        assert_eq!(result, vec!["bash", "mcp__processkit-workitem"]);
     }
 
     #[test]
@@ -2938,10 +2956,7 @@ args = ["server.js"]
 
         // Check that mcp__processkit-* tools and bash are in permissions.allow
         if let Some(perms) = parsed.get("permissions.allow").and_then(|p| p.as_array()) {
-            let perm_strs: Vec<_> = perms
-                .iter()
-                .filter_map(|p| p.as_str())
-                .collect();
+            let perm_strs: Vec<_> = perms.iter().filter_map(|p| p.as_str()).collect();
             assert!(perm_strs.contains(&"mcp__mcp__processkit-workitem")); // Note: double mcp__ due to format!
             assert!(perm_strs.contains(&"mcp__bash"));
             assert!(!perm_strs.iter().any(|p| p.contains("mcp__other")));
@@ -3004,7 +3019,10 @@ args = ["server.js"]
         let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
 
         // Other keys should be preserved
-        assert_eq!(parsed.get("other_key").and_then(|v| v.as_str()), Some("other_value"));
+        assert_eq!(
+            parsed.get("other_key").and_then(|v| v.as_str()),
+            Some("other_value")
+        );
 
         // Permissions should be updated
         if let Some(perms) = parsed.get("permissions.allow").and_then(|p| p.as_array()) {
@@ -3272,7 +3290,9 @@ args = ["server.js"]
         let content = fs::read_to_string(&env_path).unwrap();
 
         // Should be comma-separated
-        assert!(content.contains("mcp__tool1,mcp__tool2") || content.contains("mcp__tool2,mcp__tool1"));
+        assert!(
+            content.contains("mcp__tool1,mcp__tool2") || content.contains("mcp__tool2,mcp__tool1")
+        );
     }
 
     // ---------------------------------------------------------------------------
