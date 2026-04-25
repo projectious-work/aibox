@@ -1256,6 +1256,24 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
         }
     }
 
+    // Ensure aibox.lock exists even if processkit install was skipped or failed.
+    // If install_content_source succeeded, it already created the lock. If it was
+    // skipped or failed, create a minimal lock with just the [aibox] section.
+    let lock_path = project_root.join("aibox.lock");
+    if !lock_path.exists() {
+        let cli_version = env!("CARGO_PKG_VERSION").to_string();
+        let synced_at = chrono::Utc::now().to_rfc3339();
+        let minimal_lock = crate::lock::AiboxLock {
+            aibox: crate::lock::AiboxLockSection {
+                cli_version,
+                synced_at,
+            },
+            processkit: None,
+            addons: None,
+        };
+        let _ = crate::lock::write_lock(&project_root, &minimal_lock);
+    }
+
     output::ok("Project initialized. Edit aibox.toml to customize, then run: aibox start");
 
     Ok(())

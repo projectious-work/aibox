@@ -71,6 +71,8 @@ fn init_project(dir: &std::path::Path, name: &str) {
             "debian",
             "--process",
             "managed",
+            "--processkit-version",
+            "v0.21.0",
         ],
     );
     assert!(
