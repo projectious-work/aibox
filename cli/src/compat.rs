@@ -190,6 +190,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.21.0",
         note: "Patch release: implements MCP config fingerprint tracking (issue #54) to detect per-skill config drift without version bumps; all 660 tests passing.",
     },
+    CompatEntry {
+        aibox_version: "0.20.0",
+        processkit_version: "v0.22.0",
+        note: "Minor release: install integrity check + self-heal (`aibox doctor --integrity`, `context/.processkit-provenance.toml`, `SyncDecision::Reinstall`); preauth merge into committed `.claude/settings.json` (closes aibox#55, consumes processkit v0.22.0 `skill-gate/assets/preauth.json`); `--no-container` scaffold mode + `AIBOX_NO_CONTAINER` env var on init/sync; new Tier 1 E2E harness (`no_container_harness`, `preauth_merge`); slash-command name collisions hard-fail; content-diff classifies upstream-removed-stale skills; `mcp_config_hash` renamed `processkit_install_hash` and broadened to cover skills/schemas/processes/state-machines; permissions JSON shape bug (`permissions.allow` flat-key) fixed with nested merge preserving user entries; `aibox.toml` template ships commented `[mcp.permissions]` advisory; tolerates upstream PROVENANCE.toml stamping bug in v0.22.0 via tracing::warn!; all 709 tests passing.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
