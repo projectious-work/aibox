@@ -74,8 +74,9 @@ impl HarnessCommandProfile {
     fn render(&self, source_md_filename: &str, source_bytes: &[u8]) -> Result<Vec<u8>> {
         match self.format {
             CommandFormat::MarkdownVerbatim => Ok(source_bytes.to_vec()),
-            CommandFormat::GeminiToml => Ok(render_gemini_toml(source_md_filename, source_bytes)?
-                .into_bytes()),
+            CommandFormat::GeminiToml => {
+                Ok(render_gemini_toml(source_md_filename, source_bytes)?.into_bytes())
+            }
         }
     }
 }
@@ -507,8 +508,7 @@ fn collect_live_commands(skills_dir: &Path) -> Result<HashMap<String, PathBuf>> 
                 continue;
             };
 
-            let mut cmds: Vec<PathBuf> =
-                cmd_entries.flatten().map(|e| e.path()).collect();
+            let mut cmds: Vec<PathBuf> = cmd_entries.flatten().map(|e| e.path()).collect();
             cmds.sort();
 
             for cmd_path in cmds {
@@ -566,9 +566,8 @@ fn collect_live_commands(skills_dir: &Path) -> Result<HashMap<String, PathBuf>> 
 /// `prompt` is the body of the source file (post-frontmatter) when
 /// frontmatter is present, otherwise the entire source file verbatim.
 fn render_gemini_toml(source_filename: &str, source_bytes: &[u8]) -> Result<String> {
-    let text = std::str::from_utf8(source_bytes).with_context(|| {
-        format!("source file {source_filename} is not valid UTF-8")
-    })?;
+    let text = std::str::from_utf8(source_bytes)
+        .with_context(|| format!("source file {source_filename} is not valid UTF-8"))?;
 
     let (frontmatter_yaml, body) = split_frontmatter(text);
 
@@ -687,9 +686,8 @@ mod tests {
 
     fn config_with(version: &str, harnesses: Vec<AiHarness>) -> AiboxConfig {
         use crate::config::{
-            AddonsSection, AiSection, AiboxConfig, AiboxSection, AudioSection,
-            ContainerSection, ContextSection, CustomizationSection, ProcessKitSection,
-            SkillsSection,
+            AddonsSection, AiSection, AiboxConfig, AiboxSection, AudioSection, ContainerSection,
+            ContextSection, CustomizationSection, ProcessKitSection, SkillsSection,
         };
         AiboxConfig {
             aibox: AiboxSection {
@@ -858,8 +856,8 @@ mod tests {
             "expected body in prompt; got:\n{content}"
         );
         // Verify it parses as TOML.
-        let parsed: toml::Value = toml::from_str(&content)
-            .expect("rendered output must parse as TOML");
+        let parsed: toml::Value =
+            toml::from_str(&content).expect("rendered output must parse as TOML");
         assert_eq!(
             parsed.get("description").and_then(|v| v.as_str()),
             Some("Resume the session")
@@ -876,7 +874,10 @@ mod tests {
             "expected frontmatter description; got:\n{toml_out}"
         );
         // Body section should NOT include the YAML frontmatter.
-        assert!(!toml_out.contains("argument-hint"), "frontmatter must be stripped from prompt; got:\n{toml_out}");
+        assert!(
+            !toml_out.contains("argument-hint"),
+            "frontmatter must be stripped from prompt; got:\n{toml_out}"
+        );
     }
 
     // ----- Multi-harness fan-out -----
@@ -900,7 +901,11 @@ mod tests {
         sync_harness_commands(project, &config).unwrap();
 
         assert!(project.join(".claude/commands/pk-resume.md").exists());
-        assert!(project.join(".aibox-home/.codex/prompts/pk-resume.md").exists());
+        assert!(
+            project
+                .join(".aibox-home/.codex/prompts/pk-resume.md")
+                .exists()
+        );
         assert!(project.join(".cursor/commands/pk-resume.md").exists());
         assert!(project.join(".gemini/commands/pk-resume.toml").exists());
         assert!(project.join(".opencode/commands/pk-resume.md").exists());
@@ -937,9 +942,18 @@ mod tests {
         // Re-run; should be a no-op.
         sync_harness_commands(project, &config).unwrap();
 
-        assert_eq!(mt_claude, fs::metadata(&claude_dest).unwrap().modified().unwrap());
-        assert_eq!(mt_gemini, fs::metadata(&gemini_dest).unwrap().modified().unwrap());
-        assert_eq!(mt_cursor, fs::metadata(&cursor_dest).unwrap().modified().unwrap());
+        assert_eq!(
+            mt_claude,
+            fs::metadata(&claude_dest).unwrap().modified().unwrap()
+        );
+        assert_eq!(
+            mt_gemini,
+            fs::metadata(&gemini_dest).unwrap().modified().unwrap()
+        );
+        assert_eq!(
+            mt_cursor,
+            fs::metadata(&cursor_dest).unwrap().modified().unwrap()
+        );
 
         assert_eq!(bytes_claude, fs::read(&claude_dest).unwrap());
         assert_eq!(bytes_gemini, fs::read(&gemini_dest).unwrap());
@@ -960,7 +974,11 @@ mod tests {
         fs::create_dir_all(project.join(".cursor/commands")).unwrap();
         fs::write(project.join(".cursor/commands/my-thing.md"), "user-cursor").unwrap();
         fs::create_dir_all(project.join(".gemini/commands")).unwrap();
-        fs::write(project.join(".gemini/commands/my-thing.toml"), "description = \"u\"\nprompt = \"\"\"x\"\"\"\n").unwrap();
+        fs::write(
+            project.join(".gemini/commands/my-thing.toml"),
+            "description = \"u\"\nprompt = \"\"\"x\"\"\"\n",
+        )
+        .unwrap();
 
         let config = config_with(
             "v0.20.0",
@@ -999,13 +1017,7 @@ mod tests {
             "# pk-foo\n",
         );
         let live = project.join("context/skills");
-        make_skill_commands(
-            &live,
-            "processkit",
-            "skill-a",
-            &["pk-foo.md"],
-            "# pk-foo\n",
-        );
+        make_skill_commands(&live, "processkit", "skill-a", &["pk-foo.md"], "# pk-foo\n");
 
         // Pre-place stale pk-bar in each harness target.
         fs::create_dir_all(project.join(".claude/commands")).unwrap();
@@ -1044,10 +1056,7 @@ mod tests {
         let project = tmp.path();
         fixture_with_pk_resume(project);
 
-        let config = config_with(
-            "v0.20.0",
-            vec![AiHarness::Claude, AiHarness::Cursor],
-        );
+        let config = config_with("v0.20.0", vec![AiHarness::Claude, AiHarness::Cursor]);
         sync_harness_commands(project, &config).unwrap();
 
         // Pre-place a user file in cursor dir to confirm it's preserved.
@@ -1091,10 +1100,7 @@ mod tests {
             extract_yaml_description("description: \"quoted\"\n").as_deref(),
             Some("quoted")
         );
-        assert_eq!(
-            extract_yaml_description("other: x\n").as_deref(),
-            None
-        );
+        assert_eq!(extract_yaml_description("other: x\n").as_deref(), None);
     }
 
     #[test]

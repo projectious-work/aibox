@@ -218,8 +218,7 @@ fn check_command_registrations(config: &AiboxConfig, diag: &mut DiagResult) {
                                 .and_then(|f| f.to_str())
                                 .filter(|s| s.ends_with(".md"))
                             {
-                                source_commands
-                                    .push((commands_src.clone(), filename.to_string()));
+                                source_commands.push((commands_src.clone(), filename.to_string()));
                             }
                         }
                     }

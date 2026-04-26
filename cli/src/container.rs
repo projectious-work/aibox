@@ -1317,9 +1317,7 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             // Sync processkit command adapter files to per-harness command
             // directories (Claude, Codex, Cursor, Gemini, OpenCode) so each
             // harness can tab-complete them as slash commands. Best-effort.
-            if let Err(e) =
-                crate::harness_commands::sync_harness_commands(&project_root, &config)
-            {
+            if let Err(e) = crate::harness_commands::sync_harness_commands(&project_root, &config) {
                 output::warn(&format!("Harness command sync failed: {}", e));
             }
         }
