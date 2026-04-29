@@ -313,6 +313,7 @@ pub(crate) fn update_gitignore(addons: &AddonsSection) -> Result<()> {
     content.push_str(".root/\n");
     content.push_str(".aibox/\n");
     content.push_str(".aibox-env/\n");
+    content.push_str(".agents/skills/\n");
     // Personal overlays — never committed.
     content.push_str(".aibox-local.toml\n");
     // Generated from .aibox-local.toml by `aibox sync`; contains credentials
@@ -321,6 +322,8 @@ pub(crate) fn update_gitignore(addons: &AddonsSection) -> Result<()> {
     // Runtime cache for fetched processkit / aibox content. Reproducible
     // from aibox.lock; never tracked.
     content.push_str("context/.cache/\n");
+    // Runtime MCP/session state is local and reproducible.
+    content.push_str("context/.state/\n");
     // Generated MCP client configs — gitignored because they merge content
     // from both aibox.toml (team) and .aibox-local.toml (personal) and must
     // never embed personal server definitions in a committed file.
@@ -465,6 +468,8 @@ fn ensure_aibox_entries(gitignore_path: &Path) -> Result<()> {
         "# aibox generated",
         ".aibox-home/",
         ".aibox-env/",
+        // Generated Codex Skills adapters from processkit commands.
+        ".agents/skills/",
         // Personal overlay with credentials and per-developer mounts.
         // Never committed — secrets live here.
         ".aibox-local.toml",
@@ -474,6 +479,8 @@ fn ensure_aibox_entries(gitignore_path: &Path) -> Result<()> {
         // Runtime cache for fetched processkit / aibox content.
         // Reproducible from aibox.lock; never tracked.
         "context/.cache/",
+        // Runtime MCP/session state is local and reproducible.
+        "context/.state/",
         // Privacy tier (DEC-030): any directory named `private` under
         // context/ is never tracked. Two patterns to cover both the
         // top-level case and arbitrary nesting depth.
@@ -575,6 +582,16 @@ pub fn check_gitignore_entries() -> Vec<String> {
         warnings.push(
             ".gitignore missing '.aibox-local.env' (generated credential env file)".to_string(),
         );
+    }
+
+    let generated_entries = [
+        (".agents/skills/", "generated Codex Skills adapters"),
+        ("context/.state/", "local processkit runtime state"),
+    ];
+    for (entry, desc) in &generated_entries {
+        if !lines.contains(entry) {
+            warnings.push(format!(".gitignore missing '{}' ({})", entry, desc));
+        }
     }
 
     // MCP client configs — gitignored because they embed personal server
@@ -867,7 +884,9 @@ mod tests {
             update_gitignore(&addons).unwrap();
             let body = fs::read_to_string(".gitignore").unwrap();
             assert!(body.contains(".aibox-home/"));
+            assert!(body.contains(".agents/skills/"));
             assert!(body.contains("context/.cache/"));
+            assert!(body.contains("context/.state/"));
         });
     }
 
@@ -925,7 +944,26 @@ mod tests {
             let body = fs::read_to_string(".gitignore").unwrap();
             assert!(body.contains("my-secret"), "user entries preserved");
             assert!(body.contains(".aibox-home/"));
+            assert!(body.contains(".agents/skills/"));
             assert!(body.contains("context/.cache/"));
+            assert!(body.contains("context/.state/"));
+        });
+    }
+
+    #[test]
+    #[serial]
+    fn check_gitignore_entries_warns_for_generated_runtime_dirs() {
+        in_temp_dir(|| {
+            fs::write(
+                ".gitignore",
+                ".devcontainer/Dockerfile\n.devcontainer/docker-compose.yml\n.devcontainer/devcontainer.json\n.aibox-home/\n.aibox-local.toml\n.aibox-local.env\n.mcp.json\n.cursor/mcp.json\n.gemini/settings.json\n.codex/config.toml\n.continue/mcpServers/\n",
+            )
+            .unwrap();
+
+            let warnings = check_gitignore_entries();
+
+            assert!(warnings.iter().any(|w| w.contains(".agents/skills/")));
+            assert!(warnings.iter().any(|w| w.contains("context/.state/")));
         });
     }
 

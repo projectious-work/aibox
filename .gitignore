@@ -67,6 +67,7 @@ $RECYCLE.BIN/
 
 # aibox generated
 .aibox-env/
+.agents/skills/
 .aibox-local.toml
 .aibox-local.env
 context/.cache/

@@ -189,18 +189,14 @@ fn generate_docker_compose(
 
     let env_keys: Vec<String> = escaped_env.keys().cloned().collect();
 
-    // Write .aibox-local.env for credentials from .aibox-local.toml.
-    // docker-compose.yml references this file via env_file so the literal
-    // values never appear in the committed compose file.
-    let has_local_env = !config.local_env.is_empty();
-    if has_local_env {
-        let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
-        let env_content: String = local_env_sorted
-            .iter()
-            .map(|(k, v)| format!("{}={}\n", k, v))
-            .collect();
-        fs::write(".aibox-local.env", &env_content).context("Failed to write .aibox-local.env")?;
-    }
+    // Write .aibox-local.env even when empty so docker-compose env_file
+    // references are stable while secrets remain outside committed files.
+    let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
+    let env_content: String = local_env_sorted
+        .iter()
+        .map(|(k, v)| format!("{}={}\n", k, v))
+        .collect();
+    fs::write(".aibox-local.env", &env_content).context("Failed to write .aibox-local.env")?;
 
     // Extra volumes from aibox.toml + .aibox-local.toml
     let extra_volumes = &config.container.extra_volumes;
@@ -226,7 +222,6 @@ fn generate_docker_compose(
             env_vals => escaped_env,
             extra_volumes => extra_volumes,
             has_rust => has_rust,
-            has_local_env => has_local_env,
         })
         .context("Failed to render docker-compose template")?;
 
@@ -450,6 +445,7 @@ fn generate_devcontainer_json(config: &AiboxConfig, dir: &Path) -> Result<bool> 
 mod tests {
     use super::*;
     use crate::config::*;
+    use serial_test::serial;
 
     fn test_env() -> minijinja::Environment<'static> {
         create_template_env()
@@ -481,6 +477,14 @@ mod tests {
             pulse_server: "tcp:localhost:4714".to_string(),
         };
         config
+    }
+
+    fn in_temp_dir<F: FnOnce()>(f: F) {
+        let dir = tempfile::tempdir().unwrap();
+        let original = std::env::current_dir().unwrap();
+        std::env::set_current_dir(dir.path()).unwrap();
+        f();
+        std::env::set_current_dir(original).unwrap();
     }
 
     #[test]
@@ -524,6 +528,23 @@ mod tests {
         let content = fs::read_to_string(dir.path().join("docker-compose.yml")).unwrap();
         assert!(content.contains("container_name: test-ctr"));
         assert!(content.contains("hostname: test-host"));
+    }
+
+    #[test]
+    #[serial]
+    fn compose_always_references_empty_local_env_file() {
+        in_temp_dir(|| {
+            let devcontainer = std::path::Path::new(".devcontainer");
+            fs::create_dir_all(devcontainer).unwrap();
+            let config = make_config(&[], false);
+
+            generate_docker_compose(&config, devcontainer, &test_env()).unwrap();
+
+            let content = fs::read_to_string(devcontainer.join("docker-compose.yml")).unwrap();
+            assert!(content.contains("env_file:"));
+            assert!(content.contains("- ../.aibox-local.env"));
+            assert_eq!(fs::read_to_string(".aibox-local.env").unwrap(), "");
+        });
     }
 
     #[test]

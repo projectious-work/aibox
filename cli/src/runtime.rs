@@ -178,11 +178,11 @@ impl Runtime {
         Ok(())
     }
 
-    /// Run compose stop for a service.
-    pub fn compose_stop(&self, compose_file: &str, service: &str) -> Result<()> {
+    /// Run compose stop for the whole compose project.
+    pub fn compose_stop_all(&self, compose_file: &str) -> Result<()> {
         let file_args = Self::compose_file_args(compose_file)?;
         let mut args: Vec<&str> = file_args.iter().map(|s| s.as_str()).collect();
-        args.extend(["stop", service]);
+        args.push("stop");
         let status = self.run_compose(&args)?;
         if !status.success() {
             bail!("Compose stop failed");
@@ -190,7 +190,7 @@ impl Runtime {
         Ok(())
     }
 
-    /// Run compose down for a service (stop + remove container and network).
+    /// Run compose down for the whole compose project.
     pub fn compose_down(&self, compose_file: &str) -> Result<()> {
         let file_args = Self::compose_file_args(compose_file)?;
         let mut args: Vec<&str> = file_args.iter().map(|s| s.as_str()).collect();
@@ -344,6 +344,29 @@ mod tests {
         };
         assert_eq!(rt.runtime_bin, "docker");
         assert_eq!(rt.compose_bin.len(), 2);
+    }
+
+    #[test]
+    fn compose_file_args_include_override_when_present() {
+        let dir = tempfile::tempdir().unwrap();
+        let devcontainer = dir.path().join(".devcontainer");
+        std::fs::create_dir_all(&devcontainer).unwrap();
+        let compose_file = devcontainer.join("docker-compose.yml");
+        std::fs::write(&compose_file, "services: {}\n").unwrap();
+        std::fs::write(
+            devcontainer.join("docker-compose.override.yml"),
+            "services: {}\n",
+        )
+        .unwrap();
+
+        let compose_file = compose_file.to_string_lossy();
+        let args = Runtime::compose_file_args(&compose_file).unwrap();
+
+        assert_eq!(args.len(), 4);
+        assert_eq!(args[0], "-f");
+        assert!(args[1].ends_with(".devcontainer/docker-compose.yml"));
+        assert_eq!(args[2], "-f");
+        assert!(args[3].ends_with(".devcontainer/docker-compose.override.yml"));
     }
 
     #[test]

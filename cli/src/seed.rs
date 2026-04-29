@@ -1217,12 +1217,14 @@ ctl.!default {
 "#;
 
 /// Claude Code keybindings — disables Ctrl+g (reserved for zellij leader key).
-const DEFAULT_CLAUDE_KEYBINDINGS: &str = r#"[
-  {
-    "key": "ctrl+g",
-    "command": null
-  }
-]
+const DEFAULT_CLAUDE_KEYBINDINGS: &str = r#"{
+  "bindings": [
+    {
+      "key": "ctrl+g",
+      "command": null
+    }
+  ]
+}
 "#;
 
 /// OpenCode TypeScript plugin enforcing the processkit compliance contract.
@@ -2420,6 +2422,14 @@ mod tests {
             DEFAULT_YAZI_KEYMAP.contains("plugin toggle-pane min-preview"),
             "default yazi keymap should expose toggle-pane preview toggle binding"
         );
+    }
+
+    #[test]
+    fn claude_keybindings_use_bindings_object() {
+        let value: serde_json::Value = serde_json::from_str(DEFAULT_CLAUDE_KEYBINDINGS).unwrap();
+        let bindings = value["bindings"].as_array().unwrap();
+        assert_eq!(bindings[0]["key"], "ctrl+g");
+        assert!(bindings[0]["command"].is_null());
     }
 
     #[test]

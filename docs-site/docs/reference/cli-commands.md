@@ -269,7 +269,7 @@ aibox start --layout cowork
 
 ## aibox stop
 
-Stop the running container.
+Stop the running compose project.
 
 ### Usage
 
@@ -279,7 +279,7 @@ aibox stop
 
 ### What It Does
 
-Stops the container via `docker compose stop` (or `podman compose stop`). All data in `.aibox-home/` and the workspace is preserved. The container can be restarted with `aibox start`.
+Stops the compose project via `docker compose stop` (or `podman compose stop`), including companion services from `.devcontainer/docker-compose.override.yml`. All data in `.aibox-home/` and the workspace is preserved. The project can be restarted with `aibox start`.
 
 ### Examples
 

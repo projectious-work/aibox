@@ -294,14 +294,14 @@ GITHUB_TOKEN = "ghp_..."
 
 #### Permission Configuration: [mcp.permissions]
 
-Controls which MCP servers harnesses are permitted to use, eliminating repetitive permission prompts. `aibox sync` expands glob patterns into concrete server names and regenerates harness-specific permission files for Claude Code, OpenCode, Continue, Cursor, Gemini CLI, GitHub Copilot, Aider, and Codex.
+Controls which MCP servers harnesses are permitted to use, eliminating repetitive permission prompts. `aibox sync` expands glob patterns into concrete server names and regenerates harness-specific permission files for supported harnesses.
 
 **Global defaults:**
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `default_mode` | String | No | `"allow"` | Default permission: `"allow"`, `"ask"`, or `"deny"`. Recommend `"allow"` for aibox-shipped processkit tools (trusted content). |
-| `allow_patterns` | Array of strings | No | `["mcp__processkit-*"]` | Glob patterns to auto-allow. Supports wildcards: `prefix-*`, `*-suffix`, `*-middle*`, exact matches. First-match-wins semantics. |
+| `default_mode` | String | No | `"ask"` | Default permission when no explicit pattern matches. Use `"allow"` only when every configured MCP server is trusted. |
+| `allow_patterns` | Array of strings | No | `[]` | Glob patterns to auto-allow. Supports server patterns such as `"processkit-*"` and Claude-style aliases such as `"mcp__processkit-*"` or `"mcp__processkit-skill-gate__*"`. |
 | `deny_patterns` | Array of strings | No | `[]` | Glob patterns to auto-deny (takes precedence over allow). Use for restricting specific tool families. |
 
 **Per-harness overrides** (optional):
@@ -323,8 +323,8 @@ trust_level = "trusted"     # Codex uses project-level trust instead of per-tool
 
 ```toml
 [mcp.permissions]
-default_mode    = "allow"
-allow_patterns  = ["mcp__processkit-*", "bash"]
+default_mode    = "ask"
+allow_patterns  = ["mcp__processkit-*"]
 deny_patterns   = ["mcp__processkit-dangerous-admin"]  # Deny a specific pattern if needed
 
 [mcp.permissions.harness.claude-code]

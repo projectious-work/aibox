@@ -235,7 +235,7 @@ pub fn ensure_container_stopped(config: &AiboxConfig) -> Result<()> {
     let state = runtime.container_status(name)?;
     if state == ContainerState::Running {
         output::info(&format!("Stopping running container '{}'...", name));
-        runtime.compose_stop(crate::config::COMPOSE_FILE, name)?;
+        runtime.compose_stop_all(crate::config::COMPOSE_FILE)?;
         output::ok("Container stopped");
     }
     Ok(())

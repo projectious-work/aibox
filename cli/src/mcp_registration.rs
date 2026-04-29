@@ -130,7 +130,7 @@ pub struct McpConfig {
 
 #[allow(dead_code)]
 fn default_mode() -> String {
-    "allow".to_string()
+    "ask".to_string()
 }
 
 /// Per-harness override configuration.
@@ -163,23 +163,29 @@ fn default_true() -> bool {
 // Pattern matching logic
 // ---------------------------------------------------------------------------
 
-/// Expand glob patterns into concrete tool names.
-/// Patterns like "mcp__processkit-*" match all tools starting with that prefix.
+/// Expand glob patterns into concrete MCP server names.
+///
+/// The user-facing `[mcp.permissions]` model accepts both native server-name
+/// patterns (`processkit-*`) and Claude Code tool patterns
+/// (`mcp__processkit-*`, `mcp__processkit-skill-gate__*`) as aliases for the
+/// same processkit server set. Internally we always resolve those aliases to
+/// bare server names first, then each harness renders that set into its native
+/// permission shape.
 ///
 /// # Arguments
-/// * `patterns` - List of glob-style patterns (e.g., ["mcp__processkit-*", "bash"])
-/// * `available_tools` - All available tool names to match against
+/// * `patterns` - List of glob-style patterns
+/// * `available_servers` - All available MCP server names to match against
 ///
 /// # Returns
-/// Sorted list of unique tool names that match any pattern.
+/// Sorted list of unique server names that match any pattern.
 #[allow(dead_code)]
-pub fn expand_mcp_patterns(patterns: &[String], available_tools: &[String]) -> Vec<String> {
+pub fn expand_mcp_patterns(patterns: &[String], available_servers: &[String]) -> Vec<String> {
     let mut matched = std::collections::HashSet::new();
 
     for pattern in patterns {
-        for tool in available_tools {
-            if glob_matches(tool, pattern) {
-                matched.insert(tool.clone());
+        for server in available_servers {
+            if mcp_permission_pattern_matches_server(server, pattern) {
+                matched.insert(server.clone());
             }
         }
     }
@@ -187,6 +193,88 @@ pub fn expand_mcp_patterns(patterns: &[String], available_tools: &[String]) -> V
     let mut result: Vec<_> = matched.into_iter().collect();
     result.sort();
     result
+}
+
+/// Match one configured permission pattern against a bare MCP server name.
+///
+/// Accepted aliases:
+/// - `processkit-*` matches server names directly.
+/// - `mcp__processkit-*` is a shorthand alias for the same server set.
+/// - `mcp__processkit-skill-gate__*` is Claude's "all tools on this server"
+///   form and matches the `processkit-skill-gate` server.
+fn mcp_permission_pattern_matches_server(server: &str, pattern: &str) -> bool {
+    if glob_matches(server, pattern) {
+        return true;
+    }
+
+    let Some(rest) = pattern.strip_prefix("mcp__") else {
+        return false;
+    };
+
+    if let Some((server_pattern, _tool_pattern)) = rest.split_once("__") {
+        glob_matches(server, server_pattern)
+    } else {
+        glob_matches(server, rest)
+    }
+}
+
+fn is_mcp_server_allowed(server: &str, config: &McpConfig) -> bool {
+    if config
+        .deny_patterns
+        .iter()
+        .any(|pattern| mcp_permission_pattern_matches_server(server, pattern))
+    {
+        return false;
+    }
+
+    if config
+        .allow_patterns
+        .iter()
+        .any(|pattern| mcp_permission_pattern_matches_server(server, pattern))
+    {
+        return true;
+    }
+
+    if !config.allow_patterns.is_empty() {
+        return false;
+    }
+
+    match config.default_mode.as_str() {
+        "allow" | "automatic" => true,
+        "ask" | "deny" => false,
+        _ => true,
+    }
+}
+
+fn allowed_mcp_servers(config: &McpConfig, available_servers: &[String]) -> Vec<String> {
+    let mut servers: Vec<String> = available_servers
+        .iter()
+        .filter(|server| is_mcp_server_allowed(server, config))
+        .cloned()
+        .collect();
+    servers.sort();
+    servers.dedup();
+    servers
+}
+
+fn denied_mcp_servers(config: &McpConfig, available_servers: &[String]) -> Vec<String> {
+    let mut servers: Vec<String> = available_servers
+        .iter()
+        .filter(|server| {
+            config
+                .deny_patterns
+                .iter()
+                .any(|pattern| mcp_permission_pattern_matches_server(server, pattern))
+        })
+        .cloned()
+        .collect();
+    servers.sort();
+    servers.dedup();
+    servers
+}
+
+fn claude_mcp_server_permission(server: &str) -> String {
+    format!("mcp__{server}__*")
 }
 
 /// Simple glob pattern matching for "prefix-*" and exact matches.
@@ -282,17 +370,20 @@ pub fn generate_claude_code_permissions(
 ) -> Result<()> {
     let settings_path = project_root.join(".claude").join("settings.local.json");
 
-    // Determine allowed tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
-    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
-
-    // Build final allow list: keep tools allowed by config, remove denied ones
+    // Determine allowed servers and render them into Claude Code's native
+    // MCP permission shape: `mcp__<server-name>__*`.
+    let allowed = allowed_mcp_servers(config, all_tool_names);
+    let denied = denied_mcp_servers(config, all_tool_names);
     let mut permissions: Vec<String> = allowed
         .iter()
-        .filter(|tool| !denied.contains(tool))
-        .map(|t| format!("mcp__{}", t))
+        .map(|t| claude_mcp_server_permission(t))
         .collect();
     permissions.sort();
+    let mut deny_permissions: Vec<String> = denied
+        .iter()
+        .map(|t| claude_mcp_server_permission(t))
+        .collect();
+    deny_permissions.sort();
 
     // Read existing settings or create new
     let mut settings: serde_json::Map<String, serde_json::Value> = if settings_path.is_file() {
@@ -339,7 +430,27 @@ pub fn generate_claude_code_permissions(
         "allow".to_string(),
         serde_json::Value::Array(merged.into_iter().map(serde_json::Value::String).collect()),
     );
-
+    if !deny_permissions.is_empty() {
+        let mut merged_deny: BTreeSet<String> = permissions_obj
+            .get("deny")
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|v| v.as_str().map(String::from))
+                    .collect()
+            })
+            .unwrap_or_default();
+        merged_deny.extend(deny_permissions.iter().cloned());
+        permissions_obj.insert(
+            "deny".to_string(),
+            serde_json::Value::Array(
+                merged_deny
+                    .into_iter()
+                    .map(serde_json::Value::String)
+                    .collect(),
+            ),
+        );
+    }
     // Ensure parent dir exists
     if let Some(parent) = settings_path.parent() {
         fs::create_dir_all(parent).ok();
@@ -357,7 +468,10 @@ pub fn generate_claude_code_permissions(
 }
 
 /// Generate MCP permissions for OpenCode's config.toml.
-/// Updates `[mcp]` section with allow/ask/deny modes based on patterns.
+///
+/// OpenCode permissions are not a server-level `[mcp] allow = [...]` list.
+/// Until a reliable native mapping is implemented, this intentionally avoids
+/// writing a bogus config section.
 ///
 /// # Arguments
 /// * `project_root` - Project root directory
@@ -368,56 +482,10 @@ pub fn generate_claude_code_permissions(
 /// Result; logs warnings on individual failures
 #[allow(dead_code)]
 pub fn generate_opencode_permissions(
-    project_root: &Path,
-    config: &McpConfig,
-    all_tool_names: &[String],
+    _project_root: &Path,
+    _config: &McpConfig,
+    _all_tool_names: &[String],
 ) -> Result<()> {
-    let config_path = project_root.join(".opencode").join("config.toml");
-
-    // Determine allowed/denied tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
-    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
-
-    // Read existing config or create new
-    let mut document: toml_edit::DocumentMut = if config_path.is_file() {
-        let body = fs::read_to_string(&config_path).unwrap_or_default();
-        body.parse::<toml_edit::DocumentMut>().unwrap_or_default()
-    } else {
-        toml_edit::DocumentMut::new()
-    };
-
-    // Ensure [mcp] section exists
-    if !document.contains_key("mcp") {
-        document["mcp"] = toml_edit::table();
-    }
-
-    let mcp_table = &mut document["mcp"];
-
-    // Set mode based on config
-    mcp_table["mode"] = toml_edit::value(config.default_mode.as_str());
-
-    // Set allow list
-    let allow_array = toml_edit::Array::from_iter(allowed.iter().map(|s| s.as_str()));
-    mcp_table["allow"] = toml_edit::value(allow_array);
-
-    // Set deny list if present
-    if !denied.is_empty() {
-        let deny_array = toml_edit::Array::from_iter(denied.iter().map(|s| s.as_str()));
-        mcp_table["deny"] = toml_edit::value(deny_array);
-    }
-
-    // Ensure parent dir exists
-    if let Some(parent) = config_path.parent() {
-        fs::create_dir_all(parent).ok();
-    }
-
-    fs::write(&config_path, document.to_string()).with_context(|| {
-        format!(
-            "failed to write OpenCode permissions to {}",
-            config_path.display()
-        )
-    })?;
-
     Ok(())
 }
 
@@ -440,7 +508,7 @@ pub fn generate_continue_permissions(
     let config_path = project_root.join(".continue").join("config.json");
 
     // Determine allowed tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
+    let allowed = allowed_mcp_servers(config, all_tool_names);
 
     // Determine mode: "Ask" (default safety) or "Automatic" based on allow_patterns
     let tool_mode = match config.default_mode.as_str() {
@@ -519,7 +587,7 @@ pub fn generate_cursor_permissions(
     let settings_path = project_root.join(".cursor").join("settings.json");
 
     // Determine allowed tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
+    let allowed = allowed_mcp_servers(config, all_tool_names);
 
     // Read existing settings or create new
     let mut settings: serde_json::Map<String, serde_json::Value> = if settings_path.is_file() {
@@ -580,8 +648,8 @@ pub fn generate_aider_permissions(
     let config_path = project_root.join(".aider").join("mcp-permissions.json");
 
     // Determine allowed/denied tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
-    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
+    let allowed = allowed_mcp_servers(config, all_tool_names);
+    let denied = denied_mcp_servers(config, all_tool_names);
 
     // Build permissions object for Aider
     let mut permissions = serde_json::json!({
@@ -631,8 +699,11 @@ pub fn generate_aider_permissions(
 }
 
 /// Generate MCP permissions for Gemini CLI's settings.json.
-/// Uses dual allowlist (includeTools) and blocklist (excludeTools) with intersection semantics.
-/// A tool must be in includeTools AND not in excludeTools to be allowed.
+///
+/// Gemini's `includeTools`/`excludeTools` fields are per-server tool filters,
+/// not a top-level global server allow-list. This function therefore avoids
+/// writing those keys from server-level patterns until we have concrete tool
+/// inventories to map.
 ///
 /// # Arguments
 /// * `project_root` - Project root directory
@@ -643,65 +714,10 @@ pub fn generate_aider_permissions(
 /// Result; logs warnings on individual failures
 #[allow(dead_code)]
 pub fn generate_gemini_permissions(
-    project_root: &Path,
-    config: &McpConfig,
-    all_tool_names: &[String],
+    _project_root: &Path,
+    _config: &McpConfig,
+    _all_tool_names: &[String],
 ) -> Result<()> {
-    let settings_path = project_root.join(".gemini").join("settings.json");
-
-    // Determine allowed/denied tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
-    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
-
-    // Read existing settings or create new
-    let mut settings: serde_json::Map<String, serde_json::Value> = if settings_path.is_file() {
-        let body = fs::read_to_string(&settings_path).unwrap_or_default();
-        if body.trim().is_empty() {
-            serde_json::Map::new()
-        } else {
-            serde_json::from_str(&body).unwrap_or_default()
-        }
-    } else {
-        serde_json::Map::new()
-    };
-
-    // Set includeTools (allowlist)
-    settings.insert(
-        "includeTools".to_string(),
-        serde_json::Value::Array(
-            allowed
-                .iter()
-                .map(|t| serde_json::Value::String(t.clone()))
-                .collect(),
-        ),
-    );
-
-    // Set excludeTools (denylist) if present
-    if !denied.is_empty() {
-        settings.insert(
-            "excludeTools".to_string(),
-            serde_json::Value::Array(
-                denied
-                    .iter()
-                    .map(|t| serde_json::Value::String(t.clone()))
-                    .collect(),
-            ),
-        );
-    }
-
-    // Ensure parent dir exists
-    if let Some(parent) = settings_path.parent() {
-        fs::create_dir_all(parent).ok();
-    }
-
-    let formatted = serde_json::to_string_pretty(&settings)?;
-    fs::write(&settings_path, formatted).with_context(|| {
-        format!(
-            "failed to write Gemini permissions to {}",
-            settings_path.display()
-        )
-    })?;
-
     Ok(())
 }
 
@@ -725,8 +741,8 @@ pub fn generate_github_copilot_permissions(
     let env_path = project_root.join(".copilot-env");
 
     // Determine allowed/denied tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
-    let denied = expand_mcp_patterns(&config.deny_patterns, all_tool_names);
+    let allowed = allowed_mcp_servers(config, all_tool_names);
+    let denied = denied_mcp_servers(config, all_tool_names);
 
     // Build environment variable format (shell-sourceable)
     let mut env_content = String::new();
@@ -780,7 +796,7 @@ pub fn generate_codex_permissions(
     let config_path = project_root.join(".codex").join("config.toml");
 
     // Determine allowed tools
-    let allowed = expand_mcp_patterns(&config.allow_patterns, all_tool_names);
+    let allowed = allowed_mcp_servers(config, all_tool_names);
 
     // Read existing config or create new
     let mut document: toml_edit::DocumentMut = if config_path.is_file() {
@@ -801,8 +817,18 @@ pub fn generate_codex_permissions(
         document["mcp"] = toml_edit::table();
     }
     let mcp_table = &mut document["mcp"];
-    let allow_array = toml_edit::Array::from_iter(allowed.iter().map(|s| s.as_str()));
-    mcp_table["allowed_tools"] = toml_edit::value(allow_array);
+    let previous_managed = read_toml_string_array(mcp_table, "_aibox_managed_allowed_tools")?;
+    let previous_managed: BTreeSet<String> = previous_managed.into_iter().collect();
+    let current_managed: BTreeSet<String> = allowed.into_iter().collect();
+    let existing = read_toml_string_array(mcp_table, "allowed_tools")?;
+    let final_allowed: BTreeSet<String> = existing
+        .into_iter()
+        .filter(|tool| !previous_managed.contains(tool))
+        .chain(current_managed.iter().cloned())
+        .collect();
+
+    write_toml_string_array(mcp_table, "allowed_tools", &final_allowed);
+    write_toml_string_array(mcp_table, "_aibox_managed_allowed_tools", &current_managed);
 
     // Ensure parent dir exists
     if let Some(parent) = config_path.parent() {
@@ -817,6 +843,25 @@ pub fn generate_codex_permissions(
     })?;
 
     Ok(())
+}
+
+fn read_toml_string_array(item: &toml_edit::Item, key: &str) -> Result<Vec<String>> {
+    let Some(array) = item.get(key).and_then(|v| v.as_array()) else {
+        return Ok(Vec::new());
+    };
+    array
+        .iter()
+        .map(|v| {
+            v.as_str()
+                .map(String::from)
+                .ok_or_else(|| anyhow::anyhow!("non-string entry in [mcp].{key}"))
+        })
+        .collect()
+}
+
+fn write_toml_string_array(item: &mut toml_edit::Item, key: &str, values: &BTreeSet<String>) {
+    let array = toml_edit::Array::from_iter(values.iter().map(|s| s.as_str()));
+    item[key] = toml_edit::value(array);
 }
 
 // ---------------------------------------------------------------------------
@@ -1478,8 +1523,9 @@ fn generate_all_harness_permissions(
     config: &AiboxConfig,
     specs: &[McpServerSpec],
 ) -> Result<()> {
-    // Extract [mcp] configuration from aibox.toml.
-    // Defaults to empty config (allow all patterns by default).
+    // Extract [mcp] configuration from aibox.toml. With no explicit
+    // allow patterns and default ask mode, no additional server-level
+    // preauthorization is emitted.
     let mcp_config = &config.mcp.permissions;
 
     // Build list of tool names available for pattern matching
@@ -2983,46 +3029,80 @@ args = ["server.js"]
 
     #[test]
     fn expand_patterns_single() {
-        let tools = vec!["mcp__foo".to_string(), "bash".to_string()];
+        let tools = vec!["foo".to_string(), "bash".to_string()];
         let patterns = vec!["bash".to_string()];
         let result = expand_mcp_patterns(&patterns, &tools);
         assert_eq!(result, vec!["bash"]);
     }
 
     #[test]
-    fn expand_patterns_wildcard() {
+    fn expand_patterns_accepts_claude_server_wildcard_alias() {
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__processkit-actor".to_string(),
-            "mcp__other-tool".to_string(),
+            "processkit-workitem".to_string(),
+            "processkit-actor".to_string(),
+            "other-tool".to_string(),
             "bash".to_string(),
         ];
         let patterns = vec!["mcp__processkit-*".to_string()];
         let result = expand_mcp_patterns(&patterns, &tools);
-        assert_eq!(
-            result,
-            vec!["mcp__processkit-actor", "mcp__processkit-workitem"]
-        );
+        assert_eq!(result, vec!["processkit-actor", "processkit-workitem"]);
+    }
+
+    #[test]
+    fn expand_patterns_accepts_claude_tool_wildcard_alias() {
+        let tools = vec![
+            "processkit-skill-gate".to_string(),
+            "processkit-workitem".to_string(),
+            "other-tool".to_string(),
+        ];
+        let patterns = vec!["mcp__processkit-skill-gate__*".to_string()];
+        let result = expand_mcp_patterns(&patterns, &tools);
+        assert_eq!(result, vec!["processkit-skill-gate"]);
     }
 
     #[test]
     fn expand_patterns_multiple() {
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__other-tool".to_string(),
+            "processkit-workitem".to_string(),
+            "other-tool".to_string(),
             "bash".to_string(),
         ];
         let patterns = vec!["mcp__processkit-*".to_string(), "bash".to_string()];
         let result = expand_mcp_patterns(&patterns, &tools);
-        assert_eq!(result, vec!["bash", "mcp__processkit-workitem"]);
+        assert_eq!(result, vec!["bash", "processkit-workitem"]);
     }
 
     #[test]
     fn expand_patterns_no_match() {
-        let tools = vec!["mcp__foo".to_string(), "bash".to_string()];
+        let tools = vec!["foo".to_string(), "bash".to_string()];
         let patterns = vec!["nomatch".to_string()];
         let result = expand_mcp_patterns(&patterns, &tools);
         assert_eq!(result, Vec::<String>::new());
+    }
+
+    #[test]
+    fn allowed_mcp_servers_applies_aliases_and_deny_wins() {
+        let servers = vec![
+            "processkit-skill-gate".to_string(),
+            "processkit-workitem".to_string(),
+            "processkit-private-secret".to_string(),
+            "custom".to_string(),
+        ];
+        let config = McpConfig {
+            default_mode: "allow".to_string(),
+            allow_patterns: vec![
+                "processkit-*".to_string(),
+                "mcp__processkit-skill-gate__*".to_string(),
+            ],
+            deny_patterns: vec!["mcp__processkit-private-*".to_string()],
+            harness: BTreeMap::new(),
+        };
+
+        let allowed = allowed_mcp_servers(&config, &servers);
+        assert_eq!(
+            allowed,
+            vec!["processkit-skill-gate", "processkit-workitem"]
+        );
     }
 
     #[test]
@@ -3093,10 +3173,10 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__processkit-actor".to_string(),
+            "processkit-workitem".to_string(),
+            "processkit-actor".to_string(),
             "bash".to_string(),
-            "mcp__other".to_string(),
+            "other".to_string(),
         ];
 
         let result = generate_claude_code_permissions(tmp.path(), &config, &tools);
@@ -3116,13 +3196,14 @@ args = ["server.js"]
             .and_then(|p| p.as_array())
             .expect("permissions.allow must exist as a nested array");
         let perm_strs: Vec<_> = perms.iter().filter_map(|p| p.as_str()).collect();
-        assert!(perm_strs.contains(&"mcp__mcp__processkit-workitem")); // Note: double mcp__ due to format!
-        assert!(perm_strs.contains(&"mcp__bash"));
+        assert!(perm_strs.contains(&"mcp__processkit-workitem__*"));
+        assert!(perm_strs.contains(&"mcp__processkit-actor__*"));
+        assert!(perm_strs.contains(&"mcp__bash__*"));
         assert!(!perm_strs.iter().any(|p| p.contains("mcp__other")));
     }
 
     #[test]
-    fn opencode_permissions_creates_toml_with_mcp_section() {
+    fn opencode_permissions_does_not_write_bogus_mcp_allow_section() {
         let tmp = TempDir::new().unwrap();
         let config = McpConfig {
             default_mode: "allow".to_string(),
@@ -3131,21 +3212,18 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__private-secret".to_string(),
+            "processkit-workitem".to_string(),
+            "private-secret".to_string(),
         ];
 
         let result = generate_opencode_permissions(tmp.path(), &config, &tools);
         assert!(result.is_ok());
 
         let config_path = tmp.path().join(".opencode").join("config.toml");
-        assert!(config_path.is_file());
-
-        let content = fs::read_to_string(&config_path).unwrap();
-        assert!(content.contains("[mcp]"));
-        assert!(content.contains("mode = \"allow\""));
-        assert!(content.contains("mcp__processkit-workitem"));
-        assert!(content.contains("mcp__private-secret"));
+        assert!(
+            !config_path.exists(),
+            "OpenCode permission generation must not emit the old bogus [mcp] allow/deny shape"
+        );
     }
 
     #[test]
@@ -3172,7 +3250,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__new-tool".to_string()];
+        let tools = vec!["new-tool".to_string()];
 
         generate_claude_code_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3198,9 +3276,46 @@ args = ["server.js"]
             "pre-existing user entry must survive merge"
         );
         assert!(
-            perm_strs.contains(&"mcp__mcp__new-tool"),
+            perm_strs.contains(&"mcp__new-tool__*"),
             "newly-generated permission must be added"
         );
+    }
+
+    #[test]
+    fn claude_code_permissions_writes_deny_entries() {
+        let tmp = TempDir::new().unwrap();
+        let config = McpConfig {
+            default_mode: "allow".to_string(),
+            allow_patterns: vec!["mcp__processkit-*".to_string()],
+            deny_patterns: vec!["mcp__processkit-private-*".to_string()],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec![
+            "processkit-workitem".to_string(),
+            "processkit-private-admin".to_string(),
+        ];
+
+        generate_claude_code_permissions(tmp.path(), &config, &tools).unwrap();
+
+        let settings_path = tmp.path().join(".claude").join("settings.local.json");
+        let content = fs::read_to_string(&settings_path).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
+        let allow: Vec<&str> = parsed["permissions"]["allow"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|v| v.as_str())
+            .collect();
+        let deny: Vec<&str> = parsed["permissions"]["deny"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|v| v.as_str())
+            .collect();
+
+        assert!(allow.contains(&"mcp__processkit-workitem__*"));
+        assert!(!allow.contains(&"mcp__processkit-private-admin__*"));
+        assert!(deny.contains(&"mcp__processkit-private-admin__*"));
     }
 
     // ---------------------------------------------------------------------------
@@ -3223,7 +3338,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__processkit-workitem".to_string()];
+        let tools = vec!["processkit-workitem".to_string()];
 
         generate_claude_code_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3275,7 +3390,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__processkit-workitem".to_string()];
+        let tools = vec!["processkit-workitem".to_string()];
 
         generate_claude_code_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3304,7 +3419,7 @@ args = ["server.js"]
             "user entry `user-tool-beta` must survive re-merge"
         );
         assert!(
-            perm_strs.contains(&"mcp__mcp__processkit-workitem"),
+            perm_strs.contains(&"mcp__processkit-workitem__*"),
             "newly-generated entry must be merged in"
         );
     }
@@ -3322,9 +3437,9 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__processkit-actor".to_string(),
-            "mcp__processkit-private-secret".to_string(),
+            "processkit-workitem".to_string(),
+            "processkit-actor".to_string(),
+            "processkit-private-secret".to_string(),
             "bash".to_string(),
             "unrelated".to_string(),
         ];
@@ -3358,7 +3473,7 @@ args = ["server.js"]
         // generated entries — after merge it must appear exactly once.
         let seed = serde_json::json!({
             "permissions": {
-                "allow": ["mcp__mcp__processkit-workitem", "z-user-entry", "a-user-entry"]
+                "allow": ["mcp__processkit-workitem__*", "z-user-entry", "a-user-entry"]
             }
         });
         fs::write(&settings_path, serde_json::to_string_pretty(&seed).unwrap()).unwrap();
@@ -3369,7 +3484,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__processkit-workitem".to_string()];
+        let tools = vec!["processkit-workitem".to_string()];
 
         generate_claude_code_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3387,7 +3502,7 @@ args = ["server.js"]
         // Dedup: the duplicate appears exactly once.
         let dup_count = perms
             .iter()
-            .filter(|s| s.as_str() == "mcp__mcp__processkit-workitem")
+            .filter(|s| s.as_str() == "mcp__processkit-workitem__*")
             .count();
         assert_eq!(dup_count, 1, "duplicate entries must be deduplicated");
 
@@ -3410,10 +3525,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__other".to_string(),
-        ];
+        let tools = vec!["processkit-workitem".to_string(), "other".to_string()];
 
         let result = generate_continue_permissions(tmp.path(), &config, &tools);
         assert!(result.is_ok());
@@ -3426,9 +3538,9 @@ args = ["server.js"]
 
         // Check tools object structure
         if let Some(tools_obj) = parsed.get("tools").and_then(|t| t.as_object()) {
-            assert!(tools_obj.contains_key("mcp__processkit-workitem"));
-            assert!(!tools_obj.contains_key("mcp__other"));
-            if let Some(tool_config) = tools_obj.get("mcp__processkit-workitem") {
+            assert!(tools_obj.contains_key("processkit-workitem"));
+            assert!(!tools_obj.contains_key("other"));
+            if let Some(tool_config) = tools_obj.get("processkit-workitem") {
                 assert_eq!(
                     tool_config.get("mode").and_then(|m| m.as_str()),
                     Some("Ask")
@@ -3449,9 +3561,9 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
+            "processkit-workitem".to_string(),
             "bash".to_string(),
-            "mcp__other".to_string(),
+            "other".to_string(),
         ];
 
         let result = generate_cursor_permissions(tmp.path(), &config, &tools);
@@ -3465,9 +3577,9 @@ args = ["server.js"]
 
         if let Some(allowed) = parsed.get("allowedMcpServers").and_then(|a| a.as_array()) {
             let allowed_strs: Vec<_> = allowed.iter().filter_map(|a| a.as_str()).collect();
-            assert!(allowed_strs.contains(&"mcp__processkit-workitem"));
+            assert!(allowed_strs.contains(&"processkit-workitem"));
             assert!(allowed_strs.contains(&"bash"));
-            assert!(!allowed_strs.contains(&"mcp__other"));
+            assert!(!allowed_strs.contains(&"other"));
         } else {
             panic!("allowedMcpServers not found or not an array");
         }
@@ -3483,8 +3595,8 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__private-secret".to_string(),
+            "processkit-workitem".to_string(),
+            "private-secret".to_string(),
         ];
 
         let result = generate_aider_permissions(tmp.path(), &config, &tools);
@@ -3500,14 +3612,14 @@ args = ["server.js"]
 
         if let Some(allowed) = parsed.get("allowed_tools").and_then(|a| a.as_array()) {
             let allowed_strs: Vec<_> = allowed.iter().filter_map(|a| a.as_str()).collect();
-            assert!(allowed_strs.contains(&"mcp__processkit-workitem"));
+            assert!(allowed_strs.contains(&"processkit-workitem"));
         } else {
             panic!("allowed_tools not found");
         }
 
         if let Some(denied) = parsed.get("denied_tools").and_then(|d| d.as_array()) {
             let denied_strs: Vec<_> = denied.iter().filter_map(|d| d.as_str()).collect();
-            assert!(denied_strs.contains(&"mcp__private-secret"));
+            assert!(denied_strs.contains(&"private-secret"));
         } else {
             panic!("denied_tools not found");
         }
@@ -3522,7 +3634,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__tool".to_string()];
+        let tools = vec!["tool".to_string()];
 
         generate_continue_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3531,7 +3643,7 @@ args = ["server.js"]
         let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
 
         if let Some(tools_obj) = parsed.get("tools").and_then(|t| t.as_object())
-            && let Some(tool_config) = tools_obj.get("mcp__tool")
+            && let Some(tool_config) = tools_obj.get("tool")
         {
             assert_eq!(
                 tool_config.get("mode").and_then(|m| m.as_str()),
@@ -3545,7 +3657,7 @@ args = ["server.js"]
     // ---------------------------------------------------------------------------
 
     #[test]
-    fn gemini_permissions_creates_settings_with_include_exclude() {
+    fn gemini_permissions_does_not_write_global_include_exclude() {
         let tmp = TempDir::new().unwrap();
         let config = McpConfig {
             default_mode: "allow".to_string(),
@@ -3554,58 +3666,44 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__private-secret".to_string(),
+            "processkit-workitem".to_string(),
+            "private-secret".to_string(),
         ];
 
         let result = generate_gemini_permissions(tmp.path(), &config, &tools);
         assert!(result.is_ok());
 
         let settings_path = tmp.path().join(".gemini").join("settings.json");
-        assert!(settings_path.is_file());
-
-        let content = fs::read_to_string(&settings_path).unwrap();
-        let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
-
-        // Check includeTools
-        if let Some(include) = parsed.get("includeTools").and_then(|i| i.as_array()) {
-            let include_strs: Vec<_> = include.iter().filter_map(|i| i.as_str()).collect();
-            assert!(include_strs.contains(&"mcp__processkit-workitem"));
-        } else {
-            panic!("includeTools not found");
-        }
-
-        // Check excludeTools
-        if let Some(exclude) = parsed.get("excludeTools").and_then(|e| e.as_array()) {
-            let exclude_strs: Vec<_> = exclude.iter().filter_map(|e| e.as_str()).collect();
-            assert!(exclude_strs.contains(&"mcp__private-secret"));
-        } else {
-            panic!("excludeTools not found");
-        }
+        assert!(
+            !settings_path.exists(),
+            "Gemini permission generation must not emit global includeTools/excludeTools from server patterns"
+        );
     }
 
     #[test]
-    fn gemini_permissions_without_deny_patterns() {
+    fn gemini_permissions_preserves_existing_settings_by_not_touching_file() {
         let tmp = TempDir::new().unwrap();
+        let settings_path = tmp.path().join(".gemini").join("settings.json");
+        fs::create_dir_all(settings_path.parent().unwrap()).unwrap();
+        fs::write(
+            &settings_path,
+            r#"{"mcpServers":{"user-server":{"command":"uv"}}}"#,
+        )
+        .unwrap();
+        let before = fs::read_to_string(&settings_path).unwrap();
+
         let config = McpConfig {
             default_mode: "allow".to_string(),
             allow_patterns: vec!["mcp__processkit-*".to_string()],
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__processkit-workitem".to_string()];
+        let tools = vec!["processkit-workitem".to_string()];
 
         generate_gemini_permissions(tmp.path(), &config, &tools).unwrap();
 
-        let settings_path = tmp.path().join(".gemini").join("settings.json");
-        let content = fs::read_to_string(&settings_path).unwrap();
-        let parsed: serde_json::Value = serde_json::from_str(&content).unwrap();
-
-        // includeTools should be present
-        assert!(parsed.get("includeTools").is_some());
-
-        // excludeTools should not be present when deny_patterns is empty
-        assert!(parsed.get("excludeTools").is_none());
+        let after = fs::read_to_string(&settings_path).unwrap();
+        assert_eq!(after, before);
     }
 
     #[test]
@@ -3618,8 +3716,8 @@ args = ["server.js"]
             harness: BTreeMap::new(),
         };
         let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__private-secret".to_string(),
+            "processkit-workitem".to_string(),
+            "private-secret".to_string(),
         ];
 
         let result = generate_github_copilot_permissions(tmp.path(), &config, &tools);
@@ -3632,8 +3730,8 @@ args = ["server.js"]
         assert!(content.contains("COPILOT_MCP_ALLOW_TOOLS="));
         assert!(content.contains("COPILOT_MCP_DENY_TOOLS="));
         assert!(content.contains("COPILOT_MCP_MODE="));
-        assert!(content.contains("mcp__processkit-workitem"));
-        assert!(content.contains("mcp__private-secret"));
+        assert!(content.contains("processkit-workitem"));
+        assert!(content.contains("private-secret"));
         assert!(content.contains("allow"));
     }
 
@@ -3646,7 +3744,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__tool1".to_string(), "mcp__tool2".to_string()];
+        let tools = vec!["tool1".to_string(), "tool2".to_string()];
 
         generate_github_copilot_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3654,9 +3752,7 @@ args = ["server.js"]
         let content = fs::read_to_string(&env_path).unwrap();
 
         // Should be comma-separated
-        assert!(
-            content.contains("mcp__tool1,mcp__tool2") || content.contains("mcp__tool2,mcp__tool1")
-        );
+        assert!(content.contains("tool1,tool2") || content.contains("tool2,tool1"));
     }
 
     // ---------------------------------------------------------------------------
@@ -3672,10 +3768,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec![
-            "mcp__processkit-workitem".to_string(),
-            "mcp__other".to_string(),
-        ];
+        let tools = vec!["processkit-workitem".to_string(), "other".to_string()];
 
         let result = generate_codex_permissions(tmp.path(), &config, &tools);
         assert!(result.is_ok());
@@ -3688,7 +3781,7 @@ args = ["server.js"]
         assert!(content.contains("trust_level = \"trusted\""));
         assert!(content.contains("[mcp]"));
         assert!(content.contains("allowed_tools"));
-        assert!(content.contains("mcp__processkit-workitem"));
+        assert!(content.contains("processkit-workitem"));
     }
 
     #[test]
@@ -3707,7 +3800,7 @@ args = ["server.js"]
             deny_patterns: vec![],
             harness: BTreeMap::new(),
         };
-        let tools = vec!["mcp__new-tool".to_string()];
+        let tools = vec!["new-tool".to_string()];
 
         generate_codex_permissions(tmp.path(), &config, &tools).unwrap();
 
@@ -3721,6 +3814,33 @@ args = ["server.js"]
         assert!(content.contains("[project]"));
         assert!(content.contains("trust_level = \"trusted\""));
         assert!(content.contains("[mcp]"));
+    }
+
+    #[test]
+    fn codex_permissions_preserves_user_allowed_tools_and_drops_old_managed() {
+        let tmp = TempDir::new().unwrap();
+        let config_path = tmp.path().join(".codex").join("config.toml");
+        fs::create_dir_all(config_path.parent().unwrap()).unwrap();
+        fs::write(
+            &config_path,
+            "[mcp]\nallowed_tools = [\"user-tool\", \"old-managed\"]\n_aibox_managed_allowed_tools = [\"old-managed\"]\n",
+        )
+        .unwrap();
+
+        let config = McpConfig {
+            default_mode: "ask".to_string(),
+            allow_patterns: vec!["processkit-*".to_string()],
+            deny_patterns: vec![],
+            harness: BTreeMap::new(),
+        };
+        let tools = vec!["processkit-new".to_string()];
+
+        generate_codex_permissions(tmp.path(), &config, &tools).unwrap();
+
+        let content = fs::read_to_string(&config_path).unwrap();
+        assert!(content.contains("\"user-tool\""));
+        assert!(content.contains("\"processkit-new\""));
+        assert!(!content.contains("\"old-managed\""));
     }
 
     #[test]

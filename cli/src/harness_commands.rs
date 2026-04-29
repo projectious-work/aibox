@@ -200,10 +200,11 @@ pub fn sync_harness_commands(project_root: &Path, config: &AiboxConfig) -> Resul
     // Generate any missing command files from SKILL.md declarations before collecting.
     generate_missing_command_files(&live_skills_dir);
 
-    // Universe of all known processkit command basenames (md filenames).
+    // Universe of all current processkit command basenames (md filenames).
     let empty_dir = PathBuf::new();
     let mirror_dir_ref = mirror_skills_dir.as_deref().unwrap_or(&empty_dir);
     let universe = collect_command_filenames(mirror_dir_ref);
+    let historical_sources = collect_historical_command_sources(project_root);
 
     // Wanted set: filename → source md path for currently-installed skills.
     let wanted = collect_live_commands(&live_skills_dir)?;
@@ -219,7 +220,7 @@ pub fn sync_harness_commands(project_root: &Path, config: &AiboxConfig) -> Resul
         if !profile_enabled(&profile, config) {
             continue;
         }
-        sync_one_profile(&profile, &universe, &wanted)?;
+        sync_one_profile(&profile, &universe, &historical_sources, &wanted)?;
     }
 
     // Sweep up legacy Codex prompt files left behind by aibox v0.21.1.
@@ -235,6 +236,7 @@ pub fn sync_harness_commands(project_root: &Path, config: &AiboxConfig) -> Resul
 fn sync_one_profile(
     profile: &HarnessCommandProfile,
     universe: &HashSet<String>,
+    historical_sources: &HashMap<String, Vec<PathBuf>>,
     wanted: &HashMap<String, PathBuf>,
 ) -> Result<()> {
     fs::create_dir_all(&profile.target_dir)
@@ -264,10 +266,28 @@ fn sync_one_profile(
         added += 1;
     }
 
-    // Cleanup: remove deployed files that are in the universe but not in
-    // the wanted set. User-authored files (names not in the universe) are
-    // never touched. For per-command-subdir layouts (Codex Skills), prune
-    // an emptied per-command directory after the file removal.
+    // Cleanup: remove deployed files that are current-managed or match an
+    // older generated processkit command. Historical templates are used only
+    // as deletion evidence here, never as current command sources.
+    for (source_md_name, path) in deployed_command_files(profile)? {
+        if wanted.contains_key(&source_md_name) {
+            continue;
+        }
+        let remove_current_managed = universe.contains(&source_md_name);
+        let remove_historical_generated = deployed_matches_historical_source(
+            profile,
+            &source_md_name,
+            &path,
+            historical_sources,
+        )?;
+        if remove_current_managed || remove_historical_generated {
+            remove_deployed_command(profile, &path)?;
+            removed += 1;
+        }
+    }
+
+    // Backward-compatible cleanup for current known command names whose target
+    // file exists but was not found by the directory scan for any reason.
     for source_md_name in universe {
         if wanted.contains_key(source_md_name) {
             continue;
@@ -277,20 +297,8 @@ fn sync_one_profile(
         };
         let path = profile.target_dir.join(&relpath);
         if path.is_file() {
-            fs::remove_file(&path)
-                .with_context(|| format!("failed to remove stale command {}", path.display()))?;
+            remove_deployed_command(profile, &path)?;
             removed += 1;
-            if profile.subdir_per_command
-                && let Some(parent) = path.parent()
-                && parent != profile.target_dir.as_path()
-            {
-                let parent_empty = fs::read_dir(parent)
-                    .map(|mut d| d.next().is_none())
-                    .unwrap_or(false);
-                if parent_empty {
-                    let _ = fs::remove_dir(parent);
-                }
-            }
         }
     }
 
@@ -307,6 +315,130 @@ fn sync_one_profile(
     }
 
     Ok(())
+}
+
+fn remove_deployed_command(profile: &HarnessCommandProfile, path: &Path) -> Result<()> {
+    fs::remove_file(path)
+        .with_context(|| format!("failed to remove stale command {}", path.display()))?;
+    if profile.subdir_per_command
+        && let Some(parent) = path.parent()
+        && parent != profile.target_dir.as_path()
+    {
+        let parent_empty = fs::read_dir(parent)
+            .map(|mut d| d.next().is_none())
+            .unwrap_or(false);
+        if parent_empty {
+            let _ = fs::remove_dir(parent);
+        }
+    }
+    Ok(())
+}
+
+fn deployed_command_files(profile: &HarnessCommandProfile) -> Result<Vec<(String, PathBuf)>> {
+    let mut out = Vec::new();
+    let Ok(entries) = fs::read_dir(&profile.target_dir) else {
+        return Ok(out);
+    };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if profile.subdir_per_command {
+            if !path.is_dir() {
+                continue;
+            }
+            let Some(stem) = path.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            let file = path.join(format!("SKILL.{}", profile.file_extension));
+            if file.is_file() {
+                out.push((format!("{stem}.md"), file));
+            }
+        } else {
+            if !path.is_file() {
+                continue;
+            }
+            let Some(ext) = path.extension().and_then(|e| e.to_str()) else {
+                continue;
+            };
+            if ext != profile.file_extension {
+                continue;
+            }
+            let Some(stem) = path.file_stem().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            out.push((format!("{stem}.md"), path));
+        }
+    }
+    out.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+    Ok(out)
+}
+
+fn deployed_matches_historical_source(
+    profile: &HarnessCommandProfile,
+    source_md_name: &str,
+    deployed_path: &Path,
+    historical_sources: &HashMap<String, Vec<PathBuf>>,
+) -> Result<bool> {
+    let Some(sources) = historical_sources.get(source_md_name) else {
+        return Ok(false);
+    };
+    let deployed = fs::read(deployed_path)
+        .with_context(|| format!("failed to read {}", deployed_path.display()))?;
+    for source_path in sources {
+        let Ok(source_bytes) = fs::read(source_path) else {
+            continue;
+        };
+        if profile.render(source_md_name, &source_bytes)? == deployed {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn collect_historical_command_sources(project_root: &Path) -> HashMap<String, Vec<PathBuf>> {
+    let mut out = HashMap::new();
+    let root = project_root
+        .join("context")
+        .join("templates")
+        .join("processkit");
+    let Ok(versions) = fs::read_dir(root) else {
+        return out;
+    };
+
+    for version in versions.flatten() {
+        let skills_dir = version.path().join("context").join("skills");
+        collect_command_source_paths(&skills_dir, &mut out);
+    }
+    out
+}
+
+fn collect_command_source_paths(skills_dir: &Path, out: &mut HashMap<String, Vec<PathBuf>>) {
+    let Ok(category_entries) = fs::read_dir(skills_dir) else {
+        return;
+    };
+    for category in category_entries.flatten() {
+        let category_path = category.path();
+        if !category_path.is_dir() {
+            continue;
+        }
+        let Ok(skill_entries) = fs::read_dir(category_path) else {
+            continue;
+        };
+        for skill in skill_entries.flatten() {
+            let commands_dir = skill.path().join("commands");
+            let Ok(commands) = fs::read_dir(commands_dir) else {
+                continue;
+            };
+            for command in commands.flatten() {
+                let path = command.path();
+                if path.extension().and_then(|e| e.to_str()) == Some("md")
+                    && let Some(name) = path.file_name().and_then(|n| n.to_str())
+                {
+                    out.entry(name.to_string()).or_default().push(path);
+                }
+            }
+        }
+    }
 }
 
 /// Remove every aibox-managed command file from every scaffolded harness
@@ -1311,6 +1443,69 @@ mod tests {
         assert!(project.join(".claude/commands/pk-foo.md").exists());
         assert!(project.join(".cursor/commands/pk-foo.md").exists());
         assert!(project.join(".gemini/commands/pk-foo.toml").exists());
+    }
+
+    #[test]
+    fn dropped_historical_codex_skill_removed_when_rendered_from_old_processkit_source() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+
+        let old_skills = project.join("context/templates/processkit/v0.19.0/context/skills");
+        make_skill_commands(
+            &old_skills,
+            "processkit",
+            "morning-briefing",
+            &["morning-briefing-generate.md"],
+            "---\ndescription: Old briefing\n---\n\n# Old briefing\n",
+        );
+
+        let current_skills = project.join("context/templates/processkit/v0.20.0/context/skills");
+        make_skill_commands(
+            &current_skills,
+            "processkit",
+            "status-briefing",
+            &["pk-resume.md"],
+            "---\ndescription: Resume\n---\n\n# Resume\n",
+        );
+        let live = project.join("context/skills");
+        make_skill_commands(
+            &live,
+            "processkit",
+            "status-briefing",
+            &["pk-resume.md"],
+            "---\ndescription: Resume\n---\n\n# Resume\n",
+        );
+
+        let old_source =
+            old_skills.join("processkit/morning-briefing/commands/morning-briefing-generate.md");
+        let stale = render_codex_skill(
+            "morning-briefing-generate.md",
+            &fs::read(old_source).unwrap(),
+        )
+        .unwrap();
+        fs::create_dir_all(project.join(".agents/skills/morning-briefing-generate")).unwrap();
+        fs::write(
+            project.join(".agents/skills/morning-briefing-generate/SKILL.md"),
+            stale,
+        )
+        .unwrap();
+        fs::create_dir_all(project.join(".agents/skills/user-skill")).unwrap();
+        fs::write(
+            project.join(".agents/skills/user-skill/SKILL.md"),
+            "---\nname: user-skill\ndescription: user\n---\n\ncustom",
+        )
+        .unwrap();
+
+        let config = config_with("v0.20.0", vec![AiHarness::Codex]);
+        sync_harness_commands(project, &config).unwrap();
+
+        assert!(
+            !project
+                .join(".agents/skills/morning-briefing-generate/SKILL.md")
+                .exists()
+        );
+        assert!(project.join(".agents/skills/pk-resume/SKILL.md").exists());
+        assert!(project.join(".agents/skills/user-skill/SKILL.md").exists());
     }
 
     // ----- Cleanup (remove_managed_commands_all) -----

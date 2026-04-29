@@ -1,7 +1,7 @@
 //! Preauth merge — surface processkit's `preauth.json` (shipped with
-//! processkit ≥ v0.22.0) into Claude Code's `.claude/settings.json` so
-//! that pre-approved Bash patterns and MCP servers do not prompt the
-//! user on first invocation.
+//! processkit ≥ v0.22.0) into harness configuration so pre-approved
+//! Bash patterns and MCP servers do not prompt the user on first
+//! invocation.
 //!
 //! ## What this module does
 //!
@@ -15,6 +15,10 @@
 //!   `permissions.allow` in the spec.
 //! - `enabledMcpjsonServers[]` — the MCP server names listed under
 //!   `enabledMcpjsonServers` in the spec.
+//! - `codex.mcp.allowed_tools[]` — Codex MCP allow patterns when the
+//!   installed processkit spec provides them. Older specs fall back to
+//!   `permissions.allow[]` because the processkit MCP tool names share
+//!   Claude's `mcp__<server>__<tool>` shape.
 //!
 //! ## Sidecar manifest (`_processkit_managed_keys`)
 //!
@@ -50,7 +54,7 @@
 //!   `hooks.UserPromptSubmit` / `hooks.PreToolUse` — those are owned by
 //!   `hook_registration.rs` and live behind a different marker
 //!   (`_processkit_managed: true` per array entry).
-//! - Top-level keys outside `permissions.allow`,
+//! - Claude top-level keys outside `permissions.allow`,
 //!   `enabledMcpjsonServers`, and `_processkit_managed_keys` are
 //!   round-tripped byte-for-byte.
 
@@ -84,6 +88,8 @@ pub(crate) struct PreauthSpec {
     pub permissions: PreauthPermissions,
     #[serde(default, rename = "enabledMcpjsonServers")]
     pub enabled_mcp_json_servers: Vec<String>,
+    #[serde(default)]
+    pub codex: Option<CodexPreauth>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -96,8 +102,20 @@ pub(crate) struct PreauthPermissions {
     pub deny: Vec<String>,
 }
 
+#[derive(Debug, Clone, Default, Deserialize)]
+pub(crate) struct CodexPreauth {
+    #[serde(default)]
+    pub mcp: CodexMcpPreauth,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub(crate) struct CodexMcpPreauth {
+    #[serde(default)]
+    pub allowed_tools: Vec<String>,
+}
+
 /// Read the processkit-shipped preauth spec from the project and merge
-/// its contents into `.claude/settings.json`.
+/// its contents into supported harness settings.
 ///
 /// Best-effort contract:
 ///
@@ -109,7 +127,7 @@ pub(crate) struct PreauthPermissions {
 /// - **Happy path** → settings.json is created (if missing) or
 ///   merged-into (if present), with the `_processkit_managed_keys`
 ///   sidecar updated.
-pub fn merge_processkit_preauth_into_claude_settings(project_root: &Path) -> Result<()> {
+pub fn merge_processkit_preauth_into_harness_settings(project_root: &Path) -> Result<()> {
     let spec_path = project_root.join("context/skills/processkit/skill-gate/assets/preauth.json");
 
     if !spec_path.is_file() {
@@ -140,15 +158,23 @@ pub fn merge_processkit_preauth_into_claude_settings(project_root: &Path) -> Res
 
     let settings_path = project_root.join(".claude/settings.json");
     let mut top = read_or_empty_object(&settings_path)?;
-    merge_managed_lists(&mut top, &spec)?;
+    merge_claude_managed_lists(&mut top, &spec)?;
     write_atomic(&settings_path, &top)?;
 
+    merge_codex_preauth(project_root, &spec)?;
+
     output::ok(&format!(
-        "preauth merged: {} allow patterns, {} enabled servers",
+        "preauth merged: {} Claude allow patterns, {} enabled servers, {} Codex allowed tools",
         spec.permissions.allow.len(),
-        spec.enabled_mcp_json_servers.len()
+        spec.enabled_mcp_json_servers.len(),
+        codex_allowed_tools(&spec).len()
     ));
     Ok(())
+}
+
+/// Backward-compatible wrapper kept for existing call sites/tests.
+pub fn merge_processkit_preauth_into_claude_settings(project_root: &Path) -> Result<()> {
+    merge_processkit_preauth_into_harness_settings(project_root)
 }
 
 // ---------------------------------------------------------------------------
@@ -174,7 +200,10 @@ fn read_or_empty_object(path: &Path) -> Result<serde_json::Map<String, Value>> {
 /// In-place merge of the spec's allow + enabled-servers arrays into the
 /// `top` settings map, refreshing the `_processkit_managed_keys`
 /// sidecar.
-fn merge_managed_lists(top: &mut serde_json::Map<String, Value>, spec: &PreauthSpec) -> Result<()> {
+fn merge_claude_managed_lists(
+    top: &mut serde_json::Map<String, Value>,
+    spec: &PreauthSpec,
+) -> Result<()> {
     // ── Read previous-run snapshot from sidecar (default: empty). ──────
     let (previous_allow, previous_servers) = read_managed_snapshot(top);
 
@@ -205,6 +234,81 @@ fn merge_managed_lists(top: &mut serde_json::Map<String, Value>, spec: &PreauthS
     write_managed_snapshot(top, &current_allow, &current_servers);
 
     Ok(())
+}
+
+fn codex_allowed_tools(spec: &PreauthSpec) -> BTreeSet<String> {
+    let explicit = spec
+        .codex
+        .as_ref()
+        .map(|c| c.mcp.allowed_tools.as_slice())
+        .unwrap_or(&[]);
+    if explicit.is_empty() {
+        spec.permissions.allow.iter().cloned().collect()
+    } else {
+        explicit.iter().cloned().collect()
+    }
+}
+
+fn merge_codex_preauth(project_root: &Path, spec: &PreauthSpec) -> Result<()> {
+    let current = codex_allowed_tools(spec);
+    if current.is_empty() {
+        return Ok(());
+    }
+
+    let path = project_root.join(".codex/config.toml");
+    let mut document: toml_edit::DocumentMut = if path.is_file() {
+        let body = fs::read_to_string(&path)
+            .with_context(|| format!("failed to read {}", path.display()))?;
+        body.parse::<toml_edit::DocumentMut>()
+            .with_context(|| format!("failed to parse {}", path.display()))?
+    } else {
+        toml_edit::DocumentMut::new()
+    };
+
+    if !document.contains_key("mcp") {
+        document["mcp"] = toml_edit::table();
+    }
+
+    let mcp = &mut document["mcp"];
+    let existing = read_toml_string_array(mcp, "allowed_tools")?;
+    let previous = read_toml_string_array(mcp, "_processkit_managed_allowed_tools")?;
+
+    let previous_set: BTreeSet<String> = previous.into_iter().collect();
+    let final_allowed: BTreeSet<String> = existing
+        .into_iter()
+        .filter(|item| !previous_set.contains(item))
+        .chain(current.iter().cloned())
+        .collect();
+
+    write_toml_string_array(mcp, "allowed_tools", &final_allowed);
+    write_toml_string_array(mcp, "_processkit_managed_allowed_tools", &current);
+
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create directory {}", parent.display()))?;
+    }
+    fs::write(&path, document.to_string())
+        .with_context(|| format!("failed to write {}", path.display()))?;
+    Ok(())
+}
+
+fn read_toml_string_array(item: &toml_edit::Item, key: &str) -> Result<Vec<String>> {
+    let Some(array) = item.get(key).and_then(|v| v.as_array()) else {
+        return Ok(Vec::new());
+    };
+    array
+        .iter()
+        .map(|v| {
+            v.as_str()
+                .map(String::from)
+                .ok_or_else(|| anyhow::anyhow!("non-string entry in [mcp].{key}"))
+        })
+        .collect()
+}
+
+fn write_toml_string_array(item: &mut toml_edit::Item, key: &str, values: &BTreeSet<String>) {
+    let array = toml_edit::Array::from_iter(values.iter().map(|s| s.as_str()));
+    item[key] = toml_edit::value(array);
 }
 
 /// Pull `_processkit_managed_keys.{allow, enabled_servers}` from the
@@ -683,5 +787,46 @@ mod tests {
         let s = read_settings(project);
         assert_eq!(s["permissions"]["allow"].as_array().unwrap().len(), 18);
         assert_eq!(s["enabledMcpjsonServers"].as_array().unwrap().len(), 18);
+    }
+
+    #[test]
+    fn codex_allowed_tools_merge_preserves_user_and_removes_old_managed() {
+        let tmp = TempDir::new().unwrap();
+        let project = tmp.path();
+        write_preauth(
+            project,
+            r#"{
+              "version": 1,
+              "permissions": {"allow": ["mcp__processkit-fallback__*"]},
+              "enabledMcpjsonServers": [],
+              "codex": {"mcp": {"allowed_tools": ["mcp__processkit-new__*"]}}
+            }"#,
+        );
+        let codex_dir = project.join(".codex");
+        fs::create_dir_all(&codex_dir).unwrap();
+        fs::write(
+            codex_dir.join("config.toml"),
+            "[mcp]\nallowed_tools = [\"user-tool\", \"mcp__processkit-old__*\"]\n_processkit_managed_allowed_tools = [\"mcp__processkit-old__*\"]\n",
+        )
+        .unwrap();
+
+        merge_processkit_preauth_into_claude_settings(project).unwrap();
+
+        let body = fs::read_to_string(codex_dir.join("config.toml")).unwrap();
+        assert!(body.contains("\"user-tool\""));
+        assert!(body.contains("\"mcp__processkit-new__*\""));
+        assert!(!body.contains("\"mcp__processkit-old__*\""));
+    }
+
+    #[test]
+    fn codex_allowed_tools_falls_back_to_claude_allow_for_older_spec() {
+        let tmp = TempDir::new().unwrap();
+        let project = tmp.path();
+        write_preauth(project, &v0_22_0_preauth_json());
+
+        merge_processkit_preauth_into_claude_settings(project).unwrap();
+
+        let body = fs::read_to_string(project.join(".codex/config.toml")).unwrap();
+        assert!(body.contains("mcp__processkit-skill-00__*"));
     }
 }

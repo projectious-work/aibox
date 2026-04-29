@@ -601,7 +601,7 @@ pub fn cmd_stop(config_path: &Option<String>) -> Result<()> {
     match state {
         ContainerState::Running => {
             output::info("Stopping container...");
-            runtime.compose_stop(crate::config::COMPOSE_FILE, name)?;
+            runtime.compose_stop_all(crate::config::COMPOSE_FILE)?;
             output::ok("Container stopped");
         }
         ContainerState::Stopped => {
