@@ -47,21 +47,21 @@ prepend_fetchers = [
 
 prepend_previewers = [
     # SVG: convert to raster with resvg, then display as image
-    { name = "*.svg", run = "svg" },
+    { url = "*.svg", run = "svg" },
     # EPS: convert to PNG with ghostscript, then display as image
-    { name = "*.eps", run = "eps" },
+    { url = "*.eps", run = "eps" },
     # Raster images — explicit name rules ensure all extensions are covered
     # even if MIME detection fails (e.g. for BMP/TIFF without magic bytes).
-    { name = "*.jpg",  run = "image" },
-    { name = "*.jpeg", run = "image" },
-    { name = "*.png",  run = "image" },
-    { name = "*.gif",  run = "image" },
-    { name = "*.webp", run = "image" },
-    { name = "*.bmp",  run = "image" },
-    { name = "*.tiff", run = "image" },
-    { name = "*.tif",  run = "image" },
+    { url = "*.jpg",  run = "image" },
+    { url = "*.jpeg", run = "image" },
+    { url = "*.png",  run = "image" },
+    { url = "*.gif",  run = "image" },
+    { url = "*.webp", run = "image" },
+    { url = "*.bmp",  run = "image" },
+    { url = "*.tiff", run = "image" },
+    { url = "*.tif",  run = "image" },
     # PDF
-    { name = "*.pdf",  run = "pdf" },
+    { url = "*.pdf",  run = "pdf" },
 ]
 
 [opener]

@@ -16,10 +16,11 @@
 ║  Ctrl+b w          Close tab         a          Create file               ║
 ║  Ctrl+b s          Strider           ~          Go to home                ║
 ║  Ctrl+b m          Session manager   Tab        Preview next              ║
-║  Ctrl+b u          Scroll mode                                            ║
+║  Ctrl+b u          Scroll mode       w s        Size selection            ║
 ║  Ctrl+b /          Search           VIM                                   ║
-║  Ctrl+b z          Toggle borders   ──────────────────────────────        ║
-║  Ctrl+b e          Embed/float       Space+e    Netrw file explorer       ║
+║  Ctrl+b z          Toggle borders    c p/d/f    Copy path/dir/name        ║
+║  Ctrl+b e          Embed/float      ──────────────────────────────        ║
+║                                      Space+e    Netrw file explorer       ║
 ║  Ctrl+b =/-        Resize pane       Space+w    Save                     ║
 ║  Ctrl+b q          QUIT (or Ctrl+q)       Space+q    Quit                     ║
 ║                                      Space+n/p  Next/prev buffer         ║

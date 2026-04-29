@@ -18,6 +18,13 @@ prepend_keymap = [
     { on = [ "z", "m" ], run = "plugin toggle-pane max-preview", desc = "Maximize preview pane" },
     { on = [ "z", "c" ], run = "plugin toggle-pane max-current", desc = "Maximize current pane" },
     { on = [ "z", "0" ], run = "plugin toggle-pane", desc = "Reset pane layout" },
+    # w s: cumulative size for selected files
+    { on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block", desc = "Size selected files" },
+    # c *: copy selected path components to the clipboard via Yazi's native copy action
+    { on = [ "c", "p" ], run = "copy path", desc = "Copy selected paths" },
+    { on = [ "c", "d" ], run = "copy dirname", desc = "Copy selected directories" },
+    { on = [ "c", "f" ], run = "copy filename", desc = "Copy selected filenames" },
+    { on = [ "c", "n" ], run = "copy name_without_ext", desc = "Copy names without extension" },
     # g s: repo-level git summary (branch + totals)
     { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
     # g c: detailed changed-files view for the current repository

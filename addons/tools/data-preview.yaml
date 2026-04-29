@@ -1,0 +1,27 @@
+name: data-preview
+version: "1.0.0"
+description: "SQLite and tabular data preview tools for Yazi"
+builder_weight: "light"
+
+tools:
+  - name: sqlite3
+    default_enabled: true
+    default_version: ""
+    supported_versions: []
+  - name: csvkit
+    default_enabled: true
+    default_version: ""
+    supported_versions: []
+
+runtime: |
+  # Addon: data-preview — SQLite and tabular previews for Yazi.
+  # Adds sqlite3 plus csvkit's csvlook/in2csv for CSV, TSV, XLS, and XLSX previews.
+  USER root
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+  {% if tools.sqlite3.enabled %}
+      sqlite3 \
+  {% endif %}
+  {% if tools.csvkit.enabled %}
+      csvkit \
+  {% endif %}
+      && rm -rf /var/lib/apt/lists/*

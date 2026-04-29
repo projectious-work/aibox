@@ -36,12 +36,16 @@ When you open Yazi (`Ctrl+b s` from the file manager pane, or via the layout sid
 | SVG | `.svg` | `svg.yazi` plugin | `resvg` or `rsvg-convert` |
 | EPS | `.eps` | `eps.yazi` plugin | `ghostscript` (addon) |
 | PDF | `.pdf` | `pdf` (built-in) | `poppler-utils` |
+| SQLite | `.sqlite` `.sqlite3` `.db` | `sqlite-preview.yazi` plugin | `data-preview` addon |
+| CSV / TSV | `.csv` `.tsv` | `tabular-preview.yazi` plugin | `data-preview` addon |
+| Excel | `.xls` `.xlsx` | `tabular-preview.yazi` plugin | `data-preview` addon |
 | Video | `.mp4` `.mkv` `.webm` `.avi` | `video` (built-in) | `ffmpeg` (addon) |
 | Text / code | most text formats | `code` (built-in) | — |
 
-Most tools are pre-installed in the base image. EPS, video thumbnails, and advanced image conversion require the **preview-enhanced** addon:
+Most tools are pre-installed in the base image. SQLite, CSV/TSV, and Excel previews require the **data-preview** addon. EPS, video thumbnails, and advanced image conversion require the **preview-enhanced** addon:
 
 ```bash
+aibox addon add data-preview        # adds sqlite3 and csvkit for data previews
 aibox addon add preview-enhanced   # adds ffmpeg, imagemagick, ghostscript
 ```
 
@@ -52,16 +56,16 @@ Yazi matches files against a list of `prepend_previewers` in `~/.config/yazi/yaz
 ```toml
 [plugin]
 prepend_previewers = [
-    { name = "*.svg", run = "svg" },
-    { name = "*.eps", run = "eps" },
-    { name = "*.jpg",  run = "image" },
-    { name = "*.jpeg", run = "image" },
-    { name = "*.png",  run = "image" },
-    { name = "*.gif",  run = "image" },
-    { name = "*.webp", run = "image" },
-    { name = "*.bmp",  run = "image" },
-    { name = "*.tiff", run = "image" },
-    { name = "*.tif",  run = "image" },
+    { url = "*.svg", run = "svg" },
+    { url = "*.eps", run = "eps" },
+    { url = "*.jpg",  run = "image" },
+    { url = "*.jpeg", run = "image" },
+    { url = "*.png",  run = "image" },
+    { url = "*.gif",  run = "image" },
+    { url = "*.webp", run = "image" },
+    { url = "*.bmp",  run = "image" },
+    { url = "*.tiff", run = "image" },
+    { url = "*.tif",  run = "image" },
 ]
 ```
 
@@ -74,6 +78,10 @@ Custom plugins (`svg.yazi`, `eps.yazi`) live at `~/.config/yazi/plugins/<name>.y
 **EPS** — rendered to PNG at 150 DPI by `gs` (Ghostscript), then displayed as an image. Result is cached.
 
 **PDF** — page 1 is rendered by `pdftoppm` (from `poppler-utils`). Navigate multi-page documents with Yazi's built-in PDF plugin controls.
+
+**SQLite** — `sqlite-preview.yazi` opens databases read-only through `sqlite3` and shows schema objects plus table/view columns. It is enabled only when the `data-preview` addon is configured.
+
+**CSV / TSV / Excel** — `tabular-preview.yazi` formats CSV/TSV with `csvlook`; `.xls` and `.xlsx` are converted with `in2csv` before formatting. It is enabled only when the `data-preview` addon is configured.
 
 **`.excalidraw` files** — Excalidraw's native format is JSON. A graphical preview is not possible in a TUI environment. Yazi falls back to the text previewer showing the raw JSON. This is a known limitation — Excalidraw requires a browser to render.
 

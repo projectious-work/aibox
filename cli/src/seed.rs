@@ -1106,21 +1106,35 @@ AIBOX_YAZI_EXTRA_SETUPS
 "#;
 
 fn generate_yazi_config(config: &AiboxConfig) -> String {
-    let extra_previewers = if config.addons.has_addon("preview-enhanced") {
-        r#"    # Rich terminal preview for docs/data files (requires rich-cli from preview-enhanced)
+    let mut extra_previewers = String::new();
+
+    if config.addons.has_addon("data-preview") {
+        extra_previewers.push_str(
+            r#"    # Data previews (requires data-preview addon)
+    { url = "*.sqlite",  run = "sqlite-preview" },
+    { url = "*.sqlite3", run = "sqlite-preview" },
+    { url = "*.db",      run = "sqlite-preview" },
+    { url = "*.csv",     run = "tabular-preview" },
+    { url = "*.tsv",     run = "tabular-preview" },
+    { url = "*.xls",     run = "tabular-preview" },
+    { url = "*.xlsx",    run = "tabular-preview" },
+"#,
+        );
+    }
+
+    if config.addons.has_addon("preview-enhanced") {
+        extra_previewers.push_str(
+            r#"    # Rich terminal preview for docs/data files (requires rich-cli from preview-enhanced)
     { url = "*.md",       run = "rich-preview" },
     { url = "*.markdown", run = "rich-preview" },
     { url = "*.rst",      run = "rich-preview" },
-    { url = "*.csv",      run = "rich-preview" },
-    { url = "*.tsv",      run = "rich-preview" },
     { url = "*.json",     run = "rich-preview" },
     { url = "*.ipynb",    run = "rich-preview" },
-"#
-    } else {
-        ""
-    };
+"#,
+        );
+    }
 
-    DEFAULT_YAZI_CONFIG.replace("AIBOX_YAZI_EXTRA_PREVIEWERS\n", extra_previewers)
+    DEFAULT_YAZI_CONFIG.replace("AIBOX_YAZI_EXTRA_PREVIEWERS\n", &extra_previewers)
 }
 
 fn generate_yazi_init(config: &AiboxConfig) -> String {
@@ -1158,6 +1172,14 @@ const DEFAULT_YAZI_PLUGIN_TOGGLE_PANE: &str =
 const DEFAULT_YAZI_PLUGIN_RICH_PREVIEW: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/rich-preview.yazi/main.lua");
 
+/// sqlite-preview.yazi plugin — SQLite schema preview.
+const DEFAULT_YAZI_PLUGIN_SQLITE_PREVIEW: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/sqlite-preview.yazi/main.lua");
+
+/// tabular-preview.yazi plugin — CSV/TSV/XLS/XLSX table preview.
+const DEFAULT_YAZI_PLUGIN_TABULAR_PREVIEW: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/tabular-preview.yazi/main.lua");
+
 /// omp.yazi plugin — render an Oh My Posh prompt in Yazi's header.
 const DEFAULT_YAZI_PLUGIN_OMP: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/omp.yazi/main.lua");
@@ -1177,6 +1199,11 @@ prepend_keymap = [
     { on = [ "z", "m" ], run = "plugin toggle-pane max-preview", desc = "Maximize preview pane" },
     { on = [ "z", "c" ], run = "plugin toggle-pane max-current", desc = "Maximize current pane" },
     { on = [ "z", "0" ], run = "plugin toggle-pane", desc = "Reset pane layout" },
+    { on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block", desc = "Size selected files" },
+    { on = [ "c", "p" ], run = "copy path", desc = "Copy selected paths" },
+    { on = [ "c", "d" ], run = "copy dirname", desc = "Copy selected directories" },
+    { on = [ "c", "f" ], run = "copy filename", desc = "Copy selected filenames" },
+    { on = [ "c", "n" ], run = "copy name_without_ext", desc = "Copy names without extension" },
     { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
     { on = [ "g", "c" ], run = "shell 'git -c color.status=always status --short --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Show git changes" },
     { on = [ "g", "r" ], run = "cd .", desc = "Refresh directory" },
@@ -1191,6 +1218,8 @@ const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference
   Alt+p            Float pane Enter    Open in vim
   Alt+[/]          Prev/next  g s      Git summary
   Alt+1-5          Jump tab   g c      Git changes
+                             w s      Size selection
+                             c p/d/f  Copy path/dir/name
   Ctrl+g h/j/k/l  Move pane  g r      Refresh git
   Ctrl+g f         Fullscreen Space    Select
   Ctrl+g x         Close pane
@@ -1513,6 +1542,17 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         files.push((
             std::path::PathBuf::from(".config/yazi/plugins/rich-preview.yazi/main.lua"),
             DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.to_string(),
+        ));
+    }
+
+    if config.addons.has_addon("data-preview") {
+        files.push((
+            std::path::PathBuf::from(".config/yazi/plugins/sqlite-preview.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_SQLITE_PREVIEW.to_string(),
+        ));
+        files.push((
+            std::path::PathBuf::from(".config/yazi/plugins/tabular-preview.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_TABULAR_PREVIEW.to_string(),
         ));
     }
 
@@ -2425,6 +2465,32 @@ mod tests {
     }
 
     #[test]
+    fn yazi_navigation_keybindings_seeded() {
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(
+                r#"{ on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block""#
+            ),
+            "default yazi keymap should expose selected-size calculation"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "p" ], run = "copy path""#),
+            "default yazi keymap should expose path copy"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "d" ], run = "copy dirname""#),
+            "default yazi keymap should expose directory copy"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "f" ], run = "copy filename""#),
+            "default yazi keymap should expose filename copy"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "n" ], run = "copy name_without_ext""#),
+            "default yazi keymap should expose stem copy"
+        );
+    }
+
+    #[test]
     fn claude_keybindings_use_bindings_object() {
         let value: serde_json::Value = serde_json::from_str(DEFAULT_CLAUDE_KEYBINDINGS).unwrap();
         let bindings = value["bindings"].as_array().unwrap();
@@ -2452,6 +2518,37 @@ mod tests {
         assert!(
             with.contains(r#"{ url = "*.md",       run = "rich-preview" }"#),
             "rich previewers should be enabled when preview-enhanced is configured"
+        );
+    }
+
+    #[test]
+    fn data_preview_entries_only_enabled_with_data_preview_addon() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let mut config = make_config(false, root);
+
+        let without = generate_yazi_config(&config);
+        assert!(
+            !without.contains("sqlite-preview"),
+            "SQLite previewers should not be enabled without data-preview"
+        );
+        assert!(
+            !without.contains("tabular-preview"),
+            "tabular previewers should not be enabled without data-preview"
+        );
+
+        config
+            .addons
+            .addons
+            .insert("data-preview".to_string(), AddonToolsSection::default());
+        let with = generate_yazi_config(&config);
+        assert!(
+            with.contains(r#"{ url = "*.sqlite",  run = "sqlite-preview" }"#),
+            "SQLite previewers should be enabled when data-preview is configured"
+        );
+        assert!(
+            with.contains(r#"{ url = "*.xlsx",    run = "tabular-preview" }"#),
+            "spreadsheet previewers should be enabled when data-preview is configured"
         );
     }
 
