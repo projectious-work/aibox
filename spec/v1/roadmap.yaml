@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "aibox.spec-roadmap/v1",
+  "groups": [{
+    "id": "devcontainer-v1",
+    "title": "Dev Container CLI-based aibox",
+    "phases": [
+      {"id":"V1-01","title":"Accept a complete specification","summary":"Resolve mappings and review blockers against the approved boundary.","status":"planned","dependencies":[]},
+      {"id":"V1-02","title":"Operate a standard workspace safely","summary":"Qualify Go MCP/CLI delegation and enforce separate local/operator authority.","status":"planned","dependencies":["V1-01"]},
+      {"id":"V1-03","title":"Restore the complete curated workspace","summary":"Deliver all tools, customizations, previews, guidance and optional integrations.","status":"planned","dependencies":["V1-02"]},
+      {"id":"V1-04","title":"Migrate and recover existing workspaces","summary":"Preserve configuration, personal state and named environment workflows.","status":"planned","dependencies":["V1-03"]},
+      {"id":"V1-05","title":"Observe harnesses and review changes conveniently","summary":"Qualify optional sidebar and diff/PR-review integrations.","status":"planned","dependencies":["V1-03"]},
+      {"id":"V1-06","title":"Qualify v1 as the v0 replacement","summary":"Close parity, target and exact-artifact release evidence without unexplained skips.","status":"planned","dependencies":["V1-04","V1-05"]}
+    ]
+  }]
+}
