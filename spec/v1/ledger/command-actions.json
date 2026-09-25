@@ -1,0 +1,739 @@
+[
+  {
+    "id": "CMD:OutputFormat.Table",
+    "parent": "OutputFormat",
+    "name": "Table",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L27",
+    "declaration": "    Table,\n    /// JSON array",
+    "argument_annotations": [],
+    "target": "human renderer",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:OutputFormat.Json",
+    "parent": "OutputFormat",
+    "name": "Json",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L29",
+    "declaration": "    Json,\n    /// YAML sequence",
+    "argument_annotations": [],
+    "target": "versioned JSON result",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:OutputFormat.Yaml",
+    "parent": "OutputFormat",
+    "name": "Yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L31",
+    "declaration": "    Yaml,",
+    "argument_annotations": [],
+    "target": "versioned YAML projection",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Layout.Dev",
+    "parent": "Layout",
+    "name": "Dev",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L38",
+    "declaration": "    Dev,\n    /// One fullscreen window for files and each harness",
+    "argument_annotations": [],
+    "target": "workspace.layout=dev",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Layout.Focus",
+    "parent": "Layout",
+    "name": "Focus",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L40",
+    "declaration": "    Focus,\n    /// Work window with yazi and shell; AI harnesses in a separate window",
+    "argument_annotations": [],
+    "target": "workspace.layout=focus",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Layout.Cowork",
+    "parent": "Layout",
+    "name": "Cowork",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L42",
+    "declaration": "    Cowork,\n    /// Work window with yazi and first harness; secondary harnesses in AI window",
+    "argument_annotations": [],
+    "target": "workspace.layout=cowork",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Layout.Ai",
+    "parent": "Layout",
+    "name": "Ai",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L44",
+    "declaration": "    Ai,",
+    "argument_annotations": [],
+    "target": "workspace.layout=ai",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Init",
+    "parent": "Commands",
+    "name": "Init",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L113",
+    "declaration": "    Init {\n        /// Project name (default: current directory name)\n        name: Option<String>,\n\n        /// Base image (default: debian)\n        #[arg(long, value_enum)]\n        base: Option<BaseImage>,\n\n        /// Usage profile (default: human-dev)\n        #[arg(long, value_enum)]\n        profile: Option<AiboxProfile>,\n\n        /// Deprecated: processkit package tier. New scaffolds use explicit standard skills.\n        #[arg(long = \"context\", visible_alias = \"package\", num_args = 1.., hide = true)]\n        process: Option<Vec<String>>,\n\n        /// Project context mode (default: processkit)\n        #[arg(long = \"context-mode\", value_enum)]\n        context_mode: Option<ContextMode>,\n\n        /// AI harnesses to configure (default: claude)\n        #[arg(long = \"harness\", value_enum, num_args = 1..)]\n        ai: Option<Vec<AiProvider>>,\n\n        /// Container user (default: aibox)\n        #[arg(long)]\n        user: Option<String>,\n\n        /// Theme family for all tools (default: gruvbox)\n        #[arg(long, value_enum)]\n        theme: Option<ThemeFamily>,\n\n        /// Starship prompt preset (default: default)\n        #[arg(long, value_enum)]\n        prompt: Option<StarshipPreset>,\n\n        /// tmux status presentation (default: extended)\n        #[arg(long = \"tmux-status\", value_enum)]\n        tmux_status: Option<TmuxStatusMode>,\n\n        /// Addon names to enable (e.g., python, infrastructure, kubernetes).\n        /// Each selected addon's `requires` are auto-added transitively\n        /// (e.g. selecting `docs-docusaurus` also pulls in `node`).\n        #[arg(long = \"addon\", num_args = 1..)]\n        addons: Option<Vec<String>>,\n\n        /// Pin a specific tool version inside an addon. Repeatable.\n        /// Format: `addon:tool=version`. Examples:\n        ///\n        ///   --addon-tool python:python=3.14 --addon-tool node:pnpm=10\n        ///\n        /// Overrides the addon's default version and skips the\n        /// interactive version picker for that tool.\n        #[arg(long = \"addon-tool\")]\n        addon_tool: Vec<String>,\n\n        /// processkit source URL (default: projectious-work/processkit upstream).\n        /// Use this to point at a fork or a compatible alternative repo.\n        #[arg(long)]\n        processkit_source: Option<String>,\n\n        /// processkit version tag to pin. If omitted, aibox lists the\n        /// available versions at the source and (interactively) lets you\n        /// pick one or (non-interactively) defaults to the latest.\n        #[arg(long)]\n        processkit_version: Option<String>,\n\n        /// Include prerelease processkit tags in automatic and interactive\n        /// version selection. Explicit --processkit-version prerelease pins\n        /// always work without this flag.\n        #[arg(long)]\n        include_prerelease: bool,\n\n        /// processkit branch override. Tracks the moving HEAD of a branch\n        /// instead of a pinned tag — discouraged for production use, fine\n        /// for testing pre-release work. Mutually informative with\n        /// `--processkit-version`: when both are set the branch wins at\n        /// fetch time but the version is still recorded in aibox.toml.\n        #[arg(long)]\n        processkit_branch: Option<String>,\n\n        /// Skip all container-runtime interaction (runtime probe + image\n        /// build). Primarily useful for CI and nested devcontainer tests.\n        /// Also settable via `AIBOX_NO_CONTAINER=1`.\n        #[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]\n        no_container: bool,\n    },\n    /// Reconcile project state with aibox.toml desired state\n    ///\n    /// Seeds config files, regenerates .devcontainer/ files, runs the\n    /// processkit content diff, and builds the container image. The\n    /// primary command for applying any config change.",
+    "argument_annotations": [
+      "#[arg(long, value_enum)]",
+      "#[arg(long, value_enum)]",
+      "#[arg(long = \"context\", visible_alias = \"package\", num_args = 1.., hide = true)]",
+      "#[arg(long = \"context-mode\", value_enum)]",
+      "#[arg(long = \"harness\", value_enum, num_args = 1..)]",
+      "#[arg(long)]",
+      "#[arg(long, value_enum)]",
+      "#[arg(long, value_enum)]",
+      "#[arg(long = \"tmux-status\", value_enum)]",
+      "#[arg(long = \"addon\", num_args = 1..)]",
+      "#[arg(long = \"addon-tool\")]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]"
+    ],
+    "target": "native Template/copyable starter; no recurring config wizard",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Apply",
+    "parent": "Commands",
+    "name": "Apply",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L212",
+    "declaration": "    Apply {\n        /// Optional resource to apply instead of the whole project\n        #[arg(value_enum)]\n        resource: Option<ApplyResource>,\n\n        /// Resource name, currently used by `apply migration <id>`\n        name: Option<String>,\n\n        /// Force a full image rebuild without using cached layers\n        #[arg(long = \"no-cache\", visible_alias = \"rebuild\")]\n        no_cache: bool,\n\n        /// Skip the container image build step (config-only apply)\n        #[arg(long)]\n        config_only: bool,\n\n        /// Force a canonical rewrite of aibox.toml after compatibility\n        /// migrations. Recognized settings are preserved through the current\n        /// schema; unknown keys still block so they are not silently dropped.\n        #[arg(long)]\n        standardize_config: bool,\n\n        /// PulseAudio TCP port for `apply audio`\n        #[arg(long, default_value = \"4714\")]\n        port: Option<u16>,\n\n        /// Rewrite the compliance-contract block in AGENTS.md from the\n        /// canonical source at\n        /// `context/skills/processkit/skill-gate/assets/compliance-contract.md`.\n        /// Used to silence the \"compliance contract in AGENTS.md differs\n        /// from the canonical source\" warning emitted by apply. If the block\n        /// uses `pk-compliance-contract v1` markers but the canonical\n        /// source is v2, markers are migrated to v2 as part of the fix.\n        #[arg(long)]\n        fix_compliance_contract: bool,\n\n        /// Skip all container-runtime interaction (runtime probe + image\n        /// build). All file scaffolding still runs — useful inside dev\n        /// containers where building sub-containers is wasteful (E2E\n        /// tests, CI). Distinct from `--config-only`, which still probes the\n        /// runtime. Also settable via `AIBOX_NO_CONTAINER=1`.\n        #[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]\n        no_container: bool,\n    },\n    /// Start container and attach via tmux\n    ///\n    /// Seeds .aibox-home/ if needed, generates devcontainer files,\n    /// creates/starts the container, then attaches via tmux.\n    /// If already running, just attaches.\n    ///\n    /// Available layouts: dev (default), focus, cowork, ai.",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long = \"no-cache\", visible_alias = \"rebuild\")]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long, default_value = \"4714\")]",
+      "#[arg(long)]",
+      "#[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]"
+    ],
+    "target": "split into build, rebuild, local refresh, or one-time conversion by effect",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Up",
+    "parent": "Commands",
+    "name": "Up",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L270",
+    "declaration": "    Up {\n        /// tmux layout to use (dev, focus, cowork, ai)\n        #[arg(long, value_enum)]\n        layout: Option<Layout>,\n\n        /// Reconcile desired state before starting\n        #[arg(long)]\n        apply: bool,\n\n        /// Discard saved tmux session state and recreate the configured layout\n        #[arg(long)]\n        forget_tmux_state: bool,\n    },\n    /// Recover into the workspace without tmux, Yazi, or status tooling",
+    "argument_annotations": [
+      "#[arg(long, value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "start_environment; interactive attachment is a separate CLI step",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Emergency",
+    "parent": "Commands",
+    "name": "Emergency",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L284",
+    "declaration": "    Emergency {\n        /// AI harness to launch after printing the emergency briefing\n        #[arg(value_enum)]\n        harness: AiHarness,\n    },\n    /// Reclaim aibox-managed disk usage\n    ///\n    /// Reports reclaimable build caches, runtime-home caches, and provider\n    /// worktrees by default. Pass `--yes` to apply the selected cleanup scope.",
+    "argument_annotations": [
+      "#[arg(value_enum)]"
+    ],
+    "target": "attach recovery path, bypassing tmux/Yazi/status",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Prune",
+    "parent": "Commands",
+    "name": "Prune",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L293",
+    "declaration": "    Prune {\n        /// Cleanup scope to inspect or apply\n        #[arg(value_enum)]\n        scope: Option<PruneScope>,\n\n        /// Additional cleanup scope to inspect or apply; repeat for multiple scopes\n        #[arg(long = \"scope\", value_enum)]\n        scopes: Vec<PruneScope>,\n\n        /// Preview only, even when --yes is supplied\n        #[arg(long)]\n        dry_run: bool,\n\n        /// Emit structured JSON for automation\n        #[arg(long)]\n        json: bool,\n\n        /// Apply the selected cleanup\n        #[arg(long)]\n        yes: bool,\n    },\n    /// Stop the running workspace",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long = \"scope\", value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "scoped native cleanup with preview and fresh consent; no global prune",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Down",
+    "parent": "Commands",
+    "name": "Down",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L315",
+    "declaration": "    Down,\n    /// List compact state for a resource",
+    "argument_annotations": [],
+    "target": "stop_environment",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Get",
+    "parent": "Commands",
+    "name": "Get",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L317",
+    "declaration": "    Get {\n        /// Resource to list\n        #[arg(value_enum)]\n        resource: GetResource,\n\n        /// For `get runtime`: include cgroup/procfs memory and process pressure\n        #[arg(long)]\n        resources: bool,\n\n        /// Show all available items when supported\n        #[arg(long)]\n        all: bool,\n\n        /// Filter skill listings by category\n        #[arg(long)]\n        category: Option<String>,\n\n        /// Output format\n        #[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]\n        format: OutputFormat,\n    },\n    /// Show detailed state for a resource",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]"
+    ],
+    "target": "inspect_environment or versioned knowledge resource",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Describe",
+    "parent": "Commands",
+    "name": "Describe",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L345",
+    "declaration": "    Describe {\n        /// Resource to inspect\n        #[arg(value_enum)]\n        resource: DescribeResource,\n\n        /// Resource name when required\n        name: Option<String>,\n\n        /// Output format\n        #[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]\n        format: OutputFormat,\n    },\n    /// Change a project setting or enable a configurable resource\n    ///\n    /// Examples:\n    ///   aibox set theme.mode dark --apply\n    ///   aibox set theme.name tokyo-night --apply\n    ///   aibox set addon python enabled --apply\n    ///   aibox set skill model-recommender-route enabled",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]"
+    ],
+    "target": "inspect_environment or versioned knowledge resource",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Set",
+    "parent": "Commands",
+    "name": "Set",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L370",
+    "declaration": "    Set {\n        /// Setting path or resource name\n        target: String,\n\n        /// First value or resource instance name\n        value: Option<String>,\n\n        /// Additional values for resource-shaped settings\n        extra: Vec<String>,\n\n        /// Reconcile desired state after changing config\n        #[arg(long)]\n        apply: bool,\n\n        /// Restart and attach only the project tmux session for theme changes\n        #[arg(long)]\n        restart_session: bool,\n    },\n    /// Open an editable project resource",
+    "argument_annotations": [
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "ordinary file edit plus validate/refresh; no config mutation API",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Edit",
+    "parent": "Commands",
+    "name": "Edit",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L389",
+    "declaration": "    Edit {\n        /// Resource to edit\n        #[arg(value_enum)]\n        resource: EditResource,\n    },\n    /// Reset an explicit resource to a clean state",
+    "argument_annotations": [
+      "#[arg(value_enum)]"
+    ],
+    "target": "ordinary editor plus how-to resource",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Reset",
+    "parent": "Commands",
+    "name": "Reset",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L395",
+    "declaration": "    Reset {\n        /// Resource to reset\n        #[arg(value_enum)]\n        resource: ResetResource,\n\n        /// processkit version to use as the target for context reset planning\n        #[arg(long)]\n        from_processkit: Option<String>,\n        /// Skip backup — permanently delete without saving\n        #[arg(long)]\n        no_backup: bool,\n        /// Preview what would happen without modifying anything\n        #[arg(long)]\n        dry_run: bool,\n        /// Skip the confirmation prompt\n        #[arg(long)]\n        yes: bool,\n    },\n    /// Delete an explicit resource",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "scoped recovery or processkit-owned workflow",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Delete",
+    "parent": "Commands",
+    "name": "Delete",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L414",
+    "declaration": "    Delete {\n        /// Resource to delete\n        #[arg(value_enum)]\n        resource: DeleteResource,\n\n        /// Resource name when required\n        name: Option<String>,\n\n        /// Reason for rejecting a migration\n        #[arg(long)]\n        reason: Option<String>,\n\n        /// Skip confirmation prompt\n        #[arg(long)]\n        yes: bool,\n\n        /// Reconcile desired state after changing config\n        #[arg(long)]\n        apply: bool,\n    },\n    /// Validate context structure and produce migration artifacts\n    ///\n    /// Checks: config validity, container runtime, .aibox-home/ directories,\n    /// .devcontainer/ files, context structure, .gitignore entries, and\n    /// schema version. Generates migration artifacts when versions differ.\n    ///\n    /// With `--integrity`: skip the legacy doctor and run only the\n    /// install-integrity check (cheap, scriptable). Exits non-zero on\n    /// any non-Healthy / non-NotInstalled outcome.",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "remove_environment or processkit-owned workflow, by resource",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Doctor",
+    "parent": "Commands",
+    "name": "Doctor",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L443",
+    "declaration": "    Doctor {\n        /// Optional diagnostic target\n        #[arg(value_enum)]\n        target: Option<DoctorTarget>,\n\n        /// Run only the install-integrity check. Cheap, scriptable.\n        #[arg(long)]\n        integrity: bool,\n        /// Emit JSON instead of human output. Implies --integrity-only\n        /// behaviour for now (the legacy doctor doesn't yet support JSON).\n        #[arg(long, short = 'o', visible_alias = \"output\", value_enum)]\n        format: Option<OutputFormat>,\n    },\n    /// Create a resource snapshot or saved environment",
+    "argument_annotations": [
+      "#[arg(value_enum)]",
+      "#[arg(long)]",
+      "#[arg(long, short = 'o', visible_alias = \"output\", value_enum)]"
+    ],
+    "target": "read-only check_environment",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.Create",
+    "parent": "Commands",
+    "name": "Create",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L457",
+    "declaration": "    Create {\n        #[command(subcommand)]\n        action: CreateAction,\n    },\n    /// Manage the aibox binary and shell integration\n    #[command(name = \"self\")]",
+    "argument_annotations": [],
+    "target": "native scaffold or separately reviewed snapshot/backup utility",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:Commands.SelfCmd",
+    "parent": "Commands",
+    "name": "SelfCmd",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L463",
+    "declaration": "    SelfCmd {\n        #[command(subcommand)]\n        action: SelfAction,\n    },",
+    "argument_annotations": [],
+    "target": "distribution package manager; help/version/completion remain CLI-only",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ApplyResource.Audio",
+    "parent": "ApplyResource",
+    "name": "Audio",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L472",
+    "declaration": "    Audio,\n    /// Refresh only git-tracked generated runtime surfaces",
+    "argument_annotations": [],
+    "target": "external authorized host-audio setup",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ApplyResource.GeneratedRuntime",
+    "parent": "ApplyResource",
+    "name": "GeneratedRuntime",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L474",
+    "declaration": "    GeneratedRuntime,\n    /// Apply a specific processkit migration",
+    "argument_annotations": [],
+    "target": "local refresh for managed UX only",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ApplyResource.Migration",
+    "parent": "ApplyResource",
+    "name": "Migration",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L476",
+    "declaration": "    Migration,\n    /// Switch to a saved environment",
+    "argument_annotations": [],
+    "target": "processkit-owned migration workflow",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ApplyResource.Env",
+    "parent": "ApplyResource",
+    "name": "Env",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L478",
+    "declaration": "    Env,",
+    "argument_annotations": [],
+    "target": "snapshot switch utility with rollback",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Runtime",
+    "parent": "GetResource",
+    "name": "Runtime",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L483",
+    "declaration": "    Runtime,",
+    "argument_annotations": [],
+    "target": "inspect_environment",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Addon",
+    "parent": "GetResource",
+    "name": "Addon",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L484",
+    "declaration": "    Addon,",
+    "argument_annotations": [],
+    "target": "versioned tool catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Env",
+    "parent": "GetResource",
+    "name": "Env",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L485",
+    "declaration": "    Env,",
+    "argument_annotations": [],
+    "target": "snapshot utility list",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Kit",
+    "parent": "GetResource",
+    "name": "Kit",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L486",
+    "declaration": "    Kit,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Skill",
+    "parent": "GetResource",
+    "name": "Skill",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L487",
+    "declaration": "    Skill,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.SkillCategory",
+    "parent": "GetResource",
+    "name": "SkillCategory",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L488",
+    "declaration": "    SkillCategory,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Process",
+    "parent": "GetResource",
+    "name": "Process",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L489",
+    "declaration": "    Process,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:GetResource.Migration",
+    "parent": "GetResource",
+    "name": "Migration",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L490",
+    "declaration": "    Migration,",
+    "argument_annotations": [],
+    "target": "processkit migration catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Runtime",
+    "parent": "DescribeResource",
+    "name": "Runtime",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L495",
+    "declaration": "    Runtime,",
+    "argument_annotations": [],
+    "target": "inspect_environment",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Addon",
+    "parent": "DescribeResource",
+    "name": "Addon",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L496",
+    "declaration": "    Addon,",
+    "argument_annotations": [],
+    "target": "versioned tool catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.AddonCatalog",
+    "parent": "DescribeResource",
+    "name": "AddonCatalog",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L497",
+    "declaration": "    AddonCatalog,",
+    "argument_annotations": [],
+    "target": "versioned tool catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.ImageProvenancePolicy",
+    "parent": "DescribeResource",
+    "name": "ImageProvenancePolicy",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L498",
+    "declaration": "    ImageProvenancePolicy,",
+    "argument_annotations": [],
+    "target": "signed artifact metadata",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.ProviderBackends",
+    "parent": "DescribeResource",
+    "name": "ProviderBackends",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L499",
+    "declaration": "    ProviderBackends,",
+    "argument_annotations": [],
+    "target": "versioned capability catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.WorkspaceManifest",
+    "parent": "DescribeResource",
+    "name": "WorkspaceManifest",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L500",
+    "declaration": "    WorkspaceManifest,",
+    "argument_annotations": [],
+    "target": "effective config and provenance inspection",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Env",
+    "parent": "DescribeResource",
+    "name": "Env",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L501",
+    "declaration": "    Env,",
+    "argument_annotations": [],
+    "target": "snapshot utility inspect",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Kit",
+    "parent": "DescribeResource",
+    "name": "Kit",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L502",
+    "declaration": "    Kit,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Skill",
+    "parent": "DescribeResource",
+    "name": "Skill",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L503",
+    "declaration": "    Skill,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DescribeResource.Process",
+    "parent": "DescribeResource",
+    "name": "Process",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L504",
+    "declaration": "    Process,",
+    "argument_annotations": [],
+    "target": "processkit catalog",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:EditResource.Config",
+    "parent": "EditResource",
+    "name": "Config",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L509",
+    "declaration": "    Config,",
+    "argument_annotations": [],
+    "target": "ordinary editor on devcontainer.json/native referenced files",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ResetResource.Project",
+    "parent": "ResetResource",
+    "name": "Project",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L514",
+    "declaration": "    Project,",
+    "argument_annotations": [],
+    "target": "scoped backup and recovery utility",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:ResetResource.Context",
+    "parent": "ResetResource",
+    "name": "Context",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L515",
+    "declaration": "    Context,",
+    "argument_annotations": [],
+    "target": "processkit-owned recovery guidance",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DeleteResource.Runtime",
+    "parent": "DeleteResource",
+    "name": "Runtime",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L520",
+    "declaration": "    Runtime,",
+    "argument_annotations": [],
+    "target": "remove_environment",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DeleteResource.Addon",
+    "parent": "DeleteResource",
+    "name": "Addon",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L521",
+    "declaration": "    Addon,",
+    "argument_annotations": [],
+    "target": "edit Feature references then validate",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DeleteResource.Skill",
+    "parent": "DeleteResource",
+    "name": "Skill",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L522",
+    "declaration": "    Skill,",
+    "argument_annotations": [],
+    "target": "processkit-owned configuration",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DeleteResource.Env",
+    "parent": "DeleteResource",
+    "name": "Env",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L523",
+    "declaration": "    Env,",
+    "argument_annotations": [],
+    "target": "snapshot utility delete with consent",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DeleteResource.Migration",
+    "parent": "DeleteResource",
+    "name": "Migration",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L524",
+    "declaration": "    Migration,",
+    "argument_annotations": [],
+    "target": "processkit-owned migration operation",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DoctorTarget.Project",
+    "parent": "DoctorTarget",
+    "name": "Project",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L529",
+    "declaration": "    Project,",
+    "argument_annotations": [],
+    "target": "read-only local/operator project checks",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DoctorTarget.Audio",
+    "parent": "DoctorTarget",
+    "name": "Audio",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L530",
+    "declaration": "    Audio,",
+    "argument_annotations": [],
+    "target": "read-only context-scoped audio checks",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:DoctorTarget.Security",
+    "parent": "DoctorTarget",
+    "name": "Security",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L531",
+    "declaration": "    Security,",
+    "argument_annotations": [],
+    "target": "delegate scanners; report findings and scope",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.Safe",
+    "parent": "PruneScope",
+    "name": "Safe",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L537",
+    "declaration": "    Safe,\n    /// Rust debug incremental cache",
+    "argument_annotations": [],
+    "target": "scoped native cleanup preview",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.BuildCache",
+    "parent": "PruneScope",
+    "name": "BuildCache",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L539",
+    "declaration": "    BuildCache,\n    /// Managed runtime-home caches",
+    "argument_annotations": [],
+    "target": "native builder cache cleanup with exact scope",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.RuntimeHome",
+    "parent": "PruneScope",
+    "name": "RuntimeHome",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L541",
+    "declaration": "    RuntimeHome,\n    /// Provider-created Git worktrees under .claude/worktrees",
+    "argument_annotations": [],
+    "target": "scoped local cache cleanup",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.AgentWorktrees",
+    "parent": "PruneScope",
+    "name": "AgentWorktrees",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L543",
+    "declaration": "    AgentWorktrees,\n    /// Local aibox-owned container cleanup when available",
+    "argument_annotations": [],
+    "target": "provider worktree cleanup with dirty protection",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.Containers",
+    "parent": "PruneScope",
+    "name": "Containers",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L545",
+    "declaration": "    Containers,\n    /// All known cleanup scopes, including provider worktrees",
+    "argument_annotations": [],
+    "target": "owned-resource cleanup with exact identity",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:PruneScope.All",
+    "parent": "PruneScope",
+    "name": "All",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L547",
+    "declaration": "    All,",
+    "argument_annotations": [],
+    "target": "retire broad aggregate; documented individually scoped actions",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:CreateAction.Env",
+    "parent": "CreateAction",
+    "name": "Env",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L567",
+    "declaration": "    Env {\n        /// Environment name\n        name: String,\n    },\n    /// Back up aibox files to a timestamped directory",
+    "argument_annotations": [],
+    "target": "snapshot utility save",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:CreateAction.Backup",
+    "parent": "CreateAction",
+    "name": "Backup",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L572",
+    "declaration": "    Backup {\n        /// Output directory for backup (default: .aibox/backup/)\n        #[arg(long)]\n        output_dir: Option<String>,\n        /// Preview what would be backed up without copying\n        #[arg(long)]\n        dry_run: bool,\n    },",
+    "argument_annotations": [
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "scoped backup utility",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:SelfAction.Update",
+    "parent": "SelfAction",
+    "name": "Update",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L585",
+    "declaration": "    Update {\n        /// Only check versions, don't apply any changes\n        #[arg(long)]\n        check: bool,\n        /// Preview what would change without writing files\n        #[arg(long)]\n        dry_run: bool,\n    },\n    /// Generate shell completion script",
+    "argument_annotations": [
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "distribution package manager update/check",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:SelfAction.Completion",
+    "parent": "SelfAction",
+    "name": "Completion",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L594",
+    "declaration": "    Completion {\n        /// Shell to generate completions for\n        #[arg(value_enum)]\n        shell: clap_complete::Shell,\n    },\n    /// Uninstall the aibox CLI binary",
+    "argument_annotations": [
+      "#[arg(value_enum)]"
+    ],
+    "target": "generated CLI shell completion",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMD:SelfAction.Uninstall",
+    "parent": "SelfAction",
+    "name": "Uninstall",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L600",
+    "declaration": "    Uninstall {\n        /// Preview what would be removed without deleting anything\n        #[arg(long)]\n        dry_run: bool,\n        /// Also remove global config and cache (~/.aibox/)\n        #[arg(long)]\n        purge: bool,\n    },",
+    "argument_annotations": [
+      "#[arg(long)]",
+      "#[arg(long)]"
+    ],
+    "target": "distribution package manager uninstall; purge separately consented",
+    "acceptance": "AC-CLI"
+  }
+]

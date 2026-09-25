@@ -46,15 +46,22 @@ Baseline: v0.35.0 release-line commit
 
 - [Configuration ledger](ledger/configuration.md), [machine-readable rows](ledger/configuration.json),
   [type/enum/alias declarations](ledger/configuration-types.json),
-  [default-function and Default-implementation evidence](ledger/defaults.json).
+  [default-function and Default-implementation evidence](ledger/defaults.json),
+  [proposed closed aibox customization schema](customization.schema.json).
 - [Tool/dependency ledger](ledger/addons.md), [full recipe metadata](ledger/addons.json).
-- [Complete CLI declarations](ledger/commands.json), including argument types,
-  defaults, aliases, resource enums and hidden compatibility flags; pair with
-  the command disposition table rather than assuming every flag survives.
+- [Complete CLI declarations](ledger/commands.json), [atomic action rows](ledger/command-actions.json)
+  and [argument rows](ledger/command-arguments.json),
+  including argument annotations, aliases and resource enums; pair with the
+  command disposition table rather than assuming every flag survives.
 - [Runtime asset census](ledger/runtime-assets.json), [documentation coverage](ledger/documentation.json),
   [environment identifier census](ledger/environment.json), [counts](ledger/census.json).
 - [Base image build/entrypoint declarations](ledger/base-build.json) retain
   package lists, tool pins and installation behavior outside the addon catalog.
+- [Behavioral feature source map](feature-trace.md) links each F row to primary
+  v0 implementation and the proposed v1 owner.
+- [Versioned operation result schema](operation-result.schema.json) is the
+  shared CLI/MCP envelope proposal; per-operation inputs and client checks
+  remain G04.
 
 The census is exhaustive for the declared source scopes and includes custom
 deserializer exceptions described in chapter 2. It is not a claim that all

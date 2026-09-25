@@ -40,17 +40,17 @@ for (const file of ['cli/src/config.rs','cli/src/mcp_registration.rs']) {
 function mapping(p) {
   if (/permissions|execution|security\.|allow_public/.test(p)) return ['authority-request','Native harness/operator policy; project value is a request, never a grant','AC-SEC'];
   if (/^(local\.)/.test(p)) return ['private-native','Gitignored native environment/mount/harness configuration; never copy secrets to shared JSON','AC-MIG'];
-  if (/customization\.|appearance\./.test(p)) return ['aibox-ux','customizations.aibox.workspace + native user overrides; preserve exact choice','AC-UX'];
+  if (/^(customization|appearance)\./.test(p)) return ['aibox-ux',`customizations.aibox.workspace.${p.replace(/^(customization|appearance)\./,'')} (managed native output; user-local native override is separately owned)`,'AC-UX'];
   if (/^(context|processkit|skills|process)\.|\.agents\.|^agents\./.test(p)) return ['delegate-processkit','Optional processkit Feature/integration and processkit-owned configuration; no entity engine','AC-PK'];
   if (/addons\./.test(p)) return ['feature-options','features.<selected-feature> options; explicit disabled means absent; no new resolver','AC-TOOLS'];
   if (/mcp\./.test(p)) return ['native-integration','Native harness MCP configuration / optional processkit integration; scope shared vs private','AC-HARNESS'];
   if (/audio\./.test(p)) return ['audio','Audio Feature + environment/mounts; host preparation separately authorized','AC-AUDIO'];
-  if (/latex\./.test(p)) return ['latex','LaTeX Feature + customizations.aibox.latex; native Compose preview service','AC-PREVIEW'];
+  if (/^latex\./.test(p)) return ['latex',`customizations.aibox.${p}; LaTeX Feature/native Compose preview service`,'AC-PREVIEW'];
   if (/extra_volumes/.test(p)) return ['standard-mount','mounts or Compose volumes; preserve source/target/read-only and validate authority','AC-SEC'];
   if (/environment/.test(p)) return ['standard-env','containerEnv or Compose environment/env_file; local secrets remain private','AC-CONFIG'];
   if (/post_create_command/.test(p)) return ['standard-lifecycle','postCreateCommand; preserve ordering without host escalation','AC-CONFIG'];
   if (/keepalive/.test(p)) return ['runtime-helper','Container-local postStartCommand/helper; explicit opt-in','AC-CONFIG'];
-  if (/resource_thresholds/.test(p)) return ['diagnostics','customizations.aibox.diagnostics thresholds; no host privilege implied','AC-DOCTOR'];
+  if (/resource_thresholds/.test(p)) return ['diagnostics',`customizations.aibox.diagnostics.${p.split('resource_thresholds.')[1]}; no host privilege implied`,'AC-DOCTOR'];
   if (/container\.paths/.test(p)) return ['native-path','Native devcontainer build/dockerComposeFile paths and referenced assets; explicit migration','AC-MIG'];
   if (/image\.|aibox\.(base|version)/.test(p)) return ['standard-image','image or build/Dockerfile FROM with immutable release inputs','AC-BUILD'];
   if (/container\.user/.test(p)) return ['standard-user','containerUser/remoteUser/updateRemoteUserUID; test file ownership','AC-LIFE'];
@@ -96,6 +96,57 @@ for(const r of config) {
   r.id=`CFG:${r.path}`;
 }
 const uniqueConfig=[...new Map(config.map(x=>[x.id,x])).values()].sort((a,b)=>a.path.localeCompare(b.path));
+const objectSchema=()=>({type:'object',additionalProperties:false,properties:{}});
+function valueSchema(type){
+  const t=type.replace(/^Option<(.+)>$/,'$1');
+  if(t==='bool')return {type:'boolean'};
+  if(/^(u\d+|usize)$/.test(t))return {type:'integer',minimum:0};
+  if(t==='Vec<String>')return {type:'array',items:{type:'string'}};
+  if(/(?:HashMap|BTreeMap)<String, String>/.test(t))return {type:'object',additionalProperties:{type:'string'}};
+  const named=types.get(t);
+  if(named?.kind==='enum'){
+    const values=[];let annotations='';
+    for(const line of named.source.split('\n')){
+      const variant=line.match(/^    ([A-Z]\w+),/);
+      if(variant){
+        const explicit=annotations.match(/serde\(rename\s*=\s*"([^"]+)"/);
+        values.push(explicit?.[1]??kebab(variant[1]));annotations='';
+      }else if(line.trim().startsWith('#['))annotations+=line;
+    }
+    if(values.length)return {type:'string',enum:values};
+  }
+  return {type:'string'};
+}
+function addSchemaPath(root,path,type){
+  const parts=path.split('.');let current=root;
+  for(let i=0;i<parts.length;i++){
+    const isArray=parts[i].endsWith('[]'),key=parts[i].replace(/\[\]$/,'');
+    if(i===parts.length-1)current.properties[key]=valueSchema(type);
+    else {
+      if(!current.properties[key])current.properties[key]=isArray?{type:'array',items:objectSchema()}:objectSchema();
+      current=isArray?current.properties[key].items:current.properties[key];
+    }
+  }
+}
+const workspaceSchema=objectSchema(),latexSchema=objectSchema(),diagnosticsSchema=objectSchema();
+for(const row of uniqueConfig){
+  if(row.path.startsWith('customization.'))addSchemaPath(workspaceSchema,row.path.slice(14),row.type);
+  if(row.path.startsWith('latex.'))addSchemaPath(latexSchema,row.path.slice(6),row.type);
+  if(row.path.startsWith('container.resource_thresholds.'))addSchemaPath(diagnosticsSchema,row.path.slice(30),row.type);
+}
+workspaceSchema.properties.sidebar={type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'},width:{type:'integer',minimum:20},showUnknown:{type:'boolean'}}};
+workspaceSchema.properties.review={type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'},githubTui:{enum:['gh-dash','web']}}};
+const harnessSchema={type:'object',additionalProperties:false,properties:{
+  order:{type:'array',uniqueItems:true,items:{type:'string'}},
+  launch:{type:'object',additionalProperties:{type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'}}}}
+}};
+const customizationSchema={
+  $schema:'https://json-schema.org/draft/2020-12/schema',
+  $id:'https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/customization.schema.json',
+  title:'aibox devcontainer.json customizations.aibox v1',type:'object',additionalProperties:false,
+  required:['schemaVersion'],properties:{schemaVersion:{const:'1'},workspace:workspaceSchema,harnesses:harnessSchema,
+    latex:latexSchema,diagnostics:diagnosticsSchema}
+};
 
 const addonFiles=files('addons').filter(x=>x.endsWith('.yaml'));
 const addons=addonFiles.map(file=>{
@@ -112,6 +163,81 @@ const cli=show('cli/src/cli.rs');
 const commandTypes=[];
 for(const m of cli.matchAll(/^(?:pub )?(enum|struct) (\w+) \{\n([\s\S]*?)^\}/gm)) {
   commandTypes.push({id:`CMDTYPE:${m[2]}`,kind:m[1],source:url('cli/src/cli.rs',cli.slice(0,m.index).split('\n').length),declaration:m[0],acceptance:'AC-CLI'});
+}
+// A type declaration is not a command ledger: expand every public verb,
+// resource discriminator and argument so removals cannot hide inside a blob.
+const commandRoutes={
+  Init:'native Template/copyable starter; no recurring config wizard',
+  Apply:'split into build, rebuild, local refresh, or one-time conversion by effect',
+  Up:'start_environment; interactive attachment is a separate CLI step',
+  Emergency:'attach recovery path, bypassing tmux/Yazi/status',
+  Prune:'scoped native cleanup with preview and fresh consent; no global prune',
+  Down:'stop_environment', Get:'inspect_environment or versioned knowledge resource',
+  Describe:'inspect_environment or versioned knowledge resource',
+  Set:'ordinary file edit plus validate/refresh; no config mutation API',
+  Edit:'ordinary editor plus how-to resource',
+  Reset:'scoped recovery or processkit-owned workflow',
+  Delete:'remove_environment or processkit-owned workflow, by resource',
+  Doctor:'read-only check_environment',
+  Create:'native scaffold or separately reviewed snapshot/backup utility',
+  SelfCmd:'distribution package manager; help/version/completion remain CLI-only'
+};
+const resourceRoutes={
+ OutputFormat:{Table:'human renderer',Json:'versioned JSON result',Yaml:'versioned YAML projection'},
+ Layout:{Dev:'workspace.layout=dev',Focus:'workspace.layout=focus',Cowork:'workspace.layout=cowork',Ai:'workspace.layout=ai'},
+ ApplyResource:{Audio:'external authorized host-audio setup',GeneratedRuntime:'local refresh for managed UX only',Migration:'processkit-owned migration workflow',Env:'snapshot switch utility with rollback'},
+ GetResource:{Runtime:'inspect_environment',Addon:'versioned tool catalog',Env:'snapshot utility list',Kit:'processkit catalog',Skill:'processkit catalog',SkillCategory:'processkit catalog',Process:'processkit catalog',Migration:'processkit migration catalog'},
+ DescribeResource:{Runtime:'inspect_environment',Addon:'versioned tool catalog',AddonCatalog:'versioned tool catalog',ImageProvenancePolicy:'signed artifact metadata',ProviderBackends:'versioned capability catalog',WorkspaceManifest:'effective config and provenance inspection',Env:'snapshot utility inspect',Kit:'processkit catalog',Skill:'processkit catalog',Process:'processkit catalog'},
+ EditResource:{Config:'ordinary editor on devcontainer.json/native referenced files'},
+ ResetResource:{Project:'scoped backup and recovery utility',Context:'processkit-owned recovery guidance'},
+ DeleteResource:{Runtime:'remove_environment',Addon:'edit Feature references then validate',Skill:'processkit-owned configuration',Env:'snapshot utility delete with consent',Migration:'processkit-owned migration operation'},
+ DoctorTarget:{Project:'read-only local/operator project checks',Audio:'read-only context-scoped audio checks',Security:'delegate scanners; report findings and scope'},
+ PruneScope:{Safe:'scoped native cleanup preview',BuildCache:'native builder cache cleanup with exact scope',RuntimeHome:'scoped local cache cleanup',AgentWorktrees:'provider worktree cleanup with dirty protection',Containers:'owned-resource cleanup with exact identity',All:'retire broad aggregate; documented individually scoped actions'},
+ CreateAction:{Env:'snapshot utility save',Backup:'scoped backup utility'},
+ SelfAction:{Update:'distribution package manager update/check',Completion:'generated CLI shell completion',Uninstall:'distribution package manager uninstall; purge separately consented'}
+};
+const routeFor=(parent,name)=>parent==='Commands'?commandRoutes[name]:resourceRoutes[parent]?.[name];
+const commandRows=[];
+const argumentRows=[];
+for(const t of commandTypes.filter(x=>x.kind==='enum')) {
+  const declaration=t.declaration.split('\n');
+  for(let i=1;i<declaration.length-1;i++) {
+    const m=declaration[i].match(/^    (\w+)(?:\s*\{|,)$/);
+    if(!m) continue;
+    const start=i, name=m[1];
+    let end=i+1;
+    while(end<declaration.length-1 && !/^    \w+(?:\s*\{|,)$/.test(declaration[end])) end++;
+    const body=declaration.slice(start,end).join('\n');
+    const flags=[...body.matchAll(/#\[arg\((?:[^\]]|\n)*?\)\]/g)].map(x=>x[0]);
+    const typeLine=Number(t.source.match(/#L(\d+)$/)?.[1]);
+    commandRows.push({id:`CMD:${t.id.slice(8)}.${name}`,parent:t.id.slice(8),name,source:url('cli/src/cli.rs',typeLine+start),
+      declaration:body,argument_annotations:flags,
+      target:routeFor(t.id.slice(8),name),
+      acceptance:'AC-CLI'});
+    let annotation=[];
+    for(let j=start+1;j<end;j++){
+      const field=declaration[j].match(/^        (?:pub )?(\w+): ([^,]+),$/);
+      if(field){
+        argumentRows.push({id:`ARG:${t.id.slice(8)}.${name}.${field[1]}`,command:`CMD:${t.id.slice(8)}.${name}`,
+          name:field[1],type:field[2],source:url('cli/src/cli.rs',typeLine+j),
+          declaration:annotation.join('\n'),target:routeFor(t.id.slice(8),name),acceptance:'AC-CLI'});
+        annotation=[];
+      } else if(declaration[j].trim())annotation.push(declaration[j]);
+    }
+    i=end-1;
+  }
+}
+const cliStruct=commandTypes.find(x=>x.id==='CMDTYPE:Cli');
+const globalRoutes={config:'replace old aibox.toml locator with explicit devcontainer.json/workspace-folder locator',
+ log_level:'stderr/structured log level only; never changes machine result',
+ yes:'retire global consent bypass; destructive operations require fresh scoped authorization'};
+for(const [index,line] of cliStruct.declaration.split('\n').entries()){
+ const field=line.match(/^    pub (\w+): ([^,]+),$/);
+ if(!field || field[1]==='command')continue;
+ argumentRows.push({id:`ARG:Cli.${field[1]}`,command:'CMDTYPE:Cli',name:field[1],type:field[2],
+  source:url('cli/src/cli.rs',Number(cliStruct.source.match(/#L(\d+)$/)?.[1])+index),
+  declaration:cliStruct.declaration.split('\n').slice(Math.max(0,index-3),index+1).join('\n'),
+  target:globalRoutes[field[1]],acceptance:'AC-CLI'});
 }
 const runtimeFiles=files('images','cli/src/templates','cli/assets','addons').filter(x=>!x.endsWith('/AGENTS.md'));
 const runtime=runtimeFiles.map(file=>({id:`ASSET:${file}`,source:url(file),sha256:sha(show(file)),disposition:'retain behavior; reuse native tool; asset-by-asset equivalence before replacement',acceptance:/theme|tmux|starship/.test(file)?'AC-UX':/yazi|preview|latex/.test(file)?'AC-PREVIEW':'AC-TOOLS'}));
@@ -130,14 +256,15 @@ for(const file of envFiles) {
     const v=env.get(m[1])??new Set();v.add(url(file));env.set(m[1],v);
   }
 }
-const census={baseline,config_fields:uniqueConfig.length,addon_recipes:addons.length,addon_tools:addons.reduce((n,x)=>n+x.tools.length,0),cli_declarations:commandTypes.length,runtime_assets:runtime.length,documentation_pages:docs.length,environment_identifiers:env.size};
+const census={baseline,config_fields:uniqueConfig.length,addon_recipes:addons.length,addon_tools:addons.reduce((n,x)=>n+x.tools.length,0),cli_declarations:commandTypes.length,cli_actions:commandRows.length,cli_arguments:argumentRows.length,runtime_assets:runtime.length,documentation_pages:docs.length,environment_identifiers:env.size};
 const outputs={
   'configuration.json':uniqueConfig,
   'configuration-types.json':[...types.values()].filter(t=>t.file.endsWith('config.rs')||['McpConfig','HarnessOverride'].includes(t.name)),
-  'commands.json':commandTypes,'addons.json':addons,'runtime-assets.json':runtime,
+  'commands.json':commandTypes,'command-actions.json':commandRows,'command-arguments.json':argumentRows,'addons.json':addons,'runtime-assets.json':runtime,
   'defaults.json':defaults,'base-build.json':baseBuild,
   'documentation.json':docs,'environment.json':[...env].sort().map(([name,sources])=>({name,sources,classification:'source occurrence; distinguish internal/test override from supported user interface before migration',acceptance:'AC-CONFIG'})),
   'census.json':census,
+  '../customization.schema.json':customizationSchema,
 };
 const esc=s=>String(s).replaceAll('|','\\|').replaceAll('\n',' ');
 outputs['configuration.md']='# v0 configuration field ledger\n\nGenerated from the immutable baseline by `scripts/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See ../02-configuration.md for custom-deserializer and authority exceptions.\n\n| v0 path | Type | Disposition / v1 destination | Acceptance |\n|---|---|---|---|\n'+uniqueConfig.map(r=>`| [\`${esc(r.path)}\`](${r.source}) | \`${esc(r.type)}\` | ${esc(r.disposition)}: ${esc(r.target)} | ${r.acceptance} |`).join('\n')+'\n';

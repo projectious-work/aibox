@@ -995,7 +995,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L328",
     "id": "CFG:container.resource_thresholds.memory_mib_warn",
     "disposition": "diagnostics",
-    "target": "customizations.aibox.diagnostics thresholds; no host privilege implied",
+    "target": "customizations.aibox.diagnostics.memory_mib_warn; no host privilege implied",
     "acceptance": "AC-DOCTOR",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L325",
     "enum_evidence": null
@@ -1008,7 +1008,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L337",
     "id": "CFG:container.resource_thresholds.oom_kill_warn",
     "disposition": "diagnostics",
-    "target": "customizations.aibox.diagnostics thresholds; no host privilege implied",
+    "target": "customizations.aibox.diagnostics.oom_kill_warn; no host privilege implied",
     "acceptance": "AC-DOCTOR",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L325",
     "enum_evidence": null
@@ -1021,7 +1021,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L331",
     "id": "CFG:container.resource_thresholds.process_count_warn",
     "disposition": "diagnostics",
-    "target": "customizations.aibox.diagnostics thresholds; no host privilege implied",
+    "target": "customizations.aibox.diagnostics.process_count_warn; no host privilege implied",
     "acceptance": "AC-DOCTOR",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L325",
     "enum_evidence": null
@@ -1034,7 +1034,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L334",
     "id": "CFG:container.resource_thresholds.processkit_mcp_python_warn",
     "disposition": "diagnostics",
-    "target": "customizations.aibox.diagnostics thresholds; no host privilege implied",
+    "target": "customizations.aibox.diagnostics.processkit_mcp_python_warn; no host privilege implied",
     "acceptance": "AC-DOCTOR",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L325",
     "enum_evidence": null
@@ -1099,7 +1099,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3152",
     "id": "CFG:customization.emphasis",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.emphasis (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1703"
@@ -1112,7 +1112,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3156",
     "id": "CFG:customization.emphasis_overrides",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.emphasis_overrides (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": null
@@ -1125,7 +1125,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3158",
     "id": "CFG:customization.layout",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.layout (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2024"
@@ -1138,7 +1138,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3148",
     "id": "CFG:customization.mode",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.mode (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1686"
@@ -1151,7 +1151,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3157",
     "id": "CFG:customization.prompt",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.prompt (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1987"
@@ -1164,7 +1164,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3147",
     "id": "CFG:customization.theme",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.theme (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1305"
@@ -1177,7 +1177,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3012",
     "id": "CFG:customization.tmux.layout",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.layout (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3008",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2024"
@@ -1190,7 +1190,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3087",
     "id": "CFG:customization.tmux.layout_switch.confirm",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.layout_switch.confirm (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3075",
     "enum_evidence": null
@@ -1203,7 +1203,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3077",
     "id": "CFG:customization.tmux.layout_switch.enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.layout_switch.enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3075",
     "enum_evidence": null
@@ -1216,7 +1216,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3079",
     "id": "CFG:customization.tmux.layout_switch.prefix-key",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.layout_switch.prefix-key (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3075",
     "enum_evidence": null
@@ -1229,7 +1229,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3083",
     "id": "CFG:customization.tmux.layout_switch.style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.layout_switch.style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3075",
     "enum_evidence": null
@@ -1242,7 +1242,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2231",
     "id": "CFG:customization.tmux.notifications.enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.notifications.enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2229",
     "enum_evidence": null
@@ -1255,7 +1255,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2237",
     "id": "CFG:customization.tmux.notifications.include-message",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.notifications.include-message (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2229",
     "enum_evidence": null
@@ -1268,7 +1268,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2233",
     "id": "CFG:customization.tmux.notifications.protocol",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.notifications.protocol (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2229",
     "enum_evidence": null
@@ -1281,7 +1281,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2235",
     "id": "CFG:customization.tmux.notifications.states",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.notifications.states (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2229",
     "enum_evidence": null
@@ -1294,7 +1294,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3014",
     "id": "CFG:customization.tmux.prefix",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.prefix (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3008",
     "enum_evidence": null
@@ -1307,7 +1307,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3018",
     "id": "CFG:customization.tmux.session_name",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.session_name (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3008",
     "enum_evidence": null
@@ -1320,7 +1320,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2335",
     "id": "CFG:customization.tmux.status.elements.aibox",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1333,7 +1333,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2261",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.ai",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.ai (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1346,7 +1346,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2255",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.log",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.log (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1359,7 +1359,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2263",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.mcp",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.mcp (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1372,7 +1372,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2265",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.mig",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.mig (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1385,7 +1385,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2257",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.oom",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.oom (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1398,7 +1398,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2259",
     "id": "CFG:customization.tmux.status.elements.aibox-metrics.proc",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.aibox-metrics.proc (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253",
     "enum_evidence": null
@@ -1411,7 +1411,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2315",
     "id": "CFG:customization.tmux.status.elements.cloud",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.cloud (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1424,7 +1424,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2317",
     "id": "CFG:customization.tmux.status.elements.cloudstatus",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.cloudstatus (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1437,7 +1437,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2319",
     "id": "CFG:customization.tmux.status.elements.cpu",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.cpu (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1450,7 +1450,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2295",
     "id": "CFG:customization.tmux.status.elements.datetime",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.datetime (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1463,7 +1463,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2327",
     "id": "CFG:customization.tmux.status.elements.disk",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.disk (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1476,7 +1476,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2287",
     "id": "CFG:customization.tmux.status.elements.external-ip",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.external-ip (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1489,7 +1489,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2301",
     "id": "CFG:customization.tmux.status.elements.forge",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.forge (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1502,7 +1502,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2307",
     "id": "CFG:customization.tmux.status.elements.git",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.git (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1515,7 +1515,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2309",
     "id": "CFG:customization.tmux.status.elements.github",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.github (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1528,7 +1528,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2329",
     "id": "CFG:customization.tmux.status.elements.gpu",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.gpu (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1541,7 +1541,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2285",
     "id": "CFG:customization.tmux.status.elements.hostname",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.hostname (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1554,7 +1554,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2311",
     "id": "CFG:customization.tmux.status.elements.kubernetes",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.kubernetes (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1567,7 +1567,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2321",
     "id": "CFG:customization.tmux.status.elements.loadavg",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.loadavg (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1580,7 +1580,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2323",
     "id": "CFG:customization.tmux.status.elements.mem",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.mem (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1593,7 +1593,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2331",
     "id": "CFG:customization.tmux.status.elements.netspeed",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.netspeed (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1606,7 +1606,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2333",
     "id": "CFG:customization.tmux.status.elements.ping",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.ping (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1619,7 +1619,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2289",
     "id": "CFG:customization.tmux.status.elements.ssh",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.ssh (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1632,7 +1632,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2325",
     "id": "CFG:customization.tmux.status.elements.swap",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.swap (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1645,7 +1645,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2313",
     "id": "CFG:customization.tmux.status.elements.terraform",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.terraform (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1658,7 +1658,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2291",
     "id": "CFG:customization.tmux.status.elements.uptime",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.uptime (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1671,7 +1671,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2293",
     "id": "CFG:customization.tmux.status.elements.weather",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.elements.weather (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283",
     "enum_evidence": null
@@ -1684,7 +1684,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2650",
     "id": "CFG:customization.tmux.status.forge.github-hosts",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.forge.github-hosts (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2648",
     "enum_evidence": null
@@ -1697,7 +1697,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2393",
     "id": "CFG:customization.tmux.status.labels.aibox-ai",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-ai (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1710,7 +1710,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2387",
     "id": "CFG:customization.tmux.status.labels.aibox-log",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-log (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1723,7 +1723,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2395",
     "id": "CFG:customization.tmux.status.labels.aibox-mcp",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-mcp (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1736,7 +1736,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2397",
     "id": "CFG:customization.tmux.status.labels.aibox-mig",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-mig (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1749,7 +1749,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2389",
     "id": "CFG:customization.tmux.status.labels.aibox-oom",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-oom (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1762,7 +1762,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2391",
     "id": "CFG:customization.tmux.status.labels.aibox-proc",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.aibox-proc (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1775,7 +1775,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2401",
     "id": "CFG:customization.tmux.status.labels.cloud",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.cloud (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1788,7 +1788,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2403",
     "id": "CFG:customization.tmux.status.labels.cloud-aws",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.cloud-aws (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1801,7 +1801,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2407",
     "id": "CFG:customization.tmux.status.labels.cloud-azure",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.cloud-azure (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1814,7 +1814,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2405",
     "id": "CFG:customization.tmux.status.labels.cloud-gcp",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.cloud-gcp (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1827,7 +1827,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2409",
     "id": "CFG:customization.tmux.status.labels.cloud-multi",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.cloud-multi (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1840,7 +1840,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2399",
     "id": "CFG:customization.tmux.status.labels.kubernetes",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.kubernetes (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1853,7 +1853,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2413",
     "id": "CFG:customization.tmux.status.labels.netspeed",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.netspeed (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1866,7 +1866,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2415",
     "id": "CFG:customization.tmux.status.labels.netspeed-download",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.netspeed-download (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1879,7 +1879,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2417",
     "id": "CFG:customization.tmux.status.labels.netspeed-upload",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.netspeed-upload (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1892,7 +1892,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2411",
     "id": "CFG:customization.tmux.status.labels.uptime",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.labels.uptime (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385",
     "enum_evidence": null
@@ -1905,7 +1905,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2374",
     "id": "CFG:customization.tmux.status.layout.line1-left",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.layout.line1-left (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2372",
     "enum_evidence": null
@@ -1918,7 +1918,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2376",
     "id": "CFG:customization.tmux.status.layout.line1-right",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.layout.line1-right (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2372",
     "enum_evidence": null
@@ -1931,7 +1931,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2378",
     "id": "CFG:customization.tmux.status.layout.line2-left",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.layout.line2-left (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2372",
     "enum_evidence": null
@@ -1944,7 +1944,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2380",
     "id": "CFG:customization.tmux.status.layout.line2-right",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.layout.line2-right (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2372",
     "enum_evidence": null
@@ -1957,7 +1957,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2903",
     "id": "CFG:customization.tmux.status.mode",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.mode (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2901",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2055"
@@ -1970,7 +1970,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2782",
     "id": "CFG:customization.tmux.status.model_providers.admin-usage-enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.admin-usage-enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -1983,7 +1983,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2766",
     "id": "CFG:customization.tmux.status.model_providers.cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -1996,7 +1996,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2764",
     "id": "CFG:customization.tmux.status.model_providers.enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -2009,7 +2009,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2757",
     "id": "CFG:customization.tmux.status.model_providers.providers[].admin-api-key-env",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].admin-api-key-env (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2022,7 +2022,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2726",
     "id": "CFG:customization.tmux.status.model_providers.providers[].agent-binaries",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].agent-binaries (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2035,7 +2035,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2705",
     "id": "CFG:customization.tmux.status.model_providers.providers[].checks",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].checks (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2048,7 +2048,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2713",
     "id": "CFG:customization.tmux.status.model_providers.providers[].harness-components",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].harness-components (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2061,7 +2061,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2703",
     "id": "CFG:customization.tmux.status.model_providers.providers[].label",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].label (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2074,7 +2074,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2711",
     "id": "CFG:customization.tmux.status.model_providers.providers[].model-components",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].model-components (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2087,7 +2087,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2709",
     "id": "CFG:customization.tmux.status.model_providers.providers[].overall-components",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].overall-components (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2100,7 +2100,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2702",
     "id": "CFG:customization.tmux.status.model_providers.providers[].provider",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].provider (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2113,7 +2113,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2743",
     "id": "CFG:customization.tmux.status.model_providers.providers[].quota-api-key-env",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].quota-api-key-env (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2126,7 +2126,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2738",
     "id": "CFG:customization.tmux.status.model_providers.providers[].quota-window",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].quota-window (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2139,7 +2139,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2752",
     "id": "CFG:customization.tmux.status.model_providers.providers[].show-admin-usage",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].show-admin-usage (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2152,7 +2152,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2720",
     "id": "CFG:customization.tmux.status.model_providers.providers[].show-agent-count",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].show-agent-count (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2165,7 +2165,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2733",
     "id": "CFG:customization.tmux.status.model_providers.providers[].show-quota",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].show-quota (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2178,7 +2178,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2707",
     "id": "CFG:customization.tmux.status.model_providers.providers[].status-url",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.providers[].status-url (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701",
     "enum_evidence": null
@@ -2191,7 +2191,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2773",
     "id": "CFG:customization.tmux.status.model_providers.show-glyph-when-ok",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.show-glyph-when-ok (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -2206,7 +2206,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2777",
     "id": "CFG:customization.tmux.status.model_providers.show-ok",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.show-ok (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -2219,7 +2219,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2768",
     "id": "CFG:customization.tmux.status.model_providers.timeout-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.model_providers.timeout-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762",
     "enum_evidence": null
@@ -2232,7 +2232,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2618",
     "id": "CFG:customization.tmux.status.refresh.aibox-metrics-cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.aibox-metrics-cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2245,7 +2245,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2624",
     "id": "CFG:customization.tmux.status.refresh.cloud-cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.cloud-cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2258,7 +2258,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2626",
     "id": "CFG:customization.tmux.status.refresh.github-cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.github-cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2271,7 +2271,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2616",
     "id": "CFG:customization.tmux.status.refresh.interval-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.interval-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2284,7 +2284,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2622",
     "id": "CFG:customization.tmux.status.refresh.kubernetes-cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.kubernetes-cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2297,7 +2297,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2620",
     "id": "CFG:customization.tmux.status.refresh.netspeed-cache-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.refresh.netspeed-cache-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614",
     "enum_evidence": null
@@ -2310,7 +2310,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2573",
     "id": "CFG:customization.tmux.status.separators.edge-style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.separators.edge-style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2569",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2509"
@@ -2323,7 +2323,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2575",
     "id": "CFG:customization.tmux.status.separators.elements-spacing",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.separators.elements-spacing (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2569",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2543"
@@ -2336,7 +2336,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2571",
     "id": "CFG:customization.tmux.status.separators.style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.status.separators.style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2569",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2509"
@@ -2349,7 +2349,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3122",
     "id": "CFG:customization.tmux.theme_switch.confirm-restart-tuis",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.theme_switch.confirm-restart-tuis (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107",
     "enum_evidence": null
@@ -2362,7 +2362,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3109",
     "id": "CFG:customization.tmux.theme_switch.enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.theme_switch.enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107",
     "enum_evidence": null
@@ -2375,7 +2375,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3119",
     "id": "CFG:customization.tmux.theme_switch.include-mode-toggle",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.theme_switch.include-mode-toggle (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107",
     "enum_evidence": null
@@ -2388,7 +2388,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3111",
     "id": "CFG:customization.tmux.theme_switch.prefix-key",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.theme_switch.prefix-key (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107",
     "enum_evidence": null
@@ -2401,7 +2401,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3115",
     "id": "CFG:customization.tmux.theme_switch.themes",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.theme_switch.themes (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107",
     "enum_evidence": null
@@ -2414,7 +2414,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2193",
     "id": "CFG:customization.tmux.title.agent-style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.agent-style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2427,7 +2427,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2189",
     "id": "CFG:customization.tmux.title.directory-style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.directory-style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2440,7 +2440,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2195",
     "id": "CFG:customization.tmux.title.done-ttl-seconds",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.done-ttl-seconds (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2453,7 +2453,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2183",
     "id": "CFG:customization.tmux.title.enabled",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.enabled (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2466,7 +2466,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2185",
     "id": "CFG:customization.tmux.title.format",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.format (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2479,7 +2479,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2187",
     "id": "CFG:customization.tmux.title.max-length",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.max-length (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2492,7 +2492,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2197",
     "id": "CFG:customization.tmux.title.message-max-length",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.message-max-length (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2505,7 +2505,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2191",
     "id": "CFG:customization.tmux.title.repository-style",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.repository-style (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181",
     "enum_evidence": null
@@ -2518,7 +2518,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2157",
     "id": "CFG:customization.tmux.title.states.done",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.states.done (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151",
     "enum_evidence": null
@@ -2531,7 +2531,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2159",
     "id": "CFG:customization.tmux.title.states.error",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.states.error (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151",
     "enum_evidence": null
@@ -2544,7 +2544,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2161",
     "id": "CFG:customization.tmux.title.states.idle",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.states.idle (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151",
     "enum_evidence": null
@@ -2557,7 +2557,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2155",
     "id": "CFG:customization.tmux.title.states.question",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.states.question (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151",
     "enum_evidence": null
@@ -2570,7 +2570,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2153",
     "id": "CFG:customization.tmux.title.states.working",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.tmux.title.states.working (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151",
     "enum_evidence": null
@@ -2583,7 +2583,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3151",
     "id": "CFG:customization.variant",
     "disposition": "aibox-ux",
-    "target": "customizations.aibox.workspace + native user overrides; preserve exact choice",
+    "target": "customizations.aibox.workspace.variant (managed native output; user-local native override is separately owned)",
     "acceptance": "AC-UX",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145",
     "enum_evidence": null
@@ -2650,7 +2650,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3975",
     "id": "CFG:latex.cache_dir",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.cache_dir; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3971",
     "enum_evidence": null
@@ -2663,7 +2663,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3919",
     "id": "CFG:latex.documents[].name",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.documents[].name; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3918",
     "enum_evidence": null
@@ -2676,7 +2676,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3922",
     "id": "CFG:latex.documents[].output_dir",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.documents[].output_dir; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3918",
     "enum_evidence": null
@@ -2689,7 +2689,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3920",
     "id": "CFG:latex.documents[].source",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.documents[].source; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3918",
     "enum_evidence": null
@@ -2702,7 +2702,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3973",
     "id": "CFG:latex.engine",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.engine; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3971",
     "enum_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3898"
@@ -2715,7 +2715,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3977",
     "id": "CFG:latex.options",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.options; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3971",
     "enum_evidence": null
@@ -2741,7 +2741,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3936",
     "id": "CFG:latex.preview.bind",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.preview.bind; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930",
     "enum_evidence": null
@@ -2754,7 +2754,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3940",
     "id": "CFG:latex.preview.document",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.preview.document; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930",
     "enum_evidence": null
@@ -2767,7 +2767,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3932",
     "id": "CFG:latex.preview.enabled",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.preview.enabled; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930",
     "enum_evidence": null
@@ -2780,7 +2780,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3934",
     "id": "CFG:latex.preview.engine",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.preview.engine; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930",
     "enum_evidence": null
@@ -2793,7 +2793,7 @@
     "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3938",
     "id": "CFG:latex.preview.port",
     "disposition": "latex",
-    "target": "LaTeX Feature + customizations.aibox.latex; native Compose preview service",
+    "target": "customizations.aibox.latex.preview.port; LaTeX Feature/native Compose preview service",
     "acceptance": "AC-PREVIEW",
     "default_evidence": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930",
     "enum_evidence": null

@@ -4,6 +4,8 @@
   "addon_recipes": 41,
   "addon_tools": 98,
   "cli_declarations": 14,
+  "cli_actions": 66,
+  "cli_arguments": 74,
   "runtime_assets": 105,
   "documentation_pages": 52,
   "environment_identifiers": 83

@@ -66,10 +66,10 @@ document is a proposed sequence, not the reviewed implementation plan.
 
 | ID | Question to close | Required evidence / responsible role |
 |---|---|---|
-| G01 | Exact configuration schema and complete field mapping | Maintainer + owner: schema, validated examples, effective-value/alias/default migration fixtures and private-override design. |
+| G01 | Complete effective configuration mapping | Maintainer + owner: the proposed closed aibox UX schema exists; finish exact standard-field/Feature destinations, cross-field rules, effective-value/alias/default migration fixtures and private-override proof. |
 | G02 | Feature selection and processkit ownership/API compatibility | Integration maintainer: per-tool Feature/package mapping, license/provenance clearance, supported processkit interfaces and versions. |
 | G03 | Named environment snapshots, backup/recovery and host audio setup without a broad config CLI | Maintainer: native/delegated workflow proof including process context and secret-safe rollback; owner approves any scope change. |
-| G04 | Public command/tool/result schemas and long-operation behavior | Interface maintainer: precise schemas, exit/cancellation/retry/locking contracts and actual client compatibility. |
+| G04 | Public per-operation input schemas and long-operation behavior | Interface maintainer: the common result envelope now has a closed proposed schema; complete precise tool/input schemas, exit/cancellation/retry/locking fixtures and actual client compatibility. |
 | G05 | Exact supported target/dependency versions | Release maintainer + host owner: v0 evidence audit and explicit v1 qualification matrix, no silent platform retirement. |
 | G06 | Sidebar selection and telemetry availability | UX maintainer: per-harness source/freshness/permissions matrix, shared-quota correctness, bounded collector budget and layout prototype. |
 | G07 | PR-review dependency and interaction scope | UX maintainer: end-to-end LazyGit/gh-dash/native-web comparison; verify inline review limitations, license and accessibility. |
@@ -84,8 +84,12 @@ remain required while mappings are unresolved. No generic `TBD` marks them done.
 
 Run inventory reproducibility and `validate.mjs`, plus `git diff --check`.
 The inventory extractor is deliberately baseline-specific, not a general Rust
-parser. It preserves original declarations alongside derived rows; changes to
-the baseline require review of extraction coverage, not merely new counts.
+parser. It preserves original declarations alongside 66 atomic command-action,
+74 argument and 265 configuration rows. The v0 behavioral source map covers
+all 48 existing F rows. The validator checks the roadmap, aibox customization
+and operation-result schemas with positive/negative fixtures, but it is not a
+general JSON Schema implementation. Changes to the baseline require semantic
+review of extraction coverage, not merely new counts.
 
 No runtime parity, host gate or dependency qualification was executed for
 this draft. The existing Rust repository asks for cargo test/clippy before

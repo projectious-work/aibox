@@ -4,6 +4,9 @@ Every row below is required for the replacement release unless the owner
 explicitly changes scope. Status for every row: **specified, not verified in
 v1**. Baseline references are the immutable documentation/asset/type indexes
 in `ledger/`; existing tests are inputs to the new fixtures, not proof of v1.
+The [reviewed behavioral source map](feature-trace.md) binds each F row to its
+primary implementation and proposed v1 owner; it complements rather than
+replaces the source declaration ledgers. No F row closes on an inventory count.
 
 ## Behavioral feature ledger
 
@@ -74,6 +77,12 @@ Cover omitted/false/empty/explicit values, arrays/order, dynamic map keys,
 aliases, malformed/unknown fields, contradictory compatibility forms, JSONC,
 Unicode/spaces in paths and source precedence. For each `CFG:*` row record
 fixture, expected effective value, destination, negative case and evidence.
+The proposed customization schema must declare each of its 115 v0 UX leaf
+paths and reject unknown keys, unknown enumerated choices and null; validate
+the representative example in chapter 2. For standard fields and Feature
+options, verify the *resolved* native Dev Container configuration, not only
+the source JSON text. A field remains blocked until its exact destination and
+effective-value fixture are recorded; the path-pattern census is not proof.
 No config mutation command appears in CLI/MCP. Pure validation causes no
 filesystem/network/process effects beyond explicitly requested reads.
 
@@ -102,9 +111,11 @@ an old name cannot make an old request target the new runtime.
 For each operation, identical logical inputs through CLI/MCP produce equivalent
 core results/errors/effects. Test stdout/stderr separation, JSON/YAML projection,
 exit codes, invalid arguments, timeout/cancellation, child error propagation,
-noninteractive execution and help/completion. All 14 v0 declaration groups
-have a documented disposition; every old action has a usable replacement or
-an owner-approved change, not simply “removed”. Test scripts against published
+noninteractive execution and help/completion. All 14 v0 declaration groups,
+66 atomic actions and 74 arguments (including global flags) have a documented
+disposition; every old
+action has a usable replacement or an owner-approved change, not simply
+“removed”. Test scripts against published
 binary, not only Go functions. Verify protocol negotiation with selected clients.
 
 ### AC-SEC — authority and malicious-input tests

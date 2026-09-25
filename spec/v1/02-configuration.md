@@ -32,17 +32,39 @@ Map each accepted old setting to an effective new outcome in migration tests.
 ### Proposed aibox extension shape
 
 `customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
-and `diagnostics` sections. `workspace` contains theme/prompt/layout/tmux
-defaults and optional sidebar/review selections. Exact field names and a
-closed schema are an acceptance blocker (G01); do not ship an arbitrary
-opaque bag or mechanically transplant the entire old configuration.
-Upstream Feature options remain the sole install/version authority.
+and `diagnostics` sections. The [closed proposed schema](customization.schema.json)
+retains the 115 v0 workspace UX leaf paths under `workspace` with their existing
+names and primitive types. This is a narrow preservation of aibox-owned UX
+intent, **not** a transplant of old image, install, security or lifecycle
+settings. `workspace` also contains the separately identified new sidebar and
+review selections. Named v0 enum values are closed by the schema; defaults,
+cross-field rules and semantic constraints remain validated by the
+aibox-specific checker. Schema acceptance alone does not prove effective-value
+equivalence.
+Unknown keys and null are errors, absence selects the documented default, and
+explicit false/empty values remain distinct. Upstream Feature options remain
+the sole install/version authority. G01 now concerns tested effective mapping,
+not the existence of a proposed namespace shape.
+`schemaVersion` is a decimal major version; this draft accepts only `"1"`.
+Unknown versions fail closed with a migration reference, and adding or changing
+a field requires a reviewed schema revision and positive/negative fixtures.
+Deprecated names are accepted only by the one-time v0 converter, never as two
+simultaneously authoritative v1 keys. Rollback retains the original v0 files
+and pinned runtime until the converted workspace passes its acceptance gate.
 
-**R-PRECEDENCE:** upstream settings use upstream precedence. For aibox UX,
-apply shipped defaults → project preferences → explicit user-local override.
-Show effective values and provenance with secrets redacted. Host policy is
-evaluated independently and can deny a requested operation; project values
-cannot override it. Do not maintain duplicate install pins in the UX namespace.
+**R-PRECEDENCE:** upstream settings use upstream precedence. For aibox-owned
+presentation preferences, apply shipped defaults → user configuration →
+project policy → environment → invocation override, omitting unused layers
+without reordering them. An explicitly user-local tmux/theme file is an
+*owned native-tool override*, not a competing aibox configuration layer:
+refresh never overwrites it, and an effective-value view reports that its
+native-tool value wins at render time. The two levels (aibox intent and native
+tool output) must be displayed separately; there is no silent promotion of a
+project preference over project policy. Show effective values and provenance
+with secrets redacted. Host policy is evaluated independently and can deny a
+requested operation; project values cannot override it. Do not maintain
+duplicate install pins in the UX namespace. This follows the company
+application-configuration layer order, including authority separation.
 
 **R-OWNERSHIP:** distribution assets are immutable/versioned; generated tool
 outputs have declared ownership; user overrides are never overwritten.
@@ -120,7 +142,8 @@ that the proposed Feature registry exists:
     "aibox": {
       "schemaVersion": "1",
       "workspace": {
-        "theme": { "family": "gruvbox", "mode": "dark" },
+        "theme": "gruvbox",
+        "mode": "dark",
         "layout": "dev"
       }
     }

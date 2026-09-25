@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.schema.json",
+  "title": "aibox v1 specification roadmap",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "groups"],
+  "properties": {
+    "schemaVersion": {"const": "aibox.spec-roadmap/v1"},
+    "groups": {
+      "type": "array", "minItems": 1,
+      "items": {"type": "object", "additionalProperties": false,
+        "required": ["id", "title", "phases"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "phases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/phase"}}
+        }}
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "summary", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^V1-[0-9]{2}$"},
+        "title": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "status": {"enum": ["idea", "planned", "in_progress", "shipped", "cancelled"]},
+        "target": {"type": "string"},
+        "dependencies": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "issues": {"type": "array", "items": {"type": "string"}},
+        "decisions": {"type": "array", "items": {"type": "string"}},
+        "devNote": {"type": "string"},
+        "release": {"type": "string"},
+        "evidence": {"type": "array", "items": {"type": "string"}},
+        "rationale": {"type": "string"}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "shipped"}}}, "then": {"required": ["devNote", "release", "evidence"]}},
+        {"if": {"properties": {"status": {"const": "cancelled"}}}, "then": {"required": ["rationale"]}}
+      ]
+    }
+  }
+}

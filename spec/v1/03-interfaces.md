@@ -46,6 +46,16 @@ host hooks, mounts, privileges or executable downloads.
 **R-RESULT:** each core operation returns a versioned result containing
 operation/request identity, target identity, input digest, outcome, changed
 resources, warnings, evidence references and structured error/next action.
+The proposed [closed result schema](operation-result.schema.json) fixes the
+common envelope for both adapters. It records initiating and executing actors
+separately; a resource ID is never substituted for an actor. Local results omit
+host runtime context/resource identity rather than inventing it. Evidence
+references point to durable, separately retained records, not log lines.
+`schemaVersion` is `aibox.operation-result/v1`; receivers reject unknown major
+versions and unknown fields rather than silently reinterpret them. A compatible
+minor evolution must be documented before use; breaking meaning requires a new
+major and migration fixtures. Operator results require runtime context and
+resource identity; `failed` and `partial` require structured errors.
 Target identity binds the runtime endpoint/context plus resolved project and
 resource identifiers; names/labels alone are not proof of ownership. Reject
 ambiguous targets and changed identity before destructive execution.
