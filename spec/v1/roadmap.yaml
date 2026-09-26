@@ -1,15 +1,54 @@
 {
   "schemaVersion": "aibox.spec-roadmap/v1",
-  "groups": [{
-    "id": "devcontainer-v1",
-    "title": "Dev Container CLI-based aibox",
-    "phases": [
-      {"id":"V1-01","title":"Accept a complete specification","summary":"Resolve mappings and review blockers against the approved boundary.","status":"planned","dependencies":[]},
-      {"id":"V1-02","title":"Operate a standard workspace safely","summary":"Qualify Go MCP/CLI delegation and enforce separate local/operator authority.","status":"planned","dependencies":["V1-01"]},
-      {"id":"V1-03","title":"Restore the complete curated workspace","summary":"Deliver all tools, customizations, previews, guidance and optional integrations.","status":"planned","dependencies":["V1-02"]},
-      {"id":"V1-04","title":"Migrate and recover existing workspaces","summary":"Preserve configuration, personal state and named environment workflows.","status":"planned","dependencies":["V1-03"]},
-      {"id":"V1-05","title":"Observe harnesses and review changes conveniently","summary":"Qualify optional sidebar and diff/PR-review integrations.","status":"planned","dependencies":["V1-03"]},
-      {"id":"V1-06","title":"Qualify v1 as the v0 replacement","summary":"Close parity, target and exact-artifact release evidence without unexplained skips.","status":"planned","dependencies":["V1-04","V1-05"]}
-    ]
-  }]
+  "groups": [
+    {
+      "id": "foundation", "title": "Foundation and native workspace contract",
+      "note": "A reviewed specification, one Go core, and standard Dev Container artifacts",
+      "phases": [
+        {"id":"V1-01","title":"Accept the implementation specification","summary":"Freeze the product boundary, exact contracts, examples, compatibility policy, requirements and conformance journeys as one reviewed baseline.","status":"planned","dependencies":[],"spec":["README.md","01-product.md","02-configuration.md","07-architecture.md","08-native-artifacts.md"]},
+        {"id":"V1-02","title":"Establish the Go operation core","summary":"Deliver typed use cases, results, diagnostics, process runner, redaction, path safety, locking and offline contract tests without a second container engine.","status":"planned","dependencies":["V1-01"],"spec":["07-architecture.md","09-lifecycle.md","13-security.md"]},
+        {"id":"V1-03","title":"Ship native workspace starters","summary":"Publish Templates, a minimal directly runnable devcontainer.json, OCI image inputs and declared ownership of generated and user-owned files.","status":"planned","dependencies":["V1-01"],"spec":["08-native-artifacts.md"]},
+        {"id":"V1-04","title":"Restore the complete optional tool catalog","summary":"Express every v0 tool, version and disable choice through Features or native packages without a parallel addon solver, with per-tool provenance and two-architecture tests.","status":"planned","dependencies":["V1-03"],"spec":["04-reuse-targets.md","08-native-artifacts.md","05-acceptance.md"]}
+      ]
+    },
+    {
+      "id": "operator", "title": "Safe operator interface",
+      "note": "Lifecycle delegation first, then equivalent MCP and human CLI",
+      "phases": [
+        {"id":"V1-05","title":"Build, start, stop and remove exact environments","summary":"Delegate build/up/exec to pinned Dev Container CLI and fill only proven stop/remove gaps with native tooling, exact identity, retention and partial-failure evidence.","status":"planned","dependencies":["V1-02","V1-03"],"spec":["09-lifecycle.md"]},
+        {"id":"V1-06","title":"Expose guarded MCP and thin CLI","summary":"Serve read-only guidance by default and bounded authorized operations through shared Go use cases; prove identical results, cancellation and client compatibility.","status":"planned","dependencies":["V1-05"],"spec":["03-interfaces.md","10-interfaces-and-guidance.md"]}
+      ]
+    },
+    {
+      "id": "workspace", "title": "Curated workspace parity",
+      "note": "Independent, content-specific slices of the current v0 experience",
+      "phases": [
+        {"id":"V1-07","title":"Preserve harnesses and private state","summary":"Restore every harness identity, installation-versus-launch choice, ordered panes, hooks, MCP files and persistent login/home/cache state without host authority.","status":"planned","dependencies":["V1-03","V1-04"],"spec":["11-workspace-experience.md","12-migration-and-state.md"]},
+        {"id":"V1-08","title":"Restore tmux layouts, status and titles","summary":"Deliver four layouts, navigation, configurable headers, status plugins, attention signals, Ghostty-compatible tab titles and safe local reload.","status":"planned","dependencies":["V1-07"],"spec":["11-workspace-experience.md"]},
+        {"id":"V1-09","title":"Restore themes and prompts","summary":"Preserve 37 theme families, 76 variants, eight Starship presets, semantic mappings, accessibility modes and durable user overrides.","status":"planned","dependencies":["V1-08"],"spec":["11-workspace-experience.md","customization.schema.json"]},
+        {"id":"V1-10","title":"Restore previews and LaTeX","summary":"Deliver Yazi and every media/data/archive preview, Vim and clipboard workflow, standalone viewers, multi-document LaTeX build/watch and read-only browser preview.","status":"planned","dependencies":["V1-04","V1-08"],"spec":["11-workspace-experience.md"]},
+        {"id":"V1-11","title":"Restore optional audio","summary":"Provide opt-in client tooling, output/input bridge and diagnostics while keeping host service setup externally authorized.","status":"planned","dependencies":["V1-04","V1-05"],"spec":["08-native-artifacts.md","11-workspace-experience.md"]},
+        {"id":"V1-12","title":"Restore optional processkit integration","summary":"Install and verify pinned processkit content through supported interfaces, preserve forks and personal MCP entries, and keep harness-only workspaces independent.","status":"planned","dependencies":["V1-04","V1-07"],"spec":["11-workspace-experience.md","12-migration-and-state.md"]},
+        {"id":"V1-13","title":"Deliver doctor and task-sized guidance","summary":"Provide read-only contextual diagnostics, effective configuration provenance and versioned MCP how-to resources generated from public documentation.","status":"planned","dependencies":["V1-06","V1-08","V1-09"],"spec":["10-interfaces-and-guidance.md","14-verification-and-release.md"]}
+      ]
+    },
+    {
+      "id": "new-experience", "title": "New user experience",
+      "note": "Explicit additions beyond v0 parity, without taking ownership of another product",
+      "phases": [
+        {"id":"V1-14","title":"Add the optional harness-status sidebar","summary":"Show current-session harness state, source freshness and only reliable session/context/account quota metrics in a collapsible left tmux pane.","status":"planned","dependencies":["V1-07","V1-08"],"spec":["11-workspace-experience.md"]},
+        {"id":"V1-15","title":"Add local diff and PR review","summary":"Integrate Git/delta/LazyGit and a qualified optional gh-dash workflow with explicit authorization for network writes and native-web fallback.","status":"planned","dependencies":["V1-04","V1-08"],"spec":["11-workspace-experience.md"]}
+      ]
+    },
+    {
+      "id": "transition", "title": "Transition, qualification and publication",
+      "note": "No v0 replacement claim without migration, security and exact-artifact proof",
+      "phases": [
+        {"id":"V1-16","title":"Migrate v0 projects and named environments","summary":"Preview and convert old configuration, snapshots and personal state with complete field mapping, conflicts, backup, interruption recovery and pinned-v0 rollback.","status":"planned","dependencies":["V1-05","V1-07","V1-09","V1-10","V1-12"],"spec":["12-migration-and-state.md"]},
+        {"id":"V1-17","title":"Harden the two-actor trust boundary","summary":"Prove in-container denial of host authority, untrusted project-input review, exact deletion scope, secret redaction, race safety and security-reporting paths.","status":"planned","dependencies":["V1-06","V1-12","V1-16"],"spec":["13-security.md"]},
+        {"id":"V1-18","title":"Qualify every supported target","summary":"Execute the host/runtime/architecture and dependency matrix on disposable targets, with capability probes, repeatability, bounded cleanup and immutable evidence.","status":"planned","dependencies":["V1-04","V1-10","V1-11","V1-14","V1-15","V1-17"],"spec":["04-reuse-targets.md","14-verification-and-release.md"]},
+        {"id":"V1-19","title":"Publish a verified v0 replacement","summary":"Close parity and new-feature criteria, produce exact-candidate binaries/images/Features/Templates, deploy version-aligned docs and independently verify published artifacts.","status":"planned","dependencies":["V1-13","V1-16","V1-18"],"spec":["05-acceptance.md","14-verification-and-release.md"]}
+      ]
+    }
+  ]
 }

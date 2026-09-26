@@ -7,7 +7,7 @@ const read=p=>readFileSync(path.join(root,p),'utf8');
 const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
 const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
-const normative=docs.filter(x=>/^0[1-6]-/.test(x)).map(read).join('\n');
+const normative=docs.filter(x=>/^(0[1-9]|1[0-4])-/.test(x)).map(read).join('\n');
 const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);
@@ -82,6 +82,19 @@ for(const row of json('ledger/configuration.json').filter(x=>x.path.startsWith('
  }
 }
 const resultSchema=json('operation-result.schema.json');
+const requestSchema=json('operation-request.schema.json');
+const requestExample={schemaVersion:'aibox.operation-request/v1',operation:'remove_environment',requestId:'example-1',projectRoot:'/workspace',expectedInputDigest:'sha256:'+'0'.repeat(64),runtimeContext:'test',resourceId:'abc'};
+schemaCheck(requestExample,requestSchema);
+for(const invalid of [
+ {...requestExample,operation:'shell'},
+ {...requestExample,resourceId:''},
+ {...requestExample,expectedInputDigest:'not-a-digest'},
+ {...requestExample,resourceId:undefined},
+ {...requestExample,unbounded:true}
+]){
+ let rejected=false;try{schemaCheck(invalid,requestSchema);}catch{rejected=true;}
+ assert(rejected,'Request negative fixture accepted');
+}
 const resultExample={schemaVersion:'aibox.operation-result/v1',operation:'check_environment',requestId:'example-1',
  actors:{initiator:'local-user',executor:'aibox-local'},target:{scope:'local',workspaceRoot:'/workspace'},
  inputDigest:'sha256:'+'0'.repeat(64),outcome:'no_change',changedResources:[],warnings:[],evidence:[]};
@@ -98,13 +111,20 @@ for(const invalid of [
  assert(rejected,'Result negative fixture accepted');
 }
 const phases=roadmap.groups.flatMap(x=>x.phases),ids=new Set(phases.map(x=>x.id));
+assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplicate roadmap group');
 assert(ids.size===phases.length,'Duplicate phase');
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
  for(const dep of p.dependencies??[])assert(ids.has(dep),`Unknown dependency ${dep}`);
+ assert(p.spec?.length>0,`Missing spec references ${p.id}`);
+ for(const ref of p.spec)assert(existsSync(path.join(root,ref)),`Missing phase spec ${p.id}: ${ref}`);
  if(p.status==='shipped')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing shipped evidence ${p.id}`);
 }
+const visited=new Set(),active=new Set();
+const byId=new Map(phases.map(x=>[x.id,x]));
+function visit(id){assert(!active.has(id),`Roadmap cycle at ${id}`);if(visited.has(id))return;active.add(id);for(const dep of byId.get(id).dependencies??[])visit(dep);active.delete(id);visited.add(id);}
+for(const id of ids)visit(id);
 // Every local Markdown link, including linked source evidence ledgers.
 for(const file of [...docs,'ledger/configuration.md','ledger/addons.md']){
  for(const m of read(file).matchAll(/\]\(([^)]+)\)/g)){

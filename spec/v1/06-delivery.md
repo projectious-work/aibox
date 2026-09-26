@@ -34,51 +34,72 @@ during boundary review; reconcile the merged source version before acceptance.
 
 | Requirement | Planned verification | Phase |
 |---|---|---|
-| R-PRODUCT | AC-PK, AC-GUIDE, minimal standalone journey | V1-03 |
-| R-PARITY | All F/CFG/ADDON/CMDTYPE/ASSET rows | V1-06 |
+| R-PRODUCT | AC-PK, AC-GUIDE, minimal standalone journey | V1-01, V1-03, V1-19 |
+| R-PARITY | All F/CFG/ADDON/CMDTYPE/ASSET rows | V1-04, V1-07–V1-12, V1-16, V1-19 |
 | R-CORE | AC-CLI, AC-BUILD; architecture review rejects duplicate engines | V1-02 |
-| R-BOUNDARY | AC-PK, AC-SEC and product handoff review | V1-01 |
-| R-AUTHORITY | AC-SEC in both contexts | V1-02 |
-| R-LOCAL | AC-SEC, AC-UX, AC-DOCTOR | V1-03 |
-| R-REUSE | Dependency clearance plus AC-TOOLS | V1-01 |
-| R-OBSERVABILITY | AC-DOCTOR, AC-CLI, AC-SIDEBAR | V1-03 |
-| R-INDEPENDENCE | AC-BUILD direct upstream journey | V1-02 |
-| R-CONFIG | AC-CONFIG all field rows | V1-01 |
-| R-PRECEDENCE | AC-CONFIG, AC-UX conflict fixtures | V1-03 |
-| R-OWNERSHIP | AC-UX, AC-MIG interrupted refresh | V1-03 |
-| R-MIGRATION | AC-MIG and every old command disposition | V1-04 |
-| R-RECOVERY | AC-MIG, AC-LIFE | V1-04 |
-| R-INTERFACES | AC-CLI adapter equivalence | V1-02 |
-| R-DOCTOR | AC-DOCTOR plus no-effect tests | V1-02 |
-| R-RESULT | AC-CLI, AC-LIFE machine schema fixtures | V1-02 |
-| R-EXECUTION | AC-SEC, AC-LIFE interruption/race tests | V1-02 |
-| R-GUIDANCE | AC-GUIDE offline/version/client tests | V1-03 |
-| R-POLICY | AC-SEC authorization bypass tests | V1-02 |
-| R-TARGETS | AC-TARGET matrix gates | V1-06 |
-| R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-06 |
+| R-BOUNDARY | AC-PK, AC-SEC and product handoff review | V1-01, V1-17 |
+| R-AUTHORITY | AC-SEC in both contexts | V1-02, V1-06, V1-17 |
+| R-LOCAL | AC-SEC, AC-UX, AC-DOCTOR | V1-07–V1-13 |
+| R-REUSE | Dependency clearance plus AC-TOOLS | V1-04, V1-18 |
+| R-OBSERVABILITY | AC-DOCTOR, AC-CLI, AC-SIDEBAR | V1-08, V1-13, V1-14 |
+| R-INDEPENDENCE | AC-BUILD direct upstream journey | V1-03, V1-05 |
+| R-CONFIG | AC-CONFIG all field rows | V1-03, V1-04, V1-16 |
+| R-PRECEDENCE | AC-CONFIG, AC-UX conflict fixtures | V1-09, V1-16 |
+| R-OWNERSHIP | AC-UX, AC-MIG interrupted refresh | V1-07, V1-09, V1-16 |
+| R-MIGRATION | AC-MIG and every old command disposition | V1-16 |
+| R-RECOVERY | AC-MIG, AC-LIFE | V1-05, V1-16 |
+| R-INTERFACES | AC-CLI adapter equivalence | V1-06 |
+| R-DOCTOR | AC-DOCTOR plus no-effect tests | V1-13 |
+| R-RESULT | AC-CLI, AC-LIFE machine schema fixtures | V1-02, V1-06 |
+| R-EXECUTION | AC-SEC, AC-LIFE interruption/race tests | V1-05, V1-17 |
+| R-GUIDANCE | AC-GUIDE offline/version/client tests | V1-06, V1-13 |
+| R-POLICY | AC-SEC authorization bypass tests | V1-06, V1-17 |
+| R-TARGETS | AC-TARGET matrix gates | V1-18 |
+| R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-04, V1-18, V1-19 |
 
-N01 → AC-SIDEBAR and N02 → AC-REVIEW, both V1-05. Feature rows refine these
+N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
 groups and link to source evidence. Each phase requires an independent plan
 review before implementation and complete conformance review afterward. This
 document is a proposed sequence, not the reviewed implementation plan.
+
+| v0 feature rows | Primary implementation phase | Cross-cutting proof |
+|---|---|---|
+| F01–F02 | V1-03, V1-12 | V1-16 migration |
+| F03–F05 | V1-05 | V1-06 interface, V1-17 security |
+| F06–F08 | V1-16 | V1-05 exact runtime identity |
+| F09 | V1-19 | V1-06 CLI distribution |
+| F10–F13 | V1-03–V1-04 | V1-16 mapping, V1-18 target qualification |
+| F14–F17 | V1-07, V1-12 | V1-17 authority |
+| F18–F22 | V1-08 | V1-09 theme, V1-13 doctor |
+| F23–F25 | V1-08 | V1-14 status integration |
+| F26–F29 | V1-09 | V1-16 alias conversion |
+| F30–F38 | V1-10 | V1-18 platform coverage |
+| F39 | V1-11 | V1-18 audio cells |
+| F40–F42 | V1-04 | V1-18 tool qualification |
+| F43–F44 | V1-13 | V1-06 machine interface |
+| F45–F46 | V1-18 | V1-19 support claim |
+| F47 | V1-19 | V1-13 guide content |
+| F48 | V1-13 | V1-14 telemetry truthfulness |
 
 ## Review blockers / explicit unknowns
 
 | ID | Question to close | Required evidence / responsible role |
 |---|---|---|
-| G01 | Complete effective configuration mapping | Maintainer + owner: the proposed closed aibox UX schema exists; finish exact standard-field/Feature destinations, cross-field rules, effective-value/alias/default migration fixtures and private-override proof. |
-| G02 | Feature selection and processkit ownership/API compatibility | Integration maintainer: per-tool Feature/package mapping, license/provenance clearance, supported processkit interfaces and versions. |
-| G03 | Named environment snapshots, backup/recovery and host audio setup without a broad config CLI | Maintainer: native/delegated workflow proof including process context and secret-safe rollback; owner approves any scope change. |
-| G04 | Public per-operation input schemas and long-operation behavior | Interface maintainer: the common result envelope now has a closed proposed schema; complete precise tool/input schemas, exit/cancellation/retry/locking fixtures and actual client compatibility. |
-| G05 | Exact supported target/dependency versions | Release maintainer + host owner: v0 evidence audit and explicit v1 qualification matrix, no silent platform retirement. |
-| G06 | Sidebar selection and telemetry availability | UX maintainer: per-harness source/freshness/permissions matrix, shared-quota correctness, bounded collector budget and layout prototype. |
-| G07 | PR-review dependency and interaction scope | UX maintainer: end-to-end LazyGit/gh-dash/native-web comparison; verify inline review limitations, license and accessibility. |
-| G08 | Source/docs disagreements and census coverage | Reviewer: compare hand-written deserializers/validators and actual shipped assets against generated ledger; resolve stale docs such as base-image harness installation wording. |
-| G09 | Standards publication/version alignment | Owner: reconcile agent-native standard and obsolete branch/host-companion guidance before implementation plan. |
+| G01 | Verify effective configuration mapping | Chapters 8/12 fix authority and converter behavior; V1-03/04/16 must provide exact field destinations, cross-field/default fixtures and native-resolution proof. |
+| G02 | Qualify Feature selection and processkit API | Chapter 8 fixes selection criteria; V1-04/12 must fill per-tool manifest, license/provenance and supported processkit API/version evidence. |
+| G03 | Prove snapshots, recovery and audio cells | Chapter 12 fixes file-based named environments and journal; V1-11/16 must test actual upstream selectors, process context, rollback and platform host bridges. |
+| G04 | Prove request/schema/client conformance | Chapters 9/10 and `operation-request.schema.json` fix common inputs, selectors, exit classes, cancellation and server modes; V1-06 must test generated SDK tool schemas and real MCP clients. |
+| G05 | Pin and qualify target/dependency manifest | Chapter 14 fixes matrix/evidence method; V1-18 must publish exact tested versions and resolve each v0 support cell. |
+| G06 | Qualify sidebar source accuracy | Chapter 11 fixes no-invention/freshness behavior; V1-14 must record per-harness signals, quota limits, performance and layout evidence. |
+| G07 | Qualify selected review TUIs | Chapter 11 fixes offline/online and write boundaries; V1-15 must verify LazyGit/gh-dash/web fallback, licenses and accessibility. |
+| G08 | Reconcile source/ledger divergences | V1-01/16 reviewers compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity sign-off. |
+| G09 | Reconcile standards version | Owner accepts a specific merged agent-native standard revision before V1-01 exits; avoid a moving policy reference. |
 
-These are blocking questions for a later accepted specification/implementation
-baseline, not blockers to opening this first draft for review. Requirements
-remain required while mappings are unresolved. No generic `TBD` marks them done.
+These are empirical implementation and baseline-acceptance gates, not silent
+design discretion. Chapters 7–14 specify behavior and owners; a phase cannot
+ship until its listed evidence closes the corresponding gate. A reviewed
+specification may still require target qualification, but it must not assert
+support without it.
 
 ## Validation of this documentation change
 

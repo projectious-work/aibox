@@ -1,6 +1,6 @@
 # aibox v1 — Dev Container CLI-based product specification
 
-Version: **0.1 draft, 2026-09-25**. Review target: `v1.x-dev`.
+Version: **0.2 implementation draft, 2026-09-26**. Review target: `v1.x-dev`.
 Product boundary accepted; this specification is **not yet accepted**.
 No product implementation, release or merge is authorized by this draft.
 
@@ -24,18 +24,31 @@ Decision provenance in the company coordination repository:
 
 The [boundary review input](boundary.md) and [command audit](command-disposition.md)
 are preserved for context. Their earlier tentative language does not reopen
-these decisions. The numbered chapters below propose the detailed contract.
+these decisions. The numbered chapters below form the proposed implementation
+contract.
 The discarded specification from PR #455/#462 and existing old v1 code are
 not the implementation baseline for this rewrite.
 
 ## Read in this order
 
-1. [Product and architecture](01-product.md)
+1. [Product boundary and requirements](01-product.md)
 2. [Configuration, persistence and migration](02-configuration.md)
 3. [CLI, MCP and authority contracts](03-interfaces.md)
 4. [Reuse assessment, target and dependency matrices](04-reuse-targets.md)
 5. [Feature ledger and acceptance criteria](05-acceptance.md)
-6. [Standards, delivery phases and review blockers](06-delivery.md)
+6. [Standards, trace and review gates](06-delivery.md)
+7. [Go architecture and package boundaries](07-architecture.md)
+8. [Native artifacts, Features and ownership](08-native-artifacts.md)
+9. [Lifecycle algorithms and failure recovery](09-lifecycle.md)
+10. [CLI, MCP, doctor and progressive guidance](10-interfaces-and-guidance.md)
+11. [Workspace UX and full v0 parity](11-workspace-experience.md)
+12. [Migration, named environments and persistence](12-migration-and-state.md)
+13. [Security and trust boundary](13-security.md)
+14. [Verification, target qualification and release](14-verification-and-release.md)
+
+The [roadmap](roadmap.yaml) is the canonical phase graph: nineteen
+content-specific phases in five capability groups. Each phase links the
+chapters governing its implementation. `planned` is not a shipped claim.
 
 ### Detailed v0 evidence
 
@@ -60,8 +73,9 @@ Baseline: v0.35.0 release-line commit
 - [Behavioral feature source map](feature-trace.md) links each F row to primary
   v0 implementation and the proposed v1 owner.
 - [Versioned operation result schema](operation-result.schema.json) is the
-  shared CLI/MCP envelope proposal; per-operation inputs and client checks
-  remain G04.
+  shared CLI/MCP envelope proposal; [request schema](operation-request.schema.json)
+  closes common fields and operation-required selectors. Actual client checks
+  and generated per-tool SDK conformance remain G04.
 
 The census is exhaustive for the declared source scopes and includes custom
 deserializer exceptions described in chapter 2. It is not a claim that all

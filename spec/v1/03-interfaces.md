@@ -7,8 +7,10 @@ Do not wrap the human CLI and parse its prose to implement MCP.
 
 ## Proposed operation set
 
-Command names in this first draft are proposals; finalized aliases and schemas
-are G04. Existing v0 spelling can be retained where it remains unambiguous.
+Command names and exit classes below are the v1 design; chapter 10 fixes their
+grammar and input semantics. Final machine-readable per-operation request
+schemas and client tests remain G04. Existing v0 spelling can be retained
+where it remains unambiguous.
 The [command audit](command-disposition.md) covers removals/delegation, while
 [commands.json](ledger/commands.json) preserves every original declaration.
 
@@ -66,10 +68,11 @@ CLI JSON stdout contains only the result; human diagnostics/progress use
 stderr. MCP stdio stdout contains only protocol messages. Human table/YAML
 views may be projections of the same result, not separate facts.
 
-Proposed exit classes: 0 success/no-change; 2 invalid input; 3 denied authority;
+Exit classes: 0 success/no-change; 2 invalid input; 3 denied authority;
 4 missing dependency/incompatible environment; 5 operation failure/partial;
-6 explicit operator action required; 130 interruption. Finalize exact public
-schema and error taxonomy in G04. Never return success after a child failed.
+6 explicit operator action required; 130 interruption. Commit the exact
+per-operation machine schemas and error-code catalog under G04. Never return
+success after a child failed.
 
 **R-EXECUTION:** invoke public tool binaries with argument arrays, explicit
 working directories, resolved executable provenance and a bounded environment.

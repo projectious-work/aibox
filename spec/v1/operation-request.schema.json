@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-request.schema.json",
+  "title": "aibox v1 typed operation request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "operation", "requestId", "projectRoot", "expectedInputDigest"],
+  "properties": {
+    "schemaVersion": {"const": "aibox.operation-request/v1"},
+    "operation": {"enum": ["build_environment", "start_environment", "stop_environment", "remove_environment", "rebuild_environment", "inspect_environment", "read_logs", "check_environment", "inspect_workspace", "check_workspace", "refresh_workspace"]},
+    "requestId": {"type": "string", "minLength": 1},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "configPath": {"type": "string", "minLength": 1},
+    "expectedInputDigest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "runtimeContext": {"type": "string", "minLength": 1},
+    "resourceId": {"type": "string", "minLength": 1},
+    "acknowledgeDisruption": {"type": "boolean"},
+    "frozenLockfile": {"type": "boolean"},
+    "source": {"type": "string", "minLength": 1},
+    "tailLines": {"type": "integer", "minimum": 1},
+    "since": {"type": "string", "minLength": 1},
+    "offline": {"type": "boolean"},
+    "checks": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "scope": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {"if": {"properties": {"operation": {"const": "stop_environment"}}}, "then": {"required": ["runtimeContext", "resourceId"]}},
+    {"if": {"properties": {"operation": {"const": "remove_environment"}}}, "then": {"required": ["runtimeContext", "resourceId"]}},
+    {"if": {"properties": {"operation": {"const": "rebuild_environment"}}}, "then": {"required": ["runtimeContext", "resourceId", "acknowledgeDisruption"]}},
+    {"if": {"properties": {"operation": {"const": "read_logs"}}}, "then": {"required": ["source", "tailLines"]}},
+    {"if": {"properties": {"operation": {"const": "refresh_workspace"}}}, "then": {"required": ["scope"]}}
+  ]
+}
