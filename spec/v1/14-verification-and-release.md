@@ -70,7 +70,7 @@ and re-run of failure-sensitive gates after changed candidate bits.
 
 ## Roadmap state and publication
 
-The canonical [roadmap](roadmap.yaml) groups nineteen content-specific phases
+The canonical [roadmap](roadmap.yaml) groups twenty-one content-specific phases
 with dependency edges and spec references. `planned` means defined, not
 approved; `in_progress` needs a reviewed phase plan; `shipped` requires a
 `devNote` path and release identifier validated by the roadmap schema, plus
@@ -81,13 +81,16 @@ their declared prerequisites exist. A phase cancellation must name the
 owner-approved replacement or explicit v0 parity exception.
 
 Before promotion, complete all F01–F48, N01/N02 and AC groups, reconcile
-every `CFG:*`, `ADDON:*`, `CMD:*` and runtime-asset row, resolve G01–G09,
-verify the complete target/dependency matrix and run an independent review
+every `CFG:*`, `ADDON:*`, `CMD:*` and runtime-asset row, close G01–G10,
+verify the complete target/dependency matrix, and run an independent review
 against the **whole** accepted baseline. Build and validate documentation
 locally; publish version-aligned README, docs, roadmap, changelog, AI-readable
 discovery and read-only product guidance from the exact release candidate.
-Use the company fast-forward promotion path and squash topic PRs; no unique
-commits on promotion branches and no project-authored GitHub Actions.
+Chapter 15 and AC-DOCS additionally require the v1 site to use the v0 Hugo
+brand-theme pipeline, with v0 retained as the current release through alpha
+and beta publication. Use the company fast-forward promotion path and squash
+topic PRs; no unique commits on promotion branches and no project-authored
+GitHub Actions.
 Only after downloaded artifacts pass fresh-machine verification may v1 be
 called a v0 replacement. An incomplete preview is labeled preview with
 precise missing capabilities and does not erase the v0 support path.

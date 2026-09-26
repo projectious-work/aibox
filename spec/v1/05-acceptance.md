@@ -59,7 +59,7 @@ replaces the source declaration ledgers. No F row closes on an inventory count.
 | F44 | Human and machine-readable catalog/provenance/workspace/harness projections | AC-CLI, AC-GUIDE |
 | F45 | Linux/macOS binary targets, amd64/arm64 image/tool compatibility | AC-TARGET |
 | F46 | Human-dev/headless selection with truthful current limits | AC-TARGET |
-| F47 | Existing theme gallery, guides, cheatsheet, compatibility and upgrade docs | AC-GUIDE, AC-RELEASE |
+| F47 | Existing theme gallery, guides, cheatsheet, compatibility and upgrade docs | AC-GUIDE, AC-DOCS, AC-RELEASE |
 | N01 | Optional left tmux pane for every current-session harness and available usage/quota/context data | AC-SIDEBAR |
 | N02 | Convenient local diff plus PR review with existing tools | AC-REVIEW |
 
@@ -278,6 +278,23 @@ published artifacts. Local docs build/deploy, no project-authored GitHub
 Actions. Release notes, compatibility matrix, roadmap and migration guide
 describe implemented behavior only. Promotion uses approved version-line
 branches and fast-forward pointers; owner merge/release authority remains explicit.
+
+### AC-DOCS — shared Hugo site and versioned prerelease truth
+
+Build v0 current, v1 preview, an alpha archive and a beta archive through the
+same Hugo/brand-theme module build route. Verify a pinned shared theme,
+line-specific content and metadata, reproducible local output and no Docsy
+runtime or submodule requirement. The Releases dropdown on both lines shows
+v0.x as the current product release and alpha/beta only as v1 previews; it
+includes published archives, keyboard/active-state semantics and a no-JS
+fallback. Publishing either line preserves the other line's files and
+manifest entries. Broken cross-line page paths fall back to a useful landing
+page, not a 404. Validate each prerelease candidate's getting started,
+configuration, migration, authority and feature pages against its exact
+binary/Feature behavior and release notes. Documentation, public Markdown,
+discovery files and MCP guidance agree; no stale v0-only or reverted-v1
+instructions remain in current v1 pages. Stable-v1/current promotion is a
+separate owner decision.
 
 ## Evidence record and closure
 

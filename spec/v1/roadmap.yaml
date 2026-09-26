@@ -41,13 +41,21 @@
       ]
     },
     {
+      "id": "documentation", "title": "Versioned documentation and prerelease clarity",
+      "note": "Reuse the v0 Hugo brand theme while keeping v0 current throughout v1 alpha/beta",
+      "phases": [
+        {"id":"V1-20","title":"Unify the v1 documentation build and theme","summary":"Build the v1 line with the same pinned Hugo brand-theme module and local pipeline as v0, retiring the Docsy-only stack without changing v0's current root.","status":"planned","dependencies":["V1-01"],"spec":["15-documentation.md","14-verification-and-release.md"]},
+        {"id":"V1-21","title":"Publish accurate alpha and beta documentation","summary":"Update each v1 prerelease candidate's task guides and shared Releases dropdown, archive exact alpha/beta docs, preserve v0 as current and both lines across deployments.","status":"planned","dependencies":["V1-20","V1-06"],"spec":["15-documentation.md","05-acceptance.md"]}
+      ]
+    },
+    {
       "id": "transition", "title": "Transition, qualification and publication",
       "note": "No v0 replacement claim without migration, security and exact-artifact proof",
       "phases": [
         {"id":"V1-16","title":"Migrate v0 projects and named environments","summary":"Preview and convert old configuration, snapshots and personal state with complete field mapping, conflicts, backup, interruption recovery and pinned-v0 rollback.","status":"planned","dependencies":["V1-05","V1-07","V1-09","V1-10","V1-12"],"spec":["12-migration-and-state.md"]},
         {"id":"V1-17","title":"Harden the two-actor trust boundary","summary":"Prove in-container denial of host authority, untrusted project-input review, exact deletion scope, secret redaction, race safety and security-reporting paths.","status":"planned","dependencies":["V1-06","V1-12","V1-16"],"spec":["13-security.md"]},
         {"id":"V1-18","title":"Qualify every supported target","summary":"Execute the host/runtime/architecture and dependency matrix on disposable targets, with capability probes, repeatability, bounded cleanup and immutable evidence.","status":"planned","dependencies":["V1-04","V1-10","V1-11","V1-14","V1-15","V1-17"],"spec":["04-reuse-targets.md","14-verification-and-release.md"]},
-        {"id":"V1-19","title":"Publish a verified v0 replacement","summary":"Close parity and new-feature criteria, produce exact-candidate binaries/images/Features/Templates, deploy version-aligned docs and independently verify published artifacts.","status":"planned","dependencies":["V1-13","V1-16","V1-18"],"spec":["05-acceptance.md","14-verification-and-release.md"]}
+        {"id":"V1-19","title":"Publish a verified v0 replacement","summary":"Close parity and new-feature criteria, produce exact-candidate binaries/images/Features/Templates, deploy version-aligned docs and independently verify published artifacts.","status":"planned","dependencies":["V1-13","V1-16","V1-18","V1-21"],"spec":["05-acceptance.md","14-verification-and-release.md","15-documentation.md"]}
       ]
     }
   ]

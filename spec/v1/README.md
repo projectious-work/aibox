@@ -45,9 +45,10 @@ not the implementation baseline for this rewrite.
 12. [Migration, named environments and persistence](12-migration-and-state.md)
 13. [Security and trust boundary](13-security.md)
 14. [Verification, target qualification and release](14-verification-and-release.md)
+15. [Version-line documentation and prerelease publication](15-documentation.md)
 
-The [roadmap](roadmap.yaml) is the canonical phase graph: nineteen
-content-specific phases in five capability groups. Each phase links the
+The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-one
+content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. `planned` is not a shipped claim.
 
 ### Detailed v0 evidence

@@ -20,8 +20,8 @@ Standards are governed upstream; this document maps applicability, not a fork.
 | Human-controlled host-phase execution | Owner-invoked bounded host gates; no host socket/privileged companion shortcut, credential-free validation separate from publication. |
 | Host-gated release conformance | AC-TARGET/AC-RELEASE; handoff identity, runtime capability probes, cleanup, repeatability and complete evidence. |
 | Git branching and release promotion | Topic branch → `v1.x-dev` → pre-release/release pointers → main under approved standard; no new unique promotion commits. |
-| Open-source documentation strategy | Canonical versioned docs/README/roadmap/changelog/releases and local gh-pages deployment; no GitHub Actions. |
-| AI-agent accessibility and generative discovery | R-GUIDANCE; public Markdown/discovery resources and offline-after-install read-only stdio server. |
+| Open-source documentation strategy | R-DOCS/AC-DOCS; one Hugo brand-theme pipeline, canonical versioned docs/README/roadmap/changelog/releases and local gh-pages deployment; no GitHub Actions. |
+| AI-agent accessibility and generative discovery | R-GUIDANCE/R-DOCS; public version-aligned Markdown/discovery resources and offline-after-install read-only stdio server. |
 
 [Canonical standard directory](https://github.com/projectious-work/internal/tree/d096a1992ab91dea2265cf4df342e7a97380b0e4/docs/standards).
 The company agent-native interface decision `CuriousSpire` also applies:
@@ -56,6 +56,7 @@ during boundary review; reconcile the merged source version before acceptance.
 | R-POLICY | AC-SEC authorization bypass tests | V1-06, V1-17 |
 | R-TARGETS | AC-TARGET matrix gates | V1-18 |
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-04, V1-18, V1-19 |
+| R-DOCS | AC-DOCS, AC-GUIDE, AC-RELEASE; both-line build/deploy tests | V1-20, V1-21, V1-19 |
 
 N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
 groups and link to source evidence. Each phase requires an independent plan
@@ -81,6 +82,10 @@ document is a proposed sequence, not the reviewed implementation plan.
 | F47 | V1-19 | V1-13 guide content |
 | F48 | V1-13 | V1-14 telemetry truthfulness |
 
+Documentation is also a completion condition for every user-facing phase,
+not only V1-20/21. V1-20 establishes the shared shell; V1-21 makes alpha
+and beta content/version navigation truthful; V1-19 verifies publication.
+
 ## Review blockers / explicit unknowns
 
 | ID | Question to close | Required evidence / responsible role |
@@ -94,6 +99,7 @@ document is a proposed sequence, not the reviewed implementation plan.
 | G07 | Qualify selected review TUIs | Chapter 11 fixes offline/online and write boundaries; V1-15 must verify LazyGit/gh-dash/web fallback, licenses and accessibility. |
 | G08 | Reconcile source/ledger divergences | V1-01/16 reviewers compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity sign-off. |
 | G09 | Reconcile standards version | Owner accepts a specific merged agent-native standard revision before V1-01 exits; avoid a moving policy reference. |
+| G10 | Replace Docsy prerelease site and preserve release lines | Documentation maintainer: V1-20/21 prove the shared Hugo brand-theme build, both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
 
 These are empirical implementation and baseline-acceptance gates, not silent
 design discretion. Chapters 7–14 specify behavior and owners; a phase cannot
