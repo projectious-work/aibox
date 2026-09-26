@@ -24,6 +24,9 @@ Decision provenance in the company coordination repository:
 - `DEC-20260926_1529-PluckyGrove-keep-aibox-v1-starter-free-of`:
   omit `.aibox/` from starters; default `/home/aibox` with native custom-user,
   named-volume and explicit bind-mount options.
+- `DEC-20260926_1907-StablePine-build-and-update-aibox-v1-documentation`:
+  establish the shared Hugo build before implementation and update/build
+documentation with every roadmap phase.
 
 The [boundary review input](boundary.md) and [command audit](command-disposition.md)
 are preserved for context. Their earlier tentative language does not reopen
@@ -55,6 +58,10 @@ not the implementation baseline for this rewrite.
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. `planned` is not a shipped claim.
+V1-20 establishes the shared Hugo build before implementation, and every
+phase names a documentation deliverable that is updated and locally built
+with that phase; V1-21 is the prerelease snapshot/publication gate, not a
+deferred documentation-writing phase.
 
 ### Detailed v0 evidence
 

@@ -57,7 +57,7 @@ during boundary review; reconcile the merged source version before acceptance.
 | R-POLICY | AC-SEC authorization bypass tests | V1-06, V1-17 |
 | R-TARGETS | AC-TARGET matrix gates | V1-18 |
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-04, V1-18, V1-19 |
-| R-DOCS | AC-DOCS, AC-GUIDE, AC-RELEASE; both-line build/deploy tests | V1-20, V1-21, V1-19 |
+| R-DOCS | AC-DOCS in every phase; each phase's `docs` deliverable and local build evidence, plus both-line deploy tests | V1-01–V1-23 (V1-20 enables; V1-21 snapshots; V1-19 publishes) |
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-22, V1-06 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-22, V1-17 |
 | R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-23, V1-17, V1-18 |
@@ -86,9 +86,11 @@ document is a proposed sequence, not the reviewed implementation plan.
 | F47 | V1-19 | V1-13 guide content |
 | F48 | V1-13 | V1-14 telemetry truthfulness |
 
-Documentation is also a completion condition for every user-facing phase,
-not only V1-20/21. V1-20 establishes the shared shell; V1-21 makes alpha
-and beta content/version navigation truthful; V1-19 verifies publication.
+Documentation is a completion condition for **every** phase, including internal
+phases, not a final writing pass. Each roadmap entry names its `docs` output;
+its candidate must pass a local site build and changed-page checks. V1-20 is
+placed in foundation before implementation to establish the shared shell;
+V1-21 verifies alpha/beta snapshots and navigation; V1-19 verifies publication.
 
 ## Review blockers / explicit unknowns
 

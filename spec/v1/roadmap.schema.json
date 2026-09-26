@@ -22,11 +22,12 @@
   "$defs": {
     "phase": {
       "type": "object", "additionalProperties": false,
-      "required": ["id", "title", "summary", "status"],
+      "required": ["id", "title", "summary", "status", "docs"],
       "properties": {
         "id": {"type": "string", "pattern": "^V1-[0-9]{2}$"},
         "title": {"type": "string", "minLength": 1},
         "summary": {"type": "string", "minLength": 1},
+        "docs": {"type": "string", "minLength": 1},
         "status": {"enum": ["idea", "planned", "in_progress", "shipped", "cancelled"]},
         "target": {"type": "string"},
         "dependencies": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},

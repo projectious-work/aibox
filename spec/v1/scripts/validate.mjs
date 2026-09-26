@@ -141,6 +141,7 @@ assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplic
 assert(ids.size===phases.length,'Duplicate phase');
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
+ assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
  assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
  for(const dep of p.dependencies??[])assert(ids.has(dep),`Unknown dependency ${dep}`);
  assert(p.spec?.length>0,`Missing spec references ${p.id}`);
@@ -151,6 +152,14 @@ const visited=new Set(),active=new Set();
 const byId=new Map(phases.map(x=>[x.id,x]));
 function visit(id){assert(!active.has(id),`Roadmap cycle at ${id}`);if(visited.has(id))return;active.add(id);for(const dep of byId.get(id).dependencies??[])visit(dep);active.delete(id);visited.add(id);}
 for(const id of ids)visit(id);
+function dependsOn(id,ancestor,seen=new Set()){
+ if(seen.has(id))return false;
+ seen.add(id);
+ return (byId.get(id).dependencies??[]).some(dep=>dep===ancestor||dependsOn(dep,ancestor,seen));
+}
+assert(roadmap.groups[0].phases.some(p=>p.id==='V1-20'),'Shared documentation build must be a foundation phase');
+for(const id of ids)if(!['V1-01','V1-20'].includes(id))
+ assert(dependsOn(id,'V1-20'),`Phase ${id} can start before the shared documentation build`);
 // Every local Markdown link, including linked source evidence ledgers.
 for(const file of [...docs,'ledger/configuration.md','ledger/addons.md']){
  for(const m of read(file).matchAll(/\]\(([^)]+)\)/g)){

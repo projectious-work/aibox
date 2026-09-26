@@ -12,6 +12,44 @@ later changes are coordinated, pinned upgrades, never floating module heads.
 The v1 content is independently maintained and describes the Dev Container
 CLI-based product, not a copied v0 `aibox.toml` manual.
 
+## Documentation is part of every phase
+
+V1-20 establishes the shared v0/v1 Hugo build **before** implementation
+phases begin. It is an enabling foundation phase, not a final documentation
+sprint. V1-01 (specification acceptance) updates the specification and
+roadmap documentation and runs the existing local documentation build as a
+baseline; V1-20 then replaces the v1 Docsy route. Every later phase depends
+directly or transitively on V1-20. The canonical roadmap gives every phase a
+`docs` deliverable; no phase may reach `shipped` with that field unfulfilled.
+The established V1-20 ID is retained for traceability; placement and
+dependency edges, not its number, determine execution order.
+
+Each phase's implementation change MUST include the relevant user, operator,
+integrator and/or maintainer documentation in the same reviewed change. Update
+the v1 preview pages, task examples, configuration/API reference, compatibility
+notes, how-to/MCP resources, roadmap and changelog/release notes as applicable.
+Remove or clearly label instructions for unavailable functionality. A purely
+internal phase still documents its public contract or maintainer-facing
+architecture/evidence; it is not exempt. Do not publish a feature guide that
+claims a feature is usable before its acceptance tests pass.
+
+The phase completion evidence MUST include: changed documentation paths and
+their audience; the phase's `docs` deliverable; a successful local build of
+the v1 Hugo site from the same candidate commit; link/schema/example checks
+for changed pages; and a check that the v0 current build and Releases labels
+remain intact. Build failures block phase completion. If a phase changes a
+CLI/MCP/config surface, test the changed examples against that phase's
+candidate binary or mark the unimplemented examples as planned. The build
+must be rerun after any code or docs change affecting the candidate. Public
+deployment remains a separate release/preview decision; a local build is
+mandatory even when publication is deferred.
+
+V1-21 is not where feature documentation first appears. It takes already-
+maintained phase content and verifies the exact alpha/beta snapshot, shared
+Releases dropdown and cross-line publication. V1-19 performs final candidate
+and published-artifact consistency checks; neither phase may be used to defer
+the documentation owed by V1-02 through V1-18 and V1-22/23.
+
 ## Site layout and release identity
 
 The stable product documentation root
@@ -70,8 +108,9 @@ README, changelog, release notes, compatibility table, public Markdown guide,
 Hugo pages, `llms.txt`, read-only product MCP resources and task-sized how-to
 guidance describe the same candidate. Derive repeated version/URL/release
 facts from a manifest where feasible and check links and examples against
-the built site. Every user-facing phase changes its relevant stable docs in
-the same change; a development note is not a substitute for user guidance.
+the built site. Every phase changes its relevant docs in the same change; a
+development note is not a substitute for user or operator guidance where
+behavior changes.
 
 ## Build, deploy and acceptance
 

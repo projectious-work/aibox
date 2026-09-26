@@ -327,6 +327,16 @@ branches and fast-forward pointers; owner merge/release authority remains explic
 
 ### AC-DOCS — shared Hugo site and versioned prerelease truth
 
+For **every** roadmap phase, verify its `docs` deliverable was updated with
+the implementation, name changed documentation paths and audiences, run the
+local v1 Hugo build from the phase candidate commit, and check links, schemas
+and changed executable examples. A build failure or stale/misleading page
+blocks that phase's completion; a development note alone does not satisfy
+the gate. Check v0 current content and Releases labels remain unchanged.
+V1-01 records the existing docs-build baseline; V1-20 establishes the shared
+Hugo route before any implementation phase. Later phases rerun the build,
+including internal phases and phases that do not publish a public preview.
+
 Build v0 current, v1 preview, an alpha archive and a beta archive through the
 same Hugo/brand-theme module build route. Verify a pinned shared theme,
 line-specific content and metadata, reproducible local output and no Docsy

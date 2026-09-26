@@ -3,9 +3,10 @@
 This chapter implements R-TARGETS and R-DEPENDENCIES and gives the roadmap
 an evidence-based definition of `shipped`. A specification phase is not a
 product release. Every content phase has a reviewed plan, implementation
-diff, AC/ledger trace, tests, user documentation and independent complete-
-baseline conformance review. No phase is marked shipped from a green unit
-test alone.
+diff, AC/ledger trace, tests, its roadmap `docs` deliverable, a passing local
+documentation build from the same commit, and independent complete-baseline
+conformance review. This includes internal and enabling phases. No phase is
+marked shipped from a green unit test alone.
 
 ## Test layers and evidence format
 
@@ -23,8 +24,10 @@ test alone.
 Each phase evidence record contains phase ID, source commit, candidate digests,
 target cell, dependency versions, command with bounded/sanitized arguments,
 start/end time, actor, result, attached redacted logs and failed/skipped
-reasons. A skipped test is never silently counted as passed. Rerun after any
-candidate-changing fix. Evidence is immutable once cited by a release;
+reasons. It also contains documentation paths/audiences, the local Hugo build
+command and result, link/schema/example checks, and confirmation that v0
+remains current. A skipped test is never silently counted as passed. Rerun
+after any candidate-changing fix. Evidence is immutable once cited by a release;
 supersession creates a new record. Public release notes state capability and
 support limits, not internal tokens/host paths.
 
@@ -75,8 +78,12 @@ The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phase
 with dependency edges and spec references. `planned` means defined, not
 approved; `in_progress` needs a reviewed phase plan; `shipped` requires a
 `devNote` path and release identifier validated by the roadmap schema, plus
-the evidence above. Keep development notes adjacent to implementation under
-the normal repository documentation structure. The phase graph is not a
+the evidence above. V1-20 is a foundation prerequisite for all implementation
+phases, so the shared Hugo build exists before features are delivered. Every
+phase has a distinct documentation deliverable and build gate; V1-21 is for
+candidate-specific snapshot/publication, not a catch-up writing phase. Keep
+development notes adjacent to implementation under the normal repository
+documentation structure. The phase graph is not a
 single linear sprint plan: independent workspace slices may proceed once
 their declared prerequisites exist. A phase cancellation must name the
 owner-approved replacement or explicit v0 parity exception.
