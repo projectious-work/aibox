@@ -159,6 +159,14 @@ invalidates operator approval. Secret fixtures are absent from returned errors,
 logs, evidence and builds. Validate names and scope again before deletion.
 Test host trust review separately from schema validity and local user trust.
 
+### AC-SECRETS — credential transfer and containment
+
+Run chapter 17's file bind, agent socket, native environment, SOPS/age,
+OpenBao/provider and BuildKit canary matrix on supported targets. Verify the
+credential-free starter, custom user/home, consent, least-scope mount,
+redaction, broker failure, cleanup and absence of host authority. A failed
+mode is reported precisely; no silent downgrade or credential copy is allowed.
+
 ### AC-TOOLS — complete optional tool matrix
 
 For every `ADDON:*` tool: installation/version smoke test on both image
@@ -201,6 +209,10 @@ structural assertions and deterministic visual baselines across the palette
 matrix; owner review of representative screenshots supplements automated tests.
 User changes survive refresh/rebuild. Failed reload leaves working config;
 session reset requires consent. Plugin version conflicts fail actionably.
+Prove each retained UX field's single owner (Feature option, native file or
+aibox runtime namespace), and direct-upstream build without optional aibox UX
+integration. A Feature option change may require rebuild; a live native edit
+must not be misreported as a rebuild-only setting.
 
 ### AC-TITLE — attention and outer terminal headers
 
@@ -243,6 +255,10 @@ Interrupt each stage and verify old workspace recovery. Switch named states
 without cross-contamination. Ordinary stop/remove/rebuild retains user data;
 purge/cleanup enumerates exact resources and requires confirmation. Backup
 verification includes permissions and restoration, not just file existence.
+Test default `/home/aibox` named-volume retention, explicit host-directory
+bind, custom Dockerfile/user/home plus aligned mount target, first-use
+initialization on empty/masking volumes, and remote-daemon path semantics.
+The default starter creates no `.aibox/` or `.aibox-home/`.
 
 ### AC-DOCTOR — actionable diagnostics
 

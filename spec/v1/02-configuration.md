@@ -4,8 +4,11 @@
 
 **R-CONFIG:** `devcontainer.json` is the project entry point. Use standard
 fields, Feature options and referenced native Dockerfile/Compose/tool files.
-Use `customizations.aibox` only for aibox-specific preferences that need an
-interpreter. No successor `aibox.toml`, no `set` CLI and no generic config-write
+Use `customizations.aibox` only for aibox-specific preferences that need a
+runtime interpreter after standard properties, Feature options and native tool
+files have been considered (chapter 8). It is optional product-specific
+metadata, not a Dev Container standard field or a second project entry point.
+No successor `aibox.toml`, no `set` CLI and no generic config-write
 MCP tool. Agents use their existing file editors after reading guidance.
 The small system/user `settings.json` in chapter 16 configures the aibox
 process (output, logging, timeout and a narrow local UX override subset);
@@ -24,7 +27,7 @@ Map each accepted old setting to an effective new outcome in migration tests.
 | Paths and custom Dockerfile/Compose | Native paths and ordered native overrides | No generator overwrites user-owned definitions. |
 | Addons/tool enabled/version | Standard Feature references/options; split capabilities when upstream Feature is too coarse | Disabling means absence where v0 promises it; no mere skipping of install over a base that already contains it. |
 | Harness install/enable/order | Feature install/version options; namespaced launch order; native harness config | Host-only integration such as Cursor must remain possible without installing a CLI inside. |
-| Theme, prompt, layout, tmux | Namespaced defaults plus native tool files/local overrides | Preserve all fields/choices; explicit managed output paths. |
+| Theme, prompt, layout, tmux | Feature options for rebuild-scoped defaults, native tool files for detailed edits, namespaced runtime intent only where proven | Preserve all fields/choices; explicit managed output paths. |
 | Audio | Feature plus environment/mount intent | Host service setup is a separate authorized task. |
 | LaTeX | Feature, namespaced document definitions, native Compose read-only preview service | Build/watch inside; serving sidecar never compiles. |
 | Processkit/skills/agents/MCP | Optional product integration and native harness configuration | Preserve source forks/pins and custom entries; processkit owns its process configuration. |
@@ -34,7 +37,7 @@ Map each accepted old setting to an effective new outcome in migration tests.
 
 ### Proposed aibox extension shape
 
-`customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
+The *candidate* `customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
 and `diagnostics` sections. The [closed proposed schema](customization.schema.json)
 retains the 115 v0 workspace UX leaf paths under `workspace` with their existing
 names and primitive types. This is a narrow preservation of aibox-owned UX
@@ -42,7 +45,8 @@ intent, **not** a transplant of old image, install, security or lifecycle
 settings. `workspace` also contains the separately identified new sidebar and
 review selections. Named v0 enum values are closed by the schema; defaults,
 cross-field rules and semantic constraints remain validated by the
-aibox-specific checker. Schema acceptance alone does not prove effective-value
+aibox-specific checker. Chapter 8 requires a field-placement review that may
+shrink this namespace before the schema is accepted. Schema acceptance alone does not prove effective-value
 equivalence.
 Unknown keys and null are errors, absence selects the documented default, and
 explicit false/empty values remain distinct. Upstream Feature options remain

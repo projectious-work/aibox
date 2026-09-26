@@ -70,12 +70,24 @@ file deletion neither stops that container nor destroys its home. Acceptance
 compares save, list, detail, switch, restore and delete outcomes against v0
 fixtures, including processkit context and personal MCP retention.
 
-Persistent home is a named/bind volume scoped by canonical project identity,
-not a global `.aibox-home` copy. Conversion offers `retain` (default),
-`copy-with-consent`, and `new-home`; it never mounts the entire host home.
+Persistent home defaults to a project-scoped named volume at `/home/aibox`
+for the standard non-root `aibox` user, not a global `.aibox-home` copy.
+Projects may use a native bind mount from a selected host directory (including
+their old `.aibox-home`) instead. For a custom Dockerfile/
+`containerUser`/`remoteUser`, resolve the user's actual home and align the
+native mount target, UID/GID and permissions; never assume `/home/aibox`
+when that user is absent. Extra persistent paths use standard mounts or
+Compose volumes, not aibox-specific configuration. Conversion offers `retain`
+(default), `copy-with-consent`, and `new-home`; it never mounts the entire
+host home without an explicit, separately reviewed native request.
 Private login/cache content is excluded from previews, Git and shared logs.
 Copying state requires container stopped, exact source/destination paths,
 permission/ownership check, size estimate, backup and post-copy hash sample.
+The preview names the chosen persistence mode, volume or bind source, resolved
+container user/home, masking behavior and rollback path. Existing v0
+`.aibox-home` is not deleted by conversion. Secret-bearing files receive the
+separate chapter 17 review; ordinary home migration never silently upgrades
+a broad credential bind into an approved secret-delivery mechanism.
 Disabling a harness or changing a theme leaves home untouched. Rebuild/remove
 retain the volume. Purge is a separately specified future operation and is
 not implemented under the generic `remove` command.

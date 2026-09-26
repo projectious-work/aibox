@@ -32,6 +32,10 @@ build/up as well. aibox never claims its policy mediates an independently
 invoked native tool.
 
 Runtime socket and operator credentials are never mounted into the container.
+Work credentials have the separate, opt-in native transfer paths and
+qualification gate in chapter 17. A persistent home is not implicit host
+credential access; a read-only bind, forwarded agent or broker identity is
+reviewed independently of workspace startup.
 The local MCP server is configured with only local resources/tools; it does
 not proxy an operator server or expose network transport. The host process
 rejects calls whose actor identity is unestablished; it never trusts an

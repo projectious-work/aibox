@@ -16,6 +16,7 @@ Standards are governed upstream; this document maps applicability, not a fork.
 | Product roadmap and development evidence | `roadmap.yaml` in this directory; stable phase IDs, evidence required before shipped. |
 | Spec-driven development cycle | Accept specification, independent plan review, implementation waves, independent complete-baseline conformance review. |
 | Security and software supply chain | R-AUTHORITY/R-POLICY/R-REUSE; AC-SEC/AC-TOOLS/AC-RELEASE; threat model and dependency clearance. |
+| Secret delivery | R-SECRETS/AC-SECRETS; explicit native file/socket/env/broker/build paths, host approval, canary scans and cleanup in chapter 17. |
 | Software verification and release engineering | Unit/component/blackbox/integration/e2e, negative tests and exact-candidate evidence; published-artifact verification. |
 | Human-controlled host-phase execution | Owner-invoked bounded host gates; no host socket/privileged companion shortcut, credential-free validation separate from publication. |
 | Host-gated release conformance | AC-TARGET/AC-RELEASE; handoff identity, runtime capability probes, cleanup, repeatability and complete evidence. |
@@ -59,6 +60,7 @@ during boundary review; reconcile the merged source version before acceptance.
 | R-DOCS | AC-DOCS, AC-GUIDE, AC-RELEASE; both-line build/deploy tests | V1-20, V1-21, V1-19 |
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-22, V1-06 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-22, V1-17 |
+| R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-23, V1-17, V1-18 |
 
 N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
 groups and link to source evidence. Each phase requires an independent plan

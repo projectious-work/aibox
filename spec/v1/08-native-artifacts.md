@@ -27,10 +27,6 @@ The initial project tree is:
   Dockerfile              # optional project-owned native build input
   compose.yaml            # optional project-owned service definition
   compose.local.yaml      # optional ignored user-owned override
-.aibox/
-  overrides/              # ignored user-owned native tmux/theme/Yazi/Starship overrides
-  state/                  # ignored local receipts and migration journals, not auth content
-  backups/                # ignored, explicit migration/recovery backups
 AGENTS.md                 # consuming repository or processkit-owned, never silently replaced
 ```
 
@@ -38,15 +34,68 @@ The Feature lockfile is owned by the Dev Container CLI; aibox MUST NOT introduce
 parallel Feature lock. The pinned CLI's build/up create it by default, and
 release builds enforce it with the supported frozen-lockfile option. Existing
 v0 `.aibox-home/` may remain during migration/rollback, but
-new v1 projects use one documented persistent home mount. Do not copy a whole
-host home. Templates include `.gitignore` entries for local overrides,
-private environment files, receipts, backups and persistent auth state.
+new v1 projects use one documented persistent home mount. The default starter
+MUST NOT create `.aibox/` or `.aibox-home/`. Do not copy or mount a whole host
+home implicitly. Templates ignore any explicitly selected project-local bind
+directory and private environment files. Receipts live in the process XDG
+state directory; migration backups use an explicit destination.
 
-The `customizations.aibox` schema in this specification is a proposed public
-contract, not a replacement for the upstream schema. `schemaVersion: "1"`
-closes accepted keys. The 115 legacy UX leaf paths map under `workspace` with
-identical semantic names; aliases and contradictory legacy forms are handled
-only by the converter. `harnesses.order` and `harnesses.launch.<name>.enabled`
+The default image creates non-root user `aibox` with home `/home/aibox`.
+The starter declares `remoteUser: "aibox"` and a project-scoped named volume:
+
+```jsonc
+"mounts": [
+  "source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"
+]
+```
+
+V1-03 verifies the pinned CLI's volume identity and rebuild behavior. A user
+may instead specify a native bind mount from an explicit host directory,
+including an ignored project-local `.aibox-home`, through `mounts` or Compose
+volumes. Changing `containerUser`/`remoteUser` and the Dockerfile user also
+requires aligning the home and mount target with the actual container user's
+home. `doctor` checks UID/GID, ownership and writability without silently
+chowning host data. A mount may mask image-baked home contents; required
+defaults belong in versioned Feature/image assets or idempotent first-use
+initialization. Further cache/data persistence uses native mounts/Compose
+volumes; aibox adds no volume schema or reconciler. Bind source paths resolve
+on the container daemon host, which matters for remote runtimes.
+
+For example, a user can replace—not add to—the named home volume with:
+
+```jsonc
+"mounts": [
+  { "source": "${localWorkspaceFolder}/.aibox-home", "target": "/home/aibox", "type": "bind" }
+]
+```
+
+For custom user `dev` whose Dockerfile home is `/home/dev`, the same native
+definition instead uses `remoteUser: "dev"` and targets `/home/dev`. If
+`containerUser` differs, its own process home and permissions are reviewed
+separately; the two users need not be identical. The operator must ensure the
+bind source exists on the daemon host and that `dev` can write it. A host bind has
+different ownership, portability and cleanup behavior from a named volume.
+
+`customizations.aibox` is not an upstream Feature or a generic customization
+facility. It is proposed product-specific data in `devcontainer.json`, read
+only by software that elects to interpret it. Dev Container Features **can**
+consume their own typed options and render assets packaged in the Feature at
+image build. A Feature lifecycle hook may read files that a Dev Container
+Template placed in the workspace after the workspace is available. Build-time
+`install.sh` cannot assume access to those workspace files. The earlier
+placement of all 115 legacy UX leaf paths under `workspace` is a candidate
+compatibility mapping,
+not an accepted necessity. Before schema acceptance, V1-03/V1-04 must review
+every field in order: standard Dev Container property; Feature option for
+build/rebuild-scoped defaults; native tool file for rich editable settings;
+then `customizations.aibox` only for cross-tool, runtime-changeable UX that
+needs an aibox interpreter. A Feature may package that interpreter. Changing
+build-time Feature options is not assumed to refresh a running container.
+Never duplicate an authoritative value across Feature options and this
+namespace. Moving a field requires schema, ledger, converter, example and
+fixture updates together. The current `schemaVersion: "1"` closes the
+candidate keys; aliases and contradictory legacy forms are converter-only.
+`harnesses.order` and `harnesses.launch.<name>.enabled`
 express launch intent, not installation. `latex` and `diagnostics` contain only
 aibox-owned UX/diagnostic preferences. New `workspace.sidebar` and
 `workspace.review` are opt-in. Unknown versions/keys and null fail closed;
@@ -58,7 +107,7 @@ there is no permissive opaque extension bag.
 |---|---|---|---|
 | Workspace name, image/build, user, ports, mounts, lifecycle | Standard `devcontainer.json`, native Dockerfile/Compose | Dev Container CLI and native tools | Edited native file; operator policy may deny unsafe requests |
 | Install/disable/version of optional tool or harness | Feature presence and documented Feature options | Feature installer and upstream CLI | Project edit of Feature reference/options |
-| Theme family/mode/variant, prompt/layout, tmux/status/title UX | `customizations.aibox.workspace` | Bounded local aibox UX renderer | Explicit native file in ignored `.aibox/overrides/` |
+| Theme family/mode/variant, prompt/layout, tmux/status/title UX | Feature options for build defaults, native files for rich settings, only a proven runtime cross-tool remainder in `customizations.aibox.workspace` | Feature installer or bounded local UX renderer | Tool-native user files in persistent home |
 | Native tool advanced settings | Native tmux, PowerKit, Yazi, Vim, Starship, LazyGit and harness files | Owning tool | User-owned native file; never copied back into namespace |
 | Optional audio client | Audio Feature and approved native env/mount declarations | Package manager, runtime and client tools | Host audio service remains operator-owned |
 | Processkit source/version/packages | Versioned processkit Feature input/lock and supported processkit interface | processkit installer | Its own documented user config/context |
@@ -145,6 +194,7 @@ assertion that a registry artifact already exists:
   "name": "my-project",
   "build": { "dockerfile": "Dockerfile" },
   "remoteUser": "aibox",
+  "mounts": ["source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"],
   "features": {
     "ghcr.io/devcontainers/features/go:1": {}
   },

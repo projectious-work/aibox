@@ -71,7 +71,7 @@ and re-run of failure-sensitive gates after changed candidate bits.
 
 ## Roadmap state and publication
 
-The canonical [roadmap](roadmap.yaml) groups twenty-two content-specific phases
+The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phases
 with dependency edges and spec references. `planned` means defined, not
 approved; `in_progress` needs a reviewed phase plan; `shipped` requires a
 `devNote` path and release identifier validated by the roadmap schema, plus

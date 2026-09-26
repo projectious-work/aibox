@@ -21,6 +21,9 @@ Decision provenance in the company coordination repository:
   configuration hypothesis and new sidebar/review workflows.
 - `DEC-20260925_0652-HopefulTower-approve-aibox-v1-product-boundary-and`:
   boundary review points 1–5 confirmed, Go and thin MCP-first wrapper selected.
+- `DEC-20260926_1529-PluckyGrove-keep-aibox-v1-starter-free-of`:
+  omit `.aibox/` from starters; default `/home/aibox` with native custom-user,
+  named-volume and explicit bind-mount options.
 
 The [boundary review input](boundary.md) and [command audit](command-disposition.md)
 are preserved for context. Their earlier tentative language does not reopen
@@ -47,8 +50,9 @@ not the implementation baseline for this rewrite.
 14. [Verification, target qualification and release](14-verification-and-release.md)
 15. [Version-line documentation and prerelease publication](15-documentation.md)
 16. [Layered CLI/MCP configuration and operational logging](16-configuration-and-logging.md)
+17. [Secret and credential transfer into the Dev Container](17-secrets-and-credential-transfer.md)
 
-The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-two
+The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. `planned` is not a shipped claim.
 

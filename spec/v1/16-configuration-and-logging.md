@@ -47,7 +47,7 @@ The file paths are:
 | System | `/etc/aibox/settings.json` | `/Library/Application Support/aibox/settings.json` | Administrator-owned, read-only to ordinary users |
 | User | `${XDG_CONFIG_HOME:-$HOME/.config}/aibox/settings.json` | `${XDG_CONFIG_HOME:-$HOME/.config}/aibox/settings.json` | OS user running the process |
 | Project | selected `.devcontainer/devcontainer.json` → `customizations.aibox` | same | Repository-owned, UX/diagnostic intent only |
-| Local native overrides | `.aibox/overrides/` and tool-native user files | same | Container-local user ownership; see chapter 8 |
+| Local native overrides | Tool-native user files in the persistent container home, or explicit project-owned native files | same | Container-local user ownership; see chapter 8; no default `.aibox/` tree |
 | Operator policy | explicit administrator-selected path outside project root | same | Authorization, *not* a precedence layer |
 | Evidence/state | `${XDG_STATE_HOME:-$HOME/.local/state}/aibox/` | same | Receipts and logs, never policy/config authority |
 
