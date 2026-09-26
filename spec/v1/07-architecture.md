@@ -35,7 +35,8 @@ replacement for a user-owned Dev Container definition during normal operation.
 | `internal/app` | Typed use-case orchestration and transaction boundaries | Shell construction, JSONC parsing, terminal rendering |
 | `internal/contract` | Operation inputs/results, findings, error codes, schema versions | Runtime calls or mutable globals |
 | `internal/project` | Discover project root and declared Dev Container inputs; read ownership manifest | Execute hooks or rewrite native configuration |
-| `internal/config` | Parse aibox UX extension, validate semantic rules, resolve provenance | Reimplement upstream Dev Container merge/build semantics |
+| `internal/config` | Strictly parse layered process settings, env files/vars, aibox UX extension and invocation overrides; validate authority and resolve provenance | Reimplement upstream Dev Container merge/build semantics or read a host home in local mode |
+| `internal/logging` | Build redacted semantic events and render them to bounded stderr/file/collector sinks | Treat logs as receipts, write to MCP stdout or start network export from project input |
 | `internal/policy` | Authorize caller, operation, target and frozen input digest | Accept repository-controlled grants |
 | `internal/identity` | Bind project, runtime endpoint/context, native resource IDs and owned labels | Treat display names as deletion proof |
 | `internal/devcontainer` | Invoke documented CLI commands and decode documented outputs | Import private Node modules or build a second compiler |
@@ -61,11 +62,17 @@ tests use fake executables and temporary roots; no host runtime is required.
 
 `cli` and `mcp` call `app`; `app` depends on narrow ports whose concrete
 implementations live in `devcontainer`, `runtime`, `project`, `policy`,
-`operation`, `diagnostic`, `guidance`, `migration` and `workspace`. `contract`
+`operation`, `diagnostic`, `guidance`, `migration`, `workspace`, `config` and
+`logging`. `contract`
 has no adapter dependency. `output` projects `contract` only. The executable
 composes the graph. A package-level test rejects an import from any local
 workspace package into `runtime`, or from an adapter into another adapter's
 private implementation.
+`config` resolves settings before use-case construction; `logging` receives
+typed events after redaction and has no route back into operation decisions.
+The exact source/sink contract is chapter 16. Prefer Go's standard structured
+logging facilities for sink rendering rather than a separate logging
+framework unless conformance tests reveal an unfilled requirement.
 
 The core operation shape is intentionally small:
 

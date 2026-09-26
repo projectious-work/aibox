@@ -118,6 +118,36 @@ action has a usable replacement or an owner-approved change, not simply
 “removed”. Test scripts against published
 binary, not only Go functions. Verify protocol negotiation with selected clients.
 
+### AC-CONFIG-SOURCES — layered process settings and provenance
+
+Test built-in, system, user, eligible project, multiple explicitly selected
+env files, inherited process environment and CLI/MCP invocation overrides in
+every pairwise precedence order and representative full-stack cases. Confirm
+missing optional files are reported, while malformed/unreadable files,
+duplicate/unknown keys, unsupported versions and unauthorized sources fail
+before side effects. Exercise `AIBOX_<SECTION>__<KEY>` parsing, null/empty/
+false, private env-file permissions, relative-path anchoring, ambient-env
+isolation and a deterministic redacted effective-config view. Native
+Dev Container fields remain under upstream semantics; no env/CLI aibox key
+rewrites Features, image, mounts or hooks. Tests use temporary homes and
+prove a project/env/MCP request cannot alter operator policy, executable
+selection or allowed log egress. CLI and MCP resolve equivalent settings for
+their shared use-case inputs; MCP callers cannot change server logging.
+
+### AC-LOGGING — sink, redaction and evidence separation
+
+Validate the closed log-event schema and each declared stderr, rotating-file
+and service-manager capture route on CLI, operator MCP and local MCP. Machine
+stdout contains only its result/protocol while progress and diagnostics use
+stderr; `NO_COLOR` and non-TTY behavior are deterministic. Test levels,
+filters, event correlation, initiating/executing actor attribution, child
+source attribution, partial/cancelled outcomes, concurrent writes, rotation,
+retention, backpressure and unavailable/closed sinks. A required sink or
+receipt failure refuses mutation before effects; mid-operation failure
+reports degraded observability without replaying work. Known secrets,
+private paths and chunked child output never reach any sink, buffer or test
+artifact. Rotating logs cannot erase durable operation receipts/evidence.
+
 ### AC-SEC — authority and malicious-input tests
 
 From the in-container agent, attempt operator mode, forged tool calls,

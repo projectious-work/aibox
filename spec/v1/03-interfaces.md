@@ -67,6 +67,9 @@ Proposed outcomes: `succeeded`, `no_change`, `failed`, `cancelled`,
 CLI JSON stdout contains only the result; human diagnostics/progress use
 stderr. MCP stdio stdout contains only protocol messages. Human table/YAML
 views may be projections of the same result, not separate facts.
+Chapter 16 specifies the structured logging event and sink contract;
+diagnostic logs are never a second result channel or a substitute for the
+durable evidence referenced by this envelope.
 
 Exit classes: 0 success/no-change; 2 invalid input; 3 denied authority;
 4 missing dependency/incompatible environment; 5 operation failure/partial;

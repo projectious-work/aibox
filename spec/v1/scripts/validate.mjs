@@ -7,15 +7,15 @@ const read=p=>readFileSync(path.join(root,p),'utf8');
 const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
 const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
-const normative=docs.filter(x=>/^(0[1-9]|1[0-5])-/.test(x)).map(read).join('\n');
-const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z]+) /gm)].map(x=>x[1]));
+const normative=docs.filter(x=>/^(0[1-9]|1[0-6])-/.test(x)).map(read).join('\n');
+const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z-]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);
 assert(new Set(tracedIds).size===tracedIds.length,'Duplicate feature trace');
 assert(featureIds.size===tracedIds.length && tracedIds.every(x=>featureIds.has(x)),'Feature trace coverage');
-for(const m of normative.matchAll(/\bAC-[A-Z]+\b/g))assert(criteria.has(m[0]),`Missing acceptance ${m[0]}`);
-const defs=new Set([...normative.matchAll(/\*\*(R-[A-Z]+):\*\*/g)].map(x=>x[1]));
-for(const m of normative.matchAll(/\bR-[A-Z]+\b/g))assert(defs.has(m[0]),`Missing requirement ${m[0]}`);
+for(const m of normative.matchAll(/\bAC-[A-Z-]+\b/g))assert(criteria.has(m[0]),`Missing acceptance ${m[0]}`);
+const defs=new Set([...normative.matchAll(/\*\*(R-[A-Z-]+):\*\*/g)].map(x=>x[1]));
+for(const m of normative.matchAll(/\bR-[A-Z-]+\b/g))assert(defs.has(m[0]),`Missing requirement ${m[0]}`);
 for(const id of defs)assert(read('06-delivery.md').includes(`| ${id} |`),`Missing trace ${id}`);
 for(const file of ['configuration.json','commands.json','command-actions.json','command-arguments.json','runtime-assets.json']){
   const rows=json('ledger/'+file),ids=new Set();
@@ -36,7 +36,7 @@ const roadmapSchema=json('roadmap.schema.json');
 // Validate the declared, intentionally small schema vocabulary without an
 // implicit online npm dependency. Unknown schema keywords fail closed.
 function schemaCheck(value,schema,at='$',rootSchema=schema){
- const known=new Set(['$schema','$id','title','type','additionalProperties','required','properties','items','minItems','minLength','minimum','pattern','enum','const','uniqueItems','$defs','$ref','allOf','if','then']);
+ const known=new Set(['$schema','$id','title','type','additionalProperties','required','properties','items','minItems','minLength','minimum','maximum','pattern','enum','const','uniqueItems','$defs','$ref','allOf','if','then']);
  for(const key of Object.keys(schema))assert(known.has(key),`Unsupported schema keyword ${key}`);
  if(schema.$ref){assert(schema.$ref.startsWith('#/$defs/'),'External schema reference');return schemaCheck(value,rootSchema.$defs[schema.$ref.slice(8)],at,rootSchema);}
  if(schema.type){const actual=Array.isArray(value)?'array':value===null?'null':Number.isInteger(value)?'integer':typeof value;assert(actual===schema.type,`${at}: expected ${schema.type}`);}
@@ -44,6 +44,7 @@ function schemaCheck(value,schema,at='$',rootSchema=schema){
  if(schema.enum)assert(schema.enum.includes(value),`${at}: enum`);
  if(schema.minLength!==undefined)assert(value.length>=schema.minLength,`${at}: minLength`);
  if(schema.minimum!==undefined)assert(value>=schema.minimum,`${at}: minimum`);
+ if(schema.maximum!==undefined)assert(value<=schema.maximum,`${at}: maximum`);
  if(schema.pattern)assert(new RegExp(schema.pattern).test(value),`${at}: pattern`);
  if(schema.minItems!==undefined)assert(value.length>=schema.minItems,`${at}: minItems`);
  if(schema.uniqueItems)assert(new Set(value.map(JSON.stringify)).size===value.length,`${at}: uniqueItems`);
@@ -62,8 +63,23 @@ function schemaCheck(value,schema,at='$',rootSchema=schema){
 }
 schemaCheck(roadmap,roadmapSchema);
 const customizationSchema=json('customization.schema.json');
+const processSettingsSchema=json('process-settings.schema.json');
+const processSettingsExample={schemaVersion:'1',output:{format:'json',color:'never'},logging:{level:'info',format:'jsonl',rotationMiB:10,retentionFiles:7,retentionDays:7},execution:{timeoutSeconds:300},workspace:{theme:'gruvbox',mode:'dark',layout:'dev'}};
+schemaCheck(processSettingsExample,processSettingsSchema);
+for(const invalid of [
+ {...processSettingsExample,logging:{level:'verbose'}},
+ {...processSettingsExample,workspace:{layout:'unknown'}},
+ {...processSettingsExample,output:{format:null}},
+ {...processSettingsExample,logging:{rotationMiB:1025}},
+ {...processSettingsExample,operatorPolicy:'/tmp/unsafe'}
+]){let rejected=false;try{schemaCheck(invalid,processSettingsSchema);}catch{rejected=true;}assert(rejected,'Process settings negative fixture accepted');}
 const customizationExample={schemaVersion:'1',workspace:{theme:'gruvbox',mode:'dark',layout:'dev',tmux:{status:{mode:'extended',refresh:{'interval-seconds':5}}}}};
 schemaCheck(customizationExample,customizationSchema);
+schemaCheck({schemaVersion:'1',workspace:processSettingsExample.workspace},customizationSchema);
+for(const key of ['theme','mode','layout']){
+ const values=processSettingsSchema.properties.workspace.properties[key].enum;
+ if(values)for(const value of values)schemaCheck({schemaVersion:'1',workspace:{[key]:value}},customizationSchema);
+}
 for(const invalid of [
  {schemaVersion:'1',workspace:{theme:'unknown-palette'}},
  {schemaVersion:'1',workspace:{tmux:{unexpected:true}}},
@@ -82,6 +98,16 @@ for(const row of json('ledger/configuration.json').filter(x=>x.path.startsWith('
  }
 }
 const resultSchema=json('operation-result.schema.json');
+const logEventSchema=json('log-event.schema.json');
+const logEventExample={schemaVersion:'aibox.log-event/v1',timestamp:'2026-09-26T12:00:00Z',severity:'info',event:'operation.started',component:'app',requestId:'example-1',sequence:0,fields:{scope:'operator'}};
+schemaCheck(logEventExample,logEventSchema);
+for(const invalid of [
+ {...logEventExample,severity:'verbose'},
+ {...logEventExample,requestId:''},
+ {...logEventExample,sequence:-1},
+ {...logEventExample,fields:{scope:123}},
+ {...logEventExample,secret:'unsafe'}
+]){let rejected=false;try{schemaCheck(invalid,logEventSchema);}catch{rejected=true;}assert(rejected,'Log event negative fixture accepted');}
 const requestSchema=json('operation-request.schema.json');
 const requestExample={schemaVersion:'aibox.operation-request/v1',operation:'remove_environment',requestId:'example-1',projectRoot:'/workspace',expectedInputDigest:'sha256:'+'0'.repeat(64),runtimeContext:'test',resourceId:'abc'};
 schemaCheck(requestExample,requestSchema);

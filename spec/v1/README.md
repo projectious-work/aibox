@@ -46,8 +46,9 @@ not the implementation baseline for this rewrite.
 13. [Security and trust boundary](13-security.md)
 14. [Verification, target qualification and release](14-verification-and-release.md)
 15. [Version-line documentation and prerelease publication](15-documentation.md)
+16. [Layered CLI/MCP configuration and operational logging](16-configuration-and-logging.md)
 
-The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-one
+The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-two
 content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. `planned` is not a shipped claim.
 
@@ -77,6 +78,10 @@ Baseline: v0.35.0 release-line commit
   shared CLI/MCP envelope proposal; [request schema](operation-request.schema.json)
   closes common fields and operation-required selectors. Actual client checks
   and generated per-tool SDK conformance remain G04.
+- [Process settings schema](process-settings.schema.json) and
+  [log event schema](log-event.schema.json) define the separate bounded
+  configuration and diagnostic contracts; chapter 16 fixes precedence,
+  authority, sinks and failure handling.
 
 The census is exhaustive for the declared source scopes and includes custom
 deserializer exceptions described in chapter 2. It is not a claim that all

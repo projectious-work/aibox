@@ -13,10 +13,11 @@
     },
     {
       "id": "operator", "title": "Safe operator interface",
-      "note": "Lifecycle delegation first, then equivalent MCP and human CLI",
+      "note": "Layered settings and logging precede lifecycle delegation and equivalent MCP/CLI adapters",
       "phases": [
-        {"id":"V1-05","title":"Build, start, stop and remove exact environments","summary":"Delegate build/up/exec to pinned Dev Container CLI and fill only proven stop/remove gaps with native tooling, exact identity, retention and partial-failure evidence.","status":"planned","dependencies":["V1-02","V1-03"],"spec":["09-lifecycle.md"]},
-        {"id":"V1-06","title":"Expose guarded MCP and thin CLI","summary":"Serve read-only guidance by default and bounded authorized operations through shared Go use cases; prove identical results, cancellation and client compatibility.","status":"planned","dependencies":["V1-05"],"spec":["03-interfaces.md","10-interfaces-and-guidance.md"]}
+        {"id":"V1-22","title":"Establish layered settings and diagnostic sinks","summary":"Resolve system/user/project/env-file/process-env/invocation settings with source authority and effective provenance; emit redacted structured logs to stderr, private rotating files and host collectors without mixing them with results or receipts.","status":"planned","dependencies":["V1-02"],"spec":["02-configuration.md","16-configuration-and-logging.md","process-settings.schema.json","log-event.schema.json"]},
+        {"id":"V1-05","title":"Build, start, stop and remove exact environments","summary":"Delegate build/up/exec to pinned Dev Container CLI and fill only proven stop/remove gaps with native tooling, exact identity, retention and partial-failure evidence.","status":"planned","dependencies":["V1-02","V1-03","V1-22"],"spec":["09-lifecycle.md","16-configuration-and-logging.md"]},
+        {"id":"V1-06","title":"Expose guarded MCP and thin CLI","summary":"Serve read-only guidance by default and bounded authorized operations through shared Go use cases; prove identical results, cancellation and client compatibility.","status":"planned","dependencies":["V1-05","V1-22"],"spec":["03-interfaces.md","10-interfaces-and-guidance.md","16-configuration-and-logging.md"]}
       ]
     },
     {

@@ -20,6 +20,11 @@ scripts cannot silently approve a changed target. MCP clients submit those
 same identity fields; client UI confirmation is never a substitute for server
 policy. No generic `exec`, `config set`, `install addon`, `purge --all` or
 unbounded file-read command is exposed.
+Chapter 16 supplies the complete settings hierarchy and common output/logging
+flags (`--settings-file`, `--env-file`, `--color`, `--log-level`, `--log-format`, `--log-file`,
+`--timeout`). `--config` selects a native Dev Container definition, not the
+aibox process settings file. Flags are invocation-only; no config-write
+command is implied.
 
 All machine calls return the closed `aibox.operation-result/v1` envelope.
 The [closed request schema](operation-request.schema.json) adds common

@@ -7,6 +7,9 @@ fields, Feature options and referenced native Dockerfile/Compose/tool files.
 Use `customizations.aibox` only for aibox-specific preferences that need an
 interpreter. No successor `aibox.toml`, no `set` CLI and no generic config-write
 MCP tool. Agents use their existing file editors after reading guidance.
+The small system/user `settings.json` in chapter 16 configures the aibox
+process (output, logging, timeout and a narrow local UX override subset);
+it is not a project workspace definition or successor to `aibox.toml`.
 
 The all-v0-settings mapping is a working assumption, not verified upstream
 coverage. The [field ledger](ledger/configuration.md) names a disposition for
@@ -52,10 +55,13 @@ Deprecated names are accepted only by the one-time v0 converter, never as two
 simultaneously authoritative v1 keys. Rollback retains the original v0 files
 and pinned runtime until the converted workspace passes its acceptance gate.
 
-**R-PRECEDENCE:** upstream settings use upstream precedence. For aibox-owned
-presentation preferences, apply shipped defaults → user configuration →
-project policy → environment → invocation override, omitting unused layers
-without reordering them. An explicitly user-local tmux/theme file is an
+**R-PRECEDENCE:** upstream settings use upstream precedence. Chapter 16
+defines aibox process-setting paths, env files/vars and invocation flags.
+For overrideable aibox-owned presentation preferences, apply shipped defaults
+→ system configuration → user configuration → project intent → explicitly
+loaded env files → process environment → invocation override, omitting layers
+that do not support a key without reordering them. File-only UX keys do not
+gain implicit env/CLI overrides. An explicitly user-local tmux/theme file is an
 *owned native-tool override*, not a competing aibox configuration layer:
 refresh never overwrites it, and an effective-value view reports that its
 native-tool value wins at render time. The two levels (aibox intent and native

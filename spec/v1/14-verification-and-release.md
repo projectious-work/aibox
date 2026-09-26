@@ -14,6 +14,7 @@ test alone.
 | Schema/static | Closed JSON schemas, valid/invalid native examples, import-boundary rules, source/ledger row counts | Reject incompatible config and duplicate engines early |
 | Unit/component | Fake child executables, policy and path checker, result serializer, guide index, local renderer | All error branches, stable codes, no side effects on denied/read-only requests |
 | Binary black box | Built Go CLI and stdio MCP client, same requests/policy, invalid input, cancellation | Machine output purity and adapter-equivalent results |
+| Settings/logging black box | Temporary system/user/project/env-file/env/flag layers; stderr/file/collector capture, disk-full and rotation fixtures | Provenance, source authority, redaction and evidence separation under real binary execution |
 | Disposable integration | Pinned Dev Container CLI, selected runtime, Features, Templates, image, local UX assets | Direct upstream and wrapped lifecycle, exact stop/remove, persisted home |
 | User journey | Fresh minimal project, complex migrated v0 project, local agent customization, sidebar/review, recovery | Actual v0 parity and new feature usability |
 | Security/fault injection | Host hook denial, symlinks, token leaks, race/restart/partial failure | Boundary holds under hostile and interrupted inputs |
@@ -70,7 +71,7 @@ and re-run of failure-sensitive gates after changed candidate bits.
 
 ## Roadmap state and publication
 
-The canonical [roadmap](roadmap.yaml) groups twenty-one content-specific phases
+The canonical [roadmap](roadmap.yaml) groups twenty-two content-specific phases
 with dependency edges and spec references. `planned` means defined, not
 approved; `in_progress` needs a reviewed phase plan; `shipped` requires a
 `devNote` path and release identifier validated by the roadmap schema, plus
@@ -81,7 +82,7 @@ their declared prerequisites exist. A phase cancellation must name the
 owner-approved replacement or explicit v0 parity exception.
 
 Before promotion, complete all F01–F48, N01/N02 and AC groups, reconcile
-every `CFG:*`, `ADDON:*`, `CMD:*` and runtime-asset row, close G01–G10,
+every `CFG:*`, `ADDON:*`, `CMD:*` and runtime-asset row, close G01–G11,
 verify the complete target/dependency matrix, and run an independent review
 against the **whole** accepted baseline. Build and validate documentation
 locally; publish version-aligned README, docs, roadmap, changelog, AI-readable

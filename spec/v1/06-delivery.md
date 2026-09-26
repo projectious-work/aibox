@@ -10,8 +10,8 @@ Standards are governed upstream; this document maps applicability, not a fork.
 | Standard | Application / evidence |
 |---|---|
 | Application profiles | Infrastructure/template distribution plus Go CLI/MCP, UX, docs, schemas and host-gated release; apply behavior-specific obligations. |
-| Application configuration | R-CONFIG/R-PRECEDENCE/R-POLICY; ownership, provenance, separate authority and preferences. |
-| Application output, logging and evidence | R-RESULT/R-OBSERVABILITY; AC-CLI/AC-DOCTOR/AC-RELEASE; separate results, diagnostics and durable evidence. |
+| Application configuration | R-CONFIG/R-PRECEDENCE/R-CONFIG-SOURCES/R-POLICY; file/env/invocation hierarchy, ownership, provenance and separate authority. |
+| Application output, logging and evidence | R-RESULT/R-OBSERVABILITY/R-LOGGING; AC-CLI/AC-LOGGING/AC-RELEASE; separate results, diagnostics and durable evidence. |
 | Compatibility and machine interfaces | R-INTERFACES/R-DEPENDENCIES/R-MIGRATION; versioned schemas, migrations, documented errors and supported windows. |
 | Product roadmap and development evidence | `roadmap.yaml` in this directory; stable phase IDs, evidence required before shipped. |
 | Spec-driven development cycle | Accept specification, independent plan review, implementation waves, independent complete-baseline conformance review. |
@@ -57,6 +57,8 @@ during boundary review; reconcile the merged source version before acceptance.
 | R-TARGETS | AC-TARGET matrix gates | V1-18 |
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-04, V1-18, V1-19 |
 | R-DOCS | AC-DOCS, AC-GUIDE, AC-RELEASE; both-line build/deploy tests | V1-20, V1-21, V1-19 |
+| R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-22, V1-06 |
+| R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-22, V1-17 |
 
 N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
 groups and link to source evidence. Each phase requires an independent plan
@@ -100,6 +102,7 @@ and beta content/version navigation truthful; V1-19 verifies publication.
 | G08 | Reconcile source/ledger divergences | V1-01/16 reviewers compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity sign-off. |
 | G09 | Reconcile standards version | Owner accepts a specific merged agent-native standard revision before V1-01 exits; avoid a moving policy reference. |
 | G10 | Replace Docsy prerelease site and preserve release lines | Documentation maintainer: V1-20/21 prove the shared Hugo brand-theme build, both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
+| G11 | Qualify configuration and logging adapters | V1-22 maintainer: test strict process-settings/env-file parser, CLI/MCP effective-value parity, protected sink authority, rotating-file behavior on Linux/macOS, and required-sink/receipt fail-closed behavior. |
 
 These are empirical implementation and baseline-acceptance gates, not silent
 design discretion. Chapters 7–14 specify behavior and owners; a phase cannot
