@@ -30,16 +30,16 @@ command -v hugo >/dev/null 2>&1 || {
   echo "Hugo extended is required: https://gohugo.io/installation/" >&2
   exit 1
 }
+command -v go >/dev/null 2>&1 || {
+  echo "Go is required to resolve the pinned Hugo module." >&2
+  exit 1
+}
 command -v npm >/dev/null 2>&1 || {
-  echo "Node.js and npm are required for Docsy assets." >&2
+  echo "Node.js and npm are required for the brand theme assets." >&2
   exit 1
 }
 
-if [[ ! -f "${DOCS_ROOT}/themes/docsy/theme.toml" ]]; then
-  git -C "${PROJECT_ROOT}" submodule update --init --recursive docs-site/themes/docsy
-fi
-
-if [[ ! -d "${DOCS_ROOT}/node_modules" ]]; then
+if [[ ! -d "${DOCS_ROOT}/node_modules/@tabler/icons/icons/outline" || ! -x "${DOCS_ROOT}/node_modules/.bin/tailwindcss" ]]; then
   npm --prefix "${DOCS_ROOT}" ci
 fi
 

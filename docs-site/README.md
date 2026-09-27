@@ -1,51 +1,65 @@
-# aibox Documentation Site
+# aibox documentation site
 
-This directory contains the public aibox documentation site. It uses
-[Hugo](https://gohugo.io/) with the [Docsy](https://www.docsy.dev/) theme and
-the [projectious.work brand system](https://github.com/projectious-work/brand).
+The v1 preview is built with Hugo Extended and the pinned
+[`brand-theme-hugo-vanilla`](https://github.com/projectious-work/brand-theme-hugo-vanilla)
+Hugo module (`v0.3.4`), matching the v0.x documentation line. Its Node assets
+are locked in `package-lock.json`; do not install a floating theme checkout or
+reintroduce Docsy, Bootstrap, or Font Awesome.
 
-## Installation
+## Prerequisites
 
-```bash
-git submodule update --init --recursive docs-site/themes/docsy
-npm --prefix docs-site ci
-```
+- Hugo Extended `0.157.0` or newer
+- Go (the Hugo module declares Go `1.22`)
+- Node.js `18` or newer and npm
 
-## Local Development
+## Local preview and build
 
-```bash
+From the repository root, start the live v1 preview at
+`http://localhost:1316/aibox/v1.x/`:
+
+```sh
 ./scripts/maintain.sh docs-serve
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+To make the production build, including the repository base path and `.nojekyll`:
 
-## Build
-
-```bash
+```sh
 ./scripts/build-docs.sh
 ```
 
-This command generates static content into `docs-site/public/`.
+The build script installs locked Node dependencies with `npm ci` when the
+required theme assets are missing. Hugo resolves the pinned theme module from
+`docs-site/go.mod` and `go.sum`. To build into a scratch directory, pass Hugo
+arguments through the script, for example:
 
-## Deployment
-
-The repository release script validates release notes, compatibility metadata,
-the root README and contributor release guidance, then runs a production Hugo
-build before publication. It deploys the validated docs as part of the release
-flow:
-
-```bash
-./scripts/maintain.sh release X.Y.Z
+```sh
+./scripts/build-docs.sh --destination /tmp/aibox-v1-docs
 ```
 
-For a manual deployment:
+The v1 source sets its preview base path to `/aibox/v1.x/`. Public publication
+is a separate operation: do not push generated files or deploy docs as part
+of ordinary content edits. Release workflows validate and publish the
+candidate snapshot while preserving the v0.x root and other archives.
 
-```bash
-cd ..
-./scripts/maintain.sh docs-deploy --dry-run
-./scripts/maintain.sh docs-deploy
-```
+## Content workflow
 
-The maintenance command builds locally and pushes the static output to the
-`gh-pages` branch. The project does not use GitHub Actions for documentation
-deployment. Do not use the generic `npm run deploy` path for this repository.
+1. Confirm the feature contract and its roadmap phase in `spec/v1/` before
+   writing product instructions. The specification is the design source until
+   an implementation phase proves the behavior.
+2. Add or update audience-specific pages in `docs-site/content/` with the
+   implementation. Label planned examples clearly; do not present them as
+   runnable until checked against the candidate implementation.
+3. Preview with `./scripts/maintain.sh docs-serve`, then run
+   `./scripts/build-docs.sh` after the final content change.
+4. Check page links, navigation, code examples, and the generated v1 preview
+   labels. For documentation foundation changes, also build the v0 current
+   site from its release-line checkout and confirm its root/current label.
+5. Include changed paths, intended audience, the phase's docs deliverable,
+   and build/check results in phase evidence. Publication remains part of the
+   reviewed release workflow.
+
+The stable site root remains the current v0.x documentation. The `/v1.x/`
+tree is visibly a preview until a separately approved stable-v1 promotion.
+Current content that describes the earlier alpha design is withheld from the
+public v1 build; it is retained only as migration source while phase-specific
+replacement docs are written.

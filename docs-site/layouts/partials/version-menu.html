@@ -1,0 +1,17 @@
+{{- $versions := site.Params.versions -}}
+{{- $manifestBase := replaceRE "v[01]\\.x(/[^/]+)?/$" "" site.BaseURL -}}
+{{- if $versions -}}
+<details class="release-menu">
+  <summary class="chipbtn target">{{ site.Params.versionMenuLabel | default "Releases" }}</summary>
+  <nav aria-label="Documentation releases">
+    <p class="release-menu__note">Each link opens that release line's documentation home.</p>
+    <ul class="release-menu__list" data-release-manifest="{{ printf "%sreleases.json" $manifestBase }}">
+      {{- range $versions -}}
+        {{- $label := .label | default (.name | default .version) -}}
+        {{- $active := or (eq .url site.BaseURL) (eq $label site.Params.version) -}}
+        <li><a href="{{ .url }}"{{ if $active }} aria-current="page"{{ end }}>{{ $label }}</a></li>
+      {{- end -}}
+    </ul>
+  </nav>
+</details>
+{{- end -}}

@@ -1,0 +1,6 @@
+<a class="header__brand" href="{{ partial "url.html" "" }}">
+  {{ with resources.Get "icons/logo.svg" }}
+    <img class="header__mark" src="{{ .RelPermalink }}" alt="" width="26" height="26">
+  {{ end }}
+  <span>{{ site.Title }}</span>
+</a>

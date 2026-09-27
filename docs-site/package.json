@@ -1,15 +1,14 @@
 {
   "name": "aibox-docs",
   "private": true,
-  "description": "Local asset dependencies for the aibox Hugo/Docsy site",
+  "description": "Build dependencies for the projectious.work Hugo brand theme",
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "6.7.2",
-    "autoprefixer": "10.4.20",
-    "bootstrap": "5.3.8",
-    "postcss": "8.5.23",
-    "postcss-cli": "11.0.1"
+    "@tabler/icons": "3.31.0",
+    "@tailwindcss/cli": "^4.1.0",
+    "playwright": "^1.62.1",
+    "smol-toml": "^1.8.0"
   }
 }
