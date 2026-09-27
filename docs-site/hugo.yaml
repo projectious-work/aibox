@@ -89,9 +89,13 @@ params:
   editURL:
     default: "https://github.com/projectious-work/aibox/edit/v0.x-dev/docs-site/content/"
   versions:
-    - label: "v0.35.0"
+    - label: "Current: v0.x"
       url: "https://projectious-work.github.io/aibox/"
-      note: latest
+      note: current
+      probe: false
+    - label: "v1.x preview"
+      url: "https://projectious-work.github.io/aibox/v1.x/"
+      note: preview
       probe: false
     - label: "v0.34.7"
       url: "https://projectious-work.github.io/aibox/v0.x/v0.34.7/"
