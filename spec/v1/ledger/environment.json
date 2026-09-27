@@ -1,0 +1,500 @@
+[
+  {
+    "name": "AIBOX_ADDONS_DIR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_EFFORT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_HARNESS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_MESSAGE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_NAME",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_REASONING_EFFORT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_AGENT_TASK",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_BASE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_CONTEXT_KEYS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_COPY_STDOUT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_DIAGNOSTICS_DEGRADED_PIDS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_DIAGNOSTICS_DIR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_DIAGNOSTICS_INTERVAL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_DIAGNOSTICS_RING_SIZE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_E2E_VISUAL_FULL_MATRIX",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_ERROR_COLOR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_ERROR_SGR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_GID",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_GLOW_STYLE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_HOST_ROOT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_HOST_THEME_MODE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LATEX_DOCUMENTS_JSON",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LATEX_PREFERRED_DOCUMENT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LAYOUT_CONFIRM",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LAYOUT_MODE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_LEVEL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_PATH",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_ROTATED_PATH",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_VIEWER",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_VIEWER_ALL_SESSIONS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_LOG_WINDOW_HOURS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_NO_CONTAINER",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_POWERKIT_CACHE_DIR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_POWERKIT_FALLBACK_CACHE_DIR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_POWERKIT_LINE_CACHE_TTL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_POWERKIT_REFRESH_CACHE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_PREVIEW_HAVE_RICH",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_PREVIEW_MODE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RELEASE_SKIP_DOCTORS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_EVENTS_LOG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_EVENTS_ROTATED_PATH",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_EVENT_INTERVAL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_SESSION_ID",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_SESSION_PATH",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_RUNTIME_STARTED_AT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_SIGNAL_MANAGED_MARKER",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_STATUS_INTERVAL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_STATUS_STYLE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_THEME_CONFIRM_RESTART_TUIS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_ACCENT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_ACTIVE_ATTR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_BG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_BGAIBOX_TMUX_ACTIVE_ATTR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_CONFIG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_DIM_BG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_DIM_FG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_FG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_LAYOUT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_LAYOUT_SCRIPT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_LAYOUT_SWITCH_BINDING",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_MANAGED_SESSION",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_MUTED",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_NO_MANAGED_SESSION",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_POWERKIT_BLOCK",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_POWERKIT_FORMATS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_POWERKIT_PLUGIN",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_PREFIX",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_SESSION",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_SOCKET",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_STATUS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_STATUS_INTERVAL",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_STATUS_RIGHT",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_THEME_SWITCH_BINDING",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_TMUX_TITLE_BLOCK",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_UID",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_VERSION",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_VIM_BG",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_VIM_COLORSCHEME",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_WORKSPACE",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_WORKSPACE_DIR",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_YAZI_EXTRA_PREVIEWERS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  },
+  {
+    "name": "AIBOX_YAZI_EXTRA_SETUPS",
+    "sources": {},
+    "classification": "source occurrence; distinguish internal/test override from supported user interface before migration",
+    "acceptance": "AC-CONFIG"
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/process-settings.schema.json",
+  "title": "aibox process settings (system or user layer only)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion"],
+  "properties": {
+    "schemaVersion": {"const": "1"},
+    "output": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "format": {"enum": ["human", "json", "yaml"]},
+        "color": {"enum": ["auto", "always", "never"]}
+      }
+    },
+    "logging": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "level": {"enum": ["trace", "debug", "info", "warn", "error", "off"]},
+        "format": {"enum": ["plain", "jsonl"]},
+        "file": {"type": "string", "minLength": 1},
+        "required": {"type": "boolean"},
+        "rotationMiB": {"type": "integer", "minimum": 1, "maximum": 1024},
+        "retentionFiles": {"type": "integer", "minimum": 1, "maximum": 100},
+        "retentionDays": {"type": "integer", "minimum": 1, "maximum": 365}
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "timeoutSeconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+        "lockWaitSeconds": {"type": "integer", "minimum": 0, "maximum": 600}
+      }
+    },
+    "diagnostics": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "offline": {"type": "boolean"}
+      }
+    },
+    "workspace": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "theme": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["dark", "light", "auto"]},
+        "layout": {"enum": ["ai", "dev", "focus", "cowork"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-receipt.schema.json",
+  "title": "Durable local aibox operation receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "aibox.operation-receipt/v1"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "requestFingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "operation": {
+      "enum": [
+        "build_environment",
+        "start_environment",
+        "stop_environment",
+        "remove_environment",
+        "rebuild_environment",
+        "inspect_environment",
+        "check_environment",
+        "inspect_workspace",
+        "check_workspace",
+        "refresh_workspace",
+        "read_logs",
+        "inspect_operation",
+        "migrate_preview",
+        "migrate_apply",
+        "migrate_rollback"
+      ]
+    },
+    "projectRoot": {
+      "type": "string",
+      "pattern": "^/",
+      "maxLength": 4096
+    },
+    "configPath": {
+      "type": "string",
+      "pattern": "^/",
+      "maxLength": 4096
+    },
+    "inputDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "policyDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "grantId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "executor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "state": {
+      "enum": [
+        "validated",
+        "authorized",
+        "executing",
+        "inspected",
+        "succeeded",
+        "no_change",
+        "failed",
+        "cancelled",
+        "partial",
+        "timed_out",
+        "refused",
+        "rebuild_required"
+      ]
+    },
+    "lastConfirmedStep": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "container",
+              "image",
+              "network",
+              "volume",
+              "file"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "role": {
+            "enum": [
+              "primary",
+              "sidecar",
+              "shared",
+              "artifact"
+            ]
+          },
+          "state": {
+            "enum": [
+              "running",
+              "stopped",
+              "absent",
+              "unknown",
+              "built"
+            ]
+          },
+          "owned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "role",
+          "state",
+          "owned"
+        ]
+      },
+      "maxItems": 64
+    },
+    "completedEffects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resource": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "resource",
+          "action",
+          "status"
+        ]
+      },
+      "maxItems": 1000
+    },
+    "unknownEffects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resource": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "resource",
+          "action",
+          "status"
+        ]
+      },
+      "maxItems": 1000
+    },
+    "result": {
+      "$ref": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-result.schema.json"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "operationId",
+    "requestFingerprint",
+    "operation",
+    "projectRoot",
+    "inputDigest",
+    "createdAt",
+    "updatedAt",
+    "executor",
+    "state",
+    "lastConfirmedStep",
+    "resources",
+    "completedEffects",
+    "unknownEffects"
+  ]
+}

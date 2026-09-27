@@ -1,0 +1,751 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/customization.schema.json",
+  "title": "aibox devcontainer.json customizations.aibox v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1"
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "emphasis": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "full",
+            "standard",
+            "minimal",
+            "none"
+          ]
+        },
+        "emphasis_overrides": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "dev",
+            "focus",
+            "cowork",
+            "ai"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "light",
+            "dark"
+          ]
+        },
+        "prompt": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plain",
+            "minimal",
+            "nerd-font",
+            "pastel",
+            "powerline-pastel",
+            "bracketed",
+            "arrow"
+          ]
+        },
+        "theme": {
+          "type": "string",
+          "enum": [
+            "andromeeda",
+            "aurora-x",
+            "ayu",
+            "borland",
+            "catppuccin",
+            "dracula",
+            "everforest",
+            "github",
+            "gruvbox",
+            "houston",
+            "kanagawa",
+            "laserwave",
+            "material",
+            "min",
+            "monokai",
+            "mono",
+            "moonlight",
+            "night-owl",
+            "nord",
+            "norton",
+            "one-dark",
+            "plastic",
+            "poimandres",
+            "phosphor",
+            "projectious",
+            "contrast",
+            "contrast-mono",
+            "red",
+            "rose-pine",
+            "slack",
+            "snazzy",
+            "solarized",
+            "synthwave84",
+            "tokyo-night",
+            "vesper",
+            "vitesse",
+            "vs-code"
+          ]
+        },
+        "tmux": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "type": "string",
+              "enum": [
+                "dev",
+                "focus",
+                "cowork",
+                "ai"
+              ]
+            },
+            "layout_switch": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "confirm": {
+                  "type": "boolean"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "prefix-key": {
+                  "type": "string"
+                },
+                "style": {
+                  "type": "string"
+                }
+              }
+            },
+            "notifications": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "include-message": {
+                  "type": "boolean"
+                },
+                "protocol": {
+                  "type": "string"
+                },
+                "states": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "session_name": {
+              "type": "string"
+            },
+            "status": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "elements": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "aibox": {
+                      "type": "boolean"
+                    },
+                    "aibox-metrics": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ai": {
+                          "type": "boolean"
+                        },
+                        "log": {
+                          "type": "boolean"
+                        },
+                        "mcp": {
+                          "type": "boolean"
+                        },
+                        "mig": {
+                          "type": "boolean"
+                        },
+                        "oom": {
+                          "type": "boolean"
+                        },
+                        "proc": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "cloud": {
+                      "type": "boolean"
+                    },
+                    "cloudstatus": {
+                      "type": "boolean"
+                    },
+                    "cpu": {
+                      "type": "boolean"
+                    },
+                    "datetime": {
+                      "type": "boolean"
+                    },
+                    "disk": {
+                      "type": "boolean"
+                    },
+                    "external-ip": {
+                      "type": "boolean"
+                    },
+                    "forge": {
+                      "type": "boolean"
+                    },
+                    "git": {
+                      "type": "boolean"
+                    },
+                    "github": {
+                      "type": "boolean"
+                    },
+                    "gpu": {
+                      "type": "boolean"
+                    },
+                    "hostname": {
+                      "type": "boolean"
+                    },
+                    "kubernetes": {
+                      "type": "boolean"
+                    },
+                    "loadavg": {
+                      "type": "boolean"
+                    },
+                    "mem": {
+                      "type": "boolean"
+                    },
+                    "netspeed": {
+                      "type": "boolean"
+                    },
+                    "ping": {
+                      "type": "boolean"
+                    },
+                    "ssh": {
+                      "type": "boolean"
+                    },
+                    "swap": {
+                      "type": "boolean"
+                    },
+                    "terraform": {
+                      "type": "boolean"
+                    },
+                    "uptime": {
+                      "type": "boolean"
+                    },
+                    "weather": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "forge": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "github-hosts": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "labels": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "aibox-ai": {
+                      "type": "string"
+                    },
+                    "aibox-log": {
+                      "type": "string"
+                    },
+                    "aibox-mcp": {
+                      "type": "string"
+                    },
+                    "aibox-mig": {
+                      "type": "string"
+                    },
+                    "aibox-oom": {
+                      "type": "string"
+                    },
+                    "aibox-proc": {
+                      "type": "string"
+                    },
+                    "cloud": {
+                      "type": "string"
+                    },
+                    "cloud-aws": {
+                      "type": "string"
+                    },
+                    "cloud-azure": {
+                      "type": "string"
+                    },
+                    "cloud-gcp": {
+                      "type": "string"
+                    },
+                    "cloud-multi": {
+                      "type": "string"
+                    },
+                    "kubernetes": {
+                      "type": "string"
+                    },
+                    "netspeed": {
+                      "type": "string"
+                    },
+                    "netspeed-download": {
+                      "type": "string"
+                    },
+                    "netspeed-upload": {
+                      "type": "string"
+                    },
+                    "uptime": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "layout": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "line1-left": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "line1-right": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "line2-left": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "line2-right": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "extended",
+                    "plain",
+                    "disabled"
+                  ]
+                },
+                "model_providers": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "admin-usage-enabled": {
+                      "type": "boolean"
+                    },
+                    "cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "providers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "admin-api-key-env": {
+                            "type": "string"
+                          },
+                          "agent-binaries": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "checks": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "harness-components": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "model-components": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "overall-components": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "provider": {
+                            "type": "string"
+                          },
+                          "quota-api-key-env": {
+                            "type": "string"
+                          },
+                          "quota-window": {
+                            "type": "string"
+                          },
+                          "show-admin-usage": {
+                            "type": "boolean"
+                          },
+                          "show-agent-count": {
+                            "type": "boolean"
+                          },
+                          "show-quota": {
+                            "type": "boolean"
+                          },
+                          "status-url": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "show-glyph-when-ok": {
+                      "type": "boolean"
+                    },
+                    "show-ok": {
+                      "type": "boolean"
+                    },
+                    "timeout-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                },
+                "refresh": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "aibox-metrics-cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "cloud-cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "github-cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "interval-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kubernetes-cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "netspeed-cache-ttl-seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                },
+                "separators": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "edge-style": {
+                      "type": "string",
+                      "enum": [
+                        "normal",
+                        "rounded",
+                        "slant",
+                        "slantup",
+                        "trapezoid",
+                        "flame",
+                        "pixel",
+                        "honeycomb",
+                        "none"
+                      ]
+                    },
+                    "elements-spacing": {
+                      "type": "string",
+                      "enum": [
+                        "false",
+                        "true",
+                        "both",
+                        "windows",
+                        "plugins"
+                      ]
+                    },
+                    "style": {
+                      "type": "string",
+                      "enum": [
+                        "normal",
+                        "rounded",
+                        "slant",
+                        "slantup",
+                        "trapezoid",
+                        "flame",
+                        "pixel",
+                        "honeycomb",
+                        "none"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "theme_switch": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "confirm-restart-tuis": {
+                  "type": "boolean"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "include-mode-toggle": {
+                  "type": "boolean"
+                },
+                "prefix-key": {
+                  "type": "string"
+                },
+                "themes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "agent-style": {
+                  "type": "string"
+                },
+                "directory-style": {
+                  "type": "string"
+                },
+                "done-ttl-seconds": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "format": {
+                  "type": "string"
+                },
+                "max-length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "message-max-length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "repository-style": {
+                  "type": "string"
+                },
+                "states": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "done": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "idle": {
+                      "type": "string"
+                    },
+                    "question": {
+                      "type": "string"
+                    },
+                    "working": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "variant": {
+          "type": "string"
+        },
+        "sidebar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 20
+            },
+            "showUnknown": {
+              "type": "boolean"
+            }
+          }
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "githubTui": {
+              "enum": [
+                "gh-dash",
+                "web"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "harnesses": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "launch": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "latex": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cache_dir": {
+          "type": "string"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "output_dir": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "lualatex",
+            "pdflatex",
+            "xelatex",
+            "tectonic"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preview": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "document": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "memory_mib_warn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oom_kill_warn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "process_count_warn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "processkit_mcp_python_warn": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
