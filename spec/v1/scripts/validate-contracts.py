@@ -93,6 +93,19 @@ check("operation-receipt.schema.json", dict(receipt, result=dict(envelope, opera
 check("operation-receipt.schema.json", dict(receipt, createdAt="not-a-date"), False)
 check("roadmap.schema.json", json.loads((root / "roadmap.yaml").read_text()))
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
+for example_name in ("minimal", "customized"):
+    example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"
+    example = json.loads(example_path.read_text())
+    assert "features" not in example, f"{example_name}: unqualified Feature reference"
+    assert "aibox" not in example, f"{example_name}: misplaced aibox configuration"
+    extension = example.get("customizations", {}).get("aibox")
+    if example_name == "minimal":
+        assert extension is None, "minimal: customization must remain optional"
+    else:
+        assert extension is not None, "customized: missing aibox customization"
+        check("customization.schema.json", extension)
+check("customization.schema.json", dict(schemaVersion="2"), False)
+check("customization.schema.json", dict(schemaVersion="1", workspace=dict(theme=None)), False)
 for key, value in {"enabled": True, "port": 8765, "bind": "0.0.0.0", "allow_public": True, "engine": "native"}.items():
     check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview={key: value})), False)
 settings = dict(schemaVersion="1", output=dict(format="json", color="never"), logging=dict(level="info", format="jsonl", rotationMiB=10, retentionFiles=7, retentionDays=7), execution=dict(timeoutSeconds=300))

@@ -1,0 +1,20 @@
+{
+  "commit": "9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6",
+  "counts": {
+    "config_fields": 265,
+    "addon_recipes": 41,
+    "addon_tools": 98,
+    "cli_declarations": 14,
+    "cli_actions": 66,
+    "cli_arguments": 74,
+    "runtime_assets": 105,
+    "documentation_pages": 52,
+    "environment_identifiers": 83
+  },
+  "source_scopes": {
+    "addons": "addons/**/*.yaml",
+    "runtime": ["images", "cli/src/templates", "cli/assets", "addons"],
+    "documentation": "docs-site/content/docs/**/*.md",
+    "environment": ["cli/src/**/*.rs", "images/**/*.sh"]
+  }
+}
