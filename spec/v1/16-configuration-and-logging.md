@@ -53,7 +53,8 @@ The file paths are:
 
 Defaults are explicit: output format `human`, color `auto` (plain on non-TTY
 and always plain under `NO_COLOR`), diagnostic level `info`, no file sink,
-execution timeout 3600 seconds, lock wait 30 seconds and offline doctor
+mutating-command timeout 3600 seconds, read/check timeout 30 seconds,
+lock wait 30 seconds and offline doctor
 checks by default. MCP uses JSON Lines on diagnostic stderr even when a CLI
 human default would be plain; an explicit `logging.format=plain` is rejected
 when launching MCP rather than silently ignored. Workspace UX defaults remain in the versioned
@@ -132,7 +133,7 @@ surface is `--format`, `--color auto|always|never`, `--log-level`,
 `--layout`; these never rewrite project defaults. A host-side `attach`
 does not inherit or apply those local presentation overrides. `--env-file`,
 `--project` and `--config` are bootstrap selectors, not persisted values.
-Command-specific flags such as `--offline`, `--frozen-lockfile`, `--tail` and
+Command-specific flags such as `--offline`, `--frozen-lockfile`, `--no-cache`, `--tail` and
 `--since` override only their corresponding operation inputs. No arbitrary
 `--set`, hidden flags for all 115 UX keys or generic JSON override blob is
 added. UX keys without a dedicated invocation flag can still be changed in

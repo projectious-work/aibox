@@ -11,7 +11,7 @@ chapter 3 and `operation-result.schema.json` are normative for v1.
 is the operator CLI shape. The project selector defaults to the current
 working directory only after canonicalization and policy validation. `up`,
 `build`, `stop`, `remove`, `rebuild`, `status`, `inspect`, `logs`, `doctor`,
-`attach`, and `mcp serve` are the bounded verbs. `refresh` and `doctor`
+`attach`, `operation status ID`, and `mcp serve` are the bounded verbs. `refresh` and `doctor`
 are also available inside a container. `migrate preview|apply|rollback`
 is a separate explicit utility, not a normal configuration setter. Human
 `remove` and `rebuild` require a displayed exact target/disruption summary;
@@ -27,14 +27,16 @@ aibox process settings file. Flags are invocation-only; no config-write
 command is implied.
 
 All machine calls return the closed `aibox.operation-result/v1` envelope.
-The [closed request schema](operation-request.schema.json) adds common
+The [closed request schema](operation-request.schema.json) defines
 `requestId`, `projectRoot`,
 `configPath`, `expectedInputDigest`, and an operation-specific selector:
 `build` has `frozenLockfile`; `start` has no implicit attach; `stop` and
 `remove` require `resourceId` and `runtimeContext`; `rebuild` additionally
 requires `acknowledgeDisruption`; `read_logs` requires `source`, `tailLines`
 (1–1000) and optional `since`; `check` has a named check set and `offline`
-defaulting true; `refresh` names only a local aibox UX scope. Unknown fields,
+defaulting true; `refresh` names a local UX scope and bounded invocation-only
+theme/mode/layout overrides. Reads do not require an expected input digest;
+they return the digest needed for a subsequent mutation (chapter 18). Unknown fields,
 empty IDs, unbounded line counts and invalid paths are rejected before any
 side effect. The Go semantic checker additionally rejects fields irrelevant
 to the selected operation, `tailLines > 1000`, a false disruption
@@ -45,7 +47,7 @@ silently weaken it.
 
 Exit classes are fixed: 0 succeeded/no-change; 2 invalid input; 3 denied;
 4 missing/incompatible dependency; 5 failed/partial; 6 explicit operator
-action or rebuild required; 130 interrupted. JSON stdout contains exactly
+action or rebuild required; 124 timeout; 130 interrupted. JSON stdout contains exactly
 one envelope and a newline. Human progress and warnings go to stderr; `--format
 human` is a projection of the same envelope. `--format yaml` must serialize
 only the result schema, not a richer hidden state. All errors include a stable
@@ -60,8 +62,9 @@ registers resources `aibox://guides/v1/index` and
 outside the project root and explicit launch argument. The server registers
 typed tools `build_environment`, `start_environment`, `stop_environment`,
 `remove_environment`, `rebuild_environment`, `inspect_environment`,
-`read_logs`, `check_environment`; local mode registers only
-`inspect_workspace`, `check_workspace`, `refresh_workspace` and guidance.
+`read_logs`, `check_environment`, `inspect_operation`; local mode registers only
+`inspect_workspace`, `check_workspace`, `refresh_workspace`, local-only
+`read_logs`, local receipt `inspect_operation` and guidance.
 Registering a tool does not authorize its invocation: every call checks
 process identity, policy, target and input digest server-side. No network
 listener, OAuth flow or remote proxy is in v1.

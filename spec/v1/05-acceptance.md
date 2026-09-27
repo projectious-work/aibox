@@ -69,6 +69,19 @@ Every current choice needs either evidence or an explicit blocked result.
 
 ## Acceptance groups
 
+### AC-CONTRACTS — executable contracts and quality limits
+
+Apply chapter 18 and the request/result/policy/receipt schemas to all operations.
+Validate with Draft 2020-12 including date-time formats and external references;
+the same positive/negative corpus must pass Go, CLI and MCP SDK adapters.
+Cover absent containers and first-build failure, invalid input without digest,
+irrelevant fields, wrong contexts, data payloads, partial effects, cancellation,
+timeouts, expired grants, receipt crash recovery and a new client inspecting
+an old operation. Verify Compose exclusive/shared membership and no volume
+deletion. Measure every R-LIMITS bound using the declared reference environment;
+publish observed values, not just pass labels. Reject oversize inputs before
+delegation, and bound/truncate diagnostic output without truncating JSON syntax.
+
 ### AC-CONFIG — configuration equivalence
 
 Given a default v0 fixture and then each non-default field/alias fixture,

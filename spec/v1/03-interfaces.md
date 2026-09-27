@@ -8,8 +8,8 @@ Do not wrap the human CLI and parse its prose to implement MCP.
 ## Proposed operation set
 
 Command names and exit classes below are the v1 design; chapter 10 fixes their
-grammar and input semantics. Final machine-readable per-operation request
-schemas and client tests remain G04. Existing v0 spelling can be retained
+grammar and input semantics. Chapter 18 and the closed per-operation schemas
+fix the machine contracts; real client conformance tests remain G04. Existing v0 spelling can be retained
 where it remains unambiguous.
 The [command audit](command-disposition.md) covers removals/delegation, while
 [commands.json](ledger/commands.json) preserves every original declaration.
@@ -25,6 +25,7 @@ The [command audit](command-disposition.md) covers removals/delegation, while
 | `logs` | `read_logs` | Scoped operator or local | Bounded tail/filter of declared logs; redact before return. No arbitrary file access. |
 | `doctor` | `check_environment` | Scoped operator or local | Read-only check suite. Offline schema checks never execute lifecycle hooks. |
 | `refresh` | `refresh_workspace` | Local | Validate and activate managed local UX changes; report rebuild-required rather than crossing authority. |
+| `operation status ID` | `inspect_operation` | Scoped operator or local | Inspect an authorized durable receipt after interruption; never resume effects automatically. |
 | `attach` / recovery option | No interactive equivalent | Operator human CLI | Delegate entry via native exec/tmux; recovery bypasses broken tmux/Yazi/status. MCP returns connection instructions. |
 | `mcp serve` | Not itself an MCP tool | Startup | Start stdio server with operator-installed capability policy. Read-only knowledge mode requires no runtime access. |
 | help/version/completion | Resources/server metadata | Both | Human shell convenience and product identity. |
@@ -54,16 +55,19 @@ separately; a resource ID is never substituted for an actor. Local results omit
 host runtime context/resource identity rather than inventing it. Evidence
 references point to durable, separately retained records, not log lines.
 `schemaVersion` is `aibox.operation-result/v1`; receivers reject unknown major
-versions and unknown fields rather than silently reinterpret them. A compatible
-minor evolution must be documented before use; breaking meaning requires a new
-major and migration fixtures. Operator results require runtime context and
-resource identity; `failed` and `partial` require structured errors.
+versions and unknown fields rather than silently reinterpret them. A wire-field
+addition therefore needs a new negotiated schema version, not an unannounced
+minor addition to this closed schema. Initial v1 implements only the v1 wire
+contract; retaining old records does not imply executing old requests.
+Chapter 18 defines operation-specific data and early-failure envelopes: builds
+and absent environments do not invent container IDs; malformed input may have
+neither target nor digest. All unsuccessful outcomes carry structured errors.
 Target identity binds the runtime endpoint/context plus resolved project and
 resource identifiers; names/labels alone are not proof of ownership. Reject
 ambiguous targets and changed identity before destructive execution.
 
 Proposed outcomes: `succeeded`, `no_change`, `failed`, `cancelled`,
-`partial`, `rebuild_required`. Evidence of partial effects survives failures.
+`partial`, `rebuild_required`, `refused`, `timed_out`. Evidence of partial effects survives failures.
 CLI JSON stdout contains only the result; human diagnostics/progress use
 stderr. MCP stdio stdout contains only protocol messages. Human table/YAML
 views may be projections of the same result, not separate facts.
@@ -73,8 +77,8 @@ durable evidence referenced by this envelope.
 
 Exit classes: 0 success/no-change; 2 invalid input; 3 denied authority;
 4 missing dependency/incompatible environment; 5 operation failure/partial;
-6 explicit operator action required; 130 interruption. Commit the exact
-per-operation machine schemas and error-code catalog under G04. Never return
+6 explicit operator action required; 124 timeout; 130 interruption. Chapter 18
+fixes the error-code catalog and outcome precedence. Never return
 success after a child failed.
 
 **R-EXECUTION:** invoke public tool binaries with argument arrays, explicit
@@ -91,11 +95,10 @@ is safe; mutating retries inspect actual state and input identity first.
 Duplicate removal must not delete a newly created container with the old name.
 No blind retry of rebuild or delete and no invented durable success receipt.
 
-For a long build, define a tested completion/cancellation behavior supported
-by the chosen MCP clients. If background operations are necessary, a bounded
-operation receipt/status design requires review; no generic workflow engine
-is authorized by this draft. Persist minimal non-secret audit evidence to
-support diagnosis and interrupted-operation recovery.
+Long builds remain synchronous calls. Chapter 18 defines durable receipts and
+read-only operation inspection across client sessions; it does not authorize
+a background workflow engine. Client compatibility and cancellation are tested
+before the relevant phase ships.
 
 ## Knowledge and progressive disclosure
 

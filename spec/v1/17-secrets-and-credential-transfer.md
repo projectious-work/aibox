@@ -88,7 +88,11 @@ decrypt failure and cleanup; broker expiry/rotation/outage; BuildKit layer
 scan; custom user/home permissions; remote-daemon bind path; malicious
 project-requested broad mount/hook; changed input digest; and disabled
 provider. Assert no canary in Git, image/layers, generated files, CLI/MCP
-stdout/stderr, logs, receipts, diagnostics, snapshots or documentation.
+stdout/stderr, logs, receipts, diagnostics, shared snapshots or documentation.
+Intentional provider-native credentials in the approved private persistent
+home, and explicit private backups of that home, are not diagnostic leakage:
+test their restricted permissions, exclusion from publication, encrypted
+backup handling and consent separately. Never claim these stores contain no secrets.
 Verify the container-local agent cannot escalate from a delivered work
 credential to host lifecycle authority. Record per-mode platform support,
 owner approval and cleanup evidence. Unqualified modes are documented as

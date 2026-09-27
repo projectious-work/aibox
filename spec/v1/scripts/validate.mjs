@@ -7,7 +7,7 @@ const read=p=>readFileSync(path.join(root,p),'utf8');
 const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
 const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
-const normative=docs.filter(x=>/^(0[1-9]|1[0-7])-/.test(x)).map(read).join('\n');
+const normative=docs.filter(x=>/^(0[1-9]|1[0-9])-/.test(x)).map(read).join('\n');
 const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z-]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);
@@ -97,7 +97,6 @@ for(const row of json('ledger/configuration.json').filter(x=>x.path.startsWith('
   current=current.properties[key];if(segment.endsWith('[]'))current=current.items;
  }
 }
-const resultSchema=json('operation-result.schema.json');
 const logEventSchema=json('log-event.schema.json');
 const logEventExample={schemaVersion:'aibox.log-event/v1',timestamp:'2026-09-26T12:00:00Z',severity:'info',event:'operation.started',component:'app',requestId:'example-1',sequence:0,fields:{scope:'operator'}};
 schemaCheck(logEventExample,logEventSchema);
@@ -108,34 +107,8 @@ for(const invalid of [
  {...logEventExample,fields:{scope:123}},
  {...logEventExample,secret:'unsafe'}
 ]){let rejected=false;try{schemaCheck(invalid,logEventSchema);}catch{rejected=true;}assert(rejected,'Log event negative fixture accepted');}
-const requestSchema=json('operation-request.schema.json');
-const requestExample={schemaVersion:'aibox.operation-request/v1',operation:'remove_environment',requestId:'example-1',projectRoot:'/workspace',expectedInputDigest:'sha256:'+'0'.repeat(64),runtimeContext:'test',resourceId:'abc'};
-schemaCheck(requestExample,requestSchema);
-for(const invalid of [
- {...requestExample,operation:'shell'},
- {...requestExample,resourceId:''},
- {...requestExample,expectedInputDigest:'not-a-digest'},
- {...requestExample,resourceId:undefined},
- {...requestExample,unbounded:true}
-]){
- let rejected=false;try{schemaCheck(invalid,requestSchema);}catch{rejected=true;}
- assert(rejected,'Request negative fixture accepted');
-}
-const resultExample={schemaVersion:'aibox.operation-result/v1',operation:'check_environment',requestId:'example-1',
- actors:{initiator:'local-user',executor:'aibox-local'},target:{scope:'local',workspaceRoot:'/workspace'},
- inputDigest:'sha256:'+'0'.repeat(64),outcome:'no_change',changedResources:[],warnings:[],evidence:[]};
-schemaCheck(resultExample,resultSchema);
-for(const invalid of [
- {...resultExample,outcome:'healthy'},
- {...resultExample,actors:{initiator:'local-user'}},
- {...resultExample,inputDigest:'not-a-digest'},
- {...resultExample,outcome:'failed'},
- {...resultExample,target:{scope:'operator',workspaceRoot:'/workspace'}},
- {...resultExample,secret:'leak'}
-]){
- let rejected=false;try{schemaCheck(invalid,resultSchema);}catch{rejected=true;}
- assert(rejected,'Result negative fixture accepted');
-}
+// Full Draft 2020-12 metaschema, conditional/union and format validation is
+// performed by validate-contracts.py using the maintained jsonschema library.
 const phases=roadmap.groups.flatMap(x=>x.phases),ids=new Set(phases.map(x=>x.id));
 assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplicate roadmap group');
 assert(ids.size===phases.length,'Duplicate phase');

@@ -27,9 +27,12 @@ Standards are governed upstream; this document maps applicability, not a fork.
 [Canonical standard directory](https://github.com/projectious-work/internal/tree/d096a1992ab91dea2265cf4df342e7a97380b0e4/docs/standards).
 The company agent-native interface decision `CuriousSpire` also applies:
 interface-neutral core, bounded deterministic operations, CLI/MCP equivalence,
-explicit authority and durable evidence. Its normative publication was pending
-in [internal PR #12](https://github.com/projectious-work/internal/pull/12)
-during boundary review; reconcile the merged source version before acceptance.
+explicit authority and durable evidence. Its normative publication remains
+pending in [internal PR #12](https://github.com/projectious-work/internal/pull/12).
+This product draft adopts its reviewed source at
+`a6f2762f4c608fb1de3ad7f3c4d9a5178e8bd1ab` as a fixed product requirement;
+later upstream changes require a recorded delta review, not a moving reference
+or an indefinite block on this specification.
 
 ## Requirement-to-evidence trace
 
@@ -61,6 +64,7 @@ during boundary review; reconcile the merged source version before acceptance.
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-22, V1-06 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-22, V1-17 |
 | R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-23, V1-17, V1-18 |
+| R-LIMITS | AC-CONTRACTS; measured resource, latency, cancellation and output bounds | V1-02, V1-06, V1-17, V1-18 |
 
 N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
 groups and link to source evidence. Each phase requires an independent plan
@@ -92,37 +96,39 @@ its candidate must pass a local site build and changed-page checks. V1-20 is
 placed in foundation before implementation to establish the shared shell;
 V1-21 verifies alpha/beta snapshots and navigation; V1-19 verifies publication.
 
-## Review blockers / explicit unknowns
+## Implementation qualification gates / explicit unknowns
 
 | ID | Question to close | Required evidence / responsible role |
 |---|---|---|
-| G01 | Verify effective configuration mapping | Chapters 8/12 fix authority and converter behavior; V1-03/04/16 must provide exact field destinations, cross-field/default fixtures and native-resolution proof. |
+| G01 | Verify effective configuration mapping | Chapters 8/12/19 fix authority, destination rules and converter behavior; V1-03/04/16 plans enumerate concrete adapters before coding and supply cross-field/default fixtures and native-resolution proof before completion. |
 | G02 | Qualify Feature selection and processkit API | Chapter 8 fixes selection criteria; V1-04/12 must fill per-tool manifest, license/provenance and supported processkit API/version evidence. |
 | G03 | Prove snapshots, recovery and audio cells | Chapter 12 fixes file-based named environments and journal; V1-11/16 must test actual upstream selectors, process context, rollback and platform host bridges. |
-| G04 | Prove request/schema/client conformance | Chapters 9/10 and `operation-request.schema.json` fix common inputs, selectors, exit classes, cancellation and server modes; V1-06 must test generated SDK tool schemas and real MCP clients. |
+| G04 | Prove request/schema/client conformance | Chapters 9/10/18 and closed schemas fix operation-specific inputs/data, early errors, policy, receipts, limits and server modes; V1-06 must test generated SDK tool schemas and real MCP clients. |
 | G05 | Pin and qualify target/dependency manifest | Chapter 14 fixes matrix/evidence method; V1-18 must publish exact tested versions and resolve each v0 support cell. |
 | G06 | Qualify sidebar source accuracy | Chapter 11 fixes no-invention/freshness behavior; V1-14 must record per-harness signals, quota limits, performance and layout evidence. |
 | G07 | Qualify selected review TUIs | Chapter 11 fixes offline/online and write boundaries; V1-15 must verify LazyGit/gh-dash/web fallback, licenses and accessibility. |
 | G08 | Reconcile source/ledger divergences | V1-01/16 reviewers compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity sign-off. |
-| G09 | Reconcile standards version | Owner accepts a specific merged agent-native standard revision before V1-01 exits; avoid a moving policy reference. |
+| G09 | Reconcile standards version | Source is pinned above; V1-01 records acceptance of that product requirement and checks any newly merged delta. A pending company PR is not an automatic implementation blocker. |
 | G10 | Replace Docsy prerelease site and preserve release lines | Documentation maintainer: V1-20/21 prove the shared Hugo brand-theme build, both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
 | G11 | Qualify configuration and logging adapters | V1-22 maintainer: test strict process-settings/env-file parser, CLI/MCP effective-value parity, protected sink authority, rotating-file behavior on Linux/macOS, and required-sink/receipt fail-closed behavior. |
 
-These are empirical implementation and baseline-acceptance gates, not silent
-design discretion. Chapters 7–14 specify behavior and owners; a phase cannot
+These are phase-plan and empirical implementation gates, not silent
+design discretion. Chapters 7–19 specify behavior and owners; a phase cannot
 ship until its listed evidence closes the corresponding gate. A reviewed
 specification may still require target qualification, but it must not assert
 support without it.
 
 ## Validation of this documentation change
 
-Run inventory reproducibility and `validate.mjs`, plus `git diff --check`.
+Run inventory and contract generation with `--check`, `validate.mjs`,
+`uv run --script spec/v1/scripts/validate-contracts.py`, and `git diff --check`.
 The inventory extractor is deliberately baseline-specific, not a general Rust
 parser. It preserves original declarations alongside 66 atomic command-action,
 74 argument and 265 configuration rows. The v0 behavioral source map covers
-all 48 existing F rows. The validator checks the roadmap, aibox customization
-and operation-result schemas with positive/negative fixtures, but it is not a
-general JSON Schema implementation. Changes to the baseline require semantic
+all 48 existing F rows. The Node validator checks links, trace coverage,
+roadmap ordering and selected fixtures. The Python validator uses maintained
+Draft 2020-12 validation, including format assertions and cross-schema references;
+the Node subset is not sufficient on its own. Changes to the baseline require semantic
 review of extraction coverage, not merely new counts.
 
 No runtime parity, host gate or dependency qualification was executed for

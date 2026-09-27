@@ -26,10 +26,12 @@ The container entrypoint restores a normal shell when no harness is selected
 or a selected harness fails. Recovery entry bypasses tmux and all status/
 preview plugins. Home persistence is explicit and portable across rebuild;
 cross-major state migration gets a backup and provider compatibility check.
-No agent inside the container receives a runtime socket, host filesystem
-mount, operator MCP endpoint, delegated host credential or capability to
+No agent inside the container receives a runtime socket, unrestricted host
+filesystem mount, operator MCP endpoint, host-management credential or capability to
 start/stop/rebuild the container. Local agent edits to tmux/theme/Yazi files
 are allowed as the container user and activate only through local refresh.
+Explicit native workspace/home mounts and scoped credential transfers in
+chapter 17 are allowed; they never confer host-management authority.
 
 ## tmux, status, titles and prompt (V1-08–09)
 

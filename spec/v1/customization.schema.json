@@ -718,24 +718,8 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "allow_public": {
-              "type": "boolean"
-            },
-            "bind": {
-              "type": "string"
-            },
             "document": {
               "type": "string"
-            },
-            "enabled": {
-              "type": "boolean"
-            },
-            "engine": {
-              "type": "string"
-            },
-            "port": {
-              "type": "integer",
-              "minimum": 0
             }
           }
         }

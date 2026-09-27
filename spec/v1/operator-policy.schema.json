@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operator-policy.schema.json",
+  "title": "External operator policy and digest-bound grants",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "aibox.operator-policy/v1"
+    },
+    "principal": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "allowedRoots": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^/",
+        "maxLength": 4096
+      },
+      "maxItems": 128
+    },
+    "executables": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "devcontainer": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "runtime": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "compose": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "devcontainer",
+        "runtime"
+      ]
+    },
+    "runtimeContexts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "kind": {
+            "enum": [
+              "docker",
+              "podman"
+            ]
+          },
+          "endpointFingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "endpointFingerprint"
+        ]
+      },
+      "maxItems": 32
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "build_environment",
+          "start_environment",
+          "stop_environment",
+          "remove_environment",
+          "rebuild_environment",
+          "inspect_environment",
+          "check_environment",
+          "read_logs",
+          "inspect_operation",
+          "migrate_preview",
+          "migrate_apply",
+          "migrate_rollback"
+        ]
+      },
+      "maxItems": 32,
+      "uniqueItems": true
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "requester": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "projectRoot": {
+            "type": "string",
+            "pattern": "^/",
+            "maxLength": 4096
+          },
+          "configPath": {
+            "type": "string",
+            "pattern": "^/",
+            "maxLength": 4096
+          },
+          "operation": {
+            "enum": [
+              "build_environment",
+              "start_environment",
+              "stop_environment",
+              "remove_environment",
+              "rebuild_environment",
+              "inspect_environment",
+              "check_environment",
+              "inspect_workspace",
+              "check_workspace",
+              "refresh_workspace",
+              "read_logs",
+              "inspect_operation",
+              "migrate_preview",
+              "migrate_apply",
+              "migrate_rollback"
+            ]
+          },
+          "inputDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "runtimeContext": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "resourceId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allowHostHooks": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "requester",
+          "projectRoot",
+          "configPath",
+          "operation",
+          "inputDigest",
+          "runtimeContext",
+          "expiresAt"
+        ]
+      },
+      "maxItems": 256
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "principal",
+    "allowedRoots",
+    "executables",
+    "runtimeContexts",
+    "operations",
+    "grants"
+  ]
+}

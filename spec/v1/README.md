@@ -1,6 +1,6 @@
 # aibox v1 — Dev Container CLI-based product specification
 
-Version: **0.2 implementation draft, 2026-09-26**. Review target: `v1.x-dev`.
+Version: **0.3 implementation draft, 2026-09-27**. Review target: `v1.x-dev`.
 Product boundary accepted; this specification is **not yet accepted**.
 No product implementation, release or merge is authorized by this draft.
 
@@ -54,6 +54,11 @@ not the implementation baseline for this rewrite.
 15. [Version-line documentation and prerelease publication](15-documentation.md)
 16. [Layered CLI/MCP configuration and operational logging](16-configuration-and-logging.md)
 17. [Secret and credential transfer into the Dev Container](17-secrets-and-credential-transfer.md)
+18. [Executable operation, policy, recovery and quality contracts](18-operational-contracts.md)
+19. [Configuration realization, installer and private-state rules](19-configuration-realization.md)
+
+[Implementation-readiness review](review-readiness.md) records the findings,
+corrections, remaining phase gates and limits of this assessment.
 
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
@@ -108,11 +113,13 @@ is required; no product runtime or credentials are needed):
 
 ```sh
 node spec/v1/scripts/inventory.mjs --check
+node spec/v1/scripts/contracts.mjs --check
 node spec/v1/scripts/validate.mjs
+uv run --script spec/v1/scripts/validate-contracts.py
 ```
 
 Omit `--check` only when intentionally regenerating inventory evidence.
-The Node scripts are specification maintenance tooling, not an exception to
+The Node/Python scripts are specification maintenance tooling, not an exception to
 the Go product-language decision. They do not run hooks or container commands.
 
 ## Normative convention

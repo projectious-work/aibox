@@ -83,18 +83,15 @@ consume their own typed options and render assets packaged in the Feature at
 image build. A Feature lifecycle hook may read files that a Dev Container
 Template placed in the workspace after the workspace is available. Build-time
 `install.sh` cannot assume access to those workspace files. The earlier
-placement of all 115 legacy UX leaf paths under `workspace` is a candidate
-compatibility mapping,
-not an accepted necessity. Before schema acceptance, V1-03/V1-04 must review
-every field in order: standard Dev Container property; Feature option for
-build/rebuild-scoped defaults; native tool file for rich editable settings;
-then `customizations.aibox` only for cross-tool, runtime-changeable UX that
-needs an aibox interpreter. A Feature may package that interpreter. Changing
-build-time Feature options is not assumed to refresh a running container.
+placement of 115 legacy UX leaf paths under `workspace` is resolved in chapter
+19 as an optional runtime compatibility interface, not an infrastructure
+override system. Native-only users may omit it. A Feature packages the local
+interpreter and assets, without duplicating those preferences as build options.
+Changing install/version Feature options requires a rebuild.
 Never duplicate an authoritative value across Feature options and this
 namespace. Moving a field requires schema, ledger, converter, example and
 fixture updates together. The current `schemaVersion: "1"` closes the
-candidate keys; aliases and contradictory legacy forms are converter-only.
+specified keys; aliases and contradictory legacy forms are converter-only.
 `harnesses.order` and `harnesses.launch.<name>.enabled`
 express launch intent, not installation. `latex` and `diagnostics` contain only
 aibox-owned UX/diagnostic preferences. New `workspace.sidebar` and
@@ -107,7 +104,7 @@ there is no permissive opaque extension bag.
 |---|---|---|---|
 | Workspace name, image/build, user, ports, mounts, lifecycle | Standard `devcontainer.json`, native Dockerfile/Compose | Dev Container CLI and native tools | Edited native file; operator policy may deny unsafe requests |
 | Install/disable/version of optional tool or harness | Feature presence and documented Feature options | Feature installer and upstream CLI | Project edit of Feature reference/options |
-| Theme family/mode/variant, prompt/layout, tmux/status/title UX | Feature options for build defaults, native files for rich settings, only a proven runtime cross-tool remainder in `customizations.aibox.workspace` | Feature installer or bounded local UX renderer | Tool-native user files in persistent home |
+| Theme family/mode/variant, prompt/layout, tmux/status/title UX | Versioned distribution defaults and optional `customizations.aibox.workspace`; no duplicate Feature preference options | Bounded local UX renderer; native-only operation also supported | Tool-native user files in persistent home |
 | Native tool advanced settings | Native tmux, PowerKit, Yazi, Vim, Starship, LazyGit and harness files | Owning tool | User-owned native file; never copied back into namespace |
 | Optional audio client | Audio Feature and approved native env/mount declarations | Package manager, runtime and client tools | Host audio service remains operator-owned |
 | Processkit source/version/packages | Versioned processkit Feature input/lock and supported processkit interface | processkit installer | Its own documented user config/context |
@@ -116,11 +113,11 @@ there is no permissive opaque extension bag.
 
 Every `CFG:*` migration row must resolve to exactly one of these authorities,
 with a concrete destination path/property, transform, default behavior and
-fixture. A row that says merely “Feature options” or “native integration” is
-not implementation-ready. This is a specification completion gate, not work to
-silently improvise during implementation. The machine-readable field ledger
+fixture under chapter 19's conversion rules. The machine-readable field ledger
 is inventory evidence; its generic targets are not binding implementation
-instructions.
+instructions. Exact per-tool references and per-harness translations require
+independent phase-plan review before those adapters are implemented; unsupported
+conversion is never silently reported as parity.
 
 ## Feature composition contract
 
@@ -171,12 +168,14 @@ root. Each managed file has a recorded source digest and a header or manifest
 claiming aibox ownership. It never writes `.devcontainer/devcontainer.json`,
 Dockerfile, Compose, `AGENTS.md`, processkit context, user overrides or provider
 auth. A path with a symlink, special file, wrong owner or unexpected content is
-rejected rather than overwritten.
+rejected rather than overwritten. The sole allowed managed generation-pointer
+symlink and exact output layout are specified in chapter 19.
 
-Refresh is transactional at the file-set level as far as the filesystem
-supports it: validate all inputs; render to a private staging directory;
-check output paths and permissions; atomically replace managed files; retain
-the previous generation until tmux/tool reload succeeds; roll back on failure.
+Refresh validates all inputs, renders a private complete generation, checks
+paths/permissions, and atomically selects it through the managed pointer in
+chapter 19. Retain the previous generation until reload succeeds; rollback
+restores file selection and reports failed reload recovery. This does not
+promise atomic rollback of tool-process side effects.
 The result reports changed files and any `rebuild_required` setting separately.
 It must not run `postCreateCommand`, install packages, regenerate host files,
 restart the container or recreate a tmux session implicitly. A live theme

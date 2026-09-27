@@ -38,6 +38,7 @@ for (const file of ['cli/src/config.rs','cli/src/mcp_registration.rs']) {
 }
 
 function mapping(p) {
+  if (/^latex\.preview\.(allow_public|bind|enabled|engine|port)$/.test(p)) return ['native-compose','compose.yaml services.latex-preview: service presence, image and ports; allow_public is an operator-policy request, never a local UX grant','AC-PREVIEW'];
   if (/permissions|execution|security\.|allow_public/.test(p)) return ['authority-request','Native harness/operator policy; project value is a request, never a grant','AC-SEC'];
   if (/^(local\.)/.test(p)) return ['private-native','Gitignored native environment/mount/harness configuration; never copy secrets to shared JSON','AC-MIG'];
   if (/^(customization|appearance)\./.test(p)) return ['aibox-ux',`customizations.aibox.workspace.${p.replace(/^(customization|appearance)\./,'')} (managed native output; user-local native override is separately owned)`,'AC-UX'];
@@ -131,7 +132,7 @@ function addSchemaPath(root,path,type){
 const workspaceSchema=objectSchema(),latexSchema=objectSchema(),diagnosticsSchema=objectSchema();
 for(const row of uniqueConfig){
   if(row.path.startsWith('customization.'))addSchemaPath(workspaceSchema,row.path.slice(14),row.type);
-  if(row.path.startsWith('latex.'))addSchemaPath(latexSchema,row.path.slice(6),row.type);
+  if(row.path.startsWith('latex.')&&!/^latex\.preview\.(allow_public|bind|enabled|engine|port)$/.test(row.path))addSchemaPath(latexSchema,row.path.slice(6),row.type);
   if(row.path.startsWith('container.resource_thresholds.'))addSchemaPath(diagnosticsSchema,row.path.slice(30),row.type);
 }
 workspaceSchema.properties.sidebar={type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'},width:{type:'integer',minimum:20},showUnknown:{type:'boolean'}}};
