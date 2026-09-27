@@ -5,7 +5,7 @@ uses the same Go core. CLI-only presentation conveniences do not require MCP
 equivalents. Core operations have capability-equivalent typed inputs/results.
 Do not wrap the human CLI and parse its prose to implement MCP.
 
-## Proposed operation set
+## Operation set
 
 Command names and exit classes below are the v1 design; chapter 10 fixes their
 grammar and input semantics. Chapter 18 and the closed per-operation schemas
@@ -49,7 +49,7 @@ host hooks, mounts, privileges or executable downloads.
 **R-RESULT:** each core operation returns a versioned result containing
 operation/request identity, target identity, input digest, outcome, changed
 resources, warnings, evidence references and structured error/next action.
-The proposed [closed result schema](operation-result.schema.json) fixes the
+The [closed result schema](operation-result.schema.json) fixes the
 common envelope for both adapters. It records initiating and executing actors
 separately; a resource ID is never substituted for an actor. Local results omit
 host runtime context/resource identity rather than inventing it. Evidence
@@ -66,7 +66,7 @@ Target identity binds the runtime endpoint/context plus resolved project and
 resource identifiers; names/labels alone are not proof of ownership. Reject
 ambiguous targets and changed identity before destructive execution.
 
-Proposed outcomes: `succeeded`, `no_change`, `failed`, `cancelled`,
+Outcomes: `succeeded`, `no_change`, `failed`, `cancelled`,
 `partial`, `rebuild_required`, `refused`, `timed_out`. Evidence of partial effects survives failures.
 CLI JSON stdout contains only the result; human diagnostics/progress use
 stderr. MCP stdio stdout contains only protocol messages. Human table/YAML

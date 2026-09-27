@@ -1,14 +1,14 @@
 # 4. Reuse assessment, targets and dependencies
 
-All target and dependency selections below are **proposed and unverified for
-v1** unless marked accepted direction. Source reading is not compatibility,
-license/supply-chain clearance or execution evidence.
+Qualify each selected dependency and target against the listed acceptance
+criteria. Source inspection does not establish runtime compatibility or
+license/supply-chain clearance.
 
 ## Reuse decisions
 
 | Capability | Existing implementation to prefer | Residual aibox work / acceptance |
 |---|---|---|
-| Dev Container interpretation, build/up/exec, Features/Templates | [Dev Container CLI](https://github.com/devcontainers/cli) — accepted foundation | Public-command delegation; AC-BUILD/AC-LIFE; no internal API import or compiler. |
+| Dev Container interpretation, build/up/exec, Features/Templates | [Dev Container CLI](https://github.com/devcontainers/cli) | Public-command delegation; AC-BUILD/AC-LIFE; no internal API import or compiler. |
 | Stop/remove and Compose services | Runtime CLI / native Compose | Verify exact identity and differences between stop/remove; no daemon API recreation. |
 | MCP protocol | [Official Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Typed bounded tools/resources and stdio; AC-CLI/AC-GUIDE. No custom protocol engine. |
 | Basic language/tool installs | [Maintainer Features](https://github.com/devcontainers/features), native package managers | Evaluate exact options/platform fit; fill proven gaps with small Features. |
@@ -18,7 +18,7 @@ license/supply-chain clearance or execution evidence.
 | Harness sidebar | Evaluate [tmux-agent-status](https://github.com/samleeney/tmux-agent-status) first | Session scoping, theme/layout integration, hook compatibility and telemetry gaps; AC-SIDEBAR. |
 | Rich monitoring alternative | [agent-dashboard](https://github.com/bjornjee/agent-dashboard) | Not selected: orchestration/workflow/remote control exceed monitoring scope; evaluate only a separable observational mode. |
 | Preview/render | Existing Poppler, resvg/librsvg, Ghostscript, Rich, ffmpeg, csvkit, SQLite, bat, chafa/timg/mutool/entr | Preserve small glue where native plugins do not cover existing behavior. |
-| Processkit integration | Product-owned supported installer/config/migration APIs | G02: API availability and pinned compatibility need agreement; do not copy process logic. |
+| Processkit integration | Product-owned supported installer/config/migration APIs | G02: API availability and pinned compatibility require qualification; do not copy process logic. |
 | Config schema/JSONC | Upstream schema and maintained Go parser/validator | G01/G04: select dependencies after conformance test; no new JSONC parser. |
 | Image supply chain | Existing SBOM/scanning/signing tools | Exact-artifact evidence, local release workflow; AC-RELEASE. |
 
@@ -29,7 +29,7 @@ its source default/pin/option declaration. All retain version and explicit
 disablement where supported. This matrix assigns a reuse route; it does not
 assert a matching Feature exists for every tool.
 
-| Recipes | Proposed route | Gaps to prove |
+| Recipes | Reuse route | Gaps to prove |
 |---|---|---|
 | python, node, go, rust | Upstream language Features first; native managers for companion tools | uv/pip/poetry/pdm, pnpm/yarn/bun, clippy/rustfmt/audit/cross target controls; no hidden compulsory extras. |
 | latex, typst | Suitable Feature or small package-backed aibox Feature | All TeX collections, SVG conversion, architecture coverage and optionality. |
@@ -54,10 +54,10 @@ Unverified dependencies are blocked, not silently accepted as “standard”.
 
 **R-TARGETS:** preserve the established v0 platform/user workflows; qualify
 each advertised combination with evidence. The installation docs list four
-host binary targets. Runtime mentions and host-gate evidence differ; this
-draft does not transform mentions into a fully supported Cartesian product.
+host binary targets. Runtime mentions and host-gate evidence differ; a runtime
+mention alone does not establish support for every host/architecture combination.
 
-| ID | Host / architecture | Runtime route | v0 evidence / proposed v1 obligation |
+| ID | Host / architecture | Runtime route | v0 evidence / v1 obligation |
 |---|---|---|---|
 | T01 | macOS arm64 | OrbStack Docker-compatible runtime + Compose | Documented host use and release-host workflow; primary qualification target. |
 | T02 | macOS arm64 | Docker Desktop + Compose | Documented prerequisite/audio route; qualify lifecycle, mounts, UID, audio and previews. |
@@ -69,24 +69,24 @@ draft does not transform mentions into a fully supported Cartesian product.
 | T08 | SSH access to an existing prepared machine | Operator executes supported native tooling there | Evaluate existing v0 scope; no new universal remote provisioning API implied. |
 | T09 | Kubernetes, new cloud backends, Windows native, Alpine | No initial new support claim | Older rewrite ideas are not v0 parity. Any addition requires explicit scope and verification. |
 
-Version floors/ceilings for OS/runtime/Compose/CLI remain G05. Before baseline
-acceptance, publish an explicit matrix of tested versions and evidence, with
-owner-approved treatment of any formerly supported unavailable target. No
+G05 requires explicit OS/runtime/Compose/CLI version floors and ceilings,
+a matrix of tested versions and evidence, and visible unavailable cells.
+Unreproduced v0-supported targets block replacement. No
 runtime compatibility claim follows solely from Docker-API compatibility.
 Nested rootless Podman as an optional **workspace tool** is distinct from
 Podman as the **host lifecycle runtime**; neither grants host socket access.
 
 ## Dependency and compatibility matrix
 
-**R-DEPENDENCIES:** select an exact tested dependency set before implementation
-baseline/release gates; ranges alone are not reproducibility. Commit lockfiles,
+**R-DEPENDENCIES:** record exact dependency versions for each implementation phase and
+verify the complete set before release; ranges alone are not reproducibility. Commit lockfiles,
 image/Feature digests and checksums; retain supported range separately.
 
 | Dependency | Role / where needed | Selection state / constraints |
 |---|---|---|
-| Go toolchain | Build CLI/MCP core for darwin/linux amd64/arm64 | Language accepted; supported stable version chosen with SDK minimum and recorded build provenance. No Go toolchain needed by end user of binary. |
+| Go toolchain | Build CLI/MCP core for darwin/linux amd64/arm64 | Use a supported stable version with SDK minimum and recorded build provenance. No Go toolchain needed by end user of binary. |
 | Official Go MCP SDK | Go module | Preferred; pin tested tagged release in go.mod/go.sum, protocol/client compatibility explicit. |
-| Dev Container CLI | External operator dependency | Foundation accepted; pin tested release and its runtime requirements; no fallback to private internals. |
+| Dev Container CLI | External operator dependency | Pin a tested release and its runtime requirements; no fallback to private internals. |
 | CLI's Node/runtime distribution | Operator-side CLI prerequisite | Package/install method determines runtime; do not assume Go binary makes the upstream CLI dependency disappear. |
 | Docker/Compose or qualified Podman/provider | Operator lifecycle/build | Explicit per-target versions; validate before side effects; never install silently. |
 | OCI base image + package inputs | Workspace content | Debian baseline, two native architectures; immutable digest and package manifest. |

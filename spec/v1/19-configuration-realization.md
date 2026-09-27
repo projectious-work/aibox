@@ -1,13 +1,13 @@
 # 19. Configuration realization and parity implementation rules
 
-This chapter resolves the placement review in chapters 2/8. The v0 ledger is
+This chapter defines configuration placement and conversion. The v0 ledger is
 a source census, not a claim that regex-generated destinations implement a
 converter. Implement these rules in an explicit, table-driven Go converter;
 no catch-all unknown-field copy is allowed. Each concrete ledger path gets a
 fixture, including unreachable fields and aliases. A mapping without a
 verified destination blocks that **conversion**, not basic native v1 use.
 
-## Accepted placement and defaults
+## Placement and defaults
 
 1. Native container topology, users, mounts, ports, environment, hooks and
    installation remain native Dev Container/Compose/Dockerfile/Feature inputs.
@@ -41,8 +41,9 @@ verified destination blocks that **conversion**, not basic native v1 use.
 
 Local LaTeX `engine`, `options`, `cache_dir`, `documents` and
 `preview.document` remain local build/UX intent. Preview service presence,
-image, network binding and port belong **only** to native Compose. Remove
-`latex.preview.enabled/engine/bind/port/allow_public` from the UX schema.
+image, network binding and port belong **only** to native Compose. The UX
+schema excludes
+`latex.preview.enabled/engine/bind/port/allow_public`.
 `allow_public` becomes an operator-reviewed public-bind request, never a
 local-agent permission. Default preview binds loopback; its container has
 read-only completed-PDF mounts and no compiler/source credentials.
@@ -112,14 +113,12 @@ tools are separately selected. Disabled tools cannot be baked into the base.
 Local source references are used for implementation tests; published registry
 references and immutable digests are release outputs, not invented spec inputs.
 
-The V1-04 implementation plan must enumerate the selected upstream reference
-or this concrete source unit for **every** ledger entry, show its options,
-dependencies and license, and undergo independent review before installers
-are implemented. Unqualified upstream replacements cannot silently change
+The V1-04 installation manifest enumerates the selected upstream reference
+or concrete source unit for **every** ledger entry, including options,
+dependencies and license. Unqualified upstream replacements cannot silently change
 the fallback contract. Binary checksums/signatures, architecture selection,
 failed download behavior, default/non-default versions and explicit disable
-are required tests. This phase-level reviewed selection is deliberately not
-a claim that all 98 installers or their supply chains have been qualified.
+are required tests for each selected installer.
 
 ## Local file ownership and recovery
 
@@ -167,13 +166,12 @@ manifest; deleting a definition never deletes archives, context or home.
 Tests cover divergent context, private provider config, user edits since save,
 interruption and recovery. Version control alone is not snapshot parity.
 
-## Acceptance and change control
+## Acceptance
 
 AC-CONFIG/AC-MIG/AC-TOOLS require a coverage report joining every ledger row to
 the applied rule, concrete generated destination, effective value, fixture
 and evidence. Default-only smoke tests are insufficient. Any unsupported
 conversion is an error with retained original data and a manual recipe; it
-cannot be counted as achieved v0 parity. Only owner-approved scope change may
-remove a capability. New features do not become mandatory to hide lost v0
-behavior. The reviewed phase plan resolves artifact/package selections before
-implementation; target-specific evidence resolves support claims afterward.
+cannot be counted as achieved v0 parity. New features must not become mandatory
+to hide lost v0 behavior. Record artifact/package selections before implementing
+the affected adapter; verify target support against the resulting artifacts.

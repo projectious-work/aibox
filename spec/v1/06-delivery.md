@@ -1,38 +1,4 @@
-# 6. Standards, delivery and review blockers
-
-## Standards baseline
-
-Company standards baseline: internal commit
-`d096a1992ab91dea2265cf4df342e7a97380b0e4`, inspected 2026-09-25. Names are plain
-text so they remain visible in renderers that do not resolve relative links.
-Standards are governed upstream; this document maps applicability, not a fork.
-
-| Standard | Application / evidence |
-|---|---|
-| Application profiles | Infrastructure/template distribution plus Go CLI/MCP, UX, docs, schemas and host-gated release; apply behavior-specific obligations. |
-| Application configuration | R-CONFIG/R-PRECEDENCE/R-CONFIG-SOURCES/R-POLICY; file/env/invocation hierarchy, ownership, provenance and separate authority. |
-| Application output, logging and evidence | R-RESULT/R-OBSERVABILITY/R-LOGGING; AC-CLI/AC-LOGGING/AC-RELEASE; separate results, diagnostics and durable evidence. |
-| Compatibility and machine interfaces | R-INTERFACES/R-DEPENDENCIES/R-MIGRATION; versioned schemas, migrations, documented errors and supported windows. |
-| Product roadmap and development evidence | `roadmap.yaml` in this directory; stable phase IDs, evidence required before shipped. |
-| Spec-driven development cycle | Accept specification, independent plan review, implementation waves, independent complete-baseline conformance review. |
-| Security and software supply chain | R-AUTHORITY/R-POLICY/R-REUSE; AC-SEC/AC-TOOLS/AC-RELEASE; threat model and dependency clearance. |
-| Secret delivery | R-SECRETS/AC-SECRETS; explicit native file/socket/env/broker/build paths, host approval, canary scans and cleanup in chapter 17. |
-| Software verification and release engineering | Unit/component/blackbox/integration/e2e, negative tests and exact-candidate evidence; published-artifact verification. |
-| Human-controlled host-phase execution | Owner-invoked bounded host gates; no host socket/privileged companion shortcut, credential-free validation separate from publication. |
-| Host-gated release conformance | AC-TARGET/AC-RELEASE; handoff identity, runtime capability probes, cleanup, repeatability and complete evidence. |
-| Git branching and release promotion | Topic branch → `v1.x-dev` → pre-release/release pointers → main under approved standard; no new unique promotion commits. |
-| Open-source documentation strategy | R-DOCS/AC-DOCS; one Hugo brand-theme pipeline, canonical versioned docs/README/roadmap/changelog/releases and local gh-pages deployment; no GitHub Actions. |
-| AI-agent accessibility and generative discovery | R-GUIDANCE/R-DOCS; public version-aligned Markdown/discovery resources and offline-after-install read-only stdio server. |
-
-[Canonical standard directory](https://github.com/projectious-work/internal/tree/d096a1992ab91dea2265cf4df342e7a97380b0e4/docs/standards).
-The company agent-native interface decision `CuriousSpire` also applies:
-interface-neutral core, bounded deterministic operations, CLI/MCP equivalence,
-explicit authority and durable evidence. Its normative publication remains
-pending in [internal PR #12](https://github.com/projectious-work/internal/pull/12).
-This product draft adopts its reviewed source at
-`a6f2762f4c608fb1de3ad7f3c4d9a5178e8bd1ab` as a fixed product requirement;
-later upstream changes require a recorded delta review, not a moving reference
-or an indefinite block on this specification.
+# 6. Requirements trace and technical qualification
 
 ## Requirement-to-evidence trace
 
@@ -41,7 +7,7 @@ or an indefinite block on this specification.
 | R-PRODUCT | AC-PK, AC-GUIDE, minimal standalone journey | V1-01, V1-03, V1-19 |
 | R-PARITY | All F/CFG/ADDON/CMDTYPE/ASSET rows | V1-04, V1-07–V1-12, V1-16, V1-19 |
 | R-CORE | AC-CLI, AC-BUILD; architecture review rejects duplicate engines | V1-02 |
-| R-BOUNDARY | AC-PK, AC-SEC and product handoff review | V1-01, V1-17 |
+| R-BOUNDARY | AC-PK, AC-SEC and integration-boundary tests | V1-01, V1-17 |
 | R-AUTHORITY | AC-SEC in both contexts | V1-02, V1-06, V1-17 |
 | R-LOCAL | AC-SEC, AC-UX, AC-DOCTOR | V1-07–V1-13 |
 | R-REUSE | Dependency clearance plus AC-TOOLS | V1-04, V1-18 |
@@ -67,9 +33,7 @@ or an indefinite block on this specification.
 | R-LIMITS | AC-CONTRACTS; measured resource, latency, cancellation and output bounds | V1-02, V1-06, V1-17, V1-18 |
 
 N01 → AC-SIDEBAR in V1-14 and N02 → AC-REVIEW in V1-15. Feature rows refine these
-groups and link to source evidence. Each phase requires an independent plan
-review before implementation and complete conformance review afterward. This
-document is a proposed sequence, not the reviewed implementation plan.
+groups and link to source evidence.
 
 | v0 feature rows | Primary implementation phase | Cross-cutting proof |
 |---|---|---|
@@ -96,29 +60,26 @@ its candidate must pass a local site build and changed-page checks. V1-20 is
 placed in foundation before implementation to establish the shared shell;
 V1-21 verifies alpha/beta snapshots and navigation; V1-19 verifies publication.
 
-## Implementation qualification gates / explicit unknowns
+## Technical qualification checks
 
-| ID | Question to close | Required evidence / responsible role |
+| ID | Question to close | Required evidence |
 |---|---|---|
-| G01 | Verify effective configuration mapping | Chapters 8/12/19 fix authority, destination rules and converter behavior; V1-03/04/16 plans enumerate concrete adapters before coding and supply cross-field/default fixtures and native-resolution proof before completion. |
+| G01 | Verify effective configuration mapping | Chapters 8/12/19 fix authority, destination rules and converter behavior; V1-03/04/16 enumerate concrete adapters and supply cross-field/default fixtures and native-resolution proof before completion. |
 | G02 | Qualify Feature selection and processkit API | Chapter 8 fixes selection criteria; V1-04/12 must fill per-tool manifest, license/provenance and supported processkit API/version evidence. |
 | G03 | Prove snapshots, recovery and audio cells | Chapter 12 fixes file-based named environments and journal; V1-11/16 must test actual upstream selectors, process context, rollback and platform host bridges. |
 | G04 | Prove request/schema/client conformance | Chapters 9/10/18 and closed schemas fix operation-specific inputs/data, early errors, policy, receipts, limits and server modes; V1-06 must test generated SDK tool schemas and real MCP clients. |
 | G05 | Pin and qualify target/dependency manifest | Chapter 14 fixes matrix/evidence method; V1-18 must publish exact tested versions and resolve each v0 support cell. |
 | G06 | Qualify sidebar source accuracy | Chapter 11 fixes no-invention/freshness behavior; V1-14 must record per-harness signals, quota limits, performance and layout evidence. |
 | G07 | Qualify selected review TUIs | Chapter 11 fixes offline/online and write boundaries; V1-15 must verify LazyGit/gh-dash/web fallback, licenses and accessibility. |
-| G08 | Reconcile source/ledger divergences | V1-01/16 reviewers compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity sign-off. |
-| G09 | Reconcile standards version | Source is pinned above; V1-01 records acceptance of that product requirement and checks any newly merged delta. A pending company PR is not an automatic implementation blocker. |
-| G10 | Replace Docsy prerelease site and preserve release lines | Documentation maintainer: V1-20/21 prove the shared Hugo brand-theme build, both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
-| G11 | Qualify configuration and logging adapters | V1-22 maintainer: test strict process-settings/env-file parser, CLI/MCP effective-value parity, protected sink authority, rotating-file behavior on Linux/macOS, and required-sink/receipt fail-closed behavior. |
+| G08 | Reconcile source/ledger divergences | V1-01/16 compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity verification. |
+| G10 | Replace Docsy prerelease site and preserve release lines | V1-20/21 prove the shared Hugo brand-theme build, both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
+| G11 | Qualify configuration and logging adapters | V1-22: test strict process-settings/env-file parser, CLI/MCP effective-value parity, protected sink authority, rotating-file behavior on Linux/macOS, and required-sink/receipt fail-closed behavior. |
 
-These are phase-plan and empirical implementation gates, not silent
-design discretion. Chapters 7–19 specify behavior and owners; a phase cannot
-ship until its listed evidence closes the corresponding gate. A reviewed
-specification may still require target qualification, but it must not assert
-support without it.
+A capability is complete only when its qualification checks pass on the
+claimed targets. Missing evidence remains an explicit unsupported or unverified
+cell; schema validity alone does not prove runtime compatibility.
 
-## Validation of this documentation change
+## Specification maintenance checks
 
 Run inventory and contract generation with `--check`, `validate.mjs`,
 `uv run --script spec/v1/scripts/validate-contracts.py`, and `git diff --check`.
@@ -130,20 +91,3 @@ roadmap ordering and selected fixtures. The Python validator uses maintained
 Draft 2020-12 validation, including format assertions and cross-schema references;
 the Node subset is not sufficient on its own. Changes to the baseline require semantic
 review of extraction coverage, not merely new counts.
-
-No runtime parity, host gate or dependency qualification was executed for
-this draft. The existing Rust repository asks for cargo test/clippy before
-commit; both were attempted but `cargo` is absent in this authoring environment.
-This limitation must appear in the draft PR. Product code is unchanged.
-The owner explicitly approved a documentation-only exception on 2026-09-25
-for this draft PR. This is not a waiver for later product implementation,
-release validation or host gates.
-
-## Implementation acceptance gate
-
-The owner accepts a revised specification source commit after blocker closure
-and independent review. The implementation plan then binds requirements,
-work packages, tests, target matrix, risks, reviewers and rollback. Every phase
-has a development note, conformance matrix and evidence. Shipped status needs
-a release and user documentation; previews with incomplete parity say so.
-No external lifecycle/host/publication authority is delegated by this PR.

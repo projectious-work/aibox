@@ -1,9 +1,8 @@
 # 7. Go architecture and code boundaries
 
-This chapter is normative for the proposed implementation. It refines R-CORE,
-R-BOUNDARY, R-REUSE, R-RESULT and R-EXECUTION. Package names may change in a
-reviewed implementation plan, but their responsibilities and forbidden
-dependencies may not silently change. The Go binary is an optional convenience
+This chapter defines R-CORE, R-BOUNDARY, R-REUSE, R-RESULT and R-EXECUTION.
+Package responsibilities and dependency boundaries apply independently of
+package names. The Go binary is an optional convenience
 and agent interface around a workspace that remains valid without it.
 
 ## Applications and processes

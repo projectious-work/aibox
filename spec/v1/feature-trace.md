@@ -3,7 +3,7 @@
 The paths below are relative to the immutable v0.35.0 source commit
 `9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6`. They identify the primary
 behavioral source, not just a declaration. `05-acceptance.md` defines the
-observable obligation. The proposed v1 owner is a design decision; it does not
+observable obligation. The v1 implementation component identifies responsibility; it does not
 claim implementation or runtime equivalence. Each F row must acquire an
 executable fixture and target evidence before parity can close.
 

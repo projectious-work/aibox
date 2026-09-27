@@ -35,7 +35,7 @@ Map each accepted old setting to an effective new outcome in migration tests.
 | State preservation/purge | Safe retention default, explicit recovery action | A checked-in purge flag is not consent to delete credentials. |
 | Diagnostics/thresholds | Namespaced preferences/read-only doctor | In-container checks cannot acquire host access. |
 
-### Proposed aibox extension shape
+### aibox extension schema
 
 The specified `customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
 and `diagnostics` sections. The [closed schema](customization.schema.json)
@@ -53,8 +53,8 @@ Compose input, not local UX fields.
 Unknown keys and null are errors, absence selects the documented default, and
 explicit false/empty values remain distinct. Upstream Feature options remain
 the sole install/version authority. G01 now concerns tested effective mapping,
-not the existence of a proposed namespace shape.
-`schemaVersion` is a decimal major version; this draft accepts only `"1"`.
+not just namespace syntax.
+`schemaVersion` is a decimal major version; v1 accepts only `"1"`.
 Unknown versions fail closed with a migration reference, and adding or changing
 a field requires a reviewed schema revision and positive/negative fixtures.
 Deprecated names are accepted only by the one-time v0 converter, never as two
@@ -75,8 +75,7 @@ tool output) must be displayed separately; there is no silent promotion of a
 project preference over project policy. Show effective values and provenance
 with secrets redacted. Host policy is evaluated independently and can deny a
 requested operation; project values cannot override it. Do not maintain
-duplicate install pins in the UX namespace. This follows the company
-application-configuration layer order, including authority separation.
+duplicate install pins in the UX namespace.
 
 **R-OWNERSHIP:** distribution assets are immutable/versioned; generated tool
 outputs have declared ownership; user overrides are never overwritten.
@@ -143,7 +142,7 @@ in Git, images, shared evidence or public docs.
 ## Draft examples and limits
 
 The following is schematic, not a runnable installation recipe or a claim
-that the proposed Feature registry exists:
+that the Feature registry artifacts already exist:
 
 ```jsonc
 {

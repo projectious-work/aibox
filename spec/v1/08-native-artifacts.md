@@ -77,14 +77,13 @@ bind source exists on the daemon host and that `dev` can write it. A host bind h
 different ownership, portability and cleanup behavior from a named volume.
 
 `customizations.aibox` is not an upstream Feature or a generic customization
-facility. It is proposed product-specific data in `devcontainer.json`, read
+facility. It is product-specific data in `devcontainer.json`, read
 only by software that elects to interpret it. Dev Container Features **can**
 consume their own typed options and render assets packaged in the Feature at
 image build. A Feature lifecycle hook may read files that a Dev Container
 Template placed in the workspace after the workspace is available. Build-time
-`install.sh` cannot assume access to those workspace files. The earlier
-placement of 115 legacy UX leaf paths under `workspace` is resolved in chapter
-19 as an optional runtime compatibility interface, not an infrastructure
+`install.sh` cannot assume access to those workspace files. Chapter 19 defines
+115 legacy UX leaf paths under `workspace` as an optional runtime compatibility interface, not an infrastructure
 override system. Native-only users may omit it. A Feature packages the local
 interpreter and assets, without duplicating those preferences as build options.
 Changing install/version Feature options requires a rebuild.
@@ -115,8 +114,8 @@ Every `CFG:*` migration row must resolve to exactly one of these authorities,
 with a concrete destination path/property, transform, default behavior and
 fixture under chapter 19's conversion rules. The machine-readable field ledger
 is inventory evidence; its generic targets are not binding implementation
-instructions. Exact per-tool references and per-harness translations require
-independent phase-plan review before those adapters are implemented; unsupported
+instructions. Exact per-tool references and per-harness translations must be recorded in
+the implementation manifest before implementing those adapters; unsupported
 conversion is never silently reported as parity.
 
 ## Feature composition contract
@@ -145,13 +144,11 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 5. Prove that native project lockfiles remain authoritative for application
    dependencies; bundled convenience tools never rewrite them.
 
-The selection table must be a reviewed source file keyed by `ADDON:<recipe>/<tool>`;
+The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and
 `decision`. The current `ledger/addons.json` is only its input. Phase V1-04
 cannot be accepted without the filled table and actual Feature manifests.
-This explicit design gate avoids the false certainty of assigning all 98 tools
-to guessed public Features today.
 
 The base image must separately enumerate its packages and runtime glue from
 `ledger/base-build.json`; tools outside the addon catalog do not disappear.

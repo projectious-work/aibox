@@ -1,8 +1,7 @@
 # 16. Layered application configuration and operational logging
 
-This chapter implements the company application-configuration and
-application-output/logging/evidence standards for both the Go CLI and MCP
-server. It does **not** replace `.devcontainer/devcontainer.json` or grant a
+This chapter defines configuration precedence and diagnostic output for the
+Go CLI and MCP server. It does **not** replace `.devcontainer/devcontainer.json` or grant a
 generic ability to override native Dev Container fields. `devcontainer.json`,
 Features, Dockerfile and Compose remain the only project workspace/build
 definition. The settings below configure the aibox process, its bounded
@@ -169,7 +168,7 @@ policy details it cannot access. The view never evaluates hooks, starts a
 container, reads an unrelated home directory or leaks an env-file value.
 The v0 converter maps each old output/diagnostic/logging preference either to
 this process-settings schema, to a standard native project field, or to an
-explicitly unsupported disposition with owner review. It does not
+explicitly unsupported disposition. It does not
 automatically promote `.aibox-local.toml` credentials into a committed
 settings file or begin loading a repository `.env`. Existing v0 logs remain
 readable as historical files until the operator's retention plan removes

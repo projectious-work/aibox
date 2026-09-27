@@ -25,7 +25,7 @@ The established V1-20 ID is retained for traceability; placement and
 dependency edges, not its number, determine execution order.
 
 Each phase's implementation change MUST include the relevant user, operator,
-integrator and/or maintainer documentation in the same reviewed change. Update
+integrator and/or maintainer documentation with the implementation. Update
 the v1 preview pages, task examples, configuration/API reference, compatibility
 notes, how-to/MCP resources, roadmap and changelog/release notes as applicable.
 Remove or clearly label instructions for unavailable functionality. A purely
@@ -132,5 +132,5 @@ disabled, keyboard navigation, active-state accessibility, nonexistent
 same-path fallback, relative assets, search and canonical metadata. Check
 the exact alpha/beta candidate docs against executable examples, schemas and
 release notes; reject stale Docsy assets or stale v0 configuration claims.
-No stable-v1/current label change occurs until the owner separately approves
-the stable promotion and its documentation cutover.
+Apply stable-v1/current labels only when publishing the stable release and its
+matching documentation.

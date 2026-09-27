@@ -20,7 +20,7 @@ use native runtime/Compose operations only for verified gaps. No independent
 Dev Container compiler, scheduler, builder, dependency solver, desired-state
 database, general plugin SDK, secret broker or embedded AI planner.
 
-Proposed component responsibilities (package names are illustrative):
+Component responsibilities (package names are illustrative):
 
 | Component | Responsibility | Forbidden expansion |
 |---|---|---|

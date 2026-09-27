@@ -1,11 +1,10 @@
-# 5. Feature ledger and draft acceptance criteria
+# 5. Feature ledger and acceptance criteria
 
-Every row below is required for the replacement release unless the owner
-explicitly changes scope. Status for every row: **specified, not verified in
-v1**. Baseline references are the immutable documentation/asset/type indexes
+Every row below is required for the replacement release and requires v1
+verification. Baseline references are the immutable documentation/asset/type indexes
 in `ledger/`; existing tests are inputs to the new fixtures, not proof of v1.
-The [reviewed behavioral source map](feature-trace.md) binds each F row to its
-primary implementation and proposed v1 owner; it complements rather than
+The [behavioral source map](feature-trace.md) binds each F row to its
+primary implementation and v1 implementation component; it complements rather than
 replaces the source declaration ledgers. No F row closes on an inventory count.
 
 ## Behavioral feature ledger
@@ -90,7 +89,7 @@ Cover omitted/false/empty/explicit values, arrays/order, dynamic map keys,
 aliases, malformed/unknown fields, contradictory compatibility forms, JSONC,
 Unicode/spaces in paths and source precedence. For each `CFG:*` row record
 fixture, expected effective value, destination, negative case and evidence.
-The proposed customization schema must declare each of its 115 v0 UX leaf
+The customization schema must declare each of its 115 v0 UX leaf
 paths and reject unknown keys, unknown enumerated choices and null; validate
 the representative example in chapter 2. For standard fields and Feature
 options, verify the *resolved* native Dev Container configuration, not only
@@ -127,7 +126,7 @@ exit codes, invalid arguments, timeout/cancellation, child error propagation,
 noninteractive execution and help/completion. All 14 v0 declaration groups,
 66 atomic actions and 74 arguments (including global flags) have a documented
 disposition; every old
-action has a usable replacement or an owner-approved change, not simply
+action has a usable replacement, not simply
 “removed”. Test scripts against published
 binary, not only Go functions. Verify protocol negotiation with selected clients.
 
@@ -219,7 +218,7 @@ prefix/session settings, header modes and every theme/prompt choice. Verify
 key actions, visibility/contrast, resize/narrow panes, no-color/plain-font,
 light/dark/auto, emphasis overrides and native AI-TUI fallback tiers. Use both
 structural assertions and deterministic visual baselines across the palette
-matrix; owner review of representative screenshots supplements automated tests.
+matrix; visual comparison of representative screenshots supplements automated tests.
 User changes survive refresh/rebuild. Failed reload leaves working config;
 session reset requires consent. Plugin version conflicts fail actionably.
 Prove each retained UX field's single owner (Feature option, native file or
@@ -315,7 +314,7 @@ No implicit approval, push or merge and no aibox-built diff engine.
 
 Execute the relevant lifecycle/UX/audio/browser/preview gates on each supported
 target cell with exact versions/architecture recorded. Native host-only tests
-are owner-invoked through bounded handoffs; unavailable hosts remain blocked.
+are invoked by an authorized host operator through bounded handoffs; unavailable hosts remain blocked.
 Headless selection runs without requiring interactive tmux; do not advertise
 new PID-1/agent-runner guarantees without an additional contract and tests.
 
@@ -335,8 +334,7 @@ scanning, signing/provenance and clean-room published-artifact installation.
 Use candidate-bound evidence with no unexplained skips; independently verify
 published artifacts. Local docs build/deploy, no project-authored GitHub
 Actions. Release notes, compatibility matrix, roadmap and migration guide
-describe implemented behavior only. Promotion uses approved version-line
-branches and fast-forward pointers; owner merge/release authority remains explicit.
+describe implemented behavior only. Version-line artifacts and documentation must agree.
 
 ### AC-DOCS — shared Hugo site and versioned prerelease truth
 
@@ -362,8 +360,7 @@ page, not a 404. Validate each prerelease candidate's getting started,
 configuration, migration, authority and feature pages against its exact
 binary/Feature behavior and release notes. Documentation, public Markdown,
 discovery files and MCP guidance agree; no stale v0-only or reverted-v1
-instructions remain in current v1 pages. Stable-v1/current promotion is a
-separate owner decision.
+instructions remain in current v1 pages. Stable-v1/current labels are applied only when publishing the stable release.
 
 ## Evidence record and closure
 
@@ -371,4 +368,4 @@ Each record names requirement/feature/field/tool IDs, case and fixture, target
 versions, source/candidate digest, executor/time, command, expected/actual result,
 artifact references and pass/fail/blocked status. No secret payloads. A group
 closes only when all applicable rows have evidence or accepted non-applicability.
-Independent review checks the complete ledger; counts alone never prove parity.
+Verify the complete ledger; counts alone never prove parity.
