@@ -139,6 +139,23 @@ observation is a candidate, not a compatibility test or release pin.
 
 ## Architecture acceptance
 
+### V1-03 implementation status
+
+The first Go slice lives in the root `go.mod`, `internal/contract`,
+`internal/project` and `internal/process`. It defines the common operation
+result envelope and CLI exit classes, canonical project-file containment,
+plus a no-shell argument-vector runner with an explicit environment and
+bounded, known-secret-redacted diagnostic tails. Offline tests
+use the test binary as a fake child; `go test ./internal/...` requires no
+container runtime. The module currently uses only the Go standard library.
+
+This is **not** a usable v1 CLI or MCP server. Operation-specific payload
+constructors and schema conformance, policy-owned executable resolution,
+process-group cancellation/inspection, durable receipts, locking, and actual
+Dev Container delegation remain open V1-03 work. In particular, the current
+runner must not be used for mutating lifecycle operations until its
+cancellation and observed-effect behavior meet chapter 18.
+
 - A standard minimal workspace builds/starts with the pinned upstream CLI
   without `aibox` on the operator host; direct and wrapped outcomes are
   compared under AC-BUILD.
