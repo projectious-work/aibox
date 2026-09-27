@@ -21,6 +21,10 @@ done
   echo "--line must be v0.x or v1.x" >&2
   exit 2
 }
+[[ "${LINE}" == "v1.x" ]] || {
+  echo "This documentation source publishes only the v1.x line" >&2
+  exit 2
+}
 [[ -z "${VERSION}" || "${VERSION}" =~ ^v[01]\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || {
   echo "--version must be a v-prefixed v0 or v1 semver" >&2
   exit 2
