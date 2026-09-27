@@ -1,53 +1,37 @@
 ---
-title: aibox
-description: "Reproducible AI workspaces from one aibox.toml"
+title: aibox v1.x preview
+description: "The specification and implementation plan for a Go-based aibox distribution built on the Dev Container CLI."
 ---
 
-{{< blocks/cover title="Reproducible AI workspaces" image_anchor="center" height="full" color="dark" >}}
+# aibox v1.x preview
 
-<div class="mx-auto">
-  <p class="lead mb-4">Generate standard devcontainer files, selected tool addons, provider-neutral agent context, and a terminal workspace from one project contract.</p>
-  <a class="btn btn-lg btn-primary me-3 mb-4" href="{{< relref "/docs/getting-started/installation" >}}">
-    Get started <i class="fa-solid fa-arrow-right ms-2"></i>
-  </a>
-  <a class="btn btn-lg btn-outline-light mb-4" href="{{< relref "/docs/overview" >}}">
-    Read the overview
-  </a>
-</div>
+**Preview status:** v1 is under development. The Go application, CLI, MCP
+server, Dev Container Features, and user workflows described by the
+specification are not yet implemented or available for installation.
 
-{{< /blocks/cover >}}
+The specification defines a curated workspace distribution built on the
+upstream Dev Container CLI. Projects will use standard `devcontainer.json`,
+Features, Dockerfiles, Compose files, and native tool configuration. aibox v1
+will not use `aibox.toml` as a project entry point.
 
-{{% blocks/lead color="primary" %}}
-`aibox.toml` is the single source of truth for container identity, addons, AI
-harnesses, theme, layout, runtime settings, and processkit integration.
-{{% /blocks/lead %}}
+## What this preview contains
 
-{{< blocks/section color="white" >}}
-{{% blocks/feature icon="fa-solid fa-box" title="Declarative workspaces" %}}
-One inspectable contract produces a reproducible development environment.
-{{% /blocks/feature %}}
+This site currently publishes the v1 product specification and phase roadmap,
+not installation or operating instructions. Planned commands and
+configuration examples in the specification are design contracts, not usable
+interfaces. Each implementation phase must update its user or maintainer
+documentation and build this site before it can be marked shipped.
 
-{{% blocks/feature icon="fa-solid fa-code-branch" title="Standard output" %}}
-Dockerfile, Compose, and Dev Container files remain readable and interoperable.
-{{% /blocks/feature %}}
+Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1),
+including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml).
 
-{{% blocks/feature icon="fa-solid fa-people-group" title="Provider neutral" %}}
-Agent context lives in the project, with thin provider-specific entry points.
-{{% /blocks/feature %}}
-{{< /blocks/section >}}
+## Stable version
 
-{{< blocks/section color="dark" >}}
-<div class="col-12">
+The stable documentation root continues to describe the current v0.x product.
+This `/v1.x/` site is a preview line and does not replace the stable site.
+For the current released product, use the [v0.x documentation](https://projectious-work.github.io/aibox/).
 
-## Quick start
+## Contributing
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash
-mkdir my-project && cd my-project
-aibox init my-project --harness claude --addon python
-aibox apply
-aibox up
-```
-
-</div>
-{{< /blocks/section >}}
+See the [documentation site README](https://github.com/projectious-work/aibox/blob/v1.x-dev/docs-site/README.md)
+for the local build and contribution workflow.

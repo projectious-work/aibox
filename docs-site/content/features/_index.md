@@ -1,47 +1,22 @@
 ---
 title: Features
-description: "What aibox provides."
+description: "Capabilities planned for the aibox v1 preview."
+draft: false
 ---
 
 # Features
 
-## Single Project Contract
+The v1 specification plans a curated developer workspace built around the
+upstream Dev Container CLI, standard Features, and native project files. None
+of the aibox-specific v1 capabilities below are available in this preview yet.
 
-`aibox.toml` is the source of truth for the workspace: base image, container
-identity, addons, AI harnesses, theme, layout, runtime thresholds, and
-processkit source and version.
+- A thin Go CLI and MCP server sharing one operation core.
+- Native workspace starters and optional, digest-pinned Features.
+- Local themes, tmux workspace UX, Yazi previews, and persistent user data.
+- A read-only doctor, local refresh, and bounded v0 migration/recovery tools.
+- An operator-managed runtime interface with a separate authority boundary.
 
-## Standard Devcontainer Output
-
-aibox generates Dockerfile, Compose, override, and devcontainer JSON files.
-The output remains readable and compatible with Docker, Podman, OrbStack, and
-VS Code Dev Containers.
-
-## Composable Addons
-
-Select language runtimes, AI CLIs, git tools, preview utilities,
-documentation frameworks, and infrastructure tools without forcing them into
-every container.
-
-## processkit Context Integration
-
-processkit owns skills, processes, schemas, state machines, packages, and the
-canonical `AGENTS.md` template. aibox pins, installs, and updates that content
-under `context/`.
-
-## Provider-Neutral AI Harnesses
-
-AI harnesses and their MCP configuration are selected declaratively.
-Provider-specific entry files stay thin while durable context remains local to
-the project.
-
-## Runtime Operations
-
-`aibox get runtime --resources` and `aibox doctor` report memory pressure, OOM
-kill counters, process counts, generated Compose posture, and selected runtime
-settings.
-
-## Migration System
-
-When generated content changes, aibox preserves local edits, keeps upstream
-snapshots, and emits migration documents for changes requiring review.
+These are roadmap targets from the [v1 specification](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1),
+not a v1 feature list for a released binary. Use the [stable v0.x
+documentation](https://projectious-work.github.io/aibox/) for currently
+available product behavior.

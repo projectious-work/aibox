@@ -1,28 +1,63 @@
 (function () {
   "use strict";
 
-  var menu = document.querySelector(".td-release-menu");
+  var menu = document.querySelector(".release-menu__list[data-release-manifest]");
   if (!menu) return;
 
-  function pagePath(siteBase) {
-    var root = new URL(siteBase).pathname;
-    var path = window.location.pathname;
-    if (path.indexOf(root) === 0) path = path.slice(root.length);
-    path = path.replace(/^v[01]\.x\/v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\//, "");
-    path = path.replace(/^v1\.x\//, "");
-    return path;
+  function activeBase(manifest) {
+    var candidates = [];
+    manifest.lines.forEach(function (line) {
+      if (!line || !line.current || typeof line.current.url !== "string" || !Array.isArray(line.releases)) return;
+      candidates.push(line.current.url);
+      line.releases.forEach(function (release) {
+        if (release && typeof release.url === "string") candidates.push(release.url);
+      });
+    });
+    return candidates.map(function (url) {
+      return { url: url, path: new URL(url, window.location.href).pathname.replace(/\/$/, "") + "/" };
+    }).filter(function (candidate) {
+      return window.location.pathname.indexOf(candidate.path) === 0;
+    }).sort(function (a, b) {
+      return b.path.length - a.path.length;
+    })[0];
   }
 
-  function item(label, url, active, muted) {
+  function isActive(base, active) {
+    return active && new URL(base, window.location.href).pathname.replace(/\/$/, "") + "/" === active.path;
+  }
+
+  function item(label, base, active) {
     var li = document.createElement("li");
     var link = document.createElement("a");
-    link.className = "dropdown-item" + (active ? " active" : "");
-    link.href = new URL(pagePath(url.siteBase), url.base).href;
+    // Release and line links always open that version's landing page. Page
+    // equivalence is not assumed across independently maintained docs lines.
+    link.href = new URL(base, window.location.href).href;
     link.textContent = label;
-    if (muted) link.classList.add("td-release-menu__alias");
     if (active) link.setAttribute("aria-current", "page");
     li.appendChild(link);
     return li;
+  }
+
+  function appendLine(fragment, line, active) {
+    if (!line || typeof line.line !== "string" || !line.current || typeof line.current.url !== "string" || !Array.isArray(line.releases)) {
+      throw new Error("invalid release line");
+    }
+    var headingItem = document.createElement("li");
+    var heading = document.createElement("h2");
+    heading.textContent = line.line;
+    headingItem.appendChild(heading);
+    fragment.appendChild(headingItem);
+
+    var currentUrl = line.current.url;
+    var currentLabel = line.line === "v1.x" ? "v1.x preview" : "Current: v0.x";
+    fragment.appendChild(item(currentLabel, currentUrl, isActive(currentUrl, active)));
+
+    line.releases.forEach(function (release) {
+      if (!release || typeof release.url !== "string" || typeof release.version !== "string") {
+        throw new Error("invalid release entry");
+      }
+      fragment.appendChild(item(release.version, release.url, isActive(release.url, active)));
+    });
   }
 
   fetch(menu.dataset.releaseManifest, { credentials: "omit" })
@@ -31,39 +66,16 @@
       return response.json();
     })
     .then(function (manifest) {
+      if (!manifest || !Array.isArray(manifest.lines)) {
+        throw new Error("invalid release manifest");
+      }
       var fragment = document.createDocumentFragment();
-      var currentBase = menu.dataset.currentBase.replace(/\/$/, "");
-
-      manifest.lines.forEach(function (line) {
-        var headingItem = document.createElement("li");
-        var heading = document.createElement("h6");
-        heading.className = "dropdown-header";
-        heading.textContent = line.line;
-        headingItem.appendChild(heading);
-        fragment.appendChild(headingItem);
-
-        var currentActive = line.current.url.replace(/\/$/, "") === currentBase;
-        fragment.appendChild(item(
-          "Current (" + line.current.version + ")",
-          { base: line.current.url, siteBase: manifest.siteBase },
-          currentActive,
-          true
-        ));
-
-        line.releases.forEach(function (release) {
-          var active = release.url.replace(/\/$/, "") === currentBase;
-          fragment.appendChild(item(
-            release.version,
-            { base: release.url, siteBase: manifest.siteBase },
-            active,
-            false
-          ));
-        });
-      });
+      var active = activeBase(manifest);
+      manifest.lines.forEach(function (line) { appendLine(fragment, line, active); });
 
       menu.replaceChildren(fragment);
     })
     .catch(function () {
-      // Hugo-rendered line aliases remain available as an offline fallback.
+      // Keep Hugo-rendered links usable when the manifest is unavailable.
     });
 })();

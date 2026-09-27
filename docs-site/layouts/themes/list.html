@@ -1,11 +1,18 @@
 {{ define "main" }}
-<div class="td-content container py-5">
-  <h1>{{ .Title }}</h1>
-  <p>{{ .Content }}</p>
+<div class="shell">
+  <main id="main">
+    <div class="hero">
+      <div class="hero__eyebrow">{{ site.Title }} · v1.x preview</div>
+      <h1>{{ .Title }}</h1>
+      {{ with .Description }}<p>{{ . }}</p>{{ end }}
+    </div>
+    {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
   <div id="theme-gallery" data-index="{{ "asciinema/themes/index.json" | relURL }}"
        data-base="{{ "asciinema/themes/" | relURL }}">
-    <p class="text-secondary">Loading theme recordings…</p>
+      <p role="status">Loading theme recordings…</p>
+    </div>
   </div>
+  </main>
 </div>
-<script src="{{ "js/theme-gallery.js" | relURL }}" defer></script>
+{{ partial "script.html" (dict "src" "js/theme-gallery.js" "defer" true) }}
 {{ end }}

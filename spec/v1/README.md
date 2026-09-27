@@ -40,6 +40,9 @@ phase names a documentation deliverable that is updated and locally built
 with that phase; V1-21 is the prerelease snapshot/publication gate, not a
 deferred documentation-writing phase.
 
+V1-01's baseline fixture checks, exact source and candidate commits, and
+existing local Docsy build result are recorded in [baseline evidence](baseline-evidence.md).
+
 ### Detailed v0 evidence
 
 Baseline: v0.35.0 release-line commit

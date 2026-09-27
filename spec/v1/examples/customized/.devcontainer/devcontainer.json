@@ -1,0 +1,18 @@
+{
+  "name": "Native Dev Container with Optional aibox Preferences",
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=native-devcontainer-home-${devcontainerId},target=/home/vscode,type=volume"
+  ],
+  "customizations": {
+    "aibox": {
+      "schemaVersion": "1",
+      "workspace": {
+        "theme": "gruvbox",
+        "mode": "dark",
+        "layout": "dev"
+      }
+    }
+  }
+}
