@@ -1,15 +1,29 @@
+{{- $releases := hugo.Data.releases -}}
 {{- $versions := site.Params.versions -}}
-{{- $manifestBase := replaceRE "v[01]\\.x(/[^/]+)?/$" "" site.BaseURL -}}
-{{- if $versions -}}
+{{- if or $releases $versions -}}
 <details class="release-menu">
   <summary class="chipbtn target">{{ site.Params.versionMenuLabel | default "Releases" }}</summary>
   <nav aria-label="Documentation releases">
     <p class="release-menu__note">Each link opens that release line's documentation home.</p>
-    <ul class="release-menu__list" data-release-manifest="{{ printf "%sreleases.json" $manifestBase }}">
-      {{- range $versions -}}
-        {{- $label := .label | default (.name | default .version) -}}
-        {{- $active := or (eq .url site.BaseURL) (eq $label site.Params.version) -}}
-        <li><a href="{{ .url }}"{{ if $active }} aria-current="page"{{ end }}>{{ $label }}</a></li>
+    <ul class="release-menu__list"{{ if $releases }} data-release-manifest="{{ printf "%sreleases.json" (replaceRE "v[01]\\.x(/[^/]+)?/$" "" site.BaseURL) }}"{{ end }}>
+      {{- if $releases -}}
+        {{- range $releases.lines -}}
+          {{- $line := . -}}
+          {{- $currentLabel := cond (eq $line.line "v0.x") "Current: v0.x" "v1.x preview" -}}
+          <li><h2>{{ $line.line }}</h2></li>
+          {{- $currentActive := eq (strings.TrimSuffix "/" $line.current.url) (strings.TrimSuffix "/" site.BaseURL) -}}
+          <li><a href="{{ $line.current.url }}"{{ if $currentActive }} aria-current="page"{{ end }}>{{ $currentLabel }}</a></li>
+          {{- range $line.releases -}}
+            {{- $active := eq (strings.TrimSuffix "/" .url) (strings.TrimSuffix "/" site.BaseURL) -}}
+            <li><a href="{{ .url }}"{{ if $active }} aria-current="page"{{ end }}>{{ .version }}</a></li>
+          {{- end -}}
+        {{- end -}}
+      {{- else -}}
+        {{- range $versions -}}
+          {{- $label := .label | default (.name | default .version) -}}
+          {{- $active := or (eq .url site.BaseURL) (eq $label site.Params.version) -}}
+          <li><a href="{{ .url }}"{{ if $active }} aria-current="page"{{ end }}>{{ $label }}</a></li>
+        {{- end -}}
       {{- end -}}
     </ul>
   </nav>

@@ -27,6 +27,12 @@ To make the production build, including the repository base path and `.nojekyll`
 ./scripts/build-docs.sh
 ```
 
+When `DOCS_RELEASES_MANIFEST` points to the validated shared `releases.json`,
+the build loads it as Hugo data and renders the current v0.x root, v0.x
+archives, v1.x preview root, and published v1.x archives directly into the
+release menu. Without that variable, the menu uses the local `versions`
+configuration above as a standalone preview fallback.
+
 The build script installs locked Node dependencies with `npm ci` when the
 required theme assets are missing. Hugo resolves the pinned theme module from
 `docs-site/go.mod` and `go.sum`. To build into a scratch directory, pass Hugo

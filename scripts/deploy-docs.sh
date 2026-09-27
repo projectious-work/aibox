@@ -46,33 +46,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-DOCS_BASE_URL="${CURRENT_URL}" "${ROOT_DIR}/scripts/build-docs.sh" \
-  --destination "${BUILD_DIR}/current"
-if [[ -n "${VERSION}" ]]; then
-  DOCS_BASE_URL="${SITE_BASE_URL}${LINE}/${VERSION}/" \
-    "${ROOT_DIR}/scripts/build-docs.sh" --destination "${BUILD_DIR}/archive"
-fi
-
 git -C "${ROOT_DIR}" fetch origin "+${PAGES_BRANCH}:${PAGES_BRANCH}"
 git -C "${ROOT_DIR}" worktree add "${PAGES_DIR}" "${PAGES_BRANCH}"
-
-TARGET="${PAGES_DIR}/${CURRENT_PATH}"
-mkdir -p "${TARGET}"
-while IFS= read -r -d '' entry; do
-  name="$(basename "${entry}")"
-  [[ "${name}" == ".git" ]] && continue
-  [[ -z "${CURRENT_PATH}" && "${name}" =~ ^v[01]\.x$ ]] && continue
-  [[ -n "${CURRENT_PATH}" && "${name}" =~ ^v[01]\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] && continue
-  rm -rf -- "${entry}"
-done < <(find "${TARGET}" -mindepth 1 -maxdepth 1 -print0)
-cp -R "${BUILD_DIR}/current/." "${TARGET}/"
-
-if [[ -n "${VERSION}" ]]; then
-  ARCHIVE="${PAGES_DIR}/${LINE}/${VERSION}"
-  mkdir -p "${ARCHIVE}"
-  find "${ARCHIVE}" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-  cp -R "${BUILD_DIR}/archive/." "${ARCHIVE}/"
-fi
 
 mkdir -p "${PAGES_DIR}/v0.x" "${PAGES_DIR}/v1.x"
 
@@ -86,8 +61,6 @@ release_array() {
       'split("\n") | map(select(length > 0) | {version: ., url: ($base + . + "/")})'
 }
 
-v0_releases="$(release_array v0.x)"
-v1_releases="$(release_array v1.x)"
 if [[ -e "${PAGES_DIR}/releases.json" ]]; then
   jq -e '(.schemaVersion == 1) and
     (([.lines[]?.line] | sort) as $lines |
@@ -98,6 +71,15 @@ if [[ -e "${PAGES_DIR}/releases.json" ]]; then
     exit 1
   }
 fi
+if [[ -n "${VERSION}" ]]; then
+  # Include the selected archive in the build-time navigation manifest.
+  # This is a disposable worktree; its published contents are not replaced
+  # until both candidate builds succeed.
+  ARCHIVE="${PAGES_DIR}/${LINE}/${VERSION}"
+  mkdir -p "${ARCHIVE}"
+fi
+v0_releases="$(release_array v0.x)"
+v1_releases="$(release_array v1.x)"
 v0_current="$(jq -r '(.lines[]? | select(.line == "v0.x") | .current.version) // empty' \
   "${PAGES_DIR}/releases.json" 2>/dev/null || true)"
 [[ "${LINE}" == "v0.x" && -n "${VERSION}" ]] && v0_current="${VERSION}"
@@ -115,7 +97,33 @@ jq -n \
       {line: "v0.x", current: {version: $v0Current, url: $siteBase}, releases: $v0Releases},
       {line: "v1.x", current: {version: "preview", url: ($siteBase + "v1.x/")}, releases: $v1Releases}
     ]
-  }' > "${PAGES_DIR}/releases.json"
+  }' > "${BUILD_DIR}/releases.json"
+
+DOCS_RELEASES_MANIFEST="${BUILD_DIR}/releases.json" DOCS_BASE_URL="${CURRENT_URL}" \
+  "${ROOT_DIR}/scripts/build-docs.sh" --destination "${BUILD_DIR}/current"
+if [[ -n "${VERSION}" ]]; then
+  DOCS_RELEASES_MANIFEST="${BUILD_DIR}/releases.json" \
+    DOCS_BASE_URL="${SITE_BASE_URL}${LINE}/${VERSION}/" \
+    "${ROOT_DIR}/scripts/build-docs.sh" --destination "${BUILD_DIR}/archive"
+fi
+
+TARGET="${PAGES_DIR}/${CURRENT_PATH}"
+mkdir -p "${TARGET}"
+while IFS= read -r -d '' entry; do
+  name="$(basename "${entry}")"
+  [[ "${name}" == ".git" ]] && continue
+  [[ -z "${CURRENT_PATH}" && "${name}" =~ ^v[01]\.x$ ]] && continue
+  [[ -n "${CURRENT_PATH}" && "${name}" =~ ^v[01]\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] && continue
+  rm -rf -- "${entry}"
+done < <(find "${TARGET}" -mindepth 1 -maxdepth 1 -print0)
+cp -R "${BUILD_DIR}/current/." "${TARGET}/"
+
+if [[ -n "${VERSION}" ]]; then
+  find "${ARCHIVE}" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+  cp -R "${BUILD_DIR}/archive/." "${ARCHIVE}/"
+fi
+
+cp "${BUILD_DIR}/releases.json" "${PAGES_DIR}/releases.json"
 : > "${PAGES_DIR}/.nojekyll"
 
 git -C "${PAGES_DIR}" add -A
