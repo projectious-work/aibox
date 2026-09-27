@@ -5,6 +5,52 @@ html[data-theme="light"] {
   --header-bg: rgba(248, 249, 251, 0.88);
 }
 
+.release-menu { position: relative; z-index: 2; }
+.release-menu summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+.release-menu summary::-webkit-details-marker { display: none; }
+.release-menu summary::after { content: " ▾"; }
+.release-menu[open] summary::after { content: " ▴"; }
+.release-menu nav {
+  position: absolute;
+  inset-block-start: calc(100% + 0.35rem);
+  inset-inline-end: 0;
+  min-width: 15rem;
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+}
+.release-menu__note { margin: 0.35rem 0.5rem; color: var(--color-text-secondary); font-size: 0.85rem; }
+.release-menu__list { margin: 0; padding: 0.5rem; list-style: none; }
+.release-menu__list h2 {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.release-menu__list a {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.release-menu__list a:hover,
+.release-menu__list a:focus-visible { background: var(--color-surface-raised); }
+.release-menu__list a[aria-current="page"] { font-weight: 700; }
+
 /* The chooser uses brand tokens and the theme's native filter buttons; page
    structure, typography, tables, disclosures, and navigation stay native. */
 .theme-chooser {
