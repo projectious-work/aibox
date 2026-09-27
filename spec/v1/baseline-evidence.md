@@ -49,7 +49,7 @@ minimal example has no aibox-specific customization; the customized example
 validates against `customization.schema.json`, including invalid-version,
 unknown-field, null and invalid-theme cases. Both currently use a generic
 upstream image and user. They are not claims about the future aibox base image,
-V1-03 starter projects, image build/up/exec behavior or qualified runtime
+V1-04 starter projects, image build/up/exec behavior or qualified runtime
 parity. Runtime and published-artifact qualification remain phase gates.
 
 Run the repository-root checks (the baseline commit must be available in Git
@@ -78,7 +78,7 @@ schemas and 98 fixtures. None of these checks is a product runtime test.
 | `node spec/v1/scripts/inventory.mjs --check` | Ledger regeneration makes no changes | Same census as pinned baseline | Pass |
 | `node spec/v1/scripts/contracts.mjs --check` | Contract generation makes no changes | 15 operations, policy and receipts checked | Pass |
 | `node spec/v1/scripts/validate.mjs` | Normative trace, roadmap and links consistent | 27 requirements, 24 acceptance groups, 23 phases | Pass |
-| `node spec/v1/scripts/validate-examples.mjs` | Static native examples and negative cases pass | Static checks passed; V1-03 runtime qualification deferred | Pass |
+| `node spec/v1/scripts/validate-examples.mjs` | Static native examples and negative cases pass | Static checks passed; V1-04 runtime qualification deferred | Pass |
 | `uv run --script spec/v1/scripts/validate-contracts.py` | Full Draft 2020-12 schema fixtures pass | 8 schemas, 98 fixtures | Pass |
 | `./scripts/build-docs.sh --destination /tmp/aibox-v1-pr463-docs` | Existing v1 Docsy site builds as a baseline | 161 pages and 139 static files; two Hugo deprecation warnings | Pass with warnings |
 

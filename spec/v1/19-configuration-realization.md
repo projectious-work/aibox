@@ -113,7 +113,7 @@ tools are separately selected. Disabled tools cannot be baked into the base.
 Local source references are used for implementation tests; published registry
 references and immutable digests are release outputs, not invented spec inputs.
 
-The V1-04 installation manifest enumerates the selected upstream reference
+The V1-05 installation manifest enumerates the selected upstream reference
 or concrete source unit for **every** ledger entry, including options,
 dependencies and license. Unqualified upstream replacements cannot silently change
 the fallback contract. Binary checksums/signatures, architecture selection,

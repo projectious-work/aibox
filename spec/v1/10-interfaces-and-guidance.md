@@ -41,7 +41,7 @@ empty IDs, unbounded line counts and invalid paths are rejected before any
 side effect. The Go semantic checker additionally rejects fields irrelevant
 to the selected operation, `tailLines > 1000`, a false disruption
 acknowledgement, an operator selector in local mode, and non-canonical paths.
-Before V1-06 ships, each tool's SDK-exposed schema must be generated from or
+Before V1-09 ships, each tool's SDK-exposed schema must be generated from or
 conformance-tested against this file; a type wrapper may strengthen but not
 silently weaken it.
 

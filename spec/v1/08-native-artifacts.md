@@ -49,7 +49,7 @@ The starter declares `remoteUser: "aibox"` and a project-scoped named volume:
 ]
 ```
 
-V1-03 verifies the pinned CLI's volume identity and rebuild behavior. A user
+V1-04 verifies the pinned CLI's volume identity and rebuild behavior. A user
 may instead specify a native bind mount from an explicit host directory,
 including an ignored project-local `.aibox-home`, through `mounts` or Compose
 volumes. Changing `containerUser`/`remoteUser` and the Dockerfile user also
@@ -147,7 +147,7 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and
-`decision`. The current `ledger/addons.json` is only its input. Phase V1-04
+`decision`. The current `ledger/addons.json` is only its input. Phase V1-05
 cannot be accepted without the filled table and actual Feature manifests.
 
 The base image must separately enumerate its packages and runtime glue from
@@ -182,7 +182,7 @@ rebuild remains pending for the external operator.
 ## Native configuration example
 
 This example is schematic until selected Feature refs/digests and pins are
-recorded in the V1-04 table. It demonstrates ownership and syntax, not an
+recorded in the V1-05 table. It demonstrates ownership and syntax, not an
 assertion that a registry artifact already exists:
 
 ```jsonc

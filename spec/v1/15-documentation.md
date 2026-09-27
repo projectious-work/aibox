@@ -3,10 +3,10 @@
 **R-DOCS:** aibox v1.x MUST have its own version-aligned public documentation
 line, built with the same Hugo build pipeline and the same
 `github.com/projectious-work/brand-theme-hugo-vanilla` theme module used by
-v0.x. The current v1 prerelease tree uses Docsy, a separate submodule,
-Bootstrap and Font Awesome; that is a migration input, not the target. Reuse
-the v0 documentation shell, build scripts and brand components rather than
-maintaining two site frameworks. The initial theme pin must match the v0
+v0.x. Earlier v1 preview content used Docsy, a separate submodule,
+Bootstrap and Font Awesome; that material remains excluded migration history.
+The current v1 tree uses the shared Hugo shell, build scripts and brand
+components rather than maintaining two site frameworks. The theme pin matches the v0
 line's tested pin (currently v0.3.4 at the inspected v0.x release branch);
 later changes are coordinated, pinned upgrades, never floating module heads.
 The v1 content is independently maintained and describes the Dev Container
@@ -14,15 +14,15 @@ CLI-based product, not a copied v0 `aibox.toml` manual.
 
 ## Documentation is part of every phase
 
-V1-20 establishes the shared v0/v1 Hugo build **before** implementation
-phases begin. It is an enabling foundation phase, not a final documentation
-sprint. V1-01 (specification acceptance) updates the specification and
-roadmap documentation and runs the existing local documentation build as a
-baseline; V1-20 then replaces the v1 Docsy route. Every later phase depends
-directly or transitively on V1-20. The canonical roadmap gives every phase a
+V1-02 established the shared v0/v1 Hugo build **before** Go implementation
+begins. It is an enabling foundation phase, not a final documentation sprint.
+V1-01 (specification acceptance) updated the specification and roadmap and
+recorded the earlier local documentation build as a baseline; V1-02 replaced
+the v1 Docsy route. Every later phase depends
+directly or transitively on V1-02. The canonical roadmap gives every phase a
 `docs` deliverable; no phase may reach `shipped` with that field unfulfilled.
-The established V1-20 ID is retained for traceability; placement and
-dependency edges, not its number, determine execution order.
+Phase IDs follow this implementation order; the
+[crosswalk](phase-id-crosswalk.md) preserves references from earlier reviews.
 
 Each phase's implementation change MUST include the relevant user, operator,
 integrator and/or maintainer documentation with the implementation. Update
@@ -44,11 +44,11 @@ must be rerun after any code or docs change affecting the candidate. Public
 deployment remains a separate release/preview decision; a local build is
 mandatory even when publication is deferred.
 
-V1-21 is not where feature documentation first appears. It takes already-
+V1-19 is not where feature documentation first appears. It takes already-
 maintained phase content and verifies the exact alpha/beta snapshot, shared
-Releases dropdown and cross-line publication. V1-19 performs final candidate
+Releases dropdown and cross-line publication. V1-23 performs final candidate
 and published-artifact consistency checks; neither phase may be used to defer
-the documentation owed by V1-02 through V1-18 and V1-22/23.
+the documentation owed by intervening implementation phases.
 
 ## Site layout and release identity
 

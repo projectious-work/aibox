@@ -112,14 +112,23 @@ for(const invalid of [
 const phases=roadmap.groups.flatMap(x=>x.phases),ids=new Set(phases.map(x=>x.id));
 assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplicate roadmap group');
 assert(ids.size===phases.length,'Duplicate phase');
+assert(phases.every((p,i)=>p.id===`V1-${String(i+1).padStart(2,'0')}`),'Roadmap IDs must follow implementation order without gaps');
+assert(phases.filter(p=>p.status==='in_progress').length<=1,'Only one phase may be in progress');
+const current=phases.findIndex(p=>p.status==='in_progress');
+if(current>=0)assert(phases.slice(0,current).every(p=>['implemented','shipped','cancelled'].includes(p.status)),'Earlier phases must finish before the active phase');
+const position=new Map(phases.map((p,i)=>[p.id,i]));
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
- assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
- for(const dep of p.dependencies??[])assert(ids.has(dep),`Unknown dependency ${dep}`);
+ assert(['idea','planned','in_progress','implemented','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
+ for(const dep of p.dependencies??[]){
+  assert(ids.has(dep),`Unknown dependency ${dep}`);
+  assert(position.get(dep)<position.get(p.id),`Dependency ${dep} must precede ${p.id}`);
+ }
  assert(p.spec?.length>0,`Missing spec references ${p.id}`);
  for(const ref of p.spec)assert(existsSync(path.join(root,ref)),`Missing phase spec ${p.id}: ${ref}`);
  if(p.status==='shipped')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing shipped evidence ${p.id}`);
+ if(p.status==='implemented')assert(p.evidence?.length>0 && p.evidence.every(ref=>existsSync(path.join(root,ref))),`Missing implemented evidence ${p.id}`);
 }
 const visited=new Set(),active=new Set();
 const byId=new Map(phases.map(x=>[x.id,x]));
@@ -130,9 +139,9 @@ function dependsOn(id,ancestor,seen=new Set()){
  seen.add(id);
  return (byId.get(id).dependencies??[]).some(dep=>dep===ancestor||dependsOn(dep,ancestor,seen));
 }
-assert(roadmap.groups[0].phases.some(p=>p.id==='V1-20'),'Shared documentation build must be a foundation phase');
-for(const id of ids)if(!['V1-01','V1-20'].includes(id))
- assert(dependsOn(id,'V1-20'),`Phase ${id} can start before the shared documentation build`);
+assert(roadmap.groups[0].phases.some(p=>p.id==='V1-02'),'Shared documentation build must be a foundation phase');
+for(const id of ids)if(!['V1-01','V1-02'].includes(id))
+ assert(dependsOn(id,'V1-02'),`Phase ${id} can start before the shared documentation build`);
 // Every local Markdown link, including linked source evidence ledgers.
 for(const file of [...docs,'ledger/configuration.md','ledger/addons.md']){
  for(const m of read(file).matchAll(/\]\(([^)]+)\)/g)){

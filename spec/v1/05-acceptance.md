@@ -344,7 +344,7 @@ local v1 Hugo build from the phase candidate commit, and check links, schemas
 and changed executable examples. A build failure or stale/misleading page
 blocks that phase's completion; a development note alone does not satisfy
 the gate. Check v0 current content and Releases labels remain unchanged.
-V1-01 records the existing docs-build baseline; V1-20 establishes the shared
+V1-01 records the existing docs-build baseline; V1-02 establishes the shared
 Hugo route before any implementation phase. Later phases rerun the build,
 including internal phases and phases that do not publish a public preview.
 

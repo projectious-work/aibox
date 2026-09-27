@@ -1,4 +1,10 @@
-# aibox Documentation Site
+# Archived Docsy instructions
+
+This file describes the former v1 preview site and is retained only for
+migration history. The active site uses the pinned projectious.work Hugo brand
+theme; use [README.md](README.md) for current build instructions.
+
+# Former aibox Documentation Site
 
 This directory contains the public aibox documentation site. It uses
 [Hugo](https://gohugo.io/) with the [Docsy](https://www.docsy.dev/) theme and

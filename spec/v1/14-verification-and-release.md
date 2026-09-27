@@ -75,9 +75,9 @@ The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phase
 with dependency edges and spec references. `planned` identifies pending work;
 `in_progress` identifies active implementation; `shipped` requires a
 `devNote` path and release identifier validated by the roadmap schema, plus
-the evidence above. V1-20 is a foundation prerequisite for all implementation
+the evidence above. V1-02 is a foundation prerequisite for all implementation
 phases, so the shared Hugo build exists before features are delivered. Every
-phase has a distinct documentation deliverable and build gate; V1-21 is for
+phase has a distinct documentation deliverable and build gate; V1-19 is for
 candidate-specific snapshot/publication, not a catch-up writing phase. Keep
 development notes adjacent to implementation under the normal repository
 documentation structure. The phase graph is not a
