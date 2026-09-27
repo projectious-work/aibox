@@ -34,14 +34,21 @@ maps the v0 CLI to v1 operations and delegated workflows.
 
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
-chapters governing its implementation. `planned` is not a shipped claim.
-V1-20 establishes the shared Hugo build before implementation, and every
-phase names a documentation deliverable that is updated and locally built
-with that phase; V1-21 is the prerelease snapshot/publication gate, not a
+chapters governing its implementation. Phase IDs now follow execution order,
+with dependencies pointing only backward. `implemented` means merged work
+with recorded evidence, not a published release; `shipped` requires release
+evidence. Only one phase may be `in_progress` at a time. V1-01 and V1-02 are
+implemented; V1-03 (Go operation core) is the sole active phase. Every phase
+names a documentation deliverable that is updated and locally built with that
+phase; V1-19 is the prerelease snapshot/publication gate, not a
 deferred documentation-writing phase.
 
-V1-01's baseline fixture checks, exact source and candidate commits, and
-existing local Docsy build result are recorded in [baseline evidence](baseline-evidence.md).
+The [phase ID crosswalk](phase-id-crosswalk.md) maps identifiers used before
+this sequential renumbering to their current IDs.
+
+V1-01's baseline fixture checks and pre-migration local docs build are recorded
+in [baseline evidence](baseline-evidence.md). The current shared Hugo build is
+recorded in [documentation foundation evidence](docs-foundation-evidence.md).
 
 ### Detailed v0 evidence
 

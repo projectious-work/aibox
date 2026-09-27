@@ -1,4 +1,4 @@
-// Static native Dev Container examples only. V1-03 owns runtime build/up/exec
+// Static native Dev Container examples only. V1-04 owns runtime build/up/exec
 // qualification and publication of Dev Container Templates.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -83,4 +83,4 @@ for (const invalid of [
 }
 
 console.log('Static native Dev Container examples: passed.');
-console.log('V1-03 runtime build/up/exec qualification and template publication: deferred.');
+console.log('V1-04 runtime build/up/exec qualification and template publication: deferred.');

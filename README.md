@@ -174,7 +174,7 @@ Release quality expectations are strict:
 - zero Clippy warnings
 - all tests passing
 - `cargo audit` clean before tagging
-- tracked release notes, compatibility metadata, and a successful Hugo/Docsy
+- tracked release notes, compatibility metadata, and a successful Hugo
   production build before publication
 - releases created through `./scripts/maintain.sh release <version>`
 
@@ -185,7 +185,7 @@ Release quality expectations are strict:
 | `cli/` | Rust CLI source for the `aibox` binary |
 | `addons/` | YAML addon definitions for runtimes, tools, docs frameworks, and AI CLIs |
 | `images/` | Base image recipes published for downstream projects |
-| `docs-site/` | Hugo/Docsy documentation site |
+| `docs-site/` | Hugo documentation site using the pinned projectious.work brand theme |
 | `context/` | This repository's processkit-managed project context |
 | `scripts/` | Release, install, and maintenance tooling |
 | `.devcontainer/` | This repository's own development container |

@@ -6,7 +6,7 @@ configuration, addon and runtime-asset ledgers. All F01–F48 behaviors remain
 required even where not repeated below. A missing row is a failing parity
 test, not implicit permission to retire it. New N01/N02 are additional.
 
-## Harnesses and durable user state (V1-07)
+## Harnesses and durable user state (V1-10)
 
 Support the existing eleven harness identities, including host-only Cursor.
 The Feature selection installs an in-container binary only for applicable
@@ -33,7 +33,7 @@ are allowed as the container user and activate only through local refresh.
 Explicit native workspace/home mounts and scoped credential transfers in
 chapter 17 are allowed; they never confer host-management authority.
 
-## tmux, status, titles and prompt (V1-08–09)
+## tmux, status, titles and prompt (V1-11–09)
 
 Recreate the four v0 layouts, pane ordering, window naming, attach/resume,
 navigation keys, copy mode, scroll behavior and all documented mode/status
@@ -67,7 +67,7 @@ status, selection and preview visibility. `auto` follows available terminal
 signals with a documented fallback and never queries host appearance from
 inside the container.
 
-## Preview, editor, LaTeX, audio and processkit (V1-10–12)
+## Preview, editor, LaTeX, audio and processkit (V1-13–12)
 
 Preserve Yazi keybindings, file-type rules and fallback rendering for text,
 Markdown, images, PDF, SVG, video/audio, archives, tabular/JSON, SQLite and
@@ -104,7 +104,7 @@ MCP entries during refresh and migration. A workspace without processkit
 retains its harness and terminal functions. Compatibility tests use a real
 pinned processkit fixture and a no-processkit fixture.
 
-## N01: observational harness sidebar (V1-14)
+## N01: observational harness sidebar (V1-17)
 
 A left tmux pane is opt-in, collapsible, resizable and scoped to the current
 tmux session. It lists harness process/session identity and state (`working`,
@@ -120,7 +120,7 @@ no account scraping, credential collection, remote control or provider
 automation. Test simultaneous harnesses, shared quotas, stale hooks, pane
 close/reopen and narrow layouts.
 
-## N02: local diff and PR review (V1-15)
+## N02: local diff and PR review (V1-18)
 
 The default diff path uses Git plus delta; optional LazyGit provides staging,
 navigation and side-by-side diff where supported. A qualified `gh-dash` plus

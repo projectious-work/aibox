@@ -28,7 +28,7 @@
         "title": {"type": "string", "minLength": 1},
         "summary": {"type": "string", "minLength": 1},
         "docs": {"type": "string", "minLength": 1},
-        "status": {"enum": ["idea", "planned", "in_progress", "shipped", "cancelled"]},
+        "status": {"enum": ["idea", "planned", "in_progress", "implemented", "shipped", "cancelled"]},
         "target": {"type": "string"},
         "dependencies": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
         "spec": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
@@ -40,6 +40,7 @@
         "rationale": {"type": "string"}
       },
       "allOf": [
+        {"if": {"properties": {"status": {"const": "implemented"}}}, "then": {"required": ["evidence"]}},
         {"if": {"properties": {"status": {"const": "shipped"}}}, "then": {"required": ["devNote", "release", "evidence"]}},
         {"if": {"properties": {"status": {"const": "cancelled"}}}, "then": {"required": ["rationale"]}}
       ]

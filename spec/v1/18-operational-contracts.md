@@ -158,7 +158,7 @@ when it may build again. These spellings are verified against the
 Retest against the qualified release; do not claim cache bypass merely
 because the preflight bypassed cache.
 Resolve `--docker-path`/Compose executable through policy. Pin/probe the exact
-CLI command surface during V1-02; no private Node imports are allowed.
+CLI command surface during V1-03; no private Node imports are allowed.
 
 Rebuild performs a non-destructive build preflight before stopping/removing
 the exact old primary and owned sidecars, then delegates normal `up`. Native
