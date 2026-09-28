@@ -5,7 +5,11 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"os/signal"
+	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -21,9 +25,117 @@ func TestHelperProcess(t *testing.T) {
 	case "exit":
 		os.Exit(17)
 	case "wait":
+		if ready := os.Getenv("AIBOX_PROCESS_TEST_READY"); ready != "" {
+			_ = os.WriteFile(ready, []byte("ready"), 0o600)
+		}
+		if marker := os.Getenv("AIBOX_PROCESS_TEST_SURVIVED"); marker != "" {
+			time.Sleep(600 * time.Millisecond)
+			_ = os.WriteFile(marker, []byte("survived"), 0o600)
+			break
+		}
+		time.Sleep(10 * time.Second)
+	case "spawn":
+		child := exec.Command(os.Args[0], "-test.run=TestHelperProcess")
+		child.Env = []string{
+			"AIBOX_PROCESS_TEST_HELPER=1",
+			"AIBOX_PROCESS_TEST_MODE=wait",
+			"AIBOX_PROCESS_TEST_READY=" + os.Getenv("AIBOX_PROCESS_TEST_READY"),
+			"AIBOX_PROCESS_TEST_SURVIVED=" + os.Getenv("AIBOX_PROCESS_TEST_SURVIVED"),
+		}
+		child.Stdout, child.Stderr = os.Stdout, os.Stderr
+		if err := child.Start(); err != nil {
+			os.Exit(19)
+		}
+		_, _ = child.Process.Wait()
+	case "ignore-term":
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGTERM)
+		if ready := os.Getenv("AIBOX_PROCESS_TEST_READY"); ready != "" {
+			_ = os.WriteFile(ready, []byte("ready"), 0o600)
+		}
 		time.Sleep(10 * time.Second)
 	}
 	os.Exit(0)
+}
+
+func TestRunCancellationEscalatesToKill(t *testing.T) {
+	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
+		t.Skip("process-group cancellation is supported on Linux and macOS")
+	}
+	ready := filepath.Join(t.TempDir(), "ready")
+	req := helperRequest(t, "ignore-term")
+	req.Environment = append(req.Environment, "AIBOX_PROCESS_TEST_READY="+ready)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cmd := exec.Command(req.Executable, req.Arguments...)
+	cmd.Dir, cmd.Env = req.Directory, req.Environment
+	done := make(chan error, 1)
+	go func() { done <- runCommand(ctx, cmd, 50*time.Millisecond) }()
+	deadline := time.After(2 * time.Second)
+	for {
+		if _, err := os.Stat(ready); err == nil {
+			break
+		}
+		select {
+		case <-deadline:
+			t.Fatal("TERM-resistant child did not become ready")
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("cancellation attribution: %v", err)
+		}
+		if cmd.ProcessState == nil || cmd.ProcessState.ExitCode() != -1 {
+			t.Fatalf("TERM-resistant child was not killed: %v", cmd.ProcessState)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("TERM-resistant child survived escalation")
+	}
+}
+
+func TestRunCancellationTerminatesDescendants(t *testing.T) {
+	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
+		t.Skip("process-group cancellation is supported on Linux and macOS")
+	}
+	root := t.TempDir()
+	ready := filepath.Join(root, "ready")
+	survived := filepath.Join(root, "survived")
+	req := helperRequest(t, "spawn")
+	req.Environment = append(req.Environment,
+		"AIBOX_PROCESS_TEST_READY="+ready,
+		"AIBOX_PROCESS_TEST_SURVIVED="+survived,
+	)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { _, err := Run(ctx, req); done <- err }()
+	deadline := time.After(2 * time.Second)
+	for {
+		if _, err := os.Stat(ready); err == nil {
+			break
+		}
+		select {
+		case <-deadline:
+			t.Fatal("descendant did not become ready")
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("cancellation attribution: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("process group did not terminate promptly")
+	}
+	time.Sleep(700 * time.Millisecond)
+	if _, err := os.Stat(survived); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("descendant survived cancellation: %v", err)
+	}
 }
 
 func helperRequest(t *testing.T, mode string) Request {

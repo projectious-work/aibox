@@ -5,7 +5,8 @@ security reviewers, and independent conformance reviewers. The accepted
 [architecture](../spec/v1/07-architecture.md),
 [lifecycle](../spec/v1/09-lifecycle.md), and
 [operational contracts](../spec/v1/18-operational-contracts.md) are the baseline.
-Work is tracked in [PR #467](https://github.com/projectious-work/aibox/pull/467).
+The initial slice was merged through
+[PR #467](https://github.com/projectious-work/aibox/pull/467).
 
 ## Implemented and boundaries
 
@@ -18,9 +19,11 @@ Dev Container CLI; this slice does not create a second container engine.
 
 There is no installable v1 CLI, MCP server, or supported lifecycle operation.
 The result `data` remains opaque here, so common envelope validation does not
-prove operation-specific schema conformance. The runner does not yet provide
-process-group cancellation, post-cancellation effect inspection, or
-policy-owned executable resolution and MUST NOT run mutating lifecycle work.
+prove operation-specific schema conformance. The next slice adds Linux/macOS
+process-group TERM/KILL cancellation and a private, exact-environment OS
+advisory lock. The runner does not yet provide
+post-cancellation effect inspection or policy-owned executable resolution and
+MUST NOT run mutating lifecycle work.
 Path checks do not remove symlink races; callers must revalidate under a lock.
 
 ## Validation and documentation
@@ -32,6 +35,11 @@ failure, cancellation, symlink escape, and sibling-prefix rejection. Re-run
 these checks for each new candidate; earlier results do not validate later
 changes. On 2026-09-28, Go declarations and safety-critical sections gained
 comments following [official Go guidance](https://go.dev/doc/comment).
+The follow-on cancellation and lock slice passes `go test ./...`, race tests,
+`go vet ./...`, macOS arm64 cross-build, the specification and contract
+validators, and a local v1 Hugo build. New offline tests cover descendant
+termination, TERM-to-KILL escalation, lock contention, endpoint separation,
+private lock files, and rejection of unsafe stores.
 
 The [architecture status](../spec/v1/07-architecture.md) and
 [public preview status](../docs-site/content/docs/core-status.md) document
@@ -41,7 +49,7 @@ v1 runtime compatibility claim is exposed by this slice.
 ## Open V1-03 work
 
 V1-03 still owns policy-controlled executable resolution, input digests,
-locks, receipts, process-group cancellation and effect inspection,
+receipts, post-cancellation effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
 work depend on these foundations.
