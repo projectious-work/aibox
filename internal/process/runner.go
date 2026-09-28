@@ -12,24 +12,45 @@ import (
 	"path/filepath"
 )
 
+// DiagnosticLimit is the maximum returned diagnostic tail per child stream.
+// The runner temporarily retains a few more bytes to avoid leaking a secret
+// fragment where an older prefix is discarded.
 const DiagnosticLimit = 256 * 1024
+
 const maxRedactionPatterns = 64
 const maxRedactionPatternBytes = 4096
 
+// Request describes one already-authorized child invocation. Executable and
+// Directory must be absolute. Environment is the complete child environment;
+// a nil slice means no inherited variables. Secrets lists known values that
+// must be masked in returned diagnostics; it is never serialized or logged.
 type Request struct {
-	Executable  string
-	Arguments   []string
-	Directory   string
+	// Executable is a trusted, policy-resolved absolute program path.
+	Executable string
+	// Arguments are literal argv elements and are never shell-interpolated.
+	Arguments []string
+	// Directory is the absolute child working directory.
+	Directory string
+	// Environment is an explicit list of KEY=VALUE entries.
 	Environment []string
-	Secrets     []string
+	// Secrets contains known byte strings to mask in both diagnostic streams.
+	Secrets []string
 }
 
+// Output contains bounded diagnostic tails and the child's observed exit
+// status. Truncation flags refer to the original unredacted stream lengths.
+// ExitCode is only meaningful when the child reached a process exit.
 type Output struct {
-	Stdout          string
-	Stderr          string
+	// Stdout is the redacted stdout tail, not authoritative machine output.
+	Stdout string
+	// Stderr is the redacted stderr tail.
+	Stderr string
+	// StdoutTruncated reports that stdout exceeded DiagnosticLimit.
 	StdoutTruncated bool
+	// StderrTruncated reports that stderr exceeded DiagnosticLimit.
 	StderrTruncated bool
-	ExitCode        int
+	// ExitCode is the child's exit status when ProcessState is available.
+	ExitCode int
 }
 
 // Run captures a bounded, redacted tail of each stream. A nonzero child exit
@@ -48,6 +69,8 @@ func Run(ctx context.Context, req Request) (Output, error) {
 	if len(req.Secrets) > maxRedactionPatterns {
 		return Output{}, errors.New("too many redaction patterns")
 	}
+	// Retain the longest secret length minus one before the visible tail.
+	// A secret crossing that discard boundary can then be masked in full.
 	guard := 0
 	for _, secret := range req.Secrets {
 		if len(secret) > maxRedactionPatternBytes {
@@ -62,6 +85,7 @@ func Run(ctx context.Context, req Request) (Output, error) {
 	}
 	cmd := exec.CommandContext(ctx, req.Executable, req.Arguments...)
 	cmd.Dir = req.Directory
+	// An allocated empty slice is intentional: nil would inherit os.Environ.
 	cmd.Env = make([]string, len(req.Environment))
 	copy(cmd.Env, req.Environment)
 	stdout := newTail(DiagnosticLimit + guard)
@@ -89,8 +113,10 @@ type tail struct {
 	total uint64
 }
 
+// newTail bounds retained bytes regardless of how much the child writes.
 func newTail(limit int) *tail { return &tail{limit: limit} }
 
+// Write implements io.Writer while retaining only the most recent bytes.
 func (t *tail) Write(p []byte) (int, error) {
 	n := len(p)
 	t.total += uint64(n)
@@ -107,6 +133,9 @@ func (t *tail) Write(p []byte) (int, error) {
 	return n, nil
 }
 
+// redactTail masks every occurrence before removing the guard prefix.
+// Fixed-width masking preserves byte offsets, so a secret overlapping the
+// discarded prefix cannot reappear as an unmatched suffix in the output.
 func redactTail(t *tail, secrets []string, guard int) string {
 	data := bytes.Clone(t.data)
 	masked := make([]bool, len(data))

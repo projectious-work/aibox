@@ -2,8 +2,10 @@
 
 The roadmap now numbers its 23 phases in intended execution order. The
 dependency graph and phase scope did not change; the IDs below let older PRs,
-reviews and issue references be read without ambiguity. V1-01 and V1-02 are
-implemented; V1-03 (Go operation core) is the sole active phase.
+reviews and issue references be read without ambiguity. The current IDs are
+retained as stable references. V1-01 and V1-02 have merged evidence but remain
+`in_progress` pending conformance and release acceptance; V1-03 (Go operation
+core) is the primary coding focus.
 
 | Previous ID | Current ID | Phase |
 |---|---|---|
