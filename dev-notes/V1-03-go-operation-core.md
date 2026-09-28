@@ -55,6 +55,10 @@ The interruption slice tests that confirmed or uninspectable effects yield
 `partial`; only proven absence yields `cancelled` or `timed_out`.
 The executable-resolution slice tests digest binding, rejection of project
 programs and refusal of writable files or parent directories.
+The input-manifest slice hashes explicit, confined native control files in
+stable path order and binds optional policy/executable digests. The read-only
+CLI now uses this shared builder for its single declared native entry point;
+the broader lifecycle dependency set still needs upstream-assisted discovery.
 
 The [architecture status](../spec/v1/07-architecture.md) and
 [public preview walkthrough](../docs-site/content/docs/core-status.md) document
@@ -65,7 +69,7 @@ v1 runtime compatibility claim is exposed by this slice.
 
 ## Open V1-03 work
 
-V1-03 still owns policy loading and authorization, complete input manifests,
+V1-03 still owns policy loading and authorization, upstream-assisted complete input discovery,
 receipt recovery reads, runtime-specific effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary

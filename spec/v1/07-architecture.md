@@ -161,6 +161,8 @@ advisory lock. An internal private durable-receipt store now provides bounded
 atomic writes, validated reads and forward-only state transitions, but no CLI
 uses it yet. A standalone executable resolver rejects project-selected or
 writable programs and returns a byte digest, but is not wired to policy.
+The read-only CLI and a reusable manifest builder hash explicit confined
+control files; full upstream-assisted discovery is not yet implemented.
 Operation-specific payload checks, policy authorization, receipt recovery
 rules and a runtime-specific post-cancellation observer remain foundation
 work. An offline classifier now treats uninspectable effects as partial.
