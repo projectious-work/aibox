@@ -160,8 +160,9 @@ groups on Linux/macOS, and `internal/operation` has an exact-environment
 advisory lock. An internal private durable-receipt store now provides bounded
 atomic writes and validated reads, but no CLI uses it yet. Operation-specific
 payload checks, policy-owned executable resolution, receipt transition/recovery
-rules and post-cancellation effect inspection remain foundation work. These
-components must not be used for mutating lifecycle
+rules and a runtime-specific post-cancellation observer remain foundation
+work. An offline classifier now treats uninspectable effects as partial.
+These components must not be used for mutating lifecycle
 operations until observed-effect behavior meets chapter 18.
 
 - V1-03 binary black-box tests build `cmd/aibox`, invoke version/help and the

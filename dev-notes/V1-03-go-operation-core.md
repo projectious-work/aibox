@@ -24,9 +24,10 @@ validation alone does not prove operation-specific schema conformance. A
 follow-on slice added Linux/macOS process-group TERM/KILL cancellation and a
 private, exact-environment OS advisory lock. A private durable receipt store
 now writes bounded, schema-shaped records by file sync, atomic rename and
-directory sync; a caller must hold the exact-environment lock. The runner does
-not yet provide post-cancellation effect inspection or policy-owned executable
-resolution and MUST NOT run mutating lifecycle work.
+directory sync; a caller must hold the exact-environment lock. An offline
+post-cancellation classifier now requires exact-effect observation before
+reporting harmless cancellation. No runtime-specific observer or policy-owned
+executable resolver is wired yet, so the runner MUST NOT run mutating lifecycle work.
 Path checks do not remove symlink races; callers must revalidate under a lock.
 
 ## Validation and documentation
@@ -46,6 +47,8 @@ private lock files, and rejection of unsafe stores.
 The receipt slice adds offline tests for atomic replacement, private storage,
 invalid records, traversal and symlink rejection. It does not yet expose a
 receipt-reading CLI or imply that an interrupted mutation can be replayed.
+The interruption slice tests that confirmed or uninspectable effects yield
+`partial`; only proven absence yields `cancelled` or `timed_out`.
 
 The [architecture status](../spec/v1/07-architecture.md) and
 [public preview walkthrough](../docs-site/content/docs/core-status.md) document
@@ -57,7 +60,7 @@ v1 runtime compatibility claim is exposed by this slice.
 ## Open V1-03 work
 
 V1-03 still owns policy-controlled executable resolution, complete input manifests,
-receipt state transitions and recovery reads, post-cancellation effect inspection,
+receipt state transitions and recovery reads, runtime-specific effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
 work depend on these foundations.
