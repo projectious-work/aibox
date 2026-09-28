@@ -34,6 +34,14 @@ Path checks do not remove symlink races; callers must revalidate under a lock.
 
 ## Validation and documentation
 
+For an exact candidate checkpoint, run `./scripts/verify-v1-03.sh` from the
+repository root. It builds Linux and macOS arm64 Go binaries, executes the
+minimal customer demo, validates the actual JSON against the closed result
+schema, runs Go tests/race/vet and specification checks, builds the v1 Hugo
+site, and prints the source SHA, binary digests and preserved evidence path.
+This is a reproducible review gate, not a public prerelease or a claim that
+host mutations and MCP already work.
+
 The initial candidate passed `go test ./...`, `go test -race ./internal/...`,
 `go vet ./...`, specification validation, and a local Hugo build. Tests cover
 literal argv, empty inherited environment, bounded/redacted output, child
