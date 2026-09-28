@@ -159,8 +159,10 @@ the matching v1 Hugo walkthrough. The runner now terminates child process
 groups on Linux/macOS, and `internal/operation` has an exact-environment
 advisory lock. An internal private durable-receipt store now provides bounded
 atomic writes, validated reads and forward-only state transitions, but no CLI
-uses it yet. Operation-specific payload checks, policy-owned executable
-resolution, receipt recovery rules and a runtime-specific post-cancellation observer remain foundation
+uses it yet. A standalone executable resolver rejects project-selected or
+writable programs and returns a byte digest, but is not wired to policy.
+Operation-specific payload checks, policy authorization, receipt recovery
+rules and a runtime-specific post-cancellation observer remain foundation
 work. An offline classifier now treats uninspectable effects as partial.
 These components must not be used for mutating lifecycle
 operations until observed-effect behavior meets chapter 18.
