@@ -5,13 +5,52 @@ an evidence-based definition of `shipped`. Each phase includes implementation,
 AC/ledger trace, tests, its roadmap `docs` deliverable and a passing local
 documentation build from the same commit. Unit-test success alone is insufficient.
 
+## Runnable increments and frequent preview checkpoints
+
+V1-03 delivers the first Go `aibox` executable: version/help plus a safe,
+read-only `inspect --context local` journey on the minimal native example. It
+must produce a schema-valid result without Docker, operator policy or host
+credentials. It does not expose unfinished lifecycle mutation or claim v0
+parity. V1-09 completes the guarded MCP and thin CLI surfaces; it is not the
+first executable milestone.
+
+For every phase from V1-03 onward, the [roadmap's phase demo](roadmap.yaml)
+names a product-binary command and an observable, feature-specific outcome.
+The implementation change builds the Go executable, runs that phase's demo
+against a disposable fixture, keeps earlier supported demo journeys working,
+and builds the matching v1 Hugo documentation from the same commit. The
+customer walkthrough states prerequisites, exact command, expected result,
+current limitations and a cleanup or reset path. A package-only test, static
+page, version-only smoke test or screen recording cannot replace the executable
+journey. Where a capability needs a host runtime, credential or network,
+default CI still runs a deterministic fake/offline binary journey; an opt-in
+host gate proves the real claim before it is advertised.
+
+The phase development note records the demo command, source SHA, built-binary
+digest, fixture, observed output or redacted transcript, documentation paths,
+Hugo build result, and failed/skipped checks. Demo readiness is an integration
+checkpoint, not a new roadmap status and not `shipped`. The dev branch remains
+buildable and demonstrable after every integrated increment; a later change
+that breaks an earlier supported journey blocks integration.
+
+Work in small, reviewable increments and prepare alpha/beta candidates at
+verified checkpoints rather than waiting for all v0 parity. A public preview
+has an explicit supported-scope and target matrix: run the complete applicable
+test, security, documentation, host and artifact gates for what it claims;
+label everything else planned, unavailable or unsupported. Publish only from
+the accepted exact candidate through the protected version-line path, verify
+downloaded artifacts and matching documentation, and keep v0 current. A
+locally working demo never bypasses owner approval, release identity,
+provenance, or post-publication checks. A phase becomes `shipped` only when its
+named release and conformance evidence support that status.
+
 ## Test layers and evidence format
 
 | Layer | Required fixtures / oracle | Release relevance |
 |---|---|---|
 | Schema/static | Closed JSON schemas, valid/invalid native examples, import-boundary rules, source/ledger row counts | Reject incompatible config and duplicate engines early |
 | Unit/component | Fake child executables, policy and path checker, result serializer, guide index, local renderer | All error branches, stable codes, no side effects on denied/read-only requests |
-| Binary black box | Built Go CLI and stdio MCP client, same requests/policy, invalid input, cancellation | Machine output purity and adapter-equivalent results |
+| Binary black box | Built Go CLI from V1-03 with read-only demo, invalid input and output separation; stdio MCP parity from V1-09 | Earlier executable journeys remain working; later adapters return equivalent results |
 | Settings/logging black box | Temporary system/user/project/env-file/env/flag layers; stderr/file/collector capture, disk-full and rotation fixtures | Provenance, source authority, redaction and evidence separation under real binary execution |
 | Disposable integration | Pinned Dev Container CLI, selected runtime, Features, Templates, image, local UX assets | Direct upstream and wrapped lifecycle, exact stop/remove, persisted home |
 | User journey | Fresh minimal project, complex migrated v0 project, local agent customization, sidebar/review, recovery | Actual v0 parity and new feature usability |
@@ -77,15 +116,17 @@ with dependency edges and spec references. `planned` identifies pending work;
 `devNote` path and release identifier validated by the roadmap schema, plus
 the evidence above. V1-02 is a foundation prerequisite for all implementation
 phases, so the shared Hugo build exists before features are delivered. Every
-phase has a distinct documentation deliverable and build gate; V1-19 is for
-candidate-specific snapshot/publication, not a catch-up writing phase. Keep
+phase has a distinct executable demo and documentation deliverable; V1-19
+hardens the later cross-line alpha/beta archive matrix, not the first
+opportunity to publish a scoped, verified preview. Keep
 development notes adjacent to implementation under the normal repository
 documentation structure. The phase graph is not a
 single linear sprint plan: independent workspace slices may proceed once
 their declared prerequisites exist. Required parity remains applicable regardless
 of phase ordering.
 
-Before promotion, complete all F01–F48, N01/N02 and AC groups, reconcile
+Before stable-v1 promotion as a verified v0 replacement, complete all
+F01–F48, N01/N02 and AC groups, reconcile
 every `CFG:*`, `ADDON:*`, `CMD:*` and runtime-asset row, complete chapter 6's
 technical qualification checks, and verify the full target/dependency matrix
 and specification baseline. Build and validate documentation

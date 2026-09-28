@@ -28,10 +28,19 @@ Each phase's implementation change MUST include the relevant user, operator,
 integrator and/or maintainer documentation with the implementation. Update
 the v1 preview pages, task examples, configuration/API reference, compatibility
 notes, how-to/MCP resources, roadmap and changelog/release notes as applicable.
-Remove or clearly label instructions for unavailable functionality. A purely
-internal phase still documents its public contract or maintainer-facing
-architecture/evidence; it is not exempt. Do not publish a feature guide that
+Remove or clearly label instructions for unavailable functionality. A phase
+with substantial internal work still documents its public contract and
+maintainer-facing architecture/evidence; from V1-03 it must also keep a
+feature-specific executable customer demo. Do not publish a feature guide that
 claims a feature is usable before its acceptance tests pass.
+
+Beginning with V1-03, each phase's user-facing preview docs MUST make the
+same candidate executable demonstrable: a runnable command, disposable
+fixture or setup, expected output, supported targets, current limits and
+cleanup/reset. A package-only phase is not an acceptable completed increment.
+V1-03's first walkthrough exercises read-only local inspection and must not
+suggest that build/up/MCP mutations already work. Every later phase extends
+this executable walkthrough and preserves the prior working journeys.
 
 The phase completion evidence MUST include: changed documentation paths and
 their audience; the phase's `docs` deliverable; a successful local build of
@@ -44,9 +53,11 @@ must be rerun after any code or docs change affecting the candidate. Public
 deployment remains a separate release/preview decision; a local build is
 mandatory even when publication is deferred.
 
-V1-19 is not where feature documentation first appears. It takes already-
-maintained phase content and verifies the exact alpha/beta snapshot, shared
-Releases dropdown and cross-line publication. V1-23 performs final candidate
+V1-19 is not where feature documentation or preview publication first appears.
+Earlier verified checkpoints may publish scoped alpha/beta releases with exact
+candidate-matched docs and immutable archives. V1-19 expands the cross-line
+alpha/beta snapshot matrix, shared Releases dropdown and preservation checks
+over those earlier releases. V1-23 performs final candidate
 and published-artifact consistency checks; neither phase may be used to defer
 the documentation owed by intervening implementation phases.
 
@@ -90,7 +101,10 @@ introduced later, apply the same rule to each; do not publish docs built
 from a different branch or a later mainline commit. A candidate release
 cannot rely on an obsolete Docsy-only page or a v0-oriented instruction.
 
-The v1 docs must cover: preview maturity and support limits; installation
+At each verified preview checkpoint, the public v1 docs cover only the
+candidate's available journeys as runnable instructions and label the
+remaining roadmap capabilities planned or unsupported. The evolving v1 docs
+must ultimately cover: preview maturity and support limits; installation
 of the pinned Dev Container CLI and aibox distribution; a direct-upstream
 minimal project journey; standard `devcontainer.json` and Feature/tool
 selection; local themes, tmux headers/titles, Yazi previews and persistence;
@@ -123,7 +137,10 @@ the release manifest, preserves all other line directories, checks changed
 paths, then pushes only after local review. An interrupted deployment must
 leave the existing public site intact or have a documented recovery path.
 
-AC-DOCS requires clean builds of v0 current, v1 preview, one alpha archive
+At an earlier scoped alpha/beta checkpoint, AC-DOCS applies to the exact
+candidate and every documentation line/archive that already exists; it does
+not require inventing an unreleased beta archive. The full V1-19 AC-DOCS
+matrix requires clean builds of v0 current, v1 preview, one alpha archive
 and one beta archive using the common theme and build route. Test both
 deployment directions: v1 publication preserves v0 root/current/archive,
 and v0 publication preserves v1 preview/archive and both manifest lines.

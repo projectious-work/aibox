@@ -149,21 +149,27 @@ bounded, known-secret-redacted diagnostic tails. Offline tests
 use the test binary as a fake child; `go test ./internal/...` requires no
 container runtime. The module currently uses only the Go standard library.
 
-This is **not** a usable v1 CLI or MCP server. Operation-specific payload
-constructors and schema conformance, policy-owned executable resolution,
-process-group cancellation/inspection, durable receipts, locking, and actual
-Dev Container delegation remain open V1-03 work. In particular, the current
-runner must not be used for mutating lifecycle operations until its
-cancellation and observed-effect behavior meet chapter 18.
+This baseline has **no runnable v1 executable** and cannot close V1-03. That
+phase must add `cmd/aibox`, a buildable Go binary with version/help and
+read-only local inspection of the minimal native example. The inspection
+returns the closed result envelope and a real input digest while rejecting
+unavailable operator/lifecycle commands explicitly; it does not need Docker,
+host policy or credentials. A customer can build and run the binary and follow
+the matching v1 Hugo walkthrough. Operation-specific payload checks,
+policy-owned executable resolution, process-group cancellation/inspection,
+durable receipts and locking remain V1-03 foundation work. The runner must
+not be used for mutating lifecycle operations until its cancellation and
+observed-effect behavior meet chapter 18.
 
-- A standard minimal workspace builds/starts with the pinned upstream CLI
-  without `aibox` on the operator host; direct and wrapped outcomes are
-  compared under AC-BUILD.
+- V1-03 binary black-box tests build `cmd/aibox`, invoke version/help and the
+  local inspection demo, validate its JSON result and output separation, and
+  prove unavailable host mutations fail without effects.
 - Static import checks and a code review find no Dev Container resolver,
   package manager, daemon, host bridge or broad provider SDK in the Go tree.
-- Fake-executable tests prove each use case delegates public commands with
-  argument arrays, bounded environment, correct working directory, cancellation
-  and attributed child failures.
-- A compiled binary black-box suite verifies CLI/MCP equivalence, output
-  separation and stable result/finding schemas. A product-code change cannot
-  claim parity solely from this architecture document.
+- V1-08 fake-executable and disposable integration tests prove delegated
+  public commands use argument arrays, bounded environments, correct working
+  directories, cancellation and attributed child failures; direct upstream
+  and wrapped outcomes are compared under AC-BUILD.
+- V1-09 extends the existing binary with guarded stdio MCP. Its black-box
+  suite verifies CLI/MCP equivalence and stable result/finding schemas. A
+  product-code change cannot claim parity from this document alone.

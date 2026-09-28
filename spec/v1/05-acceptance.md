@@ -6,6 +6,11 @@ in `ledger/`; existing tests are inputs to the new fixtures, not proof of v1.
 The [behavioral source map](feature-trace.md) binds each F row to its
 primary implementation and v1 implementation component; it complements rather than
 replaces the source declaration ledgers. No F row closes on an inventory count.
+An earlier alpha/beta may claim a smaller, explicitly verified capability
+and target subset; unimplemented rows remain planned and are not silently
+counted as passed. Every such checkpoint still builds and demonstrates its
+actual Go binary with matching documentation and applies the full safety and
+release gates to the scope it claims (chapter 14).
 
 ## Behavioral feature ledger
 

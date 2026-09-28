@@ -112,6 +112,13 @@ for(const invalid of [
 const phases=roadmap.groups.flatMap(x=>x.phases),ids=new Set(phases.map(x=>x.id));
 assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplicate roadmap group');
 assert(ids.size===phases.length,'Duplicate phase');
+const demoIds=new Set(Object.keys(roadmap.demos));
+const implementationIds=new Set(phases.filter(p=>!['V1-01','V1-02'].includes(p.id)).map(p=>p.id));
+assert(demoIds.size===implementationIds.size && [...implementationIds].every(id=>demoIds.has(id)),'Every V1-03+ phase needs exactly one demo contract');
+for(const [id,demo] of Object.entries(roadmap.demos)){
+ assert(implementationIds.has(id),`Unknown or foundation demo ${id}`);
+ assert(/\baibox\b/.test(demo.run) && demo.expect.length>=16,`Demo ${id} must exercise aibox and state an observable outcome`);
+}
 const position=new Map(phases.map((p,i)=>[p.id,i]));
 if(roadmap.currentFocus){
  assert(ids.has(roadmap.currentFocus),'Unknown current focus');
@@ -144,6 +151,8 @@ function dependsOn(id,ancestor,seen=new Set()){
 assert(roadmap.groups[0].phases.some(p=>p.id==='V1-02'),'Shared documentation build must be a foundation phase');
 for(const id of ids)if(!['V1-01','V1-02'].includes(id))
  assert(dependsOn(id,'V1-02'),`Phase ${id} can start before the shared documentation build`);
+for(const id of ids)if(!['V1-01','V1-02','V1-03'].includes(id))
+ assert(dependsOn(id,'V1-03'),`Phase ${id} can start before the first runnable Go executable`);
 // Every local Markdown link, including linked source evidence ledgers.
 for(const file of [...docs,'ledger/configuration.md','ledger/addons.md']){
  for(const m of read(file).matchAll(/\]\(([^)]+)\)/g)){

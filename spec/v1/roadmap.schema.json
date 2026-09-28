@@ -4,10 +4,11 @@
   "title": "aibox v1 specification roadmap",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "groups"],
+  "required": ["schemaVersion", "groups", "demos"],
   "properties": {
     "schemaVersion": {"const": "aibox.spec-roadmap/v1"},
     "currentFocus": {"type": "string", "pattern": "^V1-[0-9]{2}$"},
+    "demos": {"type": "object", "additionalProperties": {"$ref": "#/$defs/demo"}},
     "groups": {
       "type": "array", "minItems": 1,
       "items": {"type": "object", "additionalProperties": false,
@@ -21,6 +22,14 @@
     }
   },
   "$defs": {
+    "demo": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run", "expect"],
+      "properties": {
+        "run": {"type": "string", "minLength": 1},
+        "expect": {"type": "string", "minLength": 1}
+      }
+    },
     "phase": {
       "type": "object", "additionalProperties": false,
       "required": ["id", "title", "summary", "status", "docs"],
