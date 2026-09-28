@@ -151,10 +151,11 @@ container runtime. The module currently uses only the Go standard library.
 
 This is **not** a usable v1 CLI or MCP server. Operation-specific payload
 constructors and schema conformance, policy-owned executable resolution,
-process-group cancellation/inspection, durable receipts, locking, and actual
-Dev Container delegation remain open V1-03 work. In particular, the current
-runner must not be used for mutating lifecycle operations until its
-cancellation and observed-effect behavior meet chapter 18.
+post-cancellation effect inspection, durable receipts, and actual
+Dev Container delegation remain open V1-03 work. The runner now terminates
+child process groups on Linux/macOS, and `internal/operation` has an
+exact-environment advisory lock. These foundations must not be used for
+mutating lifecycle operations until observed-effect behavior meets chapter 18.
 
 - A standard minimal workspace builds/starts with the pinned upstream CLI
   without `aibox` on the operator host; direct and wrapped outcomes are
