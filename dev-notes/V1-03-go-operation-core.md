@@ -22,9 +22,11 @@ inspection; there is no installable release, MCP server, or supported lifecycle 
 The result `data` remains opaque at the common-contract layer, so envelope
 validation alone does not prove operation-specific schema conformance. A
 follow-on slice added Linux/macOS process-group TERM/KILL cancellation and a
-private, exact-environment OS advisory lock. The runner does not yet provide
-post-cancellation effect inspection or policy-owned executable resolution and
-MUST NOT run mutating lifecycle work.
+private, exact-environment OS advisory lock. A private durable receipt store
+now writes bounded, schema-shaped records by file sync, atomic rename and
+directory sync; a caller must hold the exact-environment lock. The runner does
+not yet provide post-cancellation effect inspection or policy-owned executable
+resolution and MUST NOT run mutating lifecycle work.
 Path checks do not remove symlink races; callers must revalidate under a lock.
 
 ## Validation and documentation
@@ -41,6 +43,9 @@ The follow-on cancellation and lock slice passes `go test ./...`, race tests,
 validators, and a local v1 Hugo build. New offline tests cover descendant
 termination, TERM-to-KILL escalation, lock contention, endpoint separation,
 private lock files, and rejection of unsafe stores.
+The receipt slice adds offline tests for atomic replacement, private storage,
+invalid records, traversal and symlink rejection. It does not yet expose a
+receipt-reading CLI or imply that an interrupted mutation can be replayed.
 
 The [architecture status](../spec/v1/07-architecture.md) and
 [public preview walkthrough](../docs-site/content/docs/core-status.md) document
@@ -52,7 +57,7 @@ v1 runtime compatibility claim is exposed by this slice.
 ## Open V1-03 work
 
 V1-03 still owns policy-controlled executable resolution, complete input manifests,
-receipts, post-cancellation effect inspection,
+receipt state transitions and recovery reads, post-cancellation effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
 work depend on these foundations.

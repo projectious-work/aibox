@@ -157,9 +157,11 @@ unavailable operator/lifecycle commands explicitly; it does not need Docker,
 host policy or credentials. A customer can build and run the binary and follow
 the matching v1 Hugo walkthrough. The runner now terminates child process
 groups on Linux/macOS, and `internal/operation` has an exact-environment
-advisory lock. Operation-specific payload checks, policy-owned executable
-resolution, post-cancellation effect inspection and durable receipts remain
-foundation work. These components must not be used for mutating lifecycle
+advisory lock. An internal private durable-receipt store now provides bounded
+atomic writes and validated reads, but no CLI uses it yet. Operation-specific
+payload checks, policy-owned executable resolution, receipt transition/recovery
+rules and post-cancellation effect inspection remain foundation work. These
+components must not be used for mutating lifecycle
 operations until observed-effect behavior meets chapter 18.
 
 - V1-03 binary black-box tests build `cmd/aibox`, invoke version/help and the
