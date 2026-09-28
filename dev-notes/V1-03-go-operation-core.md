@@ -26,8 +26,10 @@ private, exact-environment OS advisory lock. A private durable receipt store
 now writes bounded, schema-shaped records by file sync, atomic rename and
 directory sync; a caller must hold the exact-environment lock. An offline
 post-cancellation classifier now requires exact-effect observation before
-reporting harmless cancellation. No runtime-specific observer or policy-owned
-executable resolver is wired yet, so the runner MUST NOT run mutating lifecycle work.
+reporting harmless cancellation. A resolver can now bind an operator-supplied
+executable path outside the project to a trusted file and byte digest. The
+resolver is not yet wired to an operator policy or runtime-specific observer,
+so the runner MUST NOT run mutating lifecycle work.
 Path checks do not remove symlink races; callers must revalidate under a lock.
 
 ## Validation and documentation
@@ -51,6 +53,8 @@ Receipt updates now reject reused IDs with changed request identity, skipped
 authorization, backward state transitions and edits to terminal records.
 The interruption slice tests that confirmed or uninspectable effects yield
 `partial`; only proven absence yields `cancelled` or `timed_out`.
+The executable-resolution slice tests digest binding, rejection of project
+programs and refusal of writable files or parent directories.
 
 The [architecture status](../spec/v1/07-architecture.md) and
 [public preview walkthrough](../docs-site/content/docs/core-status.md) document
@@ -61,7 +65,7 @@ v1 runtime compatibility claim is exposed by this slice.
 
 ## Open V1-03 work
 
-V1-03 still owns policy-controlled executable resolution, complete input manifests,
+V1-03 still owns policy loading and authorization, complete input manifests,
 receipt recovery reads, runtime-specific effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
