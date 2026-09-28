@@ -149,9 +149,9 @@ bounded, known-secret-redacted diagnostic tails. Offline tests
 use the test binary as a fake child; `go test ./internal/...` requires no
 container runtime. The module currently uses only the Go standard library.
 
-This baseline has **no runnable v1 executable** and cannot close V1-03. That
-phase must add `cmd/aibox`, a buildable Go binary with version/help and
-read-only local inspection of the minimal native example. The inspection
+This baseline now has a **source-built read-only v1 executable**, but cannot
+close V1-03 yet. `cmd/aibox` provides version/help and local inspection of
+the minimal native example. The inspection
 returns the closed result envelope and a real input digest while rejecting
 unavailable operator/lifecycle commands explicitly; it does not need Docker,
 host policy or credentials. A customer can build and run the binary and follow

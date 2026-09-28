@@ -6,14 +6,14 @@ weight: 10
 
 # v1 documentation
 
-The v1 runtime and its CLI/MCP interfaces are not implemented yet. The former
+The v1 lifecycle and MCP interfaces are not implemented yet. The former
 v1-alpha how-to pages are withheld from the public site because they describe
 an earlier design and contain instructions that do not work against the
 current specification.
 
-An internal Go core is now being built, but there is no installable v1
-command or MCP server. See the [Go core implementation status](core-status.md)
-for what is tested and what remains unavailable.
+The source-built Go preview can already inspect a native project without a
+container runtime; it is not yet an installable release. See the
+[runnable preview and current limits](core-status.md) for the exact command.
 
 As each implementation phase is completed, publish its reviewed user and
 maintainer documentation here. Planned material remains separate from
