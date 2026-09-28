@@ -112,23 +112,25 @@ for(const invalid of [
 const phases=roadmap.groups.flatMap(x=>x.phases),ids=new Set(phases.map(x=>x.id));
 assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplicate roadmap group');
 assert(ids.size===phases.length,'Duplicate phase');
-assert(phases.every((p,i)=>p.id===`V1-${String(i+1).padStart(2,'0')}`),'Roadmap IDs must follow implementation order without gaps');
-assert(phases.filter(p=>p.status==='in_progress').length<=1,'Only one phase may be in progress');
-const current=phases.findIndex(p=>p.status==='in_progress');
-if(current>=0)assert(phases.slice(0,current).every(p=>['implemented','shipped','cancelled'].includes(p.status)),'Earlier phases must finish before the active phase');
 const position=new Map(phases.map((p,i)=>[p.id,i]));
+if(roadmap.currentFocus){
+ assert(ids.has(roadmap.currentFocus),'Unknown current focus');
+ assert(phases[position.get(roadmap.currentFocus)].status==='in_progress','Current focus must be in progress');
+}
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
- assert(['idea','planned','in_progress','implemented','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
+ assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
  for(const dep of p.dependencies??[]){
   assert(ids.has(dep),`Unknown dependency ${dep}`);
   assert(position.get(dep)<position.get(p.id),`Dependency ${dep} must precede ${p.id}`);
  }
  assert(p.spec?.length>0,`Missing spec references ${p.id}`);
  for(const ref of p.spec)assert(existsSync(path.join(root,ref)),`Missing phase spec ${p.id}: ${ref}`);
+ if(p.devNote)assert(existsSync(path.join(root,p.devNote)),`Missing development note ${p.id}`);
+ for(const ref of p.evidence??[])assert(existsSync(path.join(root,ref)),`Missing evidence ${p.id}: ${ref}`);
+ if(p.status==='in_progress')assert(p.devNote && p.evidence?.length>0,`Missing in-progress evidence ${p.id}`);
  if(p.status==='shipped')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing shipped evidence ${p.id}`);
- if(p.status==='implemented')assert(p.evidence?.length>0 && p.evidence.every(ref=>existsSync(path.join(root,ref))),`Missing implemented evidence ${p.id}`);
 }
 const visited=new Set(),active=new Set();
 const byId=new Map(phases.map(x=>[x.id,x]));

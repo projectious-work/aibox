@@ -11,6 +11,10 @@ v1-alpha how-to pages are withheld from the public site because they describe
 an earlier design and contain instructions that do not work against the
 current specification.
 
+An internal Go core is now being built, but there is no installable v1
+command or MCP server. See the [Go core implementation status](core-status.md)
+for what is tested and what remains unavailable.
+
 As each implementation phase is completed, publish its reviewed user and
 maintainer documentation here. Planned material remains separate from
 instructions for released software. The phase graph is in the [canonical v1

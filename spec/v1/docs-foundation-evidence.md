@@ -18,4 +18,4 @@ The earlier Docsy build in [baseline evidence](baseline-evidence.md) is
 historical pre-migration evidence, not the current v1 build. Docsy source is
 retained under `docs-site/legacy-docsy-*` and excluded from the active site.
 Candidate-specific alpha/beta snapshots and publication checks remain in
-V1-19, so this phase is `implemented`, not `shipped`.
+V1-19, so this phase remains `in_progress`, not `shipped`.
