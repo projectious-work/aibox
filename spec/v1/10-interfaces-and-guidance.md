@@ -20,6 +20,11 @@ scripts cannot silently approve a changed target. MCP clients submit those
 same identity fields; client UI confirmation is never a substitute for server
 policy. No generic `exec`, `config set`, `install addon`, `purge --all` or
 unbounded file-read command is exposed.
+This is the eventual grammar, not a claim that every verb exists in the first
+binary. V1-03 delivers version/help and safe read-only
+`inspect --context local`; V1-08 adds verified lifecycle verbs, and V1-09
+completes CLI/MCP equivalence. A planned verb must either be absent from help
+or return an explicit unavailable result without effects.
 Chapter 16 supplies the complete settings hierarchy and common output/logging
 flags (`--settings-file`, `--env-file`, `--color`, `--log-level`, `--log-format`, `--log-file`,
 `--timeout`). `--config` selects a native Dev Container definition, not the

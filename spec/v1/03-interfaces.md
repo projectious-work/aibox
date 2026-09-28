@@ -11,6 +11,11 @@ Command names and exit classes below are the v1 design; chapter 10 fixes their
 grammar and input semantics. Chapter 18 and the closed per-operation schemas
 fix the machine contracts; real client conformance tests remain G04. Existing v0 spelling can be retained
 where it remains unambiguous.
+Availability is incremental, not all-or-nothing: V1-03 first exposes
+version/help and read-only local inspection through the Go executable; V1-08
+adds authorized lifecycle verbs, and V1-09 completes the guarded MCP adapter
+and thin CLI. Every intermediate executable rejects unavailable operations
+with a documented error instead of implying they already work.
 The [command audit](command-disposition.md) covers removals/delegation, while
 [commands.json](ledger/commands.json) preserves every original declaration.
 

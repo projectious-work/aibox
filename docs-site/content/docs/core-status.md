@@ -26,3 +26,11 @@ process-group cancellation, post-cancellation inspection, receipts and
 operation-specific schema validation remain to be implemented. The
 [canonical architecture contract](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)
 defines those acceptance conditions.
+
+V1-03 cannot finish as package-only work: its next delivery gate is a runnable
+Go `aibox` with version/help and a read-only local-inspection walkthrough
+that runs without a host container engine. Each later roadmap phase must keep
+that executable working and add a customer-runnable, documented demo. Public
+alpha/beta releases are prepared at verified checkpoints, not automatically
+after every phase; until publication, the demo is a preview, not a shipped
+support claim.

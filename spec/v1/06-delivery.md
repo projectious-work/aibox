@@ -26,7 +26,7 @@
 | R-POLICY | AC-SEC authorization bypass tests | V1-09, V1-21 |
 | R-TARGETS | AC-TARGET matrix gates | V1-22 |
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-05, V1-22, V1-23 |
-| R-DOCS | AC-DOCS in every phase; each phase's `docs` deliverable and local build evidence, plus both-line deploy tests | V1-01–V1-23 (V1-02 enables; V1-19 snapshots; V1-23 publishes) |
+| R-DOCS | Phase-scoped AC-DOCS in every phase; each phase's `docs` deliverable and local build evidence, plus candidate-matched previews at verified checkpoints and the full both-line deploy matrix | V1-01–V1-23 (V1-02 enables; V1-19 qualifies the full archive matrix; V1-23 promotes stable docs) |
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-06, V1-09 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-06, V1-21 |
 | R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-07, V1-21, V1-22 |
@@ -58,7 +58,9 @@ Documentation is a completion condition for **every** phase, including internal
 phases, not a final writing pass. Each roadmap entry names its `docs` output;
 its candidate must pass a local site build and changed-page checks. V1-02 is
 placed in foundation before implementation to establish the shared shell;
-V1-19 verifies alpha/beta snapshots and navigation; V1-23 verifies publication.
+verified earlier checkpoints may publish scoped previews with matching docs,
+V1-19 verifies the full alpha/beta snapshot and navigation matrix, and V1-23
+verifies stable publication.
 
 ## Technical qualification checks
 

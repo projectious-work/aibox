@@ -1,6 +1,6 @@
 # aibox v1 — Software implementation specification
 
-Version: **0.4, 2026-09-27**. Development line: `v1.x-dev`.
+Version: **0.5, 2026-09-28**. Development line: `v1.x-dev`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
 an MCP-first interface and a thin human CLI. Configuration is edited in files;
@@ -41,10 +41,14 @@ IDs remain stable references. Status uses the company-standard vocabulary:
 recorded as evidence, not as a separate status. V1-01 and V1-02 remain
 `in_progress` pending independent conformance and release acceptance; V1-03
 (Go operation core) is the single `currentFocus` for active coding. Only
-release-backed work with conformance evidence becomes `shipped`. Every phase
-names a documentation deliverable that is updated and locally built with that
-phase; V1-19 is the prerelease snapshot/publication gate, not a
-deferred documentation-writing phase.
+release-backed work with conformance evidence becomes `shipped`. From V1-03,
+the roadmap's `demos` map requires a feature-specific run of the Go executable
+and an observable outcome for every phase. The executable and matching Hugo
+walkthrough remain demonstrable after each integrated increment; V1-03 must
+deliver the first safe read-only binary, while V1-09 completes MCP/CLI parity.
+Verified checkpoints may publish scoped alpha/beta releases before full v0
+parity. V1-19 hardens the cross-line archive/navigation matrix rather than
+postponing the first matching prerelease documentation.
 
 The [phase ID crosswalk](phase-id-crosswalk.md) maps identifiers used before
 this sequential renumbering to their current IDs.

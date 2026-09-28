@@ -91,7 +91,14 @@ receipt = dict(schemaVersion="aibox.operation-receipt/v1", operationId="case-1",
 check("operation-receipt.schema.json", receipt)
 check("operation-receipt.schema.json", dict(receipt, result=dict(envelope, operation="start_environment", data=payloads["start_environment"])))
 check("operation-receipt.schema.json", dict(receipt, createdAt="not-a-date"), False)
-check("roadmap.schema.json", json.loads((root / "roadmap.yaml").read_text()))
+roadmap = json.loads((root / "roadmap.yaml").read_text())
+check("roadmap.schema.json", roadmap)
+missing_demo = copy.deepcopy(roadmap)
+missing_demo.pop("demos")
+check("roadmap.schema.json", missing_demo, False)
+invalid_demo = copy.deepcopy(roadmap)
+invalid_demo["demos"]["V1-03"]["run"] = ""
+check("roadmap.schema.json", invalid_demo, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
 for example_name in ("minimal", "customized"):
     example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"
