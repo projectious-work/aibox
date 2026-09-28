@@ -59,6 +59,16 @@ func (s *ReceiptStore) Save(receipt Receipt) error {
 	if err != nil {
 		return err
 	}
+	previous, err := s.Read(receipt.OperationID)
+	if err == nil {
+		if err := validateReceiptTransition(previous, receipt); err != nil {
+			return err
+		}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("read previous receipt: %w", err)
+	} else if receipt.State != "validated" {
+		return errors.New("first receipt state must be validated")
+	}
 	random := make([]byte, 12)
 	if _, err := rand.Read(random); err != nil {
 		return err

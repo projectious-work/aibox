@@ -21,8 +21,8 @@ func receiptFixture(t *testing.T) Receipt {
 		OperationID:   "operation-1", RequestFingerprint: "sha256:" + strings.Repeat("a", 64),
 		Operation: contract.StartEnvironment, ProjectRoot: t.TempDir(),
 		InputDigest: "sha256:" + strings.Repeat("b", 64),
-		CreatedAt:   now, UpdatedAt: now, Executor: "operator", State: "executing",
-		LastConfirmedStep: "authorized", Resources: []Resource{},
+		CreatedAt:   now, UpdatedAt: now, Executor: "operator", State: "validated",
+		LastConfirmedStep: "validated", Resources: []Resource{},
 		CompletedEffects: []contract.Effect{}, UnknownEffects: []contract.Effect{},
 	}
 }
@@ -47,8 +47,17 @@ func TestReceiptStorePersistsAndReplacesAtomically(t *testing.T) {
 		t.Fatalf("receipt permissions: %v %v", info, err)
 	}
 	read, err := store.Read(receipt.OperationID)
-	if err != nil || read.State != "executing" || read.RequestFingerprint != receipt.RequestFingerprint {
+	if err != nil || read.State != "validated" || read.RequestFingerprint != receipt.RequestFingerprint {
 		t.Fatalf("read receipt: %+v %v", read, err)
+	}
+	receipt.State = "authorized"
+	receipt.LastConfirmedStep = "authorized"
+	if err := store.Save(receipt); err != nil {
+		t.Fatal(err)
+	}
+	receipt.State = "executing"
+	if err := store.Save(receipt); err != nil {
+		t.Fatal(err)
 	}
 	receipt.State = "inspected"
 	receipt.LastConfirmedStep = "postcondition checked"
@@ -62,6 +71,40 @@ func TestReceiptStorePersistsAndReplacesAtomically(t *testing.T) {
 	}
 	if matches, err := filepath.Glob(filepath.Join(directory, "*.tmp")); err != nil || len(matches) != 0 {
 		t.Fatalf("temporary receipts remain: %v %v", matches, err)
+	}
+}
+
+func TestReceiptStoreRejectsIdentityChangeAndBackwardState(t *testing.T) {
+	directory := filepath.Join(t.TempDir(), "operations")
+	if err := os.Mkdir(directory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store, err := OpenReceiptStore(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	receipt := receiptFixture(t)
+	if err := store.Save(receipt); err != nil {
+		t.Fatal(err)
+	}
+	changed := receipt
+	changed.RequestFingerprint = "sha256:" + strings.Repeat("c", 64)
+	if err := store.Save(changed); err == nil {
+		t.Fatal("accepted changed request fingerprint")
+	}
+	changed = receipt
+	changed.State = "executing"
+	if err := store.Save(changed); err == nil {
+		t.Fatal("accepted skipped authorization")
+	}
+	receipt.State = "authorized"
+	if err := store.Save(receipt); err != nil {
+		t.Fatal(err)
+	}
+	receipt.State = "validated"
+	if err := store.Save(receipt); err == nil {
+		t.Fatal("accepted backward state")
 	}
 }
 
