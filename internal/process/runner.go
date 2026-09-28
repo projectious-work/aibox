@@ -10,12 +10,15 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 // DiagnosticLimit is the maximum returned diagnostic tail per child stream.
 // The runner temporarily retains a few more bytes to avoid leaking a secret
 // fragment where an older prefix is discarded.
 const DiagnosticLimit = 256 * 1024
+
+const terminationGrace = 5 * time.Second
 
 const maxRedactionPatterns = 64
 const maxRedactionPatternBytes = 4096
@@ -55,8 +58,9 @@ type Output struct {
 
 // Run captures a bounded, redacted tail of each stream. A nonzero child exit
 // returns its output and an *exec.ExitError; cancellation returns ctx.Err().
-// Process-group termination and observed-effect classification are separate
-// V1-03 work and must be added before using this for mutating lifecycle calls.
+// On supported Unix targets cancellation signals the entire child process
+// group, then escalates after terminationGrace. Effect classification remains
+// the caller's responsibility before using this for mutating lifecycle calls.
 func Run(ctx context.Context, req Request) (Output, error) {
 	if !filepath.IsAbs(req.Executable) || !filepath.IsAbs(req.Directory) {
 		return Output{}, errors.New("executable and working directory must be absolute")
@@ -83,7 +87,7 @@ func Run(ctx context.Context, req Request) (Output, error) {
 	if guard > 0 {
 		guard--
 	}
-	cmd := exec.CommandContext(ctx, req.Executable, req.Arguments...)
+	cmd := exec.Command(req.Executable, req.Arguments...)
 	cmd.Dir = req.Directory
 	// An allocated empty slice is intentional: nil would inherit os.Environ.
 	cmd.Env = make([]string, len(req.Environment))
@@ -91,7 +95,7 @@ func Run(ctx context.Context, req Request) (Output, error) {
 	stdout := newTail(DiagnosticLimit + guard)
 	stderr := newTail(DiagnosticLimit + guard)
 	cmd.Stdout, cmd.Stderr = stdout, stderr
-	err := cmd.Run()
+	err := runCommand(ctx, cmd, terminationGrace)
 	out := Output{
 		Stdout:          redactTail(stdout, req.Secrets, guard),
 		Stderr:          redactTail(stderr, req.Secrets, guard),
