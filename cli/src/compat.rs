@@ -781,7 +781,7 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
     CompatEntry {
         aibox_version: "0.35.1",
         processkit_version: "v0.28.8",
-        note: "Patch release: restores Rich Markdown preview in Yazi with the system Python interpreter and safe pager handling.",
+        note: "Patch release: restores Rich Markdown preview in Yazi and refreshes v0 base-image and addon tool versions.",
     },
 ];
 
