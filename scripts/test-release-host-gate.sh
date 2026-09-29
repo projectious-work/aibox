@@ -6,7 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 bash -n \
   "${SCRIPT_DIR}/release-host-prepare.sh" \
   "${SCRIPT_DIR}/release-host-gate.sh" \
-  "${SCRIPT_DIR}/release-host-publish.sh"
+  "${SCRIPT_DIR}/release-host-publish.sh" \
+  "${SCRIPT_DIR}/release-runtime-smoke.sh"
 /usr/bin/python3 -m py_compile \
   "${SCRIPT_DIR}/release_host_gate.py" \
   "${SCRIPT_DIR}/release_host_publish.py"
@@ -72,6 +73,14 @@ grep -A3 '^\[processkit\]$' "${SCRIPT_DIR}/release-runtime-smoke.sh" | grep -Fq 
 }
 grep -Fq 'local-candidate-substitution.env' "${SCRIPT_DIR}/release-runtime-smoke.sh" || {
   echo "release runtime smoke must retain evidence of its bounded local FROM substitution" >&2
+  exit 1
+}
+if grep -Eq '^[[:space:]]*(if )?yazi --debug' "${SCRIPT_DIR}/release-runtime-smoke.sh"; then
+  echo "release runtime smoke must not start interactive Yazi without a TTY" >&2
+  exit 1
+fi
+grep -Fq 'list-panes -t aibox-smoke:work' "${SCRIPT_DIR}/release-runtime-smoke.sh" || {
+  echo "release runtime smoke must verify Yazi in the generated work pane" >&2
   exit 1
 }
 grep -Fq '"--provenance=false"' "${SCRIPT_DIR}/release_host_gate.py" || {

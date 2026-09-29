@@ -482,14 +482,9 @@ done
 section yazi-config
 nl -ba "$HOME/.config/yazi/yazi.toml" | sed -n '1,140p'
 nl -ba "$HOME/.config/yazi/theme.toml" | sed -n '1,140p'
-if yazi --debug >/tmp/aibox-yazi-debug.txt 2>&1; then
-  sed -n '1,140p' /tmp/aibox-yazi-debug.txt
-else
-  code=$?
-  sed -n '1,180p' /tmp/aibox-yazi-debug.txt
-  echo "yazi --debug failed with ${code}"
-  fail=1
-fi
+# Yazi's debug mode launches its TUI and needs a terminal. The generated
+# layout below starts Yazi under a PTY; check that pane rather than invoking
+# an interactive command through this non-TTY container exec.
 
 if [[ "${smoke_git_ui}" == "1" ]]; then
   section lazygit-state
@@ -635,6 +630,11 @@ else
       tmux -S "${tmux_socket}" list-panes -t aibox-smoke: -F '#I.#P #{pane_current_command} #{pane_title}' 2>&1 || true
     } >/tmp/aibox-tmux-generated-state.txt
     cat /tmp/aibox-tmux-generated-state.txt
+    if ! tmux -S "${tmux_socket}" list-panes -t aibox-smoke:work -F '#{pane_current_command}' 2>/dev/null \
+      | grep -qx yazi; then
+      echo "generated ai layout did not start Yazi in the work window"
+      fail=1
+    fi
     tmux -S "${tmux_socket}" kill-session -t aibox-smoke >/dev/null 2>&1 || true
     if [[ "${pty_ready}" -ne 1 ]]; then
       echo "generated ai tmux PTY smoke did not become ready within 16s (script exit=${code})"
