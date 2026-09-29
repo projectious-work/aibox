@@ -1,49 +1,30 @@
-# aibox v0.35.0 — 2026-08-25
+# aibox v0.35.1 — 2026-09-29
 
-**Summary:** This minor release adds six period-terminal theme variants and
-three opt-in graphics-rendering addons for reproducible Hugo and documentation
-builds. No processkit migration is required.
+**Summary:** This patch restores rendered Markdown previews for Yazi users when
+an application Python shadows Debian's Rich-enabled interpreter. Update the
+v0 CLI and apply the project configuration to refresh managed preview files.
 
-## Added
+## Fixed
 
-- Add Borland, Norton, and Phosphor theme families, each with a
-  period-authentic Classic variant and a higher-contrast Optimized variant.
-- Add the `diagramming` addon with checksum-verified D2 0.7.1 binaries for
-  Linux AMD64/ARM64 and Graphviz.
-- Add the Node-backed `data-visualization` addon with Vega CLI 6.4.0 and
-  Vega-Lite 6.4.3.
-- Add the Node-backed `mermaid` addon with Mermaid CLI 11.16.0, Puppeteer
-  25.9.0, and a compatible Chrome headless shell.
-
-## Changed
-
-- Expand the generated terminal theme catalog from 76 to 82 concrete themes
-  across tmux, Yazi, Vim, Bat, Lazygit, Starship, and documentation previews.
-- Publish the new addon definitions through both the embedded CLI catalog and
-  the standalone installer.
-- Update the README, compatibility matrix, public changelog, addon guides, and
-  documentation version menu for v0.35.0.
+- Render Markdown through Debian's system Python, where the opt-in
+  `preview-enhanced` addon installs `python3-rich`.
+- Invalidate stale plain-text preview caches and handle non-`less` pagers
+  without passing them `less`-specific flags.
+- Keep the tmux attention test isolated from the active Codex session so its
+  fixture result is reproducible.
+- Refresh the Rust lockfile, including rustls 0.23.45, to clear the release
+  audit advisory.
 
 ## Compatibility
 
 - Minimum processkit version remains v0.28.8.
-- Graphics addons remain opt-in and are not implicit dependencies of Hugo.
-- D2 supports Linux AMD64 and ARM64 release artifacts in this version.
-- Mermaid's bundled browser runtime is intentionally heavyweight; projects
-  with an external compatible Chrome installation can disable Puppeteer and
-  provide their own configuration.
+- The Rich renderer remains opt-in through `preview-enhanced`; the fallback
+  preview remains available when that addon is not selected.
 
 ## Upgrade notes
 
-Run `aibox apply` to refresh generated configuration comments and runtime theme
-files. Enable only the graphics addons required by the project's build:
+After upgrading to v0.35.1, run `aibox apply` to refresh the managed Yazi
+plugin and full-pane helper. Rebuild the container against the v0.35.1 image
+once the host image-publishing phase is complete.
 
-```toml
-[addons.diagramming.tools]
-
-[addons.data-visualization.tools]
-
-[addons.mermaid.tools]
-```
-
-[v0.35.0]: https://github.com/projectious-work/aibox/compare/v0.34.7...v0.35.0
+[v0.35.1]: https://github.com/projectious-work/aibox/compare/v0.35.0...v0.35.1

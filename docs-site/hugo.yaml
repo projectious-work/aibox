@@ -79,7 +79,7 @@ menu:
 params:
   description: "Reproducible AI workspaces from one aibox.toml."
   github: "https://github.com/projectious-work/aibox"
-  version: "v0.35.0"
+  version: "v0.35.1"
   versionMenuLabel: "Releases"
   codeTheme: adaptive
   sidebarOpenDepth: 0
