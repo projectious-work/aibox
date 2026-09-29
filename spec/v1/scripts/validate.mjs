@@ -17,6 +17,10 @@ assert(!/\b(?:V1-\d{2}|currently implemented|when implemented|current Go preview
  'User stories must define target behavior, not implementation progress');
 for(const section of ['Act as','Context','Task','Iterate Output','Netiquette'])
  assert(personaChapter.split(`**${section}:**`).length===5,`Each of four persona prompts needs ACTION section ${section}`);
+assert(personaChapter.split('Persona system prompt:').length===5,'Each of four personas needs a reusable system prompt');
+for(const section of ['Role','Organization','Tasks','Important Notes'])
+ assert(personaChapter.split(`<${section}>`).length===5 && personaChapter.split(`</${section}>`).length===5,
+  `Each of four persona system prompts needs ${section}`);
 const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z-]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);
