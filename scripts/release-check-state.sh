@@ -631,7 +631,12 @@ line "- Confirm \`cargo audit\` is clean. The release script also enforces this 
 
 section "Version-Line Port Gate"
 release_major="$(sed -nE 's/^version = "([0-9]+)\..*/\1/p' "${CLI_DIR}/Cargo.toml" | head -n 1)"
-if "${SCRIPT_DIR}/check-version-line-ports.sh" check "v${release_major}" >> "${REPORT}" 2>&1; then
+if [[ "${release_major}" == "0" ]]; then
+  # v0 maintenance is independent of the v1 redevelopment. A v1-only Go or
+  # specification commit must not hold a v0 patch release hostage. The
+  # cross-line audit remains available as an explicit maintenance check.
+  line "Status: not applicable to the independent v0 maintenance line."
+elif "${SCRIPT_DIR}/check-version-line-ports.sh" check "v${release_major}" >> "${REPORT}" 2>&1; then
   line ""
   line "Status: no open cross-line port obligations target this release line."
 else

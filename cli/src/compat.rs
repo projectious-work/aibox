@@ -778,6 +778,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.28.8",
         note: "Minor release: adds Borland, Norton, and Phosphor terminal theme families plus opt-in D2, Graphviz, Vega, Vega-Lite, and Mermaid build-time graphics addons.",
     },
+    CompatEntry {
+        aibox_version: "0.35.1",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores Rich Markdown preview in Yazi with the system Python interpreter and safe pager handling.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
