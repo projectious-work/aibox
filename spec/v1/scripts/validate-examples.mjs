@@ -57,6 +57,15 @@ const minimal = readExample('examples/minimal/.devcontainer/devcontainer.json');
 const customized = readExample('examples/customized/.devcontainer/devcontainer.json');
 
 for (const [name, example] of [['minimal', minimal], ['customized', customized]]) {
+  const catalog = readFileSync(path.join(root, `examples/${name}/.devcontainer/devcontainer.json`), 'utf8');
+  assert(!/^\s*\/\/\s*(?:devcontainer|aibox)\.[\w.-]+:/m.test(catalog),
+    `${name}: comments should explain the following option without repeating its path`);
+  for (const heading of ['Definition and identity', 'Users, workspace and retained data',
+    'Tools, environment and connectivity', 'Lifecycle and shutdown',
+    'Optional aibox workspace preferences']) {
+    assert(catalog.includes(`\n\n  // --- ${heading} ---\n`),
+      `${name}: missing visually separated ${heading} group`);
+  }
   assert(example.image, `${name}: expected a native image declaration`);
   assert(example.remoteUser, `${name}: expected an explicit remoteUser`);
   assert(Array.isArray(example.mounts) && example.mounts.length > 0, `${name}: expected native persistent-home mount`);
