@@ -97,19 +97,8 @@ image/Feature digests and checksums; retain supported range separately.
 | Sidebar and PR TUI | New optional UX | Candidates only; G06/G07 qualify maintenance/license, privileges, telemetry, rendering and integration. |
 | Scanners/signers/release tools | Maintainer workflow | Existing toolset; exact candidate-bound execution evidence, no mandatory user runtime cost. |
 
-Research anchors checked 2026-09-25 (inspection snapshots, **not release pins**):
-
-- Dev Container CLI: `5dc7533314b5ba7ec3875c30143dfe1aec644870`.
-- Official Go SDK: `e07f0c9d5abf509ac1e47abf27cfa539eeda64a5`.
-- tmux-agent-status: `546b6ca51c75b415db0b3ce06910703f875d3aae`.
-- gh-dash: `1b14dd961ea47e2ad53eae5fed7fc942219bcc01`.
-
-The official CLI currently distinguishes implemented build/up/exec from
-unimplemented stop/down in its README. Qualification must inspect the pinned
-release; the aibox core may fill this bounded gap through native tooling.
-[CLI reference source](https://github.com/devcontainers/cli/blob/5dc7533314b5ba7ec3875c30143dfe1aec644870/README.md)
-
-The SDK provides Go server/client primitives, including stdio. Choose the
-protocol version with actual clients rather than assuming the latest protocol
-is universally supported.
-[SDK reference source](https://github.com/modelcontextprotocol/go-sdk/blob/e07f0c9d5abf509ac1e47abf27cfa539eeda64a5/README.md)
+Qualification inspects the exact pinned Dev Container CLI release and uses a
+bounded native adapter only for lifecycle operations the CLI does not provide.
+The Go MCP SDK protocol version is selected through actual client conformance,
+not by assuming every client supports the newest version. Research snapshots
+are evidence, not release pins, and live outside this target contract.

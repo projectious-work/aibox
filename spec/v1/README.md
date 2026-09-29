@@ -35,14 +35,11 @@ maps the v0 CLI to v1 operations and delegated workflows.
 
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
-chapters governing its implementation. The current display order follows the
-intended implementation sequence, with dependencies pointing only backward;
-IDs remain stable references. Status uses the company-standard vocabulary:
-`idea`, `planned`, `in_progress`, `shipped`, and `cancelled`. Merged work is
-recorded as evidence, not as a separate status. V1-01 and V1-02 remain
-`in_progress` pending independent conformance and release acceptance; V1-03
-(Go operation core) is the single `currentFocus` for active coding. Only
-release-backed work with conformance evidence becomes `shipped`. From V1-03,
+chapters governing its implementation. Display order follows the intended
+implementation sequence, with dependencies pointing only backward; IDs remain
+stable references. The roadmap tracks delivery separately from these target
+requirements. Only release-backed work with conformance evidence becomes
+`shipped`. From V1-03,
 the roadmap's `demos` map requires a feature-specific run of the Go executable
 and an observable outcome for every phase. The executable and matching Hugo
 walkthrough remain demonstrable after each integrated increment; V1-03 must
@@ -54,11 +51,8 @@ postponing the first matching prerelease documentation.
 The [phase ID crosswalk](phase-id-crosswalk.md) maps identifiers used before
 this sequential renumbering to their current IDs.
 
-V1-01's baseline fixture checks and pre-migration local docs build are recorded
-in [baseline evidence](baseline-evidence.md). The current shared Hugo build is
-recorded in [documentation foundation evidence](docs-foundation-evidence.md).
-The evolving [development logbook](../../dev-notes/README.md) records phase
-decisions, validation, and remaining gaps.
+Implementation evidence and remaining gaps belong in the
+[development logbook](../../dev-notes/README.md), not in the target contract.
 
 ### Detailed v0 evidence
 

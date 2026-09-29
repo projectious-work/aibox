@@ -20,11 +20,10 @@ scripts cannot silently approve a changed target. MCP clients submit those
 same identity fields; client UI confirmation is never a substitute for server
 policy. No generic `exec`, `config set`, `install addon`, `purge --all` or
 unbounded file-read command is exposed.
-This is the eventual grammar, not a claim that every verb exists in the first
-binary. V1-03 delivers version/help and safe read-only
-`inspect --context local`; V1-08 adds verified lifecycle verbs, and V1-09
-completes CLI/MCP equivalence. A planned verb must either be absent from help
-or return an explicit unavailable result without effects.
+This is the v1 grammar. A capability that is unavailable in a particular
+distributed binary is absent from help or returns an explicit unavailable
+result without effects. CLI and MCP expose a capability only when their
+shared core and adapter conformance tests support it.
 Chapter 16 supplies the complete settings hierarchy and common output/logging
 flags (`--settings-file`, `--env-file`, `--color`, `--log-level`, `--log-format`, `--log-file`,
 `--timeout`). `--config` selects a native Dev Container definition, not the
@@ -46,9 +45,8 @@ empty IDs, unbounded line counts and invalid paths are rejected before any
 side effect. The Go semantic checker additionally rejects fields irrelevant
 to the selected operation, `tailLines > 1000`, a false disruption
 acknowledgement, an operator selector in local mode, and non-canonical paths.
-Before V1-09 ships, each tool's SDK-exposed schema must be generated from or
-conformance-tested against this file; a type wrapper may strengthen but not
-silently weaken it.
+Each tool's SDK-exposed schema is generated from or conformance-tested against
+this file; a type wrapper may strengthen but not silently weaken it.
 
 Exit classes are fixed: 0 succeeded/no-change; 2 invalid input; 3 denied;
 4 missing/incompatible dependency; 5 failed/partial; 6 explicit operator

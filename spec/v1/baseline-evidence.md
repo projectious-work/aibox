@@ -88,6 +88,23 @@ site or immutable release artifact. G08 reconciliation of effective v0 defaults,
 aliases and behavior remains open for the affected conversion phases; these
 source-count checks cannot close it.
 
+## Dependency research snapshots
+
+The following source commits were inspected on 2026-09-25. They are research
+anchors, not qualification results or release pins:
+
+- Dev Container CLI: `5dc7533314b5ba7ec3875c30143dfe1aec644870`.
+- Official Go SDK: `e07f0c9d5abf509ac1e47abf27cfa539eeda64a5`.
+- tmux-agent-status: `546b6ca51c75b415db0b3ce06910703f875d3aae`.
+- gh-dash: `1b14dd961ea47e2ad53eae5fed7fc942219bcc01`.
+
+The inspected Dev Container CLI README distinguished build/up/exec from
+stop/down. Release qualification must inspect the selected pin again.
+[CLI reference source](https://github.com/devcontainers/cli/blob/5dc7533314b5ba7ec3875c30143dfe1aec644870/README.md)
+
+The inspected Go SDK exposed server/client primitives, including stdio.
+[SDK reference source](https://github.com/modelcontextprotocol/go-sdk/blob/e07f0c9d5abf509ac1e47abf27cfa539eeda64a5/README.md)
+
 ## Existing local Docsy build
 
 The existing v1 docs build succeeded locally on 2026-09-27 from the PR #463
