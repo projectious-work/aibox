@@ -15,13 +15,13 @@ tools:
   - name: mermaid-cli
     description: "Mermaid CLI (mmdc) for static SVG, PNG, and PDF rendering"
     default_enabled: true
-    default_version: "11.16.0"
-    supported_versions: ["11.16.0"]
+    default_version: "12.0.0"
+    supported_versions: ["11.16.0", "12.0.0"]
   - name: puppeteer
     description: "Pinned Puppeteer and compatible Chrome headless shell runtime"
     default_enabled: true
-    default_version: "25.9.0"
-    supported_versions: ["25.9.0"]
+    default_version: "25.12.0"
+    supported_versions: ["25.9.0", "25.12.0"]
 
 builder: null
 

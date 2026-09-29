@@ -17,8 +17,8 @@ tools:
   - name: docusaurus
     description: "React and MDX documentation site generator"
     default_enabled: true
-    default_version: "3.10.1"
-    supported_versions: ["3.7.0", "3.8", "3.9.2", "3.10.1"]
+    default_version: "3.10.2"
+    supported_versions: ["3.7.0", "3.8", "3.9.2", "3.10.1", "3.10.2"]
 
 builder: null
 

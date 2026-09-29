@@ -879,8 +879,8 @@ runtime: |
             .iter()
             .find(|tool| tool.name == "playwright")
             .expect("browser-testing should define the Playwright tool");
-        assert_eq!(playwright.default_version, "1.62.1");
-        assert_eq!(playwright.supported_versions, vec!["1.62.1"]);
+        assert_eq!(playwright.default_version, "1.63.0");
+        assert_eq!(playwright.supported_versions, vec!["1.62.1", "1.63.0"]);
 
         let axe = addon
             .tools
@@ -914,7 +914,7 @@ runtime: |
         );
 
         let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
-        assert!(rendered.contains("@playwright/test@1.62.1"));
+        assert!(rendered.contains("@playwright/test@1.63.0"));
         assert!(rendered.contains("@axe-core/playwright@4.13.0"));
         assert!(rendered.contains("axe-core@4.13.0"));
         assert!(rendered.contains("--no-shell"));
@@ -963,16 +963,16 @@ runtime: |
             .iter()
             .find(|tool| tool.name == "d2")
             .expect("diagramming should define D2");
-        assert_eq!(d2.default_version, "0.7.1");
-        assert_eq!(d2.supported_versions, ["0.7.1"]);
+        assert_eq!(d2.default_version, "0.9.0");
+        assert_eq!(d2.supported_versions, ["0.7.1", "0.9.0"]);
         let rendered = render_runtime(&diagramming, &all_enabled_tools(&diagramming)).unwrap();
-        assert!(rendered.contains("D2_VERSION=\"v0.7.1\""));
+        assert!(rendered.contains("D2_VERSION=\"v0.9.0\""));
         assert!(rendered.contains("D2_ASSET=\"d2-${D2_VERSION}-linux-${D2_ARCH}.tar.gz\""));
         assert!(
-            rendered.contains("eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7")
+            rendered.contains("5669ddc46b99e942cc96078f4a4e36d5e62103348f4c05179ede27802fdd87a9")
         );
         assert!(
-            rendered.contains("ce3a0b985a8f91335a826c254b3a88736fd81afcdd08b58f6c749d2add6864b0")
+            rendered.contains("ac2c028697199479acb321db1e3d68caee9f2ba492ed73caa3cd13f3829bf913")
         );
         assert!(rendered.contains("apt-get install -y --no-install-recommends graphviz"));
         let disabled = render_runtime(&diagramming, &all_disabled_tools(&diagramming)).unwrap();
@@ -991,8 +991,8 @@ runtime: |
         let mermaid = load_repo_addon("mermaid");
         assert_eq!(mermaid.requires, ["node"]);
         let rendered = render_runtime(&mermaid, &all_enabled_tools(&mermaid)).unwrap();
-        assert!(rendered.contains("@mermaid-js/mermaid-cli@11.16.0"));
-        assert!(rendered.contains("puppeteer@25.9.0"));
+        assert!(rendered.contains("@mermaid-js/mermaid-cli@12.0.0"));
+        assert!(rendered.contains("puppeteer@25.12.0"));
         assert!(
             rendered.contains("puppeteer browsers install chrome-headless-shell --install-deps")
         );
@@ -1940,10 +1940,10 @@ runtime: |
         let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
 
         assert!(rendered.contains(
-            r#"1.27.0:amd64) GO_SHA256="675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685""#
+            r#"1.27.1:amd64) GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445""#
         ));
         assert!(rendered.contains(
-            r#"1.27.0:arm64) GO_SHA256="51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda""#
+            r#"1.27.1:arm64) GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec""#
         ));
         assert!(rendered.contains(r#"echo "${GO_SHA256}  /tmp/go.tar.gz" | sha256sum -c -"#));
         assert!(
@@ -1952,7 +1952,9 @@ runtime: |
         );
         assert_eq!(
             addon.tools[0].supported_versions,
-            ["1.25.12", "1.26.3", "1.26.4", "1.26.5", "1.26.6", "1.27.0"]
+            [
+                "1.25.12", "1.26.3", "1.26.4", "1.26.5", "1.26.6", "1.27.0", "1.27.1"
+            ]
         );
     }
 
@@ -1962,10 +1964,10 @@ runtime: |
         let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
 
         assert!(rendered.contains(
-            r#"0.15.0:aarch64) TYPST_SHA256="cdf50ffc7b8ba759ed02200632eda3d78eb8b99aacb6611f4f75684990647620""#
+            r#"0.15.1:aarch64) TYPST_SHA256="5aa8d74a3d906e60ea12a66ac2f37f8eef1b14cbad7182a745e393a10c23dcee""#
         ));
         assert!(rendered.contains(
-            r#"0.15.0:x86_64) TYPST_SHA256="59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea""#
+            r#"0.15.1:x86_64) TYPST_SHA256="a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c""#
         ));
         assert!(rendered.contains(r#"echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c -"#));
         assert!(

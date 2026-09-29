@@ -4532,7 +4532,7 @@ mod tests {
         assert!(body.contains("# Addon catalog fingerprint: "));
         assert!(body.contains("# [addons.browser-testing.tools]"));
         assert!(body.contains("# playwright = {}"));
-        assert!(body.contains("version = \"1.62.1\" (default)"));
+        assert!(body.contains("\"1.63.0\" (default)"));
         assert!(body.contains("Terminal image renderer used by Yazi image and SVG previews"));
         assert!(
             body.contains("Markdown, JSON, RST, and notebook terminal rendering for Yazi previews")

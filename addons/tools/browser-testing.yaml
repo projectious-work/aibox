@@ -13,8 +13,8 @@ tools:
   - name: playwright
     description: "Pinned Playwright Test runner and browser automation library"
     default_enabled: true
-    default_version: "1.62.1"
-    supported_versions: ["1.62.1"]
+    default_version: "1.63.0"
+    supported_versions: ["1.62.1", "1.63.0"]
   - name: axe-playwright
     description: "Pinned axe-core accessibility checks for Playwright pages"
     default_enabled: true

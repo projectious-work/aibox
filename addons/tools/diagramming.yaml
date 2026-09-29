@@ -14,8 +14,8 @@ tools:
   - name: d2
     description: "D2 declarative diagram renderer"
     default_enabled: true
-    default_version: "0.7.1"
-    supported_versions: ["0.7.1"]
+    default_version: "0.9.0"
+    supported_versions: ["0.7.1", "0.9.0"]
   - name: graphviz
     description: "Graphviz graph layout and rendering commands"
     default_enabled: true
@@ -33,6 +33,8 @@ runtime: |
       case "${D2_VERSION}:${ARCH}" in \
         v0.7.1:x86_64) D2_ARCH="amd64"; D2_SHA256="eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7" ;; \
         v0.7.1:aarch64) D2_ARCH="arm64"; D2_SHA256="ce3a0b985a8f91335a826c254b3a88736fd81afcdd08b58f6c749d2add6864b0" ;; \
+        v0.9.0:x86_64) D2_ARCH="amd64"; D2_SHA256="5669ddc46b99e942cc96078f4a4e36d5e62103348f4c05179ede27802fdd87a9" ;; \
+        v0.9.0:aarch64) D2_ARCH="arm64"; D2_SHA256="ac2c028697199479acb321db1e3d68caee9f2ba492ed73caa3cd13f3829bf913" ;; \
         *) echo "Unsupported D2 version/architecture: ${D2_VERSION}/${ARCH}" >&2; exit 1 ;; \
       esac && \
       D2_ASSET="d2-${D2_VERSION}-linux-${D2_ARCH}.tar.gz" && \

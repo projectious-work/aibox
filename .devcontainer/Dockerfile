@@ -45,7 +45,7 @@ RUN ARCH="$(uname -m)" && \
     (cd /tmp && sha256sum -c rustup-init.sha256) && \
     chmod +x /tmp/rustup-init && \
     /tmp/rustup-init -y \
-      --default-toolchain 1.98.0 \
+      --default-toolchain 1.98.1 \
       --component clippy \
       --component rustfmt && \
     rm /tmp/rustup-init /tmp/rustup-init.sha256
@@ -73,13 +73,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG RESVG_SHA256_X86_64=5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
+      case "0.48.1" in \
+        0.47.0) RESVG_SHA256="5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7" ;; \
+        0.48.1) RESVG_SHA256="fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d" ;; \
+        *) echo "Unsupported resvg version" >&2; exit 1 ;; \
+      esac && \
       curl -fsSL \
-        "https://github.com/linebender/resvg/releases/download/v0.47.0/resvg-linux-${ARCH}.tar.gz" \
+        "https://github.com/linebender/resvg/releases/download/v0.48.1/resvg-linux-${ARCH}.tar.gz" \
         -o /tmp/resvg.tar.gz && \
-      echo "${RESVG_SHA256_X86_64}  /tmp/resvg.tar.gz" | sha256sum -c - && \
+      echo "${RESVG_SHA256}  /tmp/resvg.tar.gz" | sha256sum -c - && \
       tar -xz -C /usr/local/bin -f /tmp/resvg.tar.gz resvg && \
       chmod +x /usr/local/bin/resvg && \
       rm /tmp/resvg.tar.gz; \
@@ -137,7 +141,7 @@ RUN DEB_ARCH="$(dpkg --print-architecture)" && \
       arm64) HUGO_ARCH="arm64" ;; \
       *) echo "Unsupported Hugo architecture: ${DEB_ARCH}" >&2; exit 1 ;; \
     esac && \
-    HUGO_VERSION="0.165.0" && \
+    HUGO_VERSION="0.167.0" && \
     HUGO_ASSET="hugo_extended_${HUGO_VERSION}_linux-${HUGO_ARCH}.tar.gz" && \
     curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30 \
       "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_ASSET}" \
@@ -160,7 +164,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Addon: go (runtime)
 RUN ARCH=$(dpkg --print-architecture) && \
-    GO_VERSION="1.27.0" && \
+    GO_VERSION="1.27.1" && \
     case "${GO_VERSION}:${ARCH}" in \
       1.25.12:amd64) GO_SHA256="234828b7a89e0e303d2556310ee549fbcf253d28de937bac3da13d6294262ac1" ;; \
       1.25.12:arm64) GO_SHA256="8b5884aef89600aef5b0b051fb971f11f49bb996521e911f30f02a66884f7bd2" ;; \
@@ -174,6 +178,8 @@ RUN ARCH=$(dpkg --print-architecture) && \
       1.26.6:arm64) GO_SHA256="d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e" ;; \
       1.27.0:amd64) GO_SHA256="675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685" ;; \
       1.27.0:arm64) GO_SHA256="51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda" ;; \
+      1.27.1:amd64) GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445" ;; \
+      1.27.1:arm64) GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec" ;; \
       *) echo "Unsupported Go version/architecture: ${GO_VERSION}/${ARCH}" >&2; exit 1 ;; \
     esac && \
     curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" \
@@ -205,7 +211,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     rm -f "/tmp/${NODE_ARCHIVE}" /tmp/node-shasums.txt && \
     node --version && npm --version
 
-RUN npm install -g pnpm@11.22.0 && \
+RUN npm install -g pnpm@12.8.1 && \
     npm cache clean --force
 
 
@@ -214,11 +220,11 @@ RUN npm install -g pnpm@11.22.0 && \
 # npm package: @openai/codex | Binary: codex | Config: ~/.codex/
 # Auth: OPENAI_API_KEY (or ChatGPT Plus/Pro/Team/Enterprise account)
 # To pin a version: set [ai.harness.codex] version in aibox.toml
-RUN npm install -g @openai/codex
+RUN npm install -g @openai/codex@0.159.0
 
 
 # Addon: docs-docusaurus
-RUN npm install -g @docusaurus/core@3.10.1 && \
+RUN npm install -g @docusaurus/core@3.10.2 && \
     npm cache clean --force
 
 # Addon: preview-archive — Yazi preview helpers and archive tools.
