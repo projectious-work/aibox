@@ -40,26 +40,33 @@ if less --help 2>&1 | grep -q -- '--mouse'; then
 fi
 
 page_ansi() {
-    "${PAGER:-less}" "${pager_flags[@]}"
+    local pager="${PAGER:-less}"
+    # Mouse/color flags are less-specific. A caller may set PAGER=cat or
+    # another pager that does not accept them.
+    if [ "${pager##*/}" = "less" ]; then
+        "$pager" "${pager_flags[@]}"
+    else
+        "$pager"
+    fi
 }
 
 page_plain() {
-    "${PAGER:-less}" "${pager_flags[@]}" "$file"
+    page_ansi < "$file"
 }
 
-# Probe whether `python3 -c 'import rich'` succeeds. Cached in the env
-# so successive calls in the same shell are free.
+# The addon installs python3-rich for Debian's system Python. Prefer that
+# interpreter over a separately installed Python shadowing it on PATH.
+rich_python=""
 _aibox_preview_have_rich() {
-    if [ -n "${AIBOX_PREVIEW_HAVE_RICH:-}" ]; then
-        [ "$AIBOX_PREVIEW_HAVE_RICH" = "1" ]
-        return $?
-    fi
-    if command -v python3 >/dev/null 2>&1 \
-       && python3 -c 'import rich' >/dev/null 2>&1; then
-        export AIBOX_PREVIEW_HAVE_RICH=1
-        return 0
-    fi
-    export AIBOX_PREVIEW_HAVE_RICH=0
+    local candidate
+    for candidate in "${AIBOX_PREVIEW_PYTHON:-}" /usr/bin/python3 python3; do
+        [ -n "$candidate" ] || continue
+        if command -v "$candidate" >/dev/null 2>&1 \
+           && "$candidate" -c 'import rich' >/dev/null 2>&1; then
+            rich_python="$candidate"
+            return 0
+        fi
+    done
     return 1
 }
 
@@ -71,7 +78,7 @@ preview_rich() {
         # tput is the most portable column probe; fallback to a sensible 100.
         cols="$(tput cols 2>/dev/null || echo 100)"
     fi
-    python3 - "$file" "$cols" <<'PY' | page_ansi
+    "$rich_python" - "$file" "$cols" <<'PY' | page_ansi
 import pathlib
 import sys
 
@@ -79,13 +86,29 @@ path = pathlib.Path(sys.argv[1])
 width = int(sys.argv[2])
 text = path.read_text(errors="replace")
 
+def split_front_matter(value):
+    lines = value.splitlines()
+    if not lines or lines[0] not in {"+++", "---"}:
+        return None, value, None
+    fence = lines[0]
+    try:
+        end = lines.index(fence, 1)
+    except ValueError:
+        return None, value, None
+    lexer = "toml" if fence == "+++" else "yaml"
+    return "\n".join(lines[: end + 1]), "\n".join(lines[end + 1 :]).lstrip("\n"), lexer
+
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.syntax import Syntax
 
 console = Console(width=width, force_terminal=True, color_system="truecolor", soft_wrap=False)
 if path.suffix.lower() in {".md", ".markdown"}:
-    console.print(Markdown(text))
+    front_matter, body, lexer = split_front_matter(text)
+    if front_matter is not None:
+        console.print(Syntax(front_matter, lexer, theme="ansi_dark", word_wrap=False))
+    if body:
+        console.print(Markdown(body))
 else:
     language = path.suffix.lstrip(".") or "text"
     console.print(Syntax(text, language, theme="ansi_dark", line_numbers=True, word_wrap=False))
@@ -98,11 +121,11 @@ preview_markdown() {
     # good rich renderer) and then `bat` and finally raw `less` so the
     # command always produces *some* output even on a minimal image.
     if _aibox_preview_have_rich; then
-        preview_rich || true
+        preview_rich
     elif command -v glow >/dev/null 2>&1; then
-        glow -s "${AIBOX_GLOW_STYLE:-dark}" "$file" | page_ansi || true
+        glow -s "${AIBOX_GLOW_STYLE:-dark}" "$file" | page_ansi
     elif command -v bat >/dev/null 2>&1; then
-        bat --paging=never --style=full --color=always --language=md "$file" | page_ansi || true
+        bat --paging=never --style=full --color=always --language=md "$file" | page_ansi
     else
         page_plain
     fi
@@ -110,7 +133,7 @@ preview_markdown() {
 
 preview_code() {
     if command -v bat >/dev/null 2>&1; then
-        bat --paging=never --style=full --color=always "$file" | page_ansi || true
+        bat --paging=never --style=full --color=always "$file" | page_ansi
     else
         page_plain
     fi
