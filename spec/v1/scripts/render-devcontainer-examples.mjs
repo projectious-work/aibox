@@ -42,6 +42,20 @@ const native = [
     'Optional aibox-owned UX intent; inert until the aibox runtime Feature is installed'],
 ];
 
+// Keep related native choices together while the active keys remain valid JSONC.
+const nativeGroups = [
+  ['Definition and identity', ['name', 'image', 'build', 'dockerComposeFile', 'service', 'runServices']],
+  ['Users, workspace and retained data', ['containerUser', 'remoteUser', 'workspaceFolder', 'workspaceMount', 'mounts']],
+  ['Tools, environment and connectivity', ['features', 'containerEnv', 'remoteEnv', 'forwardPorts']],
+  ['Lifecycle and shutdown', ['initializeCommand', 'postCreateCommand', 'postStartCommand', 'shutdownAction']],
+  ['Optional aibox workspace preferences', ['customizations']],
+];
+const nativeByKey = new Map(native.map(field => [field[0], field]));
+if (nativeGroups.flatMap(([, keys]) => keys).length !== native.length ||
+    new Set(nativeGroups.flatMap(([, keys]) => keys)).size !== native.length ||
+    nativeGroups.some(([, keys]) => keys.some(key => !nativeByKey.has(key))))
+  throw Error('Native option groups must contain each documented field exactly once');
+
 const descriptions = {
   'devcontainer.build.dockerfile': 'Select the project Dockerfile path relative to this JSONC file',
   'devcontainer.build.context': 'Select the native Docker build-context directory',
@@ -137,25 +151,25 @@ const nativeValid = {
 function purposeFor(pointer) {
   if (descriptions[pointer]) return descriptions[pointer];
   if (/\.status\.elements\.aibox-metrics\.[^.]+$/.test(pointer))
-    return `Show the ${pointer.split('.').at(-1)} aibox metric in tmux status`;
+    return 'Show this aibox diagnostic metric in tmux status';
   if (/\.status\.elements\.[^.]+$/.test(pointer))
-    return `Show the ${pointer.split('.').at(-1)} tmux status segment`;
+    return 'Show this tmux status segment';
   if (/\.status\.labels\.[^.]+$/.test(pointer))
-    return `Set the visible label for the ${pointer.split('.').at(-1)} status segment`;
+    return 'Set the visible label for this status segment';
   if (/\.status\.layout\.line[12]-(left|right)$/.test(pointer))
-    return `List segment IDs at ${pointer.split('.').at(-1)} in tmux status`;
+    return 'List segment IDs at this position in tmux status';
   if (/\.status\.refresh\.[^.]+$/.test(pointer))
-    return `Set the ${pointer.split('.').at(-1)} refresh or cache duration`;
+    return 'Set this refresh or cache duration';
   if (/\.status\.model_providers\.[^.]+$/.test(pointer))
-    return `Control ${pointer.split('.').at(-1)} for model-provider status`;
+    return 'Control this model-provider status probe';
   if (/\.status\.separators\.[^.]+$/.test(pointer))
-    return `Choose the ${pointer.split('.').at(-1)} separator setting`;
+    return 'Choose this visual separator setting';
   if (/\.theme_switch\.[^.]+$/.test(pointer))
-    return `Control ${pointer.split('.').at(-1)} for the interactive theme switcher`;
+    return 'Control this interactive theme-switcher setting';
   if (/\.title\.states\.[^.]+$/.test(pointer))
-    return `Set title text for agent state ${pointer.split('.').at(-1)}`;
+    return 'Set terminal title text for this agent state';
   if (/\.title\.[^.]+$/.test(pointer))
-    return `Control ${pointer.split('.').at(-1)} for tmux-owned titles`;
+    return 'Control this tmux-owned title setting';
   throw Error(`Missing purpose for ${pointer}`);
 }
 
@@ -212,9 +226,9 @@ function emitField(lines, key, child, pointer, indent, selected, activeValues, i
   const prefix = active ? '' : '// ';
   const pad = ' '.repeat(indent);
   const doc = description ?? purposeFor(pointer);
-  lines.push(`${pad}// ${pointer}: ${doc}. Valid: ${nativeValid[pointer] ?? valid(child)}.`);
-  for (const [name, purpose, values] of dynamicOptions[pointer] ?? [])
-    lines.push(`${pad}// ${name}: ${purpose}. Valid: ${values}.`);
+  lines.push(`${pad}// ${doc}. Valid: ${nativeValid[pointer] ?? valid(child)}.`);
+  for (const [, purpose, values] of dynamicOptions[pointer] ?? [])
+    lines.push(`${pad}// ${purpose}. Valid: ${values}.`);
   if (child.properties) {
     lines.push(`${pad}${prefix}${JSON.stringify(key)}: {`);
     emitFields(lines, fieldsFor(child), pointer, indent + 2, selected, activeValues);
@@ -228,7 +242,8 @@ function emitField(lines, key, child, pointer, indent, selected, activeValues, i
 function emitFields(lines, fields, parent, indent, selected, activeValues) {
   const ordered = [...fields].sort(([a], [b]) => Number(selected.has(`${parent}.${a}`)) - Number(selected.has(`${parent}.${b}`)));
   const activeKeys = ordered.filter(([key]) => selected.has(`${parent}.${key}`)).map(([key]) => key);
-  for (const [key, child, description] of ordered) {
+  for (const [index, [key, child, description]] of ordered.entries()) {
+    if (index > 0 && (child.properties || ordered[index - 1][1].properties)) lines.push('');
     const pointer = `${parent}.${key}`;
     emitField(lines, key, child, pointer, indent, selected, activeValues,
       key === activeKeys.at(-1), description);
@@ -262,20 +277,26 @@ function render(flavor) {
     '// Feature-specific options come from each selected Feature manifest, not this file.',
     '{',
   ];
-  for (const [key, child, description] of native) {
-    const pointer = `devcontainer.${key}`;
-    if (key === 'customizations') {
-      lines.push('  // devcontainer.customizations: Product-specific metadata; optional for aibox UX. Valid: object.');
-      const active = selected.has(pointer);
-      lines.push(`  ${active ? '' : '// '}\"customizations\": {`);
-      lines.push('    // devcontainer.customizations.aibox: aibox-owned UX preferences; inert without its runtime Feature. Valid: object.');
-      lines.push(`    ${active ? '' : '// '}\"aibox\": {`);
-      emitFields(lines, fieldsFor(schema), 'aibox', 6, selected, activeValues);
-      lines.push(`    ${active ? '' : '// '}}`);
-      lines.push(`  ${active ? '' : '// '}}`);
-    } else {
-      emitField(lines, key, child, pointer, 2, selected, activeValues,
-        key === (customized ? 'customizations' : 'remoteUser'), description);
+  const activeNativeKeys = nativeGroups.flatMap(([, keys]) => keys)
+    .filter(key => selected.has(`devcontainer.${key}`));
+  for (const [heading, keys] of nativeGroups) {
+    lines.push('', `  // --- ${heading} ---`);
+    for (const key of keys) {
+      const [, child, description] = nativeByKey.get(key);
+      const pointer = `devcontainer.${key}`;
+      if (key === 'customizations') {
+        lines.push('  // Product-specific metadata; optional for aibox UX. Valid: object.');
+        const active = selected.has(pointer);
+        lines.push(`  ${active ? '' : '// '}\"customizations\": {`);
+        lines.push('    // aibox-owned UX preferences; inert without its runtime Feature. Valid: object.');
+        lines.push(`    ${active ? '' : '// '}\"aibox\": {`);
+        emitFields(lines, fieldsFor(schema), 'aibox', 6, selected, activeValues);
+        lines.push(`    ${active ? '' : '// '}}`);
+        lines.push(`  ${active ? '' : '// '}}`);
+      } else {
+        emitField(lines, key, child, pointer, 2, selected, activeValues,
+          key === activeNativeKeys.at(-1), description);
+      }
     }
   }
   lines.push('}', '');
