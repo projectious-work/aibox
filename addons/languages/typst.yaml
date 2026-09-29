@@ -20,8 +20,8 @@ tools:
   - name: typst
     description: "Typst compiler for modern document typesetting"
     default_enabled: true
-    default_version: "0.15.0"
-    supported_versions: ["0.13.1", "0.14.2", "0.15.0"]
+    default_version: "0.15.1"
+    supported_versions: ["0.13.1", "0.14.2", "0.15.0", "0.15.1"]
 
 builder: null
 
@@ -38,6 +38,8 @@ runtime: |
         0.14.2:x86_64) TYPST_SHA256="a6044cbad2a954deb921167e257e120ac0a16b20339ec01121194ff9d394996d" ;; \
         0.15.0:aarch64) TYPST_SHA256="cdf50ffc7b8ba759ed02200632eda3d78eb8b99aacb6611f4f75684990647620" ;; \
         0.15.0:x86_64) TYPST_SHA256="59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea" ;; \
+        0.15.1:aarch64) TYPST_SHA256="5aa8d74a3d906e60ea12a66ac2f37f8eef1b14cbad7182a745e393a10c23dcee" ;; \
+        0.15.1:x86_64) TYPST_SHA256="a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c" ;; \
         *) echo "Unsupported Typst version/architecture: ${TYPST_VERSION}/${ARCH}" >&2; exit 1 ;; \
       esac \
       && curl -fsSL \

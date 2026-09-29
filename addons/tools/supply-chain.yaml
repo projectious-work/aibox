@@ -9,10 +9,10 @@ builder_weight: "medium"
 
 tools:
   - { name: gitleaks, description: "Repository secret scanner", default_enabled: true, default_version: "8.30.1", supported_versions: ["8.30.1"] }
-  - { name: osv-scanner, description: "OSV dependency vulnerability scanner", default_enabled: true, default_version: "2.4.0", supported_versions: ["2.4.0"] }
-  - { name: syft, description: "Software bill of materials generator", default_enabled: true, default_version: "1.50.0", supported_versions: ["1.50.0"] }
-  - { name: grype, description: "Artifact and container vulnerability scanner", default_enabled: true, default_version: "0.116.1", supported_versions: ["0.116.1"] }
-  - { name: cosign, description: "Sigstore artifact signing and verification CLI", default_enabled: true, default_version: "3.1.2", supported_versions: ["3.1.2"] }
+  - { name: osv-scanner, description: "OSV dependency vulnerability scanner", default_enabled: true, default_version: "2.6.0", supported_versions: ["2.4.0", "2.6.0"] }
+  - { name: syft, description: "Software bill of materials generator", default_enabled: true, default_version: "1.52.0", supported_versions: ["1.50.0", "1.52.0"] }
+  - { name: grype, description: "Artifact and container vulnerability scanner", default_enabled: true, default_version: "0.119.0", supported_versions: ["0.116.1", "0.119.0"] }
+  - { name: cosign, description: "Sigstore artifact signing and verification CLI", default_enabled: true, default_version: "3.1.3", supported_versions: ["3.1.2", "3.1.3"] }
 
 builder: |
   FROM debian:trixie-slim AS supply-chain-builder

@@ -528,7 +528,7 @@ fn graphics_renderer_addons_render_pinned_tools_and_dependencies() {
     sync_project(dir.path());
     let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
     assert!(
-        dockerfile.contains("D2_VERSION=\"v0.7.1\"")
+        dockerfile.contains("D2_VERSION=\"v0.9.0\"")
             && dockerfile.contains("D2_ASSET=\"d2-${D2_VERSION}-linux-${D2_ARCH}.tar.gz\"")
             && dockerfile.contains("graphviz"),
         "diagramming must render pinned D2 and Graphviz installation:\n{dockerfile}"
@@ -538,8 +538,8 @@ fn graphics_renderer_addons_render_pinned_tools_and_dependencies() {
         "data-visualization must render pinned Vega tooling:\n{dockerfile}"
     );
     assert!(
-        dockerfile.contains("@mermaid-js/mermaid-cli@11.16.0")
-            && dockerfile.contains("puppeteer@25.9.0")
+        dockerfile.contains("@mermaid-js/mermaid-cli@12.0.0")
+            && dockerfile.contains("puppeteer@25.12.0")
             && dockerfile.contains("chrome-headless-shell --install-deps"),
         "mermaid must render its pinned CLI and browser runtime:\n{dockerfile}"
     );

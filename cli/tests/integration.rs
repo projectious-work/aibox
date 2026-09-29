@@ -471,7 +471,7 @@ grype = { enabled = false }
         "Addon: release (runtime)",
         "Addon: go-release (runtime)",
         "go test -race ./...",
-        "go install golang.org/x/tools/cmd/goimports@v0.48.0",
+        "go install golang.org/x/tools/cmd/goimports@v0.50.0",
         "goreleaser_Linux_",
     ] {
         assert!(

@@ -64,7 +64,7 @@ firefox = { enabled = true }
 webkit = { enabled = true }
 ```
 
-The v0.x catalog currently couples Playwright `1.62.1` with
+The v0.x catalog currently couples Playwright `1.63.0` with
 `@axe-core/playwright` `4.13.0` and the matching browser revisions. The addon
 provides that pinned runner/browser environment; keep the derived project's
 `package.json` and lockfile authoritative, and install the packages locally
@@ -116,7 +116,7 @@ renderers used by its Hugo hooks or shortcodes.
 
 ```toml
 [addons.diagramming.tools]
-d2 = { version = "0.7.1" }
+d2 = { version = "0.9.0" }
 graphviz = {}
 
 [addons.data-visualization.tools]
@@ -124,8 +124,8 @@ vega-cli = { version = "6.4.0" }
 vega-lite = { version = "6.4.3" }
 
 [addons.mermaid.tools]
-mermaid-cli = { version = "11.16.0" }
-puppeteer = { version = "25.9.0" }
+mermaid-cli = { version = "12.0.0" }
+puppeteer = { version = "25.12.0" }
 ```
 
 `diagramming` installs the checksum-verified D2 release for Linux AMD64 or
@@ -139,7 +139,8 @@ and `twopi`). A minimal Hugo build hook can invoke `d2 input.d2 output.svg` or
 `vl2svg chart.vl.json > chart.svg` produces a static asset during the Hugo
 build.
 
-`mermaid` also requires `node`. By default it installs `mmdc`, pinned
+`mermaid` also requires `node` version 22.13 or newer for the current
+Mermaid CLI and Puppeteer defaults. By default it installs `mmdc`, pinned
 Puppeteer, and Puppeteer's compatible Chrome headless shell plus its Linux
 system dependencies. This is intentionally a heavy, opt-in addon. Projects
 that provide their own compatible Chrome executable may disable the
@@ -204,7 +205,7 @@ packer = {}        # Machine image builder
 podman = {}        # Optional rootless container engine + Compose
 ```
 
-OpenTofu defaults to 1.12.5, Packer to 1.16.0, and Ansible to 14.3.1.
+OpenTofu defaults to 1.12.6, Packer to 1.16.1, and Ansible to 14.4.0.
 OpenTofu and Packer are installed in a multi-stage builder. Ansible is installed via pip.
 Podman is optional and installs the Debian-packaged rootless engine, Compose
 provider, user-namespace helpers, and overlay/networking prerequisites. Nested
@@ -222,7 +223,7 @@ kustomize = {}     # Configuration customization
 # k9s = {}         # Optional: terminal UI for Kubernetes
 ```
 
-kubectl defaults to 1.36.3, Helm to 4.2.4, Kustomize to 5.8.1, and k9s to 0.51.0.
+kubectl defaults to 1.37.1, Helm to 4.3.0, Kustomize to 5.8.1, and k9s to 0.51.0.
 All tools are downloaded as static binaries in a multi-stage builder.
 
 ## Cloud Providers

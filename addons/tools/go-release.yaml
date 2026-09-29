@@ -9,7 +9,7 @@ builder_weight: "light"
 requires: ["go", "release"]
 
 tools:
-  - { name: goreleaser, description: "Multi-platform Go release packager", default_enabled: true, default_version: "2.17.1", supported_versions: ["2.17.1"] }
+  - { name: goreleaser, description: "Multi-platform Go release packager", default_enabled: true, default_version: "2.18.2", supported_versions: ["2.17.1", "2.18.2"] }
 
 builder: null
 runtime: |
