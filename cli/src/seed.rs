@@ -2924,6 +2924,12 @@ mod tests {
             "aibox-preview should dispatch PDF previews to pdf-watch"
         );
         assert!(
+            aibox_preview.contains("/usr/bin/python3")
+                && aibox_preview.contains("rich_python")
+                && aibox_preview.contains("if [ \"${pager##*/}\" = \"less\" ]; then"),
+            "aibox-preview should find Debian's Rich installation and pass less-only flags only to less"
+        );
+        assert!(
             !root
                 .join(".local")
                 .join("bin")
@@ -3900,6 +3906,11 @@ rules = [
             DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("aibox-yazi-rich-preview")
                 && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("read_window"),
             "rich-preview must cache rendered output and read windowed slices on re-peek"
+        );
+        assert!(
+            DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("/usr/bin/python3")
+                && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("rich2"),
+            "rich-preview must use the Rich-enabled interpreter and invalidate stale plain-text caches"
         );
         assert!(
             DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("h1 = (h1 * 33 + byte)")

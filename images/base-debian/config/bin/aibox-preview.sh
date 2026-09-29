@@ -40,26 +40,32 @@ if less --help 2>&1 | grep -q -- '--mouse'; then
 fi
 
 page_ansi() {
-    "${PAGER:-less}" "${pager_flags[@]}"
+    local pager="${PAGER:-less}"
+    # Mouse/color flags are less-specific; other pagers may reject them.
+    if [ "${pager##*/}" = "less" ]; then
+        "$pager" "${pager_flags[@]}"
+    else
+        "$pager"
+    fi
 }
 
 page_plain() {
-    "${PAGER:-less}" "${pager_flags[@]}" "$file"
+    page_ansi < "$file"
 }
 
-# Probe whether `python3 -c 'import rich'` succeeds. Cached in the env
-# so successive calls in the same shell are free.
+# python3-rich is installed for Debian's system interpreter. Prefer it to
+# a separately installed Python that may shadow it on PATH.
+rich_python=""
 _aibox_preview_have_rich() {
-    if [ -n "${AIBOX_PREVIEW_HAVE_RICH:-}" ]; then
-        [ "$AIBOX_PREVIEW_HAVE_RICH" = "1" ]
-        return $?
-    fi
-    if command -v python3 >/dev/null 2>&1 \
-       && python3 -c 'import rich' >/dev/null 2>&1; then
-        export AIBOX_PREVIEW_HAVE_RICH=1
-        return 0
-    fi
-    export AIBOX_PREVIEW_HAVE_RICH=0
+    local candidate
+    for candidate in "${AIBOX_PREVIEW_PYTHON:-}" /usr/bin/python3 python3; do
+        [ -n "$candidate" ] || continue
+        if command -v "$candidate" >/dev/null 2>&1 \
+           && "$candidate" -c 'import rich' >/dev/null 2>&1; then
+            rich_python="$candidate"
+            return 0
+        fi
+    done
     return 1
 }
 
@@ -71,7 +77,7 @@ preview_rich() {
         # tput is the most portable column probe; fallback to a sensible 100.
         cols="$(tput cols 2>/dev/null || echo 100)"
     fi
-    python3 - "$file" "$cols" <<'PY' | page_ansi
+    "$rich_python" - "$file" "$cols" <<'PY' | page_ansi
 import pathlib
 import sys
 
@@ -114,11 +120,11 @@ preview_markdown() {
     # good rich renderer) and then `bat` and finally raw `less` so the
     # command always produces *some* output even on a minimal image.
     if _aibox_preview_have_rich; then
-        preview_rich || true
+        preview_rich
     elif command -v glow >/dev/null 2>&1; then
-        glow -s "${AIBOX_GLOW_STYLE:-dark}" "$file" | page_ansi || true
+        glow -s "${AIBOX_GLOW_STYLE:-dark}" "$file" | page_ansi
     elif command -v bat >/dev/null 2>&1; then
-        bat --paging=never --style=full --color=always --language=md "$file" | page_ansi || true
+        bat --paging=never --style=full --color=always --language=md "$file" | page_ansi
     else
         page_plain
     fi
@@ -126,7 +132,7 @@ preview_markdown() {
 
 preview_code() {
     if command -v bat >/dev/null 2>&1; then
-        bat --paging=never --style=full --color=always "$file" | page_ansi || true
+        bat --paging=never --style=full --color=always "$file" | page_ansi
     else
         page_plain
     fi

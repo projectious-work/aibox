@@ -318,9 +318,10 @@ fn signal_helper_aggregates_panes_and_expires_done() {
     };
     let signal_hook = |pane: &str, args: &str, payload: &str| {
         let command = format!(
-            "printf '%s' '{}' | TMUX_PANE='{}' '{}' {} --hook-input",
+            "printf '%s' '{}' | TMUX_PANE='{}' CODEX_HOME='{}' CODEX_THREAD_ID='' CODEX_SESSION_ID='' '{}' {} --hook-input",
             payload,
             pane,
+            codex_home.display(),
             helper.display(),
             args
         );
@@ -459,9 +460,10 @@ fn signal_helper_aggregates_panes_and_expires_done() {
 
     let notify_payload = r#"{"type":"agent-turn-complete","last-assistant-message":"Finished."}"#;
     let notify_command = format!(
-        "PATH='{}':\"$PATH\" TMUX_PANE='{}' '{}' '{}'",
+        "PATH='{}':\"$PATH\" TMUX_PANE='{}' CODEX_HOME='{}' CODEX_THREAD_ID='' CODEX_SESSION_ID='' '{}' '{}'",
         dir.path().display(),
         pane_one,
+        codex_home.display(),
         codex_notify.display(),
         notify_payload
     );

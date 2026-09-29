@@ -142,7 +142,7 @@ end
 
 local function cache_file(url, mtime, width)
 	return string.format(
-		"%s/%s-%d-%d.cache",
+		"%s/%s-rich2-%d-%d.cache",
 		cache_root(),
 		path_key(url),
 		mtime,
@@ -185,10 +185,17 @@ function M:peek(job)
 		return require("code"):peek(job)
 	end
 
+	-- python3-rich is installed for Debian's system interpreter. The
+	-- separately installed /usr/local/bin/python3 can shadow it on PATH.
+	local python = os.getenv("AIBOX_PREVIEW_PYTHON")
+	if not python or python == "" then
+		python = "/usr/bin/python3"
+	end
+
 	-- Cache miss → spawn Python once to render to disk. Subsequent peeks at
 	-- different skip offsets re-enter and find the cache populated.
 	if not fs.cha(Url(cpath)) then
-		local child = Command("python3")
+		local child = Command(python)
 			:env("COLUMNS", tostring(job.area.w))
 			:arg({
 				"-c",
