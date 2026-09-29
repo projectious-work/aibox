@@ -35,7 +35,7 @@ Run `go test ./...` to check the executable and core packages offline.
 
 There is no installable release or MCP server yet. The current runner is not safe
 for mutating lifecycle calls: policy-owned executable resolution, input
-binding, post-cancellation effect inspection, receipts and operation-specific
+binding, post-cancellation effect inspection, operation records and operation-specific
 schema validation remain to be implemented. The
 [canonical architecture contract](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)
 defines those acceptance conditions.

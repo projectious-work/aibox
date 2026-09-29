@@ -57,7 +57,7 @@ change before side effects. `doctor` reports missing/unreadable credentials as
 `missing`/`not_authorized`/`unknown` without reading values or asserting that
 the secret is valid. An in-container doctor is local-only.
 
-Secret values never enter operation requests/results, receipts, logs,
+Secret values never enter operation requests/results, operation records, logs,
 diagnostic bundles, generated UX files, image layers, release artifacts or
 the MCP how-to corpus. Native tools may have their own logs and caches; the
 qualification gate inspects those too. Redaction is defense in depth, not a
@@ -75,7 +75,7 @@ decrypt failure and cleanup; broker expiry/rotation/outage; BuildKit layer
 scan; custom user/home permissions; remote-daemon bind path; malicious
 project-requested broad mount/hook; changed input digest; and disabled
 provider. Assert no canary in Git, image/layers, generated files, CLI/MCP
-stdout/stderr, logs, receipts, diagnostics, shared snapshots or documentation.
+stdout/stderr, logs, operation records, diagnostics, shared snapshots or documentation.
 Intentional provider-native credentials in the approved private persistent
 home, and explicit private backups of that home, are not diagnostic leakage:
 test their restricted permissions, exclusion from publication, encrypted

@@ -1,6 +1,6 @@
 # aibox v1 — Software implementation specification
 
-Version: **0.5, 2026-09-28**. Development line: `v1.x-dev`.
+Version: **0.6, 2026-09-29**. Development line: `v1.x-dev`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
 an MCP-first interface and a thin human CLI. Configuration is edited in files;
@@ -31,6 +31,7 @@ maps the v0 CLI to v1 operations and delegated workflows.
 17. [Secret and credential transfer into the Dev Container](17-secrets-and-credential-transfer.md)
 18. [Executable operation, policy, recovery and quality contracts](18-operational-contracts.md)
 19. [Configuration realization, installer and private-state rules](19-configuration-realization.md)
+20. [Human and AI personas, user stories and solution paths](20-personas-and-user-stories.md)
 
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
@@ -103,6 +104,7 @@ is required; no product runtime or credentials are needed):
 ```sh
 node spec/v1/scripts/inventory.mjs --check
 node spec/v1/scripts/contracts.mjs --check
+node spec/v1/scripts/render-devcontainer-examples.mjs --check
 node spec/v1/scripts/validate.mjs
 uv run --script spec/v1/scripts/validate-contracts.py
 ```

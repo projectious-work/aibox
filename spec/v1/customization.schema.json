@@ -130,7 +130,11 @@
                   "type": "string"
                 },
                 "style": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "menu",
+                    "table"
+                  ]
                 }
               }
             },
@@ -145,7 +149,11 @@
                   "type": "boolean"
                 },
                 "protocol": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "osc-9",
+                    "bell"
+                  ]
                 },
                 "states": {
                   "type": "array",

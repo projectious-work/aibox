@@ -1,5 +1,6 @@
 // Dependency-free specification consistency checks. JSON is a YAML 1.2 subset.
 import {readFileSync,readdirSync,existsSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -7,7 +8,7 @@ const read=p=>readFileSync(path.join(root,p),'utf8');
 const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
 const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
-const normative=docs.filter(x=>/^(0[1-9]|1[0-9])-/.test(x)).map(read).join('\n');
+const normative=docs.filter(x=>/^\d{2}-/.test(x)).map(read).join('\n');
 const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z-]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);
@@ -63,6 +64,12 @@ function schemaCheck(value,schema,at='$',rootSchema=schema){
 }
 schemaCheck(roadmap,roadmapSchema);
 const customizationSchema=json('customization.schema.json');
+execFileSync(process.execPath,[path.join(root,'scripts/render-devcontainer-examples.mjs'),'--check'],{stdio:'pipe'});
+const parseDocumentedExample=flavor=>JSON.parse(read(`examples/${flavor}/.devcontainer/devcontainer.json`)
+ .split('\n').filter(line=>!line.trimStart().startsWith('//')).join('\n'));
+assert(!Object.hasOwn(parseDocumentedExample('minimal'),'customizations'),
+ 'Minimal native example must not activate the optional aibox extension');
+schemaCheck(parseDocumentedExample('customized').customizations.aibox,customizationSchema);
 const processSettingsSchema=json('process-settings.schema.json');
 const processSettingsExample={schemaVersion:'1',output:{format:'json',color:'never'},logging:{level:'info',format:'jsonl',rotationMiB:10,retentionFiles:7,retentionDays:7},execution:{timeoutSeconds:300},workspace:{theme:'gruvbox',mode:'dark',layout:'dev'}};
 schemaCheck(processSettingsExample,processSettingsSchema);

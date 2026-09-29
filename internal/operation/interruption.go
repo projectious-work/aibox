@@ -29,7 +29,7 @@ type InterruptionReport struct {
 // InspectInterruption runs independent, bounded post-cancellation inspection.
 // A missing target, failed inspection or observed effect is partial. Only
 // proven absence of every candidate allows cancelled or timed_out. Callers
-// persist the report in a receipt before returning a mutating result.
+// persist the report in a record before returning a mutating result.
 func InspectInterruption(cause error, candidates []contract.Effect, inspect InspectEffect) InterruptionReport {
 	report := InterruptionReport{
 		CompletedEffects: []contract.Effect{}, UnknownEffects: []contract.Effect{},

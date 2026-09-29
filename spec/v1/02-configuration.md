@@ -10,6 +10,19 @@ files have been considered (chapter 8). It is optional product-specific
 metadata, not a Dev Container standard field or a second project entry point.
 No successor `aibox.toml`, no `set` CLI and no generic config-write
 MCP tool. Agents use their existing file editors after reading guidance.
+Every maintained aibox-provided `devcontainer.json` example is a commented
+JSONC option catalog as well as a runnable definition: it shows every key in
+the closed `customizations.aibox` schema, with a nearby comment stating its
+purpose and schema-valid values, while only values deliberately used by that
+example are uncommented. It also documents the native fields needed for
+aibox's own journeys (image/build/Compose selection, user, home mount,
+Features, lifecycle and connection); it does not duplicate the evolving
+Dev Container CLI reference or enumerate third-party Feature options. For a
+selected aibox Feature, document its actual declared options next to that
+Feature only after the Feature is selected and qualified. Commented examples
+are guidance, not active configuration or a default; no parser may treat them
+as values. The versioned upstream CLI remains the authority for native
+field syntax and semantics.
 The small system/user `settings.json` in chapter 16 configures the aibox
 process (output, logging, timeout and a narrow local UX override subset);
 it is not a project workspace definition or successor to `aibox.toml`.

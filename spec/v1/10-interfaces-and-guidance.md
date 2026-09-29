@@ -69,7 +69,7 @@ typed tools `build_environment`, `start_environment`, `stop_environment`,
 `remove_environment`, `rebuild_environment`, `inspect_environment`,
 `read_logs`, `check_environment`, `inspect_operation`; local mode registers only
 `inspect_workspace`, `check_workspace`, `refresh_workspace`, local-only
-`read_logs`, local receipt `inspect_operation` and guidance.
+`read_logs`, `inspect_operation` for local operation records, and guidance.
 Registering a tool does not authorize its invocation: every call checks
 process identity, policy, target and input digest server-side. No network
 listener, OAuth flow or remote proxy is in v1.

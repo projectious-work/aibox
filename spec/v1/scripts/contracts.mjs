@@ -81,17 +81,17 @@ const policy=schema('operator-policy','External operator policy and digest-bound
  operations:{...list({enum:Object.keys(specs).filter(x=>!x.endsWith('_workspace'))},32),uniqueItems:true},
  grants:list(object({id:id,requester:id,projectRoot:absolute,configPath:absolute,operation:{enum:Object.keys(specs)},inputDigest:digest,runtimeContext:id,resourceId:id,expiresAt:stamp,allowHostHooks:bool},['id','requester','projectRoot','configPath','operation','inputDigest','runtimeContext','expiresAt']),256)
 },['schemaVersion','principal','allowedRoots','executables','runtimeContexts','operations','grants']));
-const receipt=schema('operation-receipt','Durable local aibox operation receipt',object({
- schemaVersion:{const:'aibox.operation-receipt/v1'},operationId:id,requestFingerprint:digest,operation:{enum:Object.keys(specs)},
+const operationRecord=schema('operation-record','Durable local aibox operation record',object({
+ schemaVersion:{const:'aibox.operation-record/v1'},operationId:id,requestFingerprint:digest,operation:{enum:Object.keys(specs)},
  projectRoot:absolute,configPath:absolute,inputDigest:digest,policyDigest:digest,grantId:id,
  createdAt:stamp,updatedAt:stamp,executor:str,state:payloads.inspect_operation.properties.state,lastConfirmedStep:str,
  resources:list(resource,64),completedEffects:list(effect),unknownEffects:list(effect),
  result:{$ref:result.$id}
 },['schemaVersion','operationId','requestFingerprint','operation','projectRoot','inputDigest','createdAt','updatedAt','executor','state','lastConfirmedStep','resources','completedEffects','unknownEffects']));
-const outputs={'operation-request.schema.json':request,'operation-result.schema.json':result,'operator-policy.schema.json':policy,'operation-receipt.schema.json':receipt};
+const outputs={'operation-request.schema.json':request,'operation-result.schema.json':result,'operator-policy.schema.json':policy,'operation-record.schema.json':operationRecord};
 for(const [file,value] of Object.entries(outputs)){
  const content=JSON.stringify(value,null,2)+'\n',destination=path.join(root,file);
  if(process.argv.includes('--check')){if(readFileSync(destination,'utf8')!==content)throw Error(`Contract drift: ${file}`);}
  else writeFileSync(destination,content);
 }
-console.log(`Contract generation checked: ${Object.keys(specs).length} operations, policy and receipts.`);
+console.log(`Contract generation checked: ${Object.keys(specs).length} operations, policy and operation records.`);

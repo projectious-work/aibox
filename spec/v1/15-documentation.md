@@ -52,6 +52,10 @@ candidate binary or mark the unimplemented examples as planned. The build
 must be rerun after any code or docs change affecting the candidate. Public
 deployment remains a separate release/preview decision; a local build is
 mandatory even when publication is deferred.
+When publishing a Dev Container example, keep its active settings minimal and
+its aibox-owned option catalog complete, commented and explanatory as required
+by chapters 2 and 8. Reference the upstream Dev Container CLI for unrelated
+native options instead of maintaining a second general-purpose reference.
 
 V1-19 is not where feature documentation or preview publication first appears.
 Earlier verified checkpoints may publish scoped alpha/beta releases with exact

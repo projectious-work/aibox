@@ -53,7 +53,7 @@ named release and conformance evidence support that status.
 | Binary black box | Built Go CLI from V1-03 with read-only demo, invalid input and output separation; stdio MCP parity from V1-09 | Earlier executable journeys remain working; later adapters return equivalent results |
 | Settings/logging black box | Temporary system/user/project/env-file/env/flag layers; stderr/file/collector capture, disk-full and rotation fixtures | Provenance, source authority, redaction and evidence separation under real binary execution |
 | Disposable integration | Pinned Dev Container CLI, selected runtime, Features, Templates, image, local UX assets | Direct upstream and wrapped lifecycle, exact stop/remove, persisted home |
-| User journey | Fresh minimal project, complex migrated v0 project, local agent customization, sidebar/review, recovery | Actual v0 parity and new feature usability |
+| User journey | Chapter 20's human and agent stories: fresh minimal project, complex migrated v0 project, local agent customization, operator lifecycle and recovery, sidebar/review | Actual v0 parity and new feature usability |
 | Security/fault injection | Host hook denial, symlinks, token leaks, race/restart/partial failure | Boundary holds under hostile and interrupted inputs |
 | Published-artifact | Download exact candidate binary/image/Feature/Template, verify hashes/signatures/SBOM, run fresh journey | Source-tree success cannot substitute for release evidence |
 

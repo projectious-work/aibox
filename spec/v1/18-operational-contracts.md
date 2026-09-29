@@ -61,7 +61,7 @@ explains a closed next action; it never becomes executable recovery text.
 | `invalid_input`, `unknown_version`, `input_changed` / invalid_input | 2 | Correct/reinspect; never automatically retry mutation |
 | `not_authorized`, `approval_expired`, `identity_changed` / denied | 3 | External authorization or fresh inspection required |
 | `dependency_missing`, `dependency_incompatible` / missing_dependency or incompatible | 4 | Advisory installation/update; no auto-install |
-| `busy`, `child_failed`, `postcondition_failed`, `receipt_unavailable`, `internal_error` | 5 | `busy` allows a later read; mutation failures require inspection |
+| `busy`, `child_failed`, `postcondition_failed`, `operation_record_unavailable`, `internal_error` | 5 | `busy` allows a later read; mutation failures require inspection |
 | `rebuild_required`, `session_restart_required`, `migration_conflict`, `recovery_required` | 6 | Explicit operator/user action |
 | `operation_timeout` / timeout | 124 | Timeout without observed effects is `timed_out`; with effects/uncertainty is `partial` |
 | `operation_cancelled` / interrupted | 130 | Cancellation without effects is `cancelled`; with effects/uncertainty is `partial`, still exit 130 |
@@ -89,7 +89,7 @@ digest-bound grants. The server validates ownership and rejects a policy
 inside a writable project or writable by the container user. The policy is
 loaded once; changes need an explicit process restart. Human CLI confirmation
 may create an in-memory grant for that single invocation under the configured
-policy and must be recorded in its receipt. `--yes` supplies acknowledgement,
+policy and must be recorded in its operation record. `--yes` supplies acknowledgement,
 not independent authority. MCP never asks itself to approve a mutation.
 
 An MCP grant matches requester (the externally configured stdio connection
@@ -105,21 +105,21 @@ Git author are attribution only, never authenticated identity.
 
 Before effects: parse → validate → establish principal → resolve selectors →
 authorize capability/grant → acquire lock → revalidate identities/digests →
-persist receipt → execute. Pure discovery needed to compute the digest uses
-only separately permitted read operations. Required-sink and receipt checks
+persist operation record → execute. Pure discovery needed to compute the digest uses
+only separately permitted read operations. Required-sink and operation record checks
 run before execution. A request cannot disable them through higher-precedence
 settings. Local calls never acquire an operator client or policy path.
 
 The fixed registry exposes the declared lifecycle tools and
 `inspect_operation`; local mode exposes `inspect_workspace`, `check_workspace`,
 `refresh_workspace`, `read_logs` for local sources, and `inspect_operation`
-for local receipts. Migration stays a human/operator CLI utility because it
+for local operation records. Migration stays a human/operator CLI utility because it
 rewrites configuration/state; this documented exception is compatible with the
 no-generic-config-mutation MCP boundary. Names, descriptions, schemas and
 capability membership are release assets checked for collisions at startup.
 Each MCP tool exposes its selected request-union branch as an object schema,
 not the whole operation union. Local `read_logs` additionally excludes runtime
-selectors and the runtime source enum; local receipt inspection cannot address
+selectors and the runtime source enum; local operation record inspection cannot address
 the host store. Server semantic authorization remains mandatory even where a
 client ignores the advertised narrowed schema.
 
@@ -131,7 +131,7 @@ code, lifecycle scripts with statically identified paths, distribution assets,
 policy digest, executable identity and relevant non-secret environment inputs.
 Hash canonical JSON (sorted object keys, domain-order arrays preserved) with
 SHA-256. Store the manifest without secrets. Secret files are references only;
-credential rotation does not put low-entropy secret hashes into a receipt.
+credential rotation does not put low-entropy secret hashes into an operation record.
 Sensitive environment values must not be included in public digest material.
 
 The digest detects changes in the declared control-input set; it is **not**
@@ -181,26 +181,26 @@ networks left by native tools are listed as retained resources with native
 cleanup guidance; no broad `compose down`/prune is implied. An ambiguous
 membership or a replica change blocks mutation rather than widening scope.
 
-Receipt storage is `${XDG_STATE_HOME:-$HOME/.local/state}/aibox/operations/`;
+Operation record storage is `${XDG_STATE_HOME:-$HOME/.local/state}/aibox/operations/`;
 host and container stores are physically distinct. Directories are 0700,
-files 0600. `operation-receipt.schema.json` fixes the record. Write a temporary
+files 0600. `operation-record.schema.json` fixes the record. Write a temporary
 file on the same filesystem, fsync, rename, then fsync the directory. Update
 after each observed step. The lock is an OS advisory lock on a SHA-256 key of
 canonical root + config path + endpoint identity; keep its file rather than
 unlinking a lock another process might hold. Do not rely on a PID file alone.
 
 `aibox operation status <id> --project <root>` and `inspect_operation` read
-the receipt after the same root/actor checks. Terminal results can be returned
+the operation record after the same root/actor checks. Terminal results can be returned
 for the same request ID only when normalized request fingerprint and target
-still match; mismatch is `invalid_input`. Interrupted/executing receipts are
+still match; mismatch is `invalid_input`. Interrupted/executing operation records are
 inspection-only on replay. A fresh mutating request must first reconcile
 native state; the wrapper never blindly resumes destructive steps. This gives
 another client a recovery path without conversation history or a daemon.
 
-Keep incomplete/partial receipts until explicitly resolved by the operator.
-Retain terminal receipts 30 days and ID/fingerprint tombstones 180 days;
+Keep incomplete/partial operation records until explicitly resolved by the operator.
+Retain terminal operation records 30 days and ID/fingerprint tombstones 180 days;
 expired tombstones do not promise perpetual replay detection. Clients use new
-UUIDs for new intent. Cleanup of receipts is a bounded local maintenance task,
+UUIDs for new intent. Cleanup of operation records is a bounded local maintenance task,
 never a side effect of log rotation or container removal. Evidence exports
 use relative file locators plus hashes; public records cannot rely solely on
 producer-local absolute paths.

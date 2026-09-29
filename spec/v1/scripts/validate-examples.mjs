@@ -6,6 +6,10 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = relative => JSON.parse(readFileSync(path.join(root, relative), 'utf8'));
+// Maintained examples use whole-line JSONC comments for inactive options.
+// Read only active fields; comments are documentation, not configuration.
+const readExample = relative => JSON.parse(readFileSync(path.join(root, relative), 'utf8')
+  .split('\n').filter(line => !line.trimStart().startsWith('//')).join('\n'));
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
@@ -49,8 +53,8 @@ function checkSchema(value, schema, at = '$', rootSchema = schema) {
 }
 
 const schema = readJson('customization.schema.json');
-const minimal = readJson('examples/minimal/.devcontainer/devcontainer.json');
-const customized = readJson('examples/customized/.devcontainer/devcontainer.json');
+const minimal = readExample('examples/minimal/.devcontainer/devcontainer.json');
+const customized = readExample('examples/customized/.devcontainer/devcontainer.json');
 
 for (const [name, example] of [['minimal', minimal], ['customized', customized]]) {
   assert(example.image, `${name}: expected a native image declaration`);
@@ -59,9 +63,9 @@ for (const [name, example] of [['minimal', minimal], ['customized', customized]]
   assert(!Object.hasOwn(example, 'features'), `${name}: example must not invent unverified Feature references`);
   assert(!Object.hasOwn(example, 'build'), `${name}: example must not claim an unverified image build`);
   assert(!Object.hasOwn(example, 'aibox'), `${name}: aibox preferences belong under customizations.aibox`);
-  assert(!readFileSync(path.join(root, `examples/${name}/.devcontainer/devcontainer.json`), 'utf8').includes('.aibox-home'),
+  assert(!JSON.stringify(example).includes('.aibox-home'),
     `${name}: starter example must not require .aibox-home`);
-  assert(!readFileSync(path.join(root, `examples/${name}/.devcontainer/devcontainer.json`), 'utf8').includes('.aibox/'),
+  assert(!JSON.stringify(example).includes('.aibox/'),
     `${name}: starter example must not require .aibox`);
 }
 
@@ -76,6 +80,8 @@ for (const invalid of [
   { schemaVersion: '1', unknownPreference: true },
   { schemaVersion: '1', workspace: { theme: null } },
   { schemaVersion: '1', workspace: { theme: 'made-up-theme' } },
+  { schemaVersion: '1', workspace: { tmux: { layout_switch: { style: 'dialog' } } } },
+  { schemaVersion: '1', workspace: { tmux: { notifications: { protocol: 'host-shell' } } } },
 ]) {
   let rejected = false;
   try { checkSchema(invalid, schema, '$.negativeFixture'); } catch { rejected = true; }
