@@ -87,10 +87,10 @@ policy = dict(schemaVersion="aibox.operator-policy/v1", principal="operator", al
 check("operator-policy.schema.json", policy)
 check("operator-policy.schema.json", dict(policy, allowEverything=True), False)
 check("operator-policy.schema.json", dict(policy, allowedRoots=["relative"]), False)
-receipt = dict(schemaVersion="aibox.operation-receipt/v1", operationId="case-1", requestFingerprint=d, operation="start_environment", projectRoot="/workspace", inputDigest=d, createdAt=t, updatedAt=t, executor="operator", state="executing", lastConfirmedStep="authorized", resources=[], completedEffects=[], unknownEffects=[])
-check("operation-receipt.schema.json", receipt)
-check("operation-receipt.schema.json", dict(receipt, result=dict(envelope, operation="start_environment", data=payloads["start_environment"])))
-check("operation-receipt.schema.json", dict(receipt, createdAt="not-a-date"), False)
+operation_record = dict(schemaVersion="aibox.operation-record/v1", operationId="case-1", requestFingerprint=d, operation="start_environment", projectRoot="/workspace", inputDigest=d, createdAt=t, updatedAt=t, executor="operator", state="executing", lastConfirmedStep="authorized", resources=[], completedEffects=[], unknownEffects=[])
+check("operation-record.schema.json", operation_record)
+check("operation-record.schema.json", dict(operation_record, result=dict(envelope, operation="start_environment", data=payloads["start_environment"])))
+check("operation-record.schema.json", dict(operation_record, createdAt="not-a-date"), False)
 roadmap = json.loads((root / "roadmap.yaml").read_text())
 check("roadmap.schema.json", roadmap)
 missing_demo = copy.deepcopy(roadmap)
@@ -102,7 +102,11 @@ check("roadmap.schema.json", invalid_demo, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
 for example_name in ("minimal", "customized"):
     example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"
-    example = json.loads(example_path.read_text())
+    # The maintained files are JSONC option catalogs: whole-line comments
+    # describe inactive choices and must not become active configuration.
+    active_lines = (line for line in example_path.read_text().splitlines()
+                    if not line.lstrip().startswith("//"))
+    example = json.loads("\n".join(active_lines))
     assert "features" not in example, f"{example_name}: unqualified Feature reference"
     assert "aibox" not in example, f"{example_name}: misplaced aibox configuration"
     extension = example.get("customizations", {}).get("aibox")

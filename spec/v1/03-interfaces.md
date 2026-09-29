@@ -30,7 +30,7 @@ The [command audit](command-disposition.md) covers removals/delegation, while
 | `logs` | `read_logs` | Scoped operator or local | Bounded tail/filter of declared logs; redact before return. No arbitrary file access. |
 | `doctor` | `check_environment` | Scoped operator or local | Read-only check suite. Offline schema checks never execute lifecycle hooks. |
 | `refresh` | `refresh_workspace` | Local | Validate and activate managed local UX changes; report rebuild-required rather than crossing authority. |
-| `operation status ID` | `inspect_operation` | Scoped operator or local | Inspect an authorized durable receipt after interruption; never resume effects automatically. |
+| `operation status ID` | `inspect_operation` | Scoped operator or local | Inspect an authorized durable operation record after interruption; never resume effects automatically. |
 | `attach` / recovery option | No interactive equivalent | Operator human CLI | Delegate entry via native exec/tmux; recovery bypasses broken tmux/Yazi/status. MCP returns connection instructions. |
 | `mcp serve` | Not itself an MCP tool | Startup | Start stdio server with operator-installed capability policy. Read-only knowledge mode requires no runtime access. |
 | help/version/completion | Resources/server metadata | Both | Human shell convenience and product identity. |
@@ -98,9 +98,9 @@ client undoes a completed runtime effect. Serialize conflicting operations on
 the same target; bounded locks recover from process crashes. Retrying reads
 is safe; mutating retries inspect actual state and input identity first.
 Duplicate removal must not delete a newly created container with the old name.
-No blind retry of rebuild or delete and no invented durable success receipt.
+No blind retry of rebuild or delete and no invented durable success operation record.
 
-Long builds remain synchronous calls. Chapter 18 defines durable receipts and
+Long builds remain synchronous calls. Chapter 18 defines durable operation records and
 read-only operation inspection across client sessions; it does not authorize
 a background workflow engine. Client compatibility and cancellation are tested
 before the relevant phase ships.

@@ -6,6 +6,16 @@ language. The project entry point is `.devcontainer/devcontainer.json` (JSONC
 as accepted by the pinned Dev Container CLI); referenced native files retain
 their own syntax and owner. aibox-specific intent is limited to the closed
 `customizations.aibox` schema. The v0 `aibox.toml` is migration input only.
+Maintained example definitions follow the chapter 2 commented-option
+convention. Each aibox schema option appears in place with a purpose and
+valid-values comment; inactive options remain commented. The list is generated
+from the closed aibox schema, so a schema addition or changed enum requires
+an updated explanation and regenerated examples in the same change. Native
+examples cover only aibox-relevant fields, not every Dev Container CLI or
+third-party extension property. The minimal starter keeps the entire aibox
+extension commented out and remains usable without aibox; curated examples
+uncomment only their selected settings. Comments never change the resolved
+native definition.
 
 ## Starter distribution and direct-upstream journey
 
@@ -37,7 +47,7 @@ v0 `.aibox-home/` may remain during migration/rollback, but
 new v1 projects use one documented persistent home mount. The default starter
 MUST NOT create `.aibox/` or `.aibox-home/`. Do not copy or mount a whole host
 home implicitly. Templates ignore any explicitly selected project-local bind
-directory and private environment files. Receipts live in the process XDG
+directory and private environment files. Operation records live in the process XDG
 state directory; migration backups use an explicit destination.
 
 The default image creates non-root user `aibox` with home `/home/aibox`.
@@ -181,32 +191,14 @@ rebuild remains pending for the external operator.
 
 ## Native configuration example
 
-This example is schematic until selected Feature refs/digests and pins are
-recorded in the V1-05 table. It demonstrates ownership and syntax, not an
-assertion that a registry artifact already exists:
-
-```jsonc
-{
-  "name": "my-project",
-  "build": { "dockerfile": "Dockerfile" },
-  "remoteUser": "aibox",
-  "mounts": ["source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"],
-  "features": {
-    "ghcr.io/devcontainers/features/go:1": {}
-  },
-  "customizations": {
-    "aibox": {
-      "schemaVersion": "1",
-      "workspace": { "theme": "gruvbox", "mode": "dark", "layout": "dev" },
-      "harnesses": { "order": ["codex"], "launch": { "codex": { "enabled": true } } }
-    }
-  }
-}
-```
-
-The Feature reference above is illustrative, not a tested release pin. Before
-this is promoted to a maintained example, replace it
-with the selected, digest-bound release and prove direct-upstream execution.
+The maintained [minimal](examples/minimal/.devcontainer/devcontainer.json) and
+[customized](examples/customized/.devcontainer/devcontainer.json) JSONC files
+show the complete commented aibox option catalog and keep only their selected
+native fields active. The customized example's aibox preferences are
+configuration intent only until the V1-05 runtime Feature is selected and
+qualified; it does not invent a Feature registry reference. When that Feature
+is added, its tested ID, digest and actual options appear in the example and
+the V1-05 selection table together.
 
 ## Artifact acceptance
 
@@ -217,5 +209,9 @@ with the selected, digest-bound release and prove direct-upstream execution.
   survive repeated refresh, rebuild and version upgrade byte-for-byte.
 - Compare direct Dev Container CLI and wrapped journeys from a clean checkout;
   the wrapper may add diagnostics but not change native workspace meaning.
+- Check each maintained example's active JSONC, exhaustive commented aibox
+  option catalog and documentation against the closed customization schema.
+  Test the aibox integration with the pinned CLI, not the upstream engine's
+  entire option matrix or unrelated Features.
 - Secret fixtures and private overrides remain outside Git, image layers,
   machine output, published docs and release artifacts.

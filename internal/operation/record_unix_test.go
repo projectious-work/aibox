@@ -13,11 +13,11 @@ import (
 	"github.com/projectious-work/aibox/internal/contract"
 )
 
-func receiptFixture(t *testing.T) Receipt {
+func recordFixture(t *testing.T) OperationRecord {
 	t.Helper()
 	now := time.Date(2026, 9, 28, 12, 0, 0, 0, time.UTC).Format(time.RFC3339)
-	return Receipt{
-		SchemaVersion: ReceiptSchemaVersion,
+	return OperationRecord{
+		SchemaVersion: OperationRecordSchemaVersion,
 		OperationID:   "operation-1", RequestFingerprint: "sha256:" + strings.Repeat("a", 64),
 		Operation: contract.StartEnvironment, ProjectRoot: t.TempDir(),
 		InputDigest: "sha256:" + strings.Repeat("b", 64),
@@ -27,130 +27,130 @@ func receiptFixture(t *testing.T) Receipt {
 	}
 }
 
-func TestReceiptStorePersistsAndReplacesAtomically(t *testing.T) {
+func TestOperationRecordStorePersistsAndReplacesAtomically(t *testing.T) {
 	directory := filepath.Join(t.TempDir(), "operations")
 	if err := os.Mkdir(directory, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store, err := OpenReceiptStore(directory)
+	store, err := OpenOperationRecordStore(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer store.Close()
-	receipt := receiptFixture(t)
-	if err := store.Save(receipt); err != nil {
+	record := recordFixture(t)
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(directory, receipt.OperationID+".json")
+	path := filepath.Join(directory, record.OperationID+".json")
 	info, err := os.Stat(path)
 	if err != nil || info.Mode().Perm() != 0600 {
-		t.Fatalf("receipt permissions: %v %v", info, err)
+		t.Fatalf("record permissions: %v %v", info, err)
 	}
-	read, err := store.Read(receipt.OperationID)
-	if err != nil || read.State != "validated" || read.RequestFingerprint != receipt.RequestFingerprint {
-		t.Fatalf("read receipt: %+v %v", read, err)
+	read, err := store.Read(record.OperationID)
+	if err != nil || read.State != "validated" || read.RequestFingerprint != record.RequestFingerprint {
+		t.Fatalf("read record: %+v %v", read, err)
 	}
-	receipt.State = "authorized"
-	receipt.LastConfirmedStep = "authorized"
-	if err := store.Save(receipt); err != nil {
+	record.State = "authorized"
+	record.LastConfirmedStep = "authorized"
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	receipt.State = "executing"
-	if err := store.Save(receipt); err != nil {
+	record.State = "executing"
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	receipt.State = "inspected"
-	receipt.LastConfirmedStep = "postcondition checked"
-	receipt.UpdatedAt = time.Date(2026, 9, 28, 12, 1, 0, 0, time.UTC).Format(time.RFC3339)
-	if err := store.Save(receipt); err != nil {
+	record.State = "inspected"
+	record.LastConfirmedStep = "postcondition checked"
+	record.UpdatedAt = time.Date(2026, 9, 28, 12, 1, 0, 0, time.UTC).Format(time.RFC3339)
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	read, err = store.Read(receipt.OperationID)
+	read, err = store.Read(record.OperationID)
 	if err != nil || read.State != "inspected" {
-		t.Fatalf("updated receipt: %+v %v", read, err)
+		t.Fatalf("updated record: %+v %v", read, err)
 	}
 	if matches, err := filepath.Glob(filepath.Join(directory, "*.tmp")); err != nil || len(matches) != 0 {
-		t.Fatalf("temporary receipts remain: %v %v", matches, err)
+		t.Fatalf("temporary records remain: %v %v", matches, err)
 	}
 }
 
-func TestReceiptStoreRejectsIdentityChangeAndBackwardState(t *testing.T) {
+func TestOperationRecordStoreRejectsIdentityChangeAndBackwardState(t *testing.T) {
 	directory := filepath.Join(t.TempDir(), "operations")
 	if err := os.Mkdir(directory, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store, err := OpenReceiptStore(directory)
+	store, err := OpenOperationRecordStore(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer store.Close()
-	receipt := receiptFixture(t)
-	if err := store.Save(receipt); err != nil {
+	record := recordFixture(t)
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	changed := receipt
+	changed := record
 	changed.RequestFingerprint = "sha256:" + strings.Repeat("c", 64)
 	if err := store.Save(changed); err == nil {
 		t.Fatal("accepted changed request fingerprint")
 	}
-	changed = receipt
+	changed = record
 	changed.State = "executing"
 	if err := store.Save(changed); err == nil {
 		t.Fatal("accepted skipped authorization")
 	}
-	receipt.State = "authorized"
-	if err := store.Save(receipt); err != nil {
+	record.State = "authorized"
+	if err := store.Save(record); err != nil {
 		t.Fatal(err)
 	}
-	receipt.State = "validated"
-	if err := store.Save(receipt); err == nil {
+	record.State = "validated"
+	if err := store.Save(record); err == nil {
 		t.Fatal("accepted backward state")
 	}
 }
 
-func TestReceiptStoreRejectsUnsafeStorageAndRecords(t *testing.T) {
+func TestOperationRecordStoreRejectsUnsafeStorageAndRecords(t *testing.T) {
 	parent := t.TempDir()
 	public := filepath.Join(parent, "public")
 	if err := os.Mkdir(public, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := OpenReceiptStore(public); err == nil {
-		t.Fatal("accepted public receipt store")
+	if _, err := OpenOperationRecordStore(public); err == nil {
+		t.Fatal("accepted public record store")
 	}
 	link := filepath.Join(parent, "link")
 	if err := os.Symlink(public, link); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := OpenReceiptStore(link); err == nil {
-		t.Fatal("accepted symlinked receipt store")
+	if _, err := OpenOperationRecordStore(link); err == nil {
+		t.Fatal("accepted symlinked record store")
 	}
 	private := filepath.Join(parent, "private")
 	if err := os.Mkdir(private, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store, err := OpenReceiptStore(private)
+	store, err := OpenOperationRecordStore(private)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer store.Close()
-	receipt := receiptFixture(t)
-	receipt.OperationID = "../escape"
-	if err := store.Save(receipt); err == nil {
+	record := recordFixture(t)
+	record.OperationID = "../escape"
+	if err := store.Save(record); err == nil {
 		t.Fatal("accepted traversal ID")
 	}
 	if _, err := store.Read("../escape"); err == nil {
 		t.Fatal("read traversal ID")
 	}
-	receipt.OperationID = "operation-1"
-	receipt.UnknownEffects = nil
-	if err := store.Save(receipt); err == nil {
+	record.OperationID = "operation-1"
+	record.UnknownEffects = nil
+	if err := store.Save(record); err == nil {
 		t.Fatal("accepted omitted effect list")
 	}
 	if err := os.WriteFile(filepath.Join(private, "operation-1.json"), []byte(`{"unexpected":true}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.Read("operation-1"); err == nil {
-		t.Fatal("accepted malformed receipt")
+		t.Fatal("accepted malformed record")
 	}
 	if err := os.Remove(filepath.Join(private, "operation-1.json")); err != nil {
 		t.Fatal(err)
@@ -159,6 +159,6 @@ func TestReceiptStoreRejectsUnsafeStorageAndRecords(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := store.Read("operation-1"); err == nil || errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("symlinked receipt should fail explicitly: %v", err)
+		t.Fatalf("symlinked record should fail explicitly: %v", err)
 	}
 }

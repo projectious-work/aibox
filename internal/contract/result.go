@@ -39,7 +39,7 @@ const (
 	RefreshWorkspace Operation = "refresh_workspace"
 	// ReadLogs reads a declared, bounded diagnostic source.
 	ReadLogs Operation = "read_logs"
-	// InspectOperation reads a durable operation receipt.
+	// InspectOperation reads a durable operation record.
 	InspectOperation Operation = "inspect_operation"
 	// MigratePreview previews a one-time v0-to-v1 conversion.
 	MigratePreview Operation = "migrate_preview"
@@ -130,7 +130,7 @@ type Result struct {
 	SchemaVersion string `json:"schemaVersion"`
 	// Operation identifies the use case or an invalid bootstrap request.
 	Operation Operation `json:"operation"`
-	// RequestID correlates requests, results and receipts without granting access.
+	// RequestID correlates requests, results and records without granting access.
 	RequestID string `json:"requestId"`
 	// Actors attributes the request and execution.
 	Actors Actors `json:"actors"`

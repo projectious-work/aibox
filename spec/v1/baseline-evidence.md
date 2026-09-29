@@ -39,7 +39,7 @@ The source link, source-hash and cardinality checks in `scripts/baseline.mjs`
 resolve against the pinned commit, then confirm that the fixture, generated
 ledgers and census agree. `scripts/inventory.mjs --check` verifies deterministic
 inventory output. `scripts/contracts.mjs --check` checks the operation, policy
-and receipt contract outputs. `scripts/validate.mjs` checks cross-document
+and operation record contract outputs. `scripts/validate.mjs` checks cross-document
 requirements, acceptance groups, roadmap references and local Markdown links.
 `scripts/validate-contracts.py` runs JSON Schema Draft 2020-12 checks and the
 positive/negative contract fixtures.
@@ -76,7 +76,7 @@ schemas and 98 fixtures. None of these checks is a product runtime test.
 |---|---|---|---|
 | `node spec/v1/scripts/baseline.mjs` | Fixture, source provenance, hashes and generated ledger match pinned v0 commit | 265 fields, 41 recipes / 98 tools, 66 actions / 74 arguments, 105 assets, 52 docs and 83 environment IDs matched | Pass |
 | `node spec/v1/scripts/inventory.mjs --check` | Ledger regeneration makes no changes | Same census as pinned baseline | Pass |
-| `node spec/v1/scripts/contracts.mjs --check` | Contract generation makes no changes | 15 operations, policy and receipts checked | Pass |
+| `node spec/v1/scripts/contracts.mjs --check` | Contract generation makes no changes | 15 operations, policy and operation records checked | Pass |
 | `node spec/v1/scripts/validate.mjs` | Normative trace, roadmap and links consistent | 27 requirements, 24 acceptance groups, 23 phases | Pass |
 | `node spec/v1/scripts/validate-examples.mjs` | Static native examples and negative cases pass | Static checks passed; V1-04 runtime qualification deferred | Pass |
 | `uv run --script spec/v1/scripts/validate-contracts.py` | Full Draft 2020-12 schema fixtures pass | 8 schemas, 98 fixtures | Pass |

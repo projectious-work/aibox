@@ -48,7 +48,7 @@ The file paths are:
 | Project | selected `.devcontainer/devcontainer.json` → `customizations.aibox` | same | Repository-owned, UX/diagnostic intent only |
 | Local native overrides | Tool-native user files in the persistent container home, or explicit project-owned native files | same | Container-local user ownership; see chapter 8; no default `.aibox/` tree |
 | Operator policy | explicit administrator-selected path outside project root | same | Authorization, *not* a precedence layer |
-| Evidence/state | `${XDG_STATE_HOME:-$HOME/.local/state}/aibox/` | same | Receipts and logs, never policy/config authority |
+| Evidence/state | `${XDG_STATE_HOME:-$HOME/.local/state}/aibox/` | same | Operation records and logs, never policy/config authority |
 
 Defaults are explicit: output format `human`, color `auto` (plain on non-TTY
 and always plain under `NO_COLOR`), diagnostic level `info`, no file sink,
@@ -97,7 +97,7 @@ duplicate keys within one file fail, later explicit files override earlier
 ones, and inherited process environment overrides every env file. Env-file
 paths are canonicalized and must be regular files; files containing secret
 values require private permissions and are never copied into an image or
-receipt. A repository may include an example env file but may not select an
+operation record. A repository may include an example env file but may not select an
 operator's private env file or grant authority through its contents.
 Env-file keys configure only the aibox process; they are not automatically
 exported to a child `devcontainer` invocation or injected into the container.
@@ -185,16 +185,16 @@ attributed child tool, per-request monotonic sequence and a bounded map of
 redacted fields. Start, validated,
 authorized/denied, dependency invocation, progress, partial effect, finish,
 cancel and cleanup have distinct event names. Never infer success from a log
-line; the typed result and durable operation receipt remain authoritative.
+line; the typed result and durable operation record remain authoritative.
 
 | Sink | Default and format | Location / failure rule |
 |---|---|---|
-| CLI diagnostic stderr | Enabled; concise plain text for interactive use, JSON Lines when selected | Never write progress/logs to result stdout. If stderr closes, preserve the operation result and receipt; do not rerun work. |
+| CLI diagnostic stderr | Enabled; concise plain text for interactive use, JSON Lines when selected | Never write progress/logs to result stdout. If stderr closes, preserve the operation result and operation record; do not rerun work. |
 | MCP diagnostic stderr | Enabled; JSON Lines | MCP stdout is protocol-only; no banner, child output or log event on stdout. |
 | Local rotating file | Opt-in, JSON Lines | User/container state directory by default; explicit allowed path only. Create directories `0700` and files `0600`, never group/world readable; default rotation is 10 MiB, seven files and seven days (whichever is shorter). |
 | Host service manager | Supported by capturing operator-server stderr under systemd/launchd or another operator-controlled collector | No custom network transport required; document unit/job integration and collector retention separately. |
 | Native runtime/child logs | Not an aibox sink | Capture bounded output with source attribution; redact before forwarding or persistence. `aibox logs` reads only declared, authorized sources. |
-| Evidence/receipts | Separate durable store | Minimal non-secret state under the state directory; rotation of operational logs never deletes it. |
+| Evidence/operation records | Separate durable store | Minimal non-secret state under the state directory; rotation of operational logs never deletes it. |
 
 The default level is `info`; `trace`/`debug` are opt-in and still redacted.
 Rotation/retention overrides are bounded by policy and semantic limits
@@ -202,7 +202,7 @@ Rotation/retention overrides are bounded by policy and semantic limits
 administrator's retention maximum or disk quota. A file sink without an
 explicit rotation setting uses the defaults above.
 `off` disables ordinary diagnostic events, not required security/operation
-receipts. `NO_COLOR` wins over color preferences for human output; non-TTY
+operation records. `NO_COLOR` wins over color preferences for human output; non-TTY
 defaults to plain with no spinner. Logging format is `plain` or `jsonl` and
 is independent of requested result `--format`. A `--log-file` path requests
 an additional sink, never redirects result stdout; a project file or env
@@ -222,7 +222,7 @@ failure, emit a bounded stderr warning and mark the sink degraded in the
 result where possible. If the configured sink is marked `required`, refuse a
 new mutating operation **before** side effects; once started, a mid-operation
 sink failure is recorded as a partial observability failure, not a request
-replay. Required durable receipts/evidence always fail closed for mutation
+replay. Required durable operation records/evidence always fail closed for mutation
 when they cannot be written. Read-only help/version/guide calls can continue
 with a visible warning. Operator policy controls file roots, retention
 minimums and whether a sink may be disabled; project/env/CLI precedence
@@ -247,4 +247,4 @@ AC-LOGGING exercises every severity, sink, format, concurrent writes,
 rotation/retention, child attribution, cancellation/partial outcomes,
 NO_COLOR/non-TTY, closed stderr, disk-full/permission failure, required-sink
 fail-closed behavior, MCP stdout purity and secret leakage across chunk
-boundaries. Evidence/receipts are checked separately from logs.
+boundaries. Evidence/operation records are checked separately from logs.

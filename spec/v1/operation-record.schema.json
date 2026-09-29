@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-receipt.schema.json",
-  "title": "Durable local aibox operation receipt",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-record.schema.json",
+  "title": "Durable local aibox operation record",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
-      "const": "aibox.operation-receipt/v1"
+      "const": "aibox.operation-record/v1"
     },
     "operationId": {
       "type": "string",

@@ -22,7 +22,7 @@ inspection; there is no installable release, MCP server, or supported lifecycle 
 The result `data` remains opaque at the common-contract layer, so envelope
 validation alone does not prove operation-specific schema conformance. A
 follow-on slice added Linux/macOS process-group TERM/KILL cancellation and a
-private, exact-environment OS advisory lock. A private durable receipt store
+private, exact-environment OS advisory lock. A private durable operation record store
 now writes bounded, schema-shaped records by file sync, atomic rename and
 directory sync; a caller must hold the exact-environment lock. An offline
 post-cancellation classifier now requires exact-effect observation before
@@ -54,10 +54,10 @@ The follow-on cancellation and lock slice passes `go test ./...`, race tests,
 validators, and a local v1 Hugo build. New offline tests cover descendant
 termination, TERM-to-KILL escalation, lock contention, endpoint separation,
 private lock files, and rejection of unsafe stores.
-The receipt slice adds offline tests for atomic replacement, private storage,
+The operation record slice adds offline tests for atomic replacement, private storage,
 invalid records, traversal and symlink rejection. It does not yet expose a
-receipt-reading CLI or imply that an interrupted mutation can be replayed.
-Receipt updates now reject reused IDs with changed request identity, skipped
+CLI for reading operation records or imply that an interrupted mutation can be replayed.
+Operation record updates now reject reused IDs with changed request identity, skipped
 authorization, backward state transitions and edits to terminal records.
 The interruption slice tests that confirmed or uninspectable effects yield
 `partial`; only proven absence yields `cancelled` or `timed_out`.
@@ -78,7 +78,7 @@ v1 runtime compatibility claim is exposed by this slice.
 ## Open V1-03 work
 
 V1-03 still owns policy loading and authorization, upstream-assisted complete input discovery,
-receipt recovery reads, runtime-specific effect inspection,
+operation record recovery reads, runtime-specific effect inspection,
 operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
 and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
 work depend on these foundations.

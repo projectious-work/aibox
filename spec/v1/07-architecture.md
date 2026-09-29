@@ -35,13 +35,13 @@ replacement for a user-owned Dev Container definition during normal operation.
 | `internal/contract` | Operation inputs/results, findings, error codes, schema versions | Runtime calls or mutable globals |
 | `internal/project` | Discover project root and declared Dev Container inputs; read ownership manifest | Execute hooks or rewrite native configuration |
 | `internal/config` | Strictly parse layered process settings, env files/vars, aibox UX extension and invocation overrides; validate authority and resolve provenance | Reimplement upstream Dev Container merge/build semantics or read a host home in local mode |
-| `internal/logging` | Build redacted semantic events and render them to bounded stderr/file/collector sinks | Treat logs as receipts, write to MCP stdout or start network export from project input |
+| `internal/logging` | Build redacted semantic events and render them to bounded stderr/file/collector sinks | Treat logs as operation records, write to MCP stdout or start network export from project input |
 | `internal/policy` | Authorize caller, operation, target and frozen input digest | Accept repository-controlled grants |
 | `internal/identity` | Bind project, runtime endpoint/context, native resource IDs and owned labels | Treat display names as deletion proof |
 | `internal/devcontainer` | Invoke documented CLI commands and decode documented outputs | Import private Node modules or build a second compiler |
 | `internal/runtime` | Narrow stop/remove/inspect adapter where CLI has a proven gap | Arbitrary container-engine API or global prune |
 | `internal/process` | Resolve allowed executables; run argument arrays with bounded IO, environment, cancellation | Interpolate project strings into a shell |
-| `internal/operation` | Per-target lock, state transitions, durable minimal receipts, interrupted-run inspection | General workflow engine or desired-state database |
+| `internal/operation` | Per-target lock, state transitions, durable minimal operation records, interrupted-run inspection | General workflow engine or desired-state database |
 | `internal/diagnostic` | Registered read-only check functions and stable finding order | Implicit network, install, fixes or lifecycle effects |
 | `internal/guidance` | Embed/version public task recipes, index and template variables | Read arbitrary project paths or generate LLM advice |
 | `internal/migration` | One-time v0 conversion preview/apply/rollback and named-state conversion | Recurring configuration manager |
@@ -107,8 +107,8 @@ result envelopes for equivalent logical requests.
 
 Do not store a parallel desired-state model. The requested definition is the
 current standard files; current runtime state is inspected from the selected
-runtime. Persist only non-secret operation receipts needed to recognize
-interruption and partial effects. A receipt contains request ID, operation,
+runtime. Persist only non-secret operation records needed to recognize
+interruption and partial effects. An operation record contains request ID, operation,
 actor IDs, project and runtime identities, input digest, start/end timestamps,
 last confirmed step, outcome and references to redacted evidence. It never
 contains copied config files, credentials, raw child output or authority grants.
@@ -116,7 +116,7 @@ contains copied config files, credentials, raw child output or authority grants.
 Each mutating operation follows `validated → authorized → locked → revalidated
 → executing → inspected → recorded`. The lock key binds canonical project root
 and runtime endpoint/context; different contexts do not share a name-only
-lock. A crash leaves an incomplete receipt. The next operation inspects the
+lock. A crash leaves an incomplete operation record. The next operation inspects the
 actual runtime and returns recovery guidance before retrying any destructive
 step. Result serialization is deterministic (stable collection ordering where
 domain order does not matter); machine stdout contains one envelope only.
@@ -157,13 +157,13 @@ unavailable operator/lifecycle commands explicitly; it does not need Docker,
 host policy or credentials. A customer can build and run the binary and follow
 the matching v1 Hugo walkthrough. The runner now terminates child process
 groups on Linux/macOS, and `internal/operation` has an exact-environment
-advisory lock. An internal private durable-receipt store now provides bounded
+advisory lock. An internal private durable operation-record store now provides bounded
 atomic writes, validated reads and forward-only state transitions, but no CLI
 uses it yet. A standalone executable resolver rejects project-selected or
 writable programs and returns a byte digest, but is not wired to policy.
 The read-only CLI and a reusable manifest builder hash explicit confined
 control files; full upstream-assisted discovery is not yet implemented.
-Operation-specific payload checks, policy authorization, receipt recovery
+Operation-specific payload checks, policy authorization, operation record recovery
 rules and a runtime-specific post-cancellation observer remain foundation
 work. An offline classifier now treats uninspectable effects as partial.
 These components must not be used for mutating lifecycle

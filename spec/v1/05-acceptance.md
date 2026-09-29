@@ -75,18 +75,24 @@ Every current choice needs either evidence or an explicit blocked result.
 
 ### AC-CONTRACTS — executable contracts and quality limits
 
-Apply chapter 18 and the request/result/policy/receipt schemas to all operations.
+Apply chapter 18 and the request, result, policy and operation-record schemas to all operations.
 Validate with Draft 2020-12 including date-time formats and external references;
 the same positive/negative corpus must pass Go, CLI and MCP SDK adapters.
 Cover absent containers and first-build failure, invalid input without digest,
 irrelevant fields, wrong contexts, data payloads, partial effects, cancellation,
-timeouts, expired grants, receipt crash recovery and a new client inspecting
+timeouts, expired grants, operation record crash recovery and a new client inspecting
 an old operation. Verify Compose exclusive/shared membership and no volume
 deletion. Measure every R-LIMITS bound using the declared reference environment;
 publish observed values, not just pass labels. Reject oversize inputs before
 delegation, and bound/truncate diagnostic output without truncating JSON syntax.
 
 ### AC-CONFIG — configuration equivalence
+
+Maintained `devcontainer.json` examples keep only selected fields active and
+document every closed aibox customization option in commented JSONC with
+purpose and schema-valid values. A generated-catalog check detects schema or
+example drift. Test the aibox-owned integration and direct-upstream
+interoperability, not the Dev Container CLI's entire generic option matrix.
 
 Given a default v0 fixture and then each non-default field/alias fixture,
 conversion preserves effective intent in standard/native destinations.
@@ -160,10 +166,10 @@ stderr; `NO_COLOR` and non-TTY behavior are deterministic. Test levels,
 filters, event correlation, initiating/executing actor attribution, child
 source attribution, partial/cancelled outcomes, concurrent writes, rotation,
 retention, backpressure and unavailable/closed sinks. A required sink or
-receipt failure refuses mutation before effects; mid-operation failure
+operation record failure refuses mutation before effects; mid-operation failure
 reports degraded observability without replaying work. Known secrets,
 private paths and chunked child output never reach any sink, buffer or test
-artifact. Rotating logs cannot erase durable operation receipts/evidence.
+artifact. Rotating logs cannot erase durable operation records/evidence.
 
 ### AC-SEC — authority and malicious-input tests
 

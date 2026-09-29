@@ -40,7 +40,7 @@ record the binding.
 | `build` | Validated definition, pinned `devcontainer` executable and runtime readiness; invoke public `devcontainer build --workspace-folder <root>` with documented configuration selector/lockfile option for that pin | Capture upstream build result and image identity; do not stop a running workspace. Child failure is `failed`, never success with a warning. |
 | `start` (`up`) | Inspect exact target; if already running with same input, `no_change`; otherwise invoke public `devcontainer up --workspace-folder <root>` plus documented options | Inspect resulting resource ID, state, definition labels and image; a CLI exit 0 without inspectable expected resource is `partial`. Start does not imply an attached terminal. |
 | `stop` | Require exact running resource ID and reconfirm endpoint/context/input; invoke native runtime stop with that ID only | Reinspect: stopped is success; already stopped is `no_change`; vanished/wrong identity is `partial` or `identity_changed`, never stop a substitute. Volumes/home retained. |
-| `remove` | Stop if necessary only after explicit remove intent; exact ID plus ownership proof; invoke native runtime remove by ID, never Compose down for an entire project | Confirm ID gone, preserve named/bind volumes and project files. Already removed is `no_change` only if receipt/identity proves it was the same resource. |
+| `remove` | Stop if necessary only after explicit remove intent; exact ID plus ownership proof; invoke native runtime remove by ID, never Compose down for an entire project | Confirm ID gone, preserve named/bind volumes and project files. Already removed is `no_change` only if the operation record and identity checks prove it was the same resource. |
 | `rebuild` | Explicit disruption acknowledgement and retained-state plan; preflight build first, then remove the exact old environment, then native `up` | If preflight build fails, old environment stays running. Native `up` can build again: this is not an atomic candidate-image swap. After removal, failure is `partial` with retained state and documented recovery; no automatic volume purge. |
 | `inspect` | Read-only upstream configuration read plus bounded runtime inspect where authorized | Report separate declared, observed and unknown fields with timestamps; do not execute lifecycle hooks. |
 | `attach` | Human CLI only, running exact resource and explicit terminal | Use public `devcontainer exec` to enter; recover mode bypasses tmux/session startup. Terminal IO is not serialized as an MCP result. |
@@ -59,8 +59,8 @@ migration preview must not run hooks.
 ## Concurrency, retries and cancellation
 
 One mutating request per `(canonical root, runtime endpoint, context)` holds
-an OS-enforced lock plus a non-secret receipt. Bounded lock acquisition returns
-`busy` with current operation ID. Stale receipt recovery is inspection-first;
+an OS-enforced lock plus a non-secret operation record. Bounded lock acquisition returns
+`busy` with current operation ID. Stale operation record recovery is inspection-first;
 PID existence alone is insufficient. A repeated request ID returns a saved
 terminal result only if the digest and target identity still match. A new
 request ID against a changed target is a new request, not an idempotent replay.
@@ -72,7 +72,7 @@ and next action. Killing `devcontainer up` may leave a running container;
 neither the CLI nor MCP may promise rollback in that case. Crash-restart
 tests kill the wrapper after each recorded step and verify that no subsequent
 `remove` touches a replacement with the same name. Child logs are redacted
-before persistence; receipts contain hashes and references, not raw secrets.
+before persistence; operation records contain hashes and references, not raw secrets.
 
 ## Acceptance fixtures
 
