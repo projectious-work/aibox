@@ -3,23 +3,17 @@
 **R-DOCS:** aibox v1.x MUST have its own version-aligned public documentation
 line, built with the same Hugo build pipeline and the same
 `github.com/projectious-work/brand-theme-hugo-vanilla` theme module used by
-v0.x. Earlier v1 preview content used Docsy, a separate submodule,
-Bootstrap and Font Awesome; that material remains excluded migration history.
-The current v1 tree uses the shared Hugo shell, build scripts and brand
-components rather than maintaining two site frameworks. The theme pin matches the v0
-line's tested pin (currently v0.3.4 at the inspected v0.x release branch);
-later changes are coordinated, pinned upgrades, never floating module heads.
+v0.x. Both lines use one Hugo build and brand shell, not two site frameworks.
+The theme version is pinned and coordinated across both lines; floating module
+heads are forbidden.
 The v1 content is independently maintained and describes the Dev Container
 CLI-based product, not a copied v0 `aibox.toml` manual.
 
 ## Documentation is part of every phase
 
-V1-02 established the shared v0/v1 Hugo build **before** Go implementation
-begins. It is an enabling foundation phase, not a final documentation sprint.
-V1-01 (specification acceptance) updated the specification and roadmap and
-recorded the earlier local documentation build as a baseline; V1-02 replaced
-the v1 Docsy route. Every later phase depends
-directly or transitively on V1-02. The canonical roadmap gives every phase a
+V1-02 establishes the shared v0/v1 Hugo build as a foundation prerequisite,
+not a final documentation sprint. Every later phase depends directly or
+transitively on it. The canonical roadmap gives every phase a
 `docs` deliverable; no phase may reach `shipped` with that field unfulfilled.
 Phase IDs follow this implementation order; the
 [crosswalk](phase-id-crosswalk.md) preserves references from earlier reviews.
@@ -36,11 +30,11 @@ claims a feature is usable before its acceptance tests pass.
 
 Beginning with V1-03, each phase's user-facing preview docs MUST make the
 same candidate executable demonstrable: a runnable command, disposable
-fixture or setup, expected output, supported targets, current limits and
+fixture or setup, expected output, supported targets, candidate limits and
 cleanup/reset. A package-only phase is not an acceptable completed increment.
-V1-03's first walkthrough exercises read-only local inspection and must not
-suggest that build/up/MCP mutations already work. Every later phase extends
-this executable walkthrough and preserves the prior working journeys.
+Each later phase extends this executable walkthrough and preserves prior
+supported journeys. Documentation never represents unsupported operations as
+usable.
 
 The phase completion evidence MUST include: changed documentation paths and
 their audience; the phase's `docs` deliverable; a successful local build of
@@ -96,7 +90,7 @@ line/version-specific.
 
 ## Alpha/beta branch and content contract
 
-The repository currently has `v1.x-dev` and `v1.x-pre-release` branches;
+The version line uses `v1.x-dev` and `v1.x-pre-release` branches;
 alpha and beta are prerelease versions/tags on the latter, not assumed
 permanent branch names. Before each alpha or beta tag, update the docs source
 on the branch from which that candidate is cut and build its immutable
@@ -109,8 +103,9 @@ At each verified preview checkpoint, the public v1 docs cover only the
 candidate's available journeys as runnable instructions and label the
 remaining roadmap capabilities planned or unsupported. The evolving v1 docs
 must ultimately cover: preview maturity and support limits; installation
-of the pinned Dev Container CLI and aibox distribution; a direct-upstream
-minimal project journey; standard `devcontainer.json` and Feature/tool
+of the pinned Dev Container CLI and aibox distribution; an aibox-wrapped
+minimal project journey and a separate direct-upstream interoperability test;
+standard `devcontainer.json` and Feature/tool
 selection; local themes, tmux headers/titles, Yazi previews and persistence;
 operator-versus-container-agent authority; MCP/CLI operations and how-to
 resources; optional audio/processkit/LaTeX/sidebar/review; migration and

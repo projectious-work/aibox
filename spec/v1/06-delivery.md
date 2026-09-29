@@ -74,7 +74,7 @@ verifies stable publication.
 | G06 | Qualify sidebar source accuracy | Chapter 11 fixes no-invention/freshness behavior; V1-17 must record per-harness signals, quota limits, performance and layout evidence. |
 | G07 | Qualify selected review TUIs | Chapter 11 fixes offline/online and write boundaries; V1-18 must verify LazyGit/gh-dash/web fallback, licenses and accessibility. |
 | G08 | Reconcile source/ledger divergences | V1-01 and V1-20 compare deserializers, validators and shipped assets to generated rows, resolving stale docs before parity verification. |
-| G10 | Preserve shared Hugo documentation and release lines | V1-02 established the shared Hugo brand-theme build; V1-19 must prove both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
+| G10 | Preserve shared Hugo documentation and release lines | V1-02 establishes the shared Hugo brand-theme build; V1-19 must prove both-direction deploy preservation, current-v0 labels, alpha/beta candidate snapshots and no stale v0/reverted-v1 instructions. |
 | G11 | Qualify configuration and logging adapters | V1-06: test strict process-settings/env-file parser, CLI/MCP effective-value parity, protected sink authority, rotating-file behavior on Linux/macOS, and fail-closed behavior for required sinks and operation records. |
 
 A capability is complete only when its qualification checks pass on the

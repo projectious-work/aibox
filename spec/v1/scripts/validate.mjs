@@ -9,6 +9,14 @@ const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
 const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
 const normative=docs.filter(x=>/^\d{2}-/.test(x)).map(read).join('\n');
+const personaChapter=read('20-personas-and-user-stories.md');
+const firstStory=personaChapter.indexOf('## Independent developer stories');
+assert(firstStory>=0,'Missing user-story section');
+const stories=personaChapter.slice(firstStory);
+assert(!/\b(?:V1-\d{2}|currently implemented|when implemented|current Go preview|planned capabilities|today)\b/i.test(stories),
+ 'User stories must define target behavior, not implementation progress');
+for(const section of ['Act as','Context','Task','Iterate Output','Netiquette'])
+ assert(personaChapter.split(`**${section}:**`).length===5,`Each of four persona prompts needs ACTION section ${section}`);
 const criteria=new Set([...read('05-acceptance.md').matchAll(/^### (AC-[A-Z-]+) /gm)].map(x=>x[1]));
 const featureIds=new Set([...read('05-acceptance.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]));
 const tracedIds=[...read('feature-trace.md').matchAll(/^\| (F\d{2}) \|/gm)].map(x=>x[1]);

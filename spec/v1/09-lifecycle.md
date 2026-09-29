@@ -4,10 +4,10 @@ This chapter is the implementation contract for R-EXECUTION, R-RESULT,
 R-AUTHORITY and R-RECOVERY. Only an external operator process may execute
 these use cases. `devcontainer` owns definition resolution, Feature
 installation, image build, container creation and user command execution.
-The pinned upstream CLI currently does not implement `stop` or `down`;
-the narrow native-runtime adapter below fills those gaps without becoming
-a second Dev Container engine. A change in upstream support is reviewed before
-replacing the adapter, with equivalence tests retained.
+When the pinned upstream CLI lacks an operation such as `stop` or `down`, the
+narrow native-runtime adapter below fills that gap without becoming a second
+Dev Container engine. Upstream support changes are reviewed before replacing
+the adapter, with equivalence tests retained.
 
 ## Target identity and discovery
 

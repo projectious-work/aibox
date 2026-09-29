@@ -175,7 +175,7 @@ that the Feature registry artifacts already exist:
 }
 ```
 
-Before their implementation phases ship, add runnable schema-validated examples
+The deliverable includes runnable schema-validated examples
 for minimal, multi-harness, tool customization, audio, LaTeX and local overrides
 with qualified Feature references/digests and no hidden host prerequisites
 (G01/G02). Chapter 19 fixes source design and conversion rules; published

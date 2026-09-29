@@ -17,14 +17,16 @@ extension commented out and remains usable without aibox; curated examples
 uncomment only their selected settings. Comments never change the resolved
 native definition.
 
-## Starter distribution and direct-upstream journey
+## Starter distribution and upstream interoperability
 
 Ship two versioned Dev Container Templates: `minimal` (Debian, shell, tmux,
 Yazi, one selectable harness) and `curated` (same base plus documented optional
 Feature choices and UX assets). A Template copies initial files; it does not
-subsequently own or overwrite user edits. Both templates MUST pass a direct
-upstream `devcontainer build`, `devcontainer up` and `devcontainer exec` test
-without the aibox host binary. Product-specific local UX rendering may require
+subsequently own or overwrite user edits. The normal user journey is
+`aibox build`, `aibox up` and `aibox attach`. Separately, both templates MUST
+pass direct upstream `devcontainer build`, `devcontainer up` and
+`devcontainer exec` interoperability tests without the aibox host binary.
+Product-specific local UX rendering may require
 the aibox runtime Feature, but the container remains a valid Dev Container if
 that Feature is removed; its special UX options then produce a doctor warning
 instead of silently pretending to be active.
@@ -194,11 +196,10 @@ rebuild remains pending for the external operator.
 The maintained [minimal](examples/minimal/.devcontainer/devcontainer.json) and
 [customized](examples/customized/.devcontainer/devcontainer.json) JSONC files
 show the complete commented aibox option catalog and keep only their selected
-native fields active. The customized example's aibox preferences are
-configuration intent only until the V1-05 runtime Feature is selected and
-qualified; it does not invent a Feature registry reference. When that Feature
-is added, its tested ID, digest and actual options appear in the example and
-the V1-05 selection table together.
+native fields active. aibox preferences are configuration intent and require
+the qualified runtime Feature for activation. An example must not invent a
+Feature registry reference; a published reference includes its tested ID,
+digest and actual options in the example and selection table together.
 
 ## Artifact acceptance
 

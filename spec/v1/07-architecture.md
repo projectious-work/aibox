@@ -139,45 +139,26 @@ observation is a candidate, not a compatibility test or release pin.
 
 ## Architecture acceptance
 
-### V1-03 implementation status
+### Core and adapter acceptance
 
-The first Go slice lives in the root `go.mod`, `internal/contract`,
-`internal/project` and `internal/process`. It defines the common operation
-result envelope and CLI exit classes, canonical project-file containment,
-plus a no-shell argument-vector runner with an explicit environment and
-bounded, known-secret-redacted diagnostic tails. Offline tests
-use the test binary as a fake child; `go test ./internal/...` requires no
-container runtime. The module currently uses only the Go standard library.
+The Go application core provides the common result envelope and CLI exit
+classes, canonical project-file containment, an explicit input manifest and
+digest, and a no-shell argument-vector runner with a bounded environment and
+redacted diagnostic tails. Child cancellation reaches the process group;
+runtime effects are reinspected rather than inferred from the exit code.
+Conflicting operations take an exact-environment lock. Private operation
+records use bounded atomic writes, validated reads and forward-only state
+transitions. Executable resolution rejects project-selected or writable
+programs and records byte provenance. Chapter 18 defines the authorization,
+recovery and observed-effect conditions required before mutation.
 
-This baseline now has a **source-built read-only v1 executable**, but cannot
-close V1-03 yet. `cmd/aibox` provides version/help and local inspection of
-the minimal native example. The inspection
-returns the closed result envelope and a real input digest while rejecting
-unavailable operator/lifecycle commands explicitly; it does not need Docker,
-host policy or credentials. A customer can build and run the binary and follow
-the matching v1 Hugo walkthrough. The runner now terminates child process
-groups on Linux/macOS, and `internal/operation` has an exact-environment
-advisory lock. An internal private durable operation-record store now provides bounded
-atomic writes, validated reads and forward-only state transitions, but no CLI
-uses it yet. A standalone executable resolver rejects project-selected or
-writable programs and returns a byte digest, but is not wired to policy.
-The read-only CLI and a reusable manifest builder hash explicit confined
-control files; full upstream-assisted discovery is not yet implemented.
-Operation-specific payload checks, policy authorization, operation record recovery
-rules and a runtime-specific post-cancellation observer remain foundation
-work. An offline classifier now treats uninspectable effects as partial.
-These components must not be used for mutating lifecycle
-operations until observed-effect behavior meets chapter 18.
-
-- V1-03 binary black-box tests build `cmd/aibox`, invoke version/help and the
-  local inspection demo, validate its JSON result and output separation, and
-  prove unavailable host mutations fail without effects.
-- Static import checks and a code review find no Dev Container resolver,
-  package manager, daemon, host bridge or broad provider SDK in the Go tree.
-- V1-08 fake-executable and disposable integration tests prove delegated
-  public commands use argument arrays, bounded environments, correct working
-  directories, cancellation and attributed child failures; direct upstream
-  and wrapped outcomes are compared under AC-BUILD.
-- V1-09 extends the existing binary with guarded stdio MCP. Its black-box
-  suite verifies CLI/MCP equivalence and stable result/finding schemas. A
-  product-code change cannot claim parity from this document alone.
+- Offline binary tests exercise version/help, local inspection, invalid input,
+  result-schema validity and stdout/stderr separation without a host runtime.
+- Static import checks reject a duplicate Dev Container resolver, package
+  manager, daemon, host bridge or broad provider SDK in the Go core.
+- Fake-executable and disposable integration tests prove delegated public
+  commands use argument arrays, bounded environments, correct working
+  directories, cancellation and attributed child failures. Direct-upstream
+  and wrapped outcomes are compared under AC-BUILD as interoperability tests.
+- Stdio MCP and CLI black-box suites verify equivalent core results and stable
+  finding schemas. No implementation claims parity without that evidence.
