@@ -5,10 +5,14 @@
     {
       "line": "v0.x",
       "current": {
-        "version": "v0.35.0",
+        "version": "v0.35.1",
         "url": "https://projectious-work.github.io/aibox/"
       },
       "releases": [
+        {
+          "version": "v0.35.1",
+          "url": "https://projectious-work.github.io/aibox/v0.x/v0.35.1/"
+        },
         {
           "version": "v0.35.0",
           "url": "https://projectious-work.github.io/aibox/v0.x/v0.35.0/"
@@ -124,6 +128,19 @@
         {
           "version": "v0.28.18",
           "url": "https://projectious-work.github.io/aibox/v0.x/v0.28.18/"
+        }
+      ]
+    },
+    {
+      "line": "v1.x",
+      "current": {
+        "version": "preview",
+        "url": "https://projectious-work.github.io/aibox/v1.x/"
+      },
+      "releases": [
+        {
+          "version": "v1.0.0-alpha.1",
+          "url": "https://projectious-work.github.io/aibox/v1.x/v1.0.0-alpha.1/"
         }
       ]
     }
