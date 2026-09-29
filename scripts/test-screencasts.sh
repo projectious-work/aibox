@@ -217,6 +217,10 @@ import json
 import re
 import copy
 
+fragment_self_test = len(sys.argv) == 2 and sys.argv[1] == "--self-test"
+if fragment_self_test:
+    sys.argv = [sys.argv[0], "", "fragmented"] + ["#282828"] * 8
+
 # ---------------------------------------------------------------------------
 # Parse CLI args: cast_path theme slug bg fg accent green orange cyan muted surface
 # ---------------------------------------------------------------------------
@@ -265,6 +269,7 @@ class Screen:
         self.cur_fg = "default"
         self.cur_bold    = False
         self.cur_reverse = False
+        self.pending_escape = ""
 
     def _cell(self, r, c):
         if 0 <= r < self.rows and 0 <= c < self.cols:
@@ -365,14 +370,20 @@ class Screen:
             i += 1
 
     def feed(self, text):
+        # An asciinema event is an arbitrary byte chunk, not an ANSI sequence
+        # boundary. Retain an unfinished escape until the next event arrives.
+        text = self.pending_escape + text
+        self.pending_escape = ""
         i = 0
         while i < len(text):
             ch = text[i]
 
             if ch == "\x1b":
                 # ESC sequence
+                escape_start = i
                 i += 1
                 if i >= len(text):
+                    self.pending_escape = text[escape_start:]
                     break
                 nxt = text[i]
 
@@ -434,6 +445,9 @@ class Screen:
                             n = parse_params(param_str)[0] if param_str else 0
                             self._erase_line(n)
                         # else: ignore unknown CSI (cursor show/hide, mode set, etc.)
+                    else:
+                        self.pending_escape = text[escape_start:]
+                        break
 
                 elif nxt == "]":
                     # OSC — consume until ST (BEL or ESC \)
@@ -727,6 +741,16 @@ def status_row_invariants(screen, palette, bg_hex, surface_hex):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+if fragment_self_test:
+    probe = Screen(cols=4, rows=1)
+    probe.feed("\x1b[48;5;")
+    probe.feed("166mX")
+    assert probe.grid[0][0].ch == "X"
+    assert probe.grid[0][0].bg == "indexed:166"
+    assert probe.pending_escape == ""
+    print("PASS fragmented ANSI SGR is replayed across cast events")
+    sys.exit(0)
+
 screen = replay_cast(cast_path)
 failures = status_row_invariants(screen, palette_set, bg_hex, surface_hex)
 
@@ -1309,6 +1333,14 @@ test_cli() {
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
+test_parser() {
+  if python3 -c "${CAST_INVARIANTS_PY}" --self-test; then
+    pass "ANSI cast parser handles fragmented color escapes"
+  else
+    fail "ANSI cast parser mishandles fragmented color escapes"
+  fi
+}
+
 info "Visual smoke tests (output: ${TEST_DIR})"
 echo ""
 
@@ -1316,10 +1348,12 @@ MODE="${1:-all}"
 
 case "${MODE}" in
   layouts) test_layouts ;;
-  themes)  test_themes ;;
+  themes)  test_parser; test_themes ;;
+  parser)  test_parser ;;
   tools)   test_tools ;;
   cli)     test_cli ;;
   all)
+    test_parser
     test_layouts
     echo ""
     test_themes
@@ -1329,7 +1363,7 @@ case "${MODE}" in
     test_cli
     ;;
   *)
-    echo "Usage: $0 [all|layouts|themes|tools|cli]" >&2
+    echo "Usage: $0 [all|layouts|themes|parser|tools|cli]" >&2
     exit 1
     ;;
 esac
