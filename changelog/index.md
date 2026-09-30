@@ -10,6 +10,7 @@ Release highlights for the current aibox lines. See the
 complete changelog and upgrade notes.
 
 
+- [v0.35.3 — restore the stable release chain](https://projectious-work.github.io/aibox/changelog/release-v0-35-3/index.md) — Promotes the current v0 code through its development line to main and keeps host validation mandatory.
 - [v0.35.1 — Yazi Markdown preview and refreshed tools](https://projectious-work.github.io/aibox/changelog/release-v0-35-1/index.md) — Restores rendered Markdown previews and refreshes v0 base-image and addon tool versions.
 - [v0.35.2 — release-host Yazi probe fix](https://projectious-work.github.io/aibox/changelog/release-v0-35-2/index.md) — Checks Yazi startup in a generated tmux pane so macOS release validation can complete.
 - [v0.35.0 — period terminal themes and graphics toolchains](https://projectious-work.github.io/aibox/changelog/release-v0-35-0/index.md) — Adds Borland, Norton, and Phosphor themes plus opt-in D2, Graphviz, Vega, Vega-Lite, and Mermaid build-time renderers.
