@@ -301,21 +301,24 @@ else:
 assert not gate.RUN_ID.fullmatch("../v0.31.2-20260809T120000Z-0123456789ab")
 assert not gate.RUN_ID.fullmatch("v0.31.2/latest")
 
-assert gate.select_impact_checks(["docs-site/content/docs/index.md"]) == {}
-latex = gate.select_impact_checks(["addons/languages/latex.yaml"])
-assert latex == {"latex-lifecycle": "addons/languages/latex.yaml"}
-infrastructure = gate.select_impact_checks(["addons/tools/infrastructure.yaml"])
-assert infrastructure == {
-    "addon-platforms": "addons/tools/infrastructure.yaml",
-    "rootless-podman": "addons/tools/infrastructure.yaml",
-}
-assert gate.select_impact_checks(["addons/tools/release.yaml"]) == {
-    "addon-languages": "addons/tools/release.yaml"
-}
-all_checks = gate.select_impact_checks(["images/base-debian/Dockerfile"])
-assert set(all_checks) == gate.ALL_IMPACT_CHECKS
-assert set(gate.select_impact_checks(["*"])) == gate.ALL_IMPACT_CHECKS
+for changed_paths in ([], ["docs-site/content/docs/index.md"],
+                      ["addons/languages/latex.yaml"],
+                      ["images/base-debian/Dockerfile"], ["*"]):
+    all_checks = gate.select_impact_checks(changed_paths)
+    assert set(all_checks) == gate.ALL_IMPACT_CHECKS
+    assert set(all_checks.values()) == {"mandatory for every host release"}
 assert set(publisher.IMPACT_EVIDENCE) == gate.ALL_IMPACT_CHECKS
+selection = {"comparison_tag": "v0.35.2", "comparison_commit": "abc", "changed_paths": [],
+             "selected": gate.select_impact_checks([]), "skipped": {}}
+assert publisher.required_impact_evidence(selection) == set(publisher.IMPACT_EVIDENCE.values())
+for skipped in ({"addon-tools": "unchanged"},):
+    incomplete = {**selection, "selected": {"addon-languages": "mandatory"}, "skipped": skipped}
+    try:
+        publisher.required_impact_evidence(incomplete)
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("publisher accepted incomplete host-check coverage")
 assert publisher.LOCAL_CANDIDATE_EVIDENCE == "evidence/container-e2e/local-candidate-substitution.env"
 assert "evidence/container-e2e/impact-selection.json" in publisher.BASE_REQUIRED_EVIDENCE
 with tempfile.TemporaryDirectory() as temporary:
