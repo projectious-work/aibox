@@ -5,7 +5,7 @@ title: "Overview"
 
 # Addons
 
-aibox uses the Debian runtime image family (`base-debian-v0.26.x` for legacy releases, `base-debian-runtime-v0.27.0+` after the image-tag cutover) with **31 composable addons** that install language runtimes, tool bundles, documentation frameworks, and AI coding agents into your container.
+aibox uses the Debian runtime image family (`base-debian-v0.26.x` for legacy releases, `base-debian-runtime-v0.27.0+` after the image-tag cutover) with **36 composable addons** that install language runtimes, tool bundles, documentation frameworks, and AI coding agents into your container.
 
 ## Managing Addons
 
@@ -33,19 +33,26 @@ aibox describe addon-catalog -o json
 ```toml
 [addons.python.tools]
 python = { version = "3.14" }
-uv = { version = "0.11.26" }
+uv = { version = "0.12.20" }
 
 [addons.rust.tools]
-rustc = { version = "1.96.1" }
+rustc = { version = "1.98.1" }
 clippy = {}
 rustfmt = {}
 
 [addons.node.tools]
 node = { version = "26" }
-pnpm = { version = "11.10.0" }
+pnpm = { version = "12.8.1" }
 ```
 
 Each addon has **default-enabled tools** that are included automatically, and **optional tools** you can enable explicitly. Tools with version selection let you pick from curated, tested versions.
+
+Language addons also expose composable nested groups. For example,
+`[addons.go.quality]`, `[addons.go.supply-chain]`, and
+`[addons.go.release]` select the canonical `go-quality`, `supply-chain`, and
+`go-release` recipes and expand their dependencies automatically. Nested
+`[addons.<language>.<group>.tools]` entries use the same `version` and
+`enabled` overrides as flat addons.
 
 `aibox describe addon-catalog -o json` emits the stable `aibox.addon-catalog.v0`
 index used by downstream automation. It includes each addon's profile intent,
@@ -61,18 +68,22 @@ After editing `aibox.toml`, run `aibox apply` to regenerate the Dockerfile and r
 
 | Addon | Default Tools | Optional Tools |
 |-------|--------------|----------------|
-| `python` | python (3.12/3.13/3.14), uv (0.7/0.11.10/0.11.11/0.11.15/0.11.19/0.11.26) | poetry (1.8/2.0/2.4.1), pdm (2.22/2.26.9/2.27.0/2.28.0) |
-| `rust` | rustc (1.90/1.91/1.92/1.93/1.94/1.94.1/1.96.0/1.96.1), clippy, rustfmt | — |
-| `node` | node (20/22/24/26), pnpm (9/10/11.1.3/11.5.2/11.10.0) | yarn (4/4.16.0/4.17.0), bun (1.2/1.3.14) |
-| `go` | go (1.25/1.26/1.26.3/1.26.4) | — |
-| `typst` | typst (0.13.1/0.14.2/0.15.0) | — |
+| `python` | python (3.12/3.13/3.14), uv (0.7/0.11.10/0.11.11/0.11.15/0.11.19/0.11.26/0.12.0/0.12.5/0.12.20) | poetry (1.8/2.0/2.4.1/2.5.1), pdm (2.22/2.26.9/2.27.0/2.28.0/2.28.1/2.28.2/2.29.2) |
+| `rust` | rustc (1.90/1.91/1.92/1.93/1.94/1.94.1/1.96.0/1.96.1/1.97.1/1.98.0/1.98.1), clippy, rustfmt | — |
+| `node` | node (20/22/24/26), pnpm (9/10/11.1.3/11.5.2/11.10.0/11.18.0/11.20.0/11.21.0/11.22.0/12.6.0/12.8.1) | yarn (4/4.16.0/4.17.0/4.18.1), bun (1.2/1.3.14/1.4.0/1.4.2) |
+| `go` | go (1.25.12/1.26.3/1.26.4/1.26.5/1.26.6/1.27.0/1.27.1) | — |
+| `go-quality` | goimports, staticcheck, golangci-lint, govulncheck, gosec | — |
+| `typst` | typst (0.13.1/0.14.2/0.15.0/0.15.1) | — |
 | `latex` | texlive-core, texlive-recommended, texlive-fonts, biber, texlive-code, texlive-diagrams, texlive-math | texlive-music, texlive-chemistry |
 
 ### Tool Bundles
 
 | Addon | Default Tools | Optional Tools |
 |-------|--------------|----------------|
-| `infrastructure` | opentofu, ansible, packer | — |
+| `infrastructure` | opentofu, ansible, packer | podman (rootless engine and Compose) |
+| `supply-chain` | gitleaks, osv-scanner, syft, grype, cosign | — |
+| `release` | shellcheck, hadolint | — |
+| `go-release` | goreleaser (requires `go` and `release`) | — |
 | `git-ui` | gh, lazygit | — |
 | `preview-archive` | chafa, librsvg, poppler, timg, mupdf, entr, p7zip, resvg | — |
 | `preview-enhanced` | rich, ffmpeg, ghostscript | — |
@@ -82,6 +93,10 @@ After editing `aibox.toml`, run `aibox apply` to regenerate the Dockerfile and r
 | `cloud-aws` | aws-cli | — |
 | `cloud-gcp` | gcloud-cli | — |
 | `cloud-azure` | azure-cli | — |
+| `browser-testing` | @playwright/test, @axe-core/playwright, Chromium | Firefox, WebKit |
+| `diagramming` | D2, Graphviz | Either renderer can be disabled independently |
+| `data-visualization` | Vega CLI, Vega-Lite CLI | Either CLI can be disabled independently |
+| `mermaid` | Mermaid CLI, Puppeteer Chrome headless shell | Puppeteer can be disabled when an external browser is configured |
 
 ### Documentation Frameworks
 
@@ -130,6 +145,7 @@ agents pick them up via skill descriptions, not via addon membership:
 | `latex` / `typst` | `documentation` |
 | `git-ui` | `git-workflow` |
 | `kubernetes` | `container-orchestration` |
+| `cloudflare` | Cloudflare Tunnel workflows |
 | `infrastructure` | terraform-flavoured patterns shipped upstream |
 
 See [Skills (via processkit)](../skills/index.md) for the full split.
@@ -173,9 +189,9 @@ Recipe version: 1.0.0
 
   TOOL      DEFAULT    VERSION  SUPPORTED
   python        yes       3.14  3.12, 3.13, 3.14
-  uv            yes    0.11.26  0.7, 0.11.10, 0.11.11, 0.11.15, 0.11.19, 0.11.26
-  poetry         no      2.4.1  1.8, 2.0, 2.4.1
-  pdm            no     2.28.0  2.22, 2.26.9, 2.27.0, 2.28.0
+  uv            yes   0.12.20  0.7, 0.11.10, 0.11.11, 0.11.15, 0.11.19, 0.11.26, 0.12.0, 0.12.5, 0.12.20
+  poetry         no      2.5.1  1.8, 2.0, 2.4.1, 2.5.1
+  pdm            no     2.29.2  2.22, 2.26.9, 2.27.0, 2.28.0, 2.28.1, 2.28.2, 2.29.2
 ```
 
 Tools marked "DEFAULT: yes" are included automatically when you set the addon. Tools marked "no" must be explicitly listed in your `aibox.toml` to be installed.

@@ -27,32 +27,30 @@ cd cli && cargo clippy --all-targets -- -D warnings
 cd cli && cargo fmt -- --check
 ```
 
-### E2E Tier 2 (full container lifecycle tests)
-
-Requires the `aibox-e2e-testrunner` companion service running alongside the devcontainer.
-The repo devcontainer also needs an SSH client (`openssh-client`) because Tier 2 tests deploy to the companion via SSH/SCP; rebuild the devcontainer after pulling changes that touch `.devcontainer/Dockerfile.local`.
+### Local E2E contracts
 
 ```bash
 # 1. Build the CLI binary
 cd /workspace/cli && cargo build
 
-# 2. Run E2E tier 2 tests (deploys binary to companion via SCP on first run).
-# The expensive visual matrix tests are opt-in and do not run here.
-cd /workspace/cli && cargo test --features e2e
+# 2. Run local E2E contracts. No Docker, SSH, or companion is used.
+cd /workspace/cli && cargo test --test e2e
 
 # Run a specific E2E test
-cd /workspace/cli && cargo test --features e2e -- lifecycle
+cd /workspace/cli && cargo test --test e2e local_lifecycle
 ```
 
-The deploy step is guarded by `std::sync::Once` — runs once per `cargo test` invocation.
-Re-running after a code change: `cargo build` again, then re-run `cargo test --features e2e`.
+Real candidate-image lifecycle evidence runs only through the owner-controlled
+macOS release host gate. Its core candidate lifecycle, native Darwin smoke,
+cleanup, SBOM, and vulnerability checks run for every release. Checksummed
+changed-path provenance additionally selects affected download-based addon
+builds, the LaTeX watcher/preview lifecycle, and the rootless Podman readiness probe.
 
 ### Visual E2E tiers
 
-The generated tmux/Yazi visual tests run real SSH/asciinema sessions in the
-companion container. They are intentionally opt-in because they are slower and
-because release validation should choose the tier that matches the changed
-surface:
+The generated tmux/Yazi visual tests run real isolated tmux/asciinema sessions
+inside the development container. The focused commands remain useful during
+development:
 
 ```bash
 ./scripts/maintain.sh test-e2e-visual-status # layouts, themes, tmux status rows
@@ -60,6 +58,11 @@ surface:
 ./scripts/maintain.sh test-e2e-visual-yazi   # Yazi previews, git symbols, plugins
 ./scripts/maintain.sh test-e2e-visual        # all visual tiers
 ```
+
+The release workflow always runs all three visual tiers plus
+`scripts/test-screencasts.sh themes`, which validates every palette using a
+test-owned tmux server. `AIBOX_RELEASE_SKIP_VISUAL=1` is an emergency-only
+override and emits a prominent warning.
 
 To generate current-release source artifacts for documentation screenshots or
 screencasts:
@@ -100,9 +103,40 @@ Include `Cargo.lock` in version bump commits.
 
 ## Release
 
-See `context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md` for the full release process.
-Quick summary: `./scripts/maintain.sh release X.Y.Z` (in container) then
-`./scripts/maintain.sh release-host X.Y.Z` (on macOS host).
+For v0, merge every code, documentation, and version change from a topic
+branch into `v0.x-dev` first. Validate the exact remote `v0.x-dev` commit
+with `./scripts/maintain.sh release X.Y.Z` in the container. The release
+command fast-forwards that commit through `v0.x-pre-release` and
+`v0.x-release` to `main`, then creates the annotated stable tag on that
+same commit. A divergent branch or protected-branch refusal stops promotion;
+do not replace a fast-forward with a merge commit on a promotion branch.
+Published tags stay immutable. Keep v1 changes on the independent v1 line.
+
+The container-side release prepares an immutable host handover. On macOS,
+run the version-bound command printed in `dist/RELEASE-PROMPT.md`.
+
+Before publication, the release checks also require
+`docs-site/content/changelog/release-vX-Y-Z.md` to contain the exact version,
+link to its GitHub release tag, and sort as the newest public changelog entry.
+
+To rehearse the complete host validation and evidence path without uploading
+artifacts or pushing images, append `--dry-run` to that command. A successful
+dry run prints the explicit publisher command for the verified run directory.
+
+The host gate defaults to `--ui=auto`: an interactive terminal receives a
+Textual dashboard with a task-count progress bar, persistent task states, and
+a bordered selectable log; redirected output retains the plain streaming
+renderer. Use `--ui=textual` to require the dashboard or `--ui=plain` for CI,
+captured logs, and troubleshooting. Space toggles live-tail, `w` toggles
+wrapping, Ctrl+A/C selects and copies log text, `y` copies the selected task
+log, End resumes following, and `p` shows the authoritative log path.
+Presentation is never release evidence: attach
+`evidence/command-results.log` when complete unabridged output is needed.
+
+For a repeated candidate rehearsal, add `--reuse-cache` to permit verified
+content-addressed container layers to be reused. The gate still runs every
+build command, smoke test, inspection, SBOM generation, vulnerability scan,
+and evidence check; the default remains fresh downstream image layers.
 
 Release validation and publication run locally. Do not introduce GitHub Actions
 or another hosted CI release path. The local release tooling runs independent
@@ -117,7 +151,7 @@ and produced artifact checksums still match.
 | `cli/` | The Rust CLI — the only shipped artifact besides addon YAMLs |
 | `addons/` | YAML addon definitions (python, rust, node, latex, …) |
 | `images/` | Container image build recipes published to GHCR |
-| `docs-site/` | Hugo/Docsy documentation site |
+| `docs-site/` | Hugo documentation using the projectious.work brand theme |
 | `scripts/` | Release and maintenance tooling |
 | `context/` | This project's context (workitems, decisions, notes, …) |
 
@@ -149,7 +183,7 @@ Rust source — add constants to `processkit_vocab.rs` instead.
 
 **We are in a dev-container building dev-containers.**
 
-- **`.devcontainer/`** — THIS project's dev environment (Rust + Python/uv + Hugo/Docsy).
+- **`.devcontainer/`** — THIS project's dev environment (Rust + Python/uv + Hugo and its module toolchain).
 - **`images/`** — Published images for OTHER projects (pushed to GHCR).
 
 Never confuse these two. Changes to `.devcontainer/` affect our development.

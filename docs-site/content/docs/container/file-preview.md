@@ -45,7 +45,7 @@ When you open Yazi (`Ctrl+g s` from the file manager pane, or via the layout sid
 | CSV / TSV | `.csv` `.tsv` | `tabular-preview.yazi` plugin | `data-preview` addon |
 | Excel | `.xls` `.xlsx` | `tabular-preview.yazi` plugin | `data-preview` addon |
 | Video | `.mp4` `.mkv` `.webm` `.avi` | `video` (built-in) | `ffmpeg` (addon) |
-| Text / code | most text formats | `code` (built-in) | — |
+| Text / code | most text formats | `preview-options.yazi` | `bat` |
 
 Raster image, SVG, PDF, archive, and standalone terminal viewers require the
 **preview-archive** addon. SQLite, CSV/TSV, and Excel previews require the
@@ -81,6 +81,22 @@ prepend_previewers = [
 
 Custom plugins (`svg.yazi`, `eps.yazi`) live at `~/.config/yazi/plugins/<name>.yazi/init.lua`. They are seeded into `.aibox-home/.config/yazi/` on first `aibox init`.
 
+### Preview controls
+
+| Keys | Action |
+|------|--------|
+| `J` / `K` | Scroll the preview vertically down/up without moving the selected file |
+| `w h` | Open the selected file in a non-wrapping pager; use Left/Right for horizontal scrolling |
+| `w n` | Toggle line numbers for textual previews |
+| `w l` | Toggle wrapping textual previews to the current preview-pane width |
+| `w s` | Show selected paths as a recursive, ls-like table with tree structure and directory disk-usage totals |
+| `w v` | Open selectable preview text read-only in Vim |
+| `w p` | Watch and refresh the selected PDF |
+
+Lowercase `j` and `k` move the selected file. Preview scrolling deliberately
+uses uppercase `J` and `K` so browsing and inspecting a long preview remain
+separate operations. The `w n` and `w l` settings persist across Yazi sessions.
+
 ### Format notes
 
 **SVG** — converted to PNG by `resvg`, a fast standalone Rust-based SVG renderer bundled as a static binary in `/usr/local/bin/resvg`. The rendered PNG is cached under Yazi's cache directory. If `resvg` is absent from `PATH`, the plugin fails gracefully and Yazi falls back to the text previewer.
@@ -99,13 +115,13 @@ Custom plugins (`svg.yazi`, `eps.yazi`) live at `~/.config/yazi/plugins/<name>.y
 
 **`.excalidraw` files** — Excalidraw's native format is JSON. A graphical preview is not possible in a TUI environment. Yazi falls back to the text previewer showing the raw JSON. This is a known limitation — Excalidraw requires a browser to render.
 
-{{% alert title="Image protocol inside tmux" color="info" %}}
+{{< callout type="info" title="Image protocol inside tmux" >}}
 
 Image preview support depends on the host terminal and tmux passthrough
 settings. The generated Yazi config favors terminal-safe fallbacks inside tmux;
 use half-block mode when you need predictable rendering across terminals.
 
-{{% /alert %}}
+{{< /callout >}}
 
 ---
 
@@ -225,11 +241,11 @@ ls <file> | entr -s '<rasterise-command> && timg --clear <output.png>'
 | SVG | `resvg file.svg /tmp/p.png` |
 | EPS | `gs -dBATCH -dNOPAUSE -sDEVICE=png16m -r150 -sOutputFile=/tmp/p.png file.eps` |
 
-{{% alert title="Pane layout for watch preview" color="success" %}}
+{{< callout type="success" title="Pane layout for watch preview" >}}
 
 In the `dev` or `cowork` layouts, open a new horizontal pane below the editor (`Ctrl+g d`) and run the watch command there. The preview refreshes in that pane every time you save. Use `Ctrl+g =` to resize the pane to taste.
 
-{{% /alert %}}
+{{< /callout >}}
 
 ---
 

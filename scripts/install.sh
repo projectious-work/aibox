@@ -129,8 +129,8 @@ check_existing() {
     local current
     current=$("${install_dir}/${BINARY_NAME}" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
     if [[ "${current}" == "${version}" ]]; then
-      ok "aibox v${version} is already installed at ${install_dir}/${BINARY_NAME}"
-      exit 0
+      ok "aibox v${version} is already installed at ${install_dir}/${BINARY_NAME}; refreshing binary and addon catalog"
+      return
     fi
     warn "Upgrading aibox from v${current} to v${version}"
   fi
@@ -223,16 +223,25 @@ main() {
     languages/rust.yaml
     languages/node.yaml
     languages/go.yaml
+    languages/go-quality.yaml
     languages/typst.yaml
     languages/latex.yaml
     tools/infrastructure.yaml
+    tools/supply-chain.yaml
+    tools/browser-testing.yaml
+    tools/release.yaml
+    tools/go-release.yaml
     tools/kubernetes.yaml
     tools/cloud-aws.yaml
     tools/cloud-gcp.yaml
     tools/cloud-azure.yaml
+    tools/cloudflare.yaml
     tools/audio-voice.yaml
     tools/data-preview.yaml
+    tools/data-visualization.yaml
+    tools/diagramming.yaml
     tools/git-ui.yaml
+    tools/mermaid.yaml
     tools/preview-archive.yaml
     tools/preview-enhanced.yaml
     docs/docs-mkdocs.yaml
@@ -248,19 +257,23 @@ main() {
     ai/ai-copilot.yaml
     ai/ai-gemini.yaml
     ai/ai-hermes.yaml
+    ai/ai-tau.yaml
     ai/ai-mistral.yaml
     ai/ai-opencode.yaml
   "
   local failed=0
+  local installed=0
   for file in ${addon_files}; do
     if ! curl -fsSL -o "${addons_dir}/${file}" "${addons_base_url}/${file}" 2>/dev/null; then
       warn "Failed to download addon: ${file}"
       failed=$((failed + 1))
+    else
+      installed=$((installed + 1))
     fi
   done
 
   if [[ "${failed}" -eq 0 ]]; then
-    ok "Installed 32 addon definitions"
+    ok "Installed ${installed} addon definitions"
   else
     warn "Installed with ${failed} addon download failures — re-run to retry"
   fi

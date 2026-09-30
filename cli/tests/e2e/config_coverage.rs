@@ -468,6 +468,87 @@ node = { version = "22" }
     );
 }
 
+#[test]
+fn browser_testing_addon_renders_chromium_first_playwright_and_axe_contract() {
+    let dir = tempfile::tempdir().unwrap();
+    init_project(dir.path(), "addon-browser-testing");
+    patch_toml(
+        dir.path(),
+        r#"
+[addons.browser-testing.tools]
+"#,
+    );
+    sync_project(dir.path());
+    let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
+    assert!(
+        dockerfile.contains("@playwright/test") && dockerfile.contains("@axe-core/playwright"),
+        "browser-testing must install the coherent Playwright Test and axe adapter packages:\n{dockerfile}"
+    );
+    assert!(
+        dockerfile.contains("playwright install --with-deps --no-shell")
+            && dockerfile.contains("chromium \\"),
+        "browser-testing must provision full Chromium by default:\n{dockerfile}"
+    );
+}
+
+#[test]
+fn browser_testing_addon_renders_optional_firefox_and_webkit() {
+    let dir = tempfile::tempdir().unwrap();
+    init_project(dir.path(), "addon-browser-testing-cross-engine");
+    patch_toml(
+        dir.path(),
+        r#"
+[addons.browser-testing.tools]
+firefox = { enabled = true }
+webkit = { enabled = true }
+"#,
+    );
+    sync_project(dir.path());
+    let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
+    assert!(
+        dockerfile.contains("firefox \\") && dockerfile.contains("webkit \\"),
+        "browser-testing must render optional Firefox and WebKit installation when enabled:\n{dockerfile}"
+    );
+}
+
+#[test]
+fn graphics_renderer_addons_render_pinned_tools_and_dependencies() {
+    let dir = tempfile::tempdir().unwrap();
+    init_project(dir.path(), "addon-graphics-renderers");
+    patch_toml(
+        dir.path(),
+        r#"
+[addons.diagramming.tools]
+
+[addons.data-visualization.tools]
+
+[addons.mermaid.tools]
+"#,
+    );
+    sync_project(dir.path());
+    let dockerfile = read_generated(dir.path(), ".devcontainer/Dockerfile");
+    assert!(
+        dockerfile.contains("D2_VERSION=\"v0.9.0\"")
+            && dockerfile.contains("D2_ASSET=\"d2-${D2_VERSION}-linux-${D2_ARCH}.tar.gz\"")
+            && dockerfile.contains("graphviz"),
+        "diagramming must render pinned D2 and Graphviz installation:\n{dockerfile}"
+    );
+    assert!(
+        dockerfile.contains("vega-cli@6.4.0") && dockerfile.contains("vega-lite@6.4.3"),
+        "data-visualization must render pinned Vega tooling:\n{dockerfile}"
+    );
+    assert!(
+        dockerfile.contains("@mermaid-js/mermaid-cli@12.0.0")
+            && dockerfile.contains("puppeteer@25.12.0")
+            && dockerfile.contains("chrome-headless-shell --install-deps"),
+        "mermaid must render its pinned CLI and browser runtime:\n{dockerfile}"
+    );
+    assert!(
+        dockerfile.contains("# Addon: node"),
+        "Node must be selected transitively for Node-based graphics addons:\n{dockerfile}"
+    );
+}
+
 // ─── processkit package selection tests ──────────────────────────────────────
 //
 // Since v0.16.0 aibox no longer scaffolds context-doc files (BACKLOG.md,

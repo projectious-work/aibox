@@ -38,6 +38,20 @@ width = int(sys.argv[2])
 cache = pathlib.Path(sys.argv[3])
 text = src.read_text(errors="replace")
 
+def split_front_matter(value):
+    lines = value.splitlines()
+    if not lines or lines[0] not in {"+++", "---"}:
+        return None, value, None
+    fence = lines[0]
+    try:
+        end = lines.index(fence, 1)
+    except ValueError:
+        return None, value, None
+    lexer = "toml" if fence == "+++" else "yaml"
+    front_matter = "\n".join(lines[: end + 1])
+    body = "\n".join(lines[end + 1 :]).lstrip("\n")
+    return front_matter, body, lexer
+
 try:
     from rich.console import Console
     from rich.markdown import Markdown
@@ -63,10 +77,17 @@ console = Console(
     soft_wrap=False,
 )
 if src.suffix.lower() in {".md", ".markdown"}:
-    console.print(Markdown(text))
+    front_matter, body, lexer = split_front_matter(text)
+    if front_matter is not None:
+        # Markdown soft-break rules collapse front-matter rows into one
+        # paragraph. Render the fenced metadata verbatim, then render only the
+        # document body as Markdown.
+        console.print(Syntax(front_matter, lexer, theme="ansi_dark", word_wrap=False))
+    if body:
+        console.print(Markdown(body))
 else:
     language = src.suffix.lstrip(".") or "text"
-    console.print(Syntax(text, language, theme="ansi_dark", line_numbers=True, word_wrap=False))
+    console.print(Syntax(text, language, theme="ansi_dark", line_numbers=False, word_wrap=False))
 
 lines = buf.getvalue().splitlines()
 
@@ -105,20 +126,23 @@ local function cache_root()
 end
 
 local function path_key(url)
-	-- Hex-encode the path so the cache filename is filesystem-safe and bounded.
-	-- Truncate to 32 chars — collisions are vanishingly rare and the full
-	-- (mtime, width) suffix guards against semantic clashes.
+	-- Hash the entire path into a bounded, filesystem-safe key. The previous
+	-- implementation truncated a hex-encoded path to its first 32 characters,
+	-- so files sharing the same first 16 path bytes collided whenever their
+	-- mtimes and preview widths also matched.
 	local s = tostring(url)
-	local out = {}
+	local h1, h2 = 5381, 52711
 	for i = 1, #s do
-		out[i] = string.format("%02x", s:byte(i))
+		local byte = s:byte(i)
+		h1 = (h1 * 33 + byte) % 4294967296
+		h2 = (h2 * 65599 + byte) % 4294967296
 	end
-	return table.concat(out):sub(1, 32)
+	return string.format("%08x%08x", h1, h2)
 end
 
 local function cache_file(url, mtime, width)
 	return string.format(
-		"%s/%s-%d-%d.cache",
+		"%s/%s-rich2-%d-%d.cache",
 		cache_root(),
 		path_key(url),
 		mtime,
@@ -152,6 +176,7 @@ local function read_window(path, skip, height)
 end
 
 function M:peek(job)
+	local preview_opts = require("preview-options"):options()
 	local cha = job.file.cha
 	local mtime = math.floor((cha and cha.mtime) or 0)
 	local cpath = cache_file(job.file.url, mtime, job.area.w)
@@ -160,10 +185,17 @@ function M:peek(job)
 		return require("code"):peek(job)
 	end
 
+	-- python3-rich is installed for Debian's system interpreter. The
+	-- separately installed /usr/local/bin/python3 can shadow it on PATH.
+	local python = os.getenv("AIBOX_PREVIEW_PYTHON")
+	if not python or python == "" then
+		python = "/usr/bin/python3"
+	end
+
 	-- Cache miss → spawn Python once to render to disk. Subsequent peeks at
 	-- different skip offsets re-enter and find the cache populated.
 	if not fs.cha(Url(cpath)) then
-		local child = Command("python3")
+		local child = Command(python)
 			:env("COLUMNS", tostring(job.area.w))
 			:arg({
 				"-c",
@@ -197,6 +229,14 @@ function M:peek(job)
 	end
 
 	lines = lines:gsub("\t", string.rep(" ", rt.preview.tab_size))
+	if preview_opts.numbers then
+		local numbered, current = {}, job.skip + 1
+		for line in (lines .. "\n"):gmatch("(.-)\n") do
+			numbered[#numbered + 1] = string.format("%5d │ %s", current, line)
+			current = current + 1
+		end
+		lines = table.concat(numbered, "\n")
+	end
 
 	-- Build the position indicator. `total == 0` (renderer fell back to
 	-- raw text) → suppress the indicator since it would be misleading.
@@ -243,7 +283,7 @@ function M:peek(job)
 	ya.preview_widget(job, {
 		ui.Text.parse(lines)
 			:area(content_area)
-			:wrap(rt.preview.wrap == "yes" and ui.Wrap.YES or ui.Wrap.NO),
+			:wrap(preview_opts.wrap and ui.Wrap.YES or ui.Wrap.NO),
 		ui.Text(indicator_line):area(indicator_area):style(ui.Style():reverse()),
 	})
 end

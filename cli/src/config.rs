@@ -475,6 +475,8 @@ pub enum AiHarness {
     OpenCode,
     /// Nous Research autonomous agent.
     Hermes,
+    /// Tau educational multi-provider coding agent.
+    Tau,
     /// Mistral has no CLI harness; retained only so old config can be parsed.
     #[serde(rename = "mistral")]
     #[clap(skip)]
@@ -493,6 +495,7 @@ impl std::fmt::Display for AiHarness {
             AiHarness::Copilot => write!(f, "copilot"),
             AiHarness::OpenCode => write!(f, "opencode"),
             AiHarness::Hermes => write!(f, "hermes"),
+            AiHarness::Tau => write!(f, "tau"),
             AiHarness::Mistral => write!(f, "mistral"),
         }
     }
@@ -511,6 +514,7 @@ impl AiHarness {
             AiHarness::Copilot => "copilot",
             AiHarness::OpenCode => "opencode",
             AiHarness::Hermes => "hermes",
+            AiHarness::Tau => "tau",
             AiHarness::Mistral => "mistral",
         }
     }
@@ -527,6 +531,7 @@ impl AiHarness {
             AiHarness::Copilot => "GitHub Copilot (copilot)",
             AiHarness::OpenCode => "OpenCode (opencode)",
             AiHarness::Hermes => "Hermes (hermes)",
+            AiHarness::Tau => "Tau (tau)",
             AiHarness::Mistral => "Mistral (mistral, legacy)",
         }
     }
@@ -561,6 +566,7 @@ impl AiHarness {
             AiHarness::Copilot => Some(".copilot"),
             AiHarness::OpenCode => Some(".opencode"),
             AiHarness::Hermes => Some(".hermes"),
+            AiHarness::Tau => Some(".tau"),
             AiHarness::Mistral => None,
         }
     }
@@ -582,6 +588,7 @@ impl AiHarness {
             AiHarness::Copilot,
             AiHarness::OpenCode,
             AiHarness::Hermes,
+            AiHarness::Tau,
         ]
     }
 }
@@ -967,7 +974,7 @@ impl AiSection {
     pub fn migrate_legacy(&mut self) {
         if self.harnesses.is_empty() && !self.providers.is_empty() {
             // Legacy format: move providers → harnesses
-            self.harnesses = self.providers.drain(..).collect();
+            self.harnesses = std::mem::take(&mut self.providers);
         }
         for harness in AiHarness::all() {
             let Some(config) = self.harness.get(harness) else {
@@ -1091,6 +1098,9 @@ pub struct ToolEntry {
 pub struct AddonToolsSection {
     #[serde(default)]
     pub tools: HashMap<String, ToolEntry>,
+    /// Language-scoped group selections such as `[addons.go.supply-chain]`.
+    #[serde(flatten)]
+    pub groups: HashMap<String, AddonToolsSection>,
 }
 
 /// [addons] section — each key is an addon name mapping to its tools table.
@@ -1099,7 +1109,7 @@ pub struct AddonToolsSection {
 /// ```toml
 /// [addons.python.tools]
 /// python = { version = "3.14" }
-/// uv = { version = "0.11.26" }
+/// uv = { version = "0.12.5" }
 /// ```
 ///
 /// Deserialized as `HashMap<String, AddonToolsSection>` where the outer key
@@ -1263,11 +1273,32 @@ pub enum Theme {
     VitesseBlack,
     VsCodeDarkPlus,
     VsCodeLightPlus,
+    ProjectiousNavy,
+    ProjectiousDeep,
+    ProjectiousLight,
+    ProjectiousHCDark,
+    ProjectiousHCLight,
+    MonoDark,
+    MonoLight,
+    ContrastDark,
+    ContrastDarkMax,
+    ContrastLight,
+    ContrastLightMax,
+    ContrastMonoDark,
+    ContrastMonoDarkMax,
+    ContrastMonoLight,
+    ContrastMonoLightMax,
+    BorlandClassic,
+    BorlandOptimized,
+    NortonClassic,
+    NortonOptimized,
+    PhosphorClassic,
+    PhosphorOptimized,
 }
 
 /// User-facing theme family selector. Pairs with `ThemeMode` (and optional
-/// `variant`) to resolve to a concrete `Theme`. Solo families (dracula, moonlight,
-/// nord, projectious) have no light/dark partner and ignore mode.
+/// `variant`) to resolve to a concrete `Theme`. Families without a light/dark
+/// partner reject an incompatible explicit mode during config validation.
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]
 #[serde(rename_all = "kebab-case")]
 #[clap(rename_all = "kebab-case")]
@@ -1275,6 +1306,7 @@ pub enum ThemeFamily {
     Andromeeda,
     AuroraX,
     Ayu,
+    Borland,
     Catppuccin,
     Dracula,
     Everforest,
@@ -1287,13 +1319,18 @@ pub enum ThemeFamily {
     Material,
     Min,
     Monokai,
+    Mono,
     Moonlight,
     NightOwl,
     Nord,
+    Norton,
     OneDark,
     Plastic,
     Poimandres,
+    Phosphor,
     Projectious,
+    Contrast,
+    ContrastMono,
     Red,
     RosePine,
     Slack,
@@ -1314,6 +1351,7 @@ impl std::fmt::Display for ThemeFamily {
             ThemeFamily::Andromeeda => write!(f, "andromeeda"),
             ThemeFamily::AuroraX => write!(f, "aurora-x"),
             ThemeFamily::Ayu => write!(f, "ayu"),
+            ThemeFamily::Borland => write!(f, "borland"),
             ThemeFamily::Catppuccin => write!(f, "catppuccin"),
             ThemeFamily::Dracula => write!(f, "dracula"),
             ThemeFamily::Everforest => write!(f, "everforest"),
@@ -1325,13 +1363,18 @@ impl std::fmt::Display for ThemeFamily {
             ThemeFamily::Material => write!(f, "material"),
             ThemeFamily::Min => write!(f, "min"),
             ThemeFamily::Monokai => write!(f, "monokai"),
+            ThemeFamily::Mono => write!(f, "mono"),
             ThemeFamily::Moonlight => write!(f, "moonlight"),
             ThemeFamily::NightOwl => write!(f, "night-owl"),
             ThemeFamily::Nord => write!(f, "nord"),
+            ThemeFamily::Norton => write!(f, "norton"),
             ThemeFamily::OneDark => write!(f, "one-dark"),
             ThemeFamily::Plastic => write!(f, "plastic"),
             ThemeFamily::Poimandres => write!(f, "poimandres"),
+            ThemeFamily::Phosphor => write!(f, "phosphor"),
             ThemeFamily::Projectious => write!(f, "projectious"),
+            ThemeFamily::Contrast => write!(f, "contrast"),
+            ThemeFamily::ContrastMono => write!(f, "contrast-mono"),
             ThemeFamily::Red => write!(f, "red"),
             ThemeFamily::RosePine => write!(f, "rose-pine"),
             ThemeFamily::Slack => write!(f, "slack"),
@@ -1369,7 +1412,24 @@ pub fn family_of(theme: &Theme) -> ThemeFamily {
         Theme::Moonlight => ThemeFamily::Moonlight,
         Theme::NightOwl | Theme::NightOwlLight => ThemeFamily::NightOwl,
         Theme::Nord => ThemeFamily::Nord,
-        Theme::Projectious => ThemeFamily::Projectious,
+        Theme::Projectious
+        | Theme::ProjectiousNavy
+        | Theme::ProjectiousDeep
+        | Theme::ProjectiousLight
+        | Theme::ProjectiousHCDark
+        | Theme::ProjectiousHCLight => ThemeFamily::Projectious,
+        Theme::MonoDark | Theme::MonoLight => ThemeFamily::Mono,
+        Theme::ContrastDark
+        | Theme::ContrastDarkMax
+        | Theme::ContrastLight
+        | Theme::ContrastLightMax => ThemeFamily::Contrast,
+        Theme::ContrastMonoDark
+        | Theme::ContrastMonoDarkMax
+        | Theme::ContrastMonoLight
+        | Theme::ContrastMonoLightMax => ThemeFamily::ContrastMono,
+        Theme::BorlandClassic | Theme::BorlandOptimized => ThemeFamily::Borland,
+        Theme::NortonClassic | Theme::NortonOptimized => ThemeFamily::Norton,
+        Theme::PhosphorClassic | Theme::PhosphorOptimized => ThemeFamily::Phosphor,
         Theme::RosePine | Theme::RosePineMoon | Theme::RosePineDawn => ThemeFamily::RosePine,
         Theme::SolarizedDark | Theme::SolarizedLight => ThemeFamily::Solarized,
         Theme::TokyoNight | Theme::TokyoNightStorm | Theme::TokyoNightDay => {
@@ -1417,6 +1477,17 @@ pub fn variant_name_of(theme: &Theme) -> Option<&'static str> {
         Theme::SlackOchin => Some("ochin"),
         Theme::TokyoNightStorm => Some("storm"),
         Theme::VitesseBlack => Some("black"),
+        Theme::ProjectiousDeep => Some("deep"),
+        Theme::ProjectiousHCDark => Some("high-contrast-dark"),
+        Theme::ProjectiousHCLight => Some("high-contrast-light"),
+        Theme::ContrastDarkMax
+        | Theme::ContrastLightMax
+        | Theme::ContrastMonoDarkMax
+        | Theme::ContrastMonoLightMax => Some("max"),
+        Theme::BorlandClassic | Theme::NortonClassic | Theme::PhosphorClassic => Some("classic"),
+        Theme::BorlandOptimized | Theme::NortonOptimized | Theme::PhosphorOptimized => {
+            Some("optimized")
+        }
         _ => None,
     }
 }
@@ -1430,7 +1501,8 @@ pub(crate) fn resolve_theme_from_family(
     mode: ThemeMode,
     variant: Option<&str>,
 ) -> Theme {
-    // Solo families ignore both mode and variant.
+    // Mode and variant compatibility is checked by `AiboxConfig::validate`.
+    // These direct returns keep resolution total for programmatic callers.
     match family {
         ThemeFamily::Andromeeda => return Theme::Andromeeda,
         ThemeFamily::AuroraX => return Theme::AuroraX,
@@ -1441,7 +1513,6 @@ pub(crate) fn resolve_theme_from_family(
         ThemeFamily::Nord => return Theme::Nord,
         ThemeFamily::Plastic => return Theme::Plastic,
         ThemeFamily::Poimandres => return Theme::Poimandres,
-        ThemeFamily::Projectious => return Theme::Projectious,
         ThemeFamily::Red => return Theme::Red,
         ThemeFamily::Snazzy => return Theme::SnazzyLight,
         ThemeFamily::Synthwave84 => return Theme::Synthwave84,
@@ -1452,6 +1523,10 @@ pub(crate) fn resolve_theme_from_family(
     match mode {
         ThemeMode::Light => match family {
             ThemeFamily::Ayu => Theme::AyuLight,
+            ThemeFamily::Borland => match variant {
+                Some("classic") => Theme::BorlandClassic,
+                _ => Theme::BorlandOptimized,
+            },
             ThemeFamily::Catppuccin => Theme::CatppuccinLatte,
             ThemeFamily::Dracula => Theme::Dracula, // no light variant — return dark canonical
             ThemeFamily::Everforest => Theme::EverforestLight,
@@ -1463,8 +1538,29 @@ pub(crate) fn resolve_theme_from_family(
             ThemeFamily::Kanagawa => Theme::KanagawaLotus,
             ThemeFamily::Material => Theme::MaterialLighter,
             ThemeFamily::Min => Theme::MinLight,
+            ThemeFamily::Mono => Theme::MonoLight,
+            ThemeFamily::Contrast => match variant {
+                Some("max") => Theme::ContrastLightMax,
+                _ => Theme::ContrastLight,
+            },
+            ThemeFamily::ContrastMono => match variant {
+                Some("max") => Theme::ContrastMonoLightMax,
+                _ => Theme::ContrastMonoLight,
+            },
+            ThemeFamily::Projectious => match variant {
+                Some("high-contrast-light") => Theme::ProjectiousHCLight,
+                _ => Theme::ProjectiousLight,
+            },
             ThemeFamily::NightOwl => Theme::NightOwlLight,
+            ThemeFamily::Norton => match variant {
+                Some("classic") => Theme::NortonClassic,
+                _ => Theme::NortonOptimized,
+            },
             ThemeFamily::OneDark => Theme::OneLight,
+            ThemeFamily::Phosphor => match variant {
+                Some("classic") => Theme::PhosphorClassic,
+                _ => Theme::PhosphorOptimized,
+            },
             ThemeFamily::RosePine => Theme::RosePineDawn,
             ThemeFamily::Slack => Theme::SlackOchin,
             ThemeFamily::Solarized => Theme::SolarizedLight,
@@ -1481,7 +1577,6 @@ pub(crate) fn resolve_theme_from_family(
             | ThemeFamily::Nord
             | ThemeFamily::Plastic
             | ThemeFamily::Poimandres
-            | ThemeFamily::Projectious
             | ThemeFamily::Red
             | ThemeFamily::Snazzy
             | ThemeFamily::Synthwave84
@@ -1493,6 +1588,10 @@ pub(crate) fn resolve_theme_from_family(
             ThemeFamily::Ayu => match variant {
                 Some("mirage") => Theme::AyuMirage,
                 _ => Theme::AyuDark,
+            },
+            ThemeFamily::Borland => match variant {
+                Some("classic") => Theme::BorlandClassic,
+                _ => Theme::BorlandOptimized,
             },
             ThemeFamily::Catppuccin => match variant {
                 Some("macchiato") => Theme::CatppuccinMacchiato,
@@ -1521,8 +1620,30 @@ pub(crate) fn resolve_theme_from_family(
                 _ => Theme::Material,
             },
             ThemeFamily::Min => Theme::MinDark,
+            ThemeFamily::Mono => Theme::MonoDark,
+            ThemeFamily::Contrast => match variant {
+                Some("max") => Theme::ContrastDarkMax,
+                _ => Theme::ContrastDark,
+            },
+            ThemeFamily::ContrastMono => match variant {
+                Some("max") => Theme::ContrastMonoDarkMax,
+                _ => Theme::ContrastMonoDark,
+            },
+            ThemeFamily::Projectious => match variant {
+                Some("deep") => Theme::ProjectiousDeep,
+                Some("high-contrast-dark") => Theme::ProjectiousHCDark,
+                _ => Theme::ProjectiousNavy,
+            },
             ThemeFamily::NightOwl => Theme::NightOwl,
+            ThemeFamily::Norton => match variant {
+                Some("classic") => Theme::NortonClassic,
+                _ => Theme::NortonOptimized,
+            },
             ThemeFamily::OneDark => Theme::OneDarkPro,
+            ThemeFamily::Phosphor => match variant {
+                Some("classic") => Theme::PhosphorClassic,
+                _ => Theme::PhosphorOptimized,
+            },
             ThemeFamily::RosePine => match variant {
                 Some("moon") => Theme::RosePineMoon,
                 _ => Theme::RosePine,
@@ -1548,7 +1669,6 @@ pub(crate) fn resolve_theme_from_family(
             | ThemeFamily::Nord
             | ThemeFamily::Plastic
             | ThemeFamily::Poimandres
-            | ThemeFamily::Projectious
             | ThemeFamily::Red
             | ThemeFamily::Snazzy
             | ThemeFamily::Synthwave84
@@ -1574,6 +1694,40 @@ pub enum ThemeMode {
     /// Prefer a dark concrete palette. Keeps dark themes unchanged and maps
     /// known light variants to their dark counterpart.
     Dark,
+}
+
+/// Font-decoration policy used as a second semantic channel alongside color.
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]
+#[serde(rename_all = "kebab-case")]
+#[clap(rename_all = "kebab-case")]
+pub enum ThemeEmphasis {
+    /// Detect terminal capabilities; defaults to standard when detection is inconclusive.
+    #[default]
+    Auto,
+    /// Bold, italic, dim, underline, and strikethrough where supported.
+    Full,
+    /// Bold, italic, and dim.
+    Standard,
+    /// Bold and dim; suitable for fonts without a true italic face.
+    Minimal,
+    /// Color only.
+    None,
+}
+
+impl std::fmt::Display for ThemeEmphasis {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Auto => "auto",
+                Self::Full => "full",
+                Self::Standard => "standard",
+                Self::Minimal => "minimal",
+                Self::None => "none",
+            }
+        )
+    }
 }
 
 impl std::fmt::Display for ThemeMode {
@@ -1801,6 +1955,27 @@ impl std::fmt::Display for Theme {
             Theme::VitesseBlack => write!(f, "vitesse-black"),
             Theme::VsCodeDarkPlus => write!(f, "vscode-dark-plus"),
             Theme::VsCodeLightPlus => write!(f, "vscode-light-plus"),
+            Theme::ProjectiousNavy => write!(f, "projectious-navy"),
+            Theme::ProjectiousDeep => write!(f, "projectious-deep"),
+            Theme::ProjectiousLight => write!(f, "projectious-light"),
+            Theme::ProjectiousHCDark => write!(f, "projectious-hc-dark"),
+            Theme::ProjectiousHCLight => write!(f, "projectious-hc-light"),
+            Theme::MonoDark => write!(f, "mono-dark"),
+            Theme::MonoLight => write!(f, "mono-light"),
+            Theme::ContrastDark => write!(f, "contrast-dark"),
+            Theme::ContrastDarkMax => write!(f, "contrast-dark-max"),
+            Theme::ContrastLight => write!(f, "contrast-light"),
+            Theme::ContrastLightMax => write!(f, "contrast-light-max"),
+            Theme::ContrastMonoDark => write!(f, "contrast-mono-dark"),
+            Theme::ContrastMonoDarkMax => write!(f, "contrast-mono-dark-max"),
+            Theme::ContrastMonoLight => write!(f, "contrast-mono-light"),
+            Theme::ContrastMonoLightMax => write!(f, "contrast-mono-light-max"),
+            Theme::BorlandClassic => write!(f, "borland-classic"),
+            Theme::BorlandOptimized => write!(f, "borland-optimized"),
+            Theme::NortonClassic => write!(f, "norton-classic"),
+            Theme::NortonOptimized => write!(f, "norton-optimized"),
+            Theme::PhosphorClassic => write!(f, "phosphor-classic"),
+            Theme::PhosphorOptimized => write!(f, "phosphor-optimized"),
         }
     }
 }
@@ -1923,6 +2098,154 @@ fn bool_true() -> bool {
 
 fn bool_false() -> bool {
     false
+}
+
+fn default_tmux_title_format() -> String {
+    "{state_symbol}{repository}{agent_suffix}".to_string()
+}
+
+fn default_tmux_title_max_length() -> u32 {
+    60
+}
+
+fn default_tmux_title_done_ttl_seconds() -> u32 {
+    10
+}
+
+fn default_tmux_title_message_max_length() -> u32 {
+    32
+}
+
+fn default_tmux_title_directory_style() -> String {
+    "basename".to_string()
+}
+
+fn default_tmux_title_repository_style() -> String {
+    "basename".to_string()
+}
+
+fn default_tmux_title_agent_style() -> String {
+    "basename".to_string()
+}
+
+fn default_tmux_title_working_symbol() -> String {
+    "● ".to_string()
+}
+
+fn default_tmux_title_question_symbol() -> String {
+    "❓ ".to_string()
+}
+
+fn default_tmux_title_done_symbol() -> String {
+    "✓ ".to_string()
+}
+
+fn default_tmux_title_error_symbol() -> String {
+    "! ".to_string()
+}
+
+/// Per-attention-state symbols. Fields use serde defaults independently so a
+/// TOML override such as `question = "? "` does not discard other defaults.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub struct TmuxTitleStatesSection {
+    #[serde(default = "default_tmux_title_working_symbol")]
+    pub working: String,
+    #[serde(default = "default_tmux_title_question_symbol")]
+    pub question: String,
+    #[serde(default = "default_tmux_title_done_symbol")]
+    pub done: String,
+    #[serde(default = "default_tmux_title_error_symbol")]
+    pub error: String,
+    #[serde(default)]
+    pub idle: String,
+}
+
+impl Default for TmuxTitleStatesSection {
+    fn default() -> Self {
+        Self {
+            working: default_tmux_title_working_symbol(),
+            question: default_tmux_title_question_symbol(),
+            done: default_tmux_title_done_symbol(),
+            error: default_tmux_title_error_symbol(),
+            idle: String::new(),
+        }
+    }
+}
+
+/// Configurable tmux tab-title presentation. Runtime helpers publish the
+/// current attention state through tmux user options; the title format only
+/// controls how that state and workspace metadata are presented.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub struct TmuxTitleSection {
+    #[serde(default = "bool_true")]
+    pub enabled: bool,
+    #[serde(default = "default_tmux_title_format")]
+    pub format: String,
+    #[serde(default = "default_tmux_title_max_length")]
+    pub max_length: u32,
+    #[serde(default = "default_tmux_title_directory_style")]
+    pub directory_style: String,
+    #[serde(default = "default_tmux_title_repository_style")]
+    pub repository_style: String,
+    #[serde(default = "default_tmux_title_agent_style")]
+    pub agent_style: String,
+    #[serde(default = "default_tmux_title_done_ttl_seconds")]
+    pub done_ttl_seconds: u32,
+    #[serde(default = "default_tmux_title_message_max_length")]
+    pub message_max_length: u32,
+    #[serde(default)]
+    pub states: TmuxTitleStatesSection,
+}
+
+impl Default for TmuxTitleSection {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            format: default_tmux_title_format(),
+            max_length: default_tmux_title_max_length(),
+            directory_style: default_tmux_title_directory_style(),
+            repository_style: default_tmux_title_repository_style(),
+            agent_style: default_tmux_title_agent_style(),
+            done_ttl_seconds: default_tmux_title_done_ttl_seconds(),
+            message_max_length: default_tmux_title_message_max_length(),
+            states: TmuxTitleStatesSection::default(),
+        }
+    }
+}
+
+fn default_tmux_notification_states() -> Vec<String> {
+    vec!["question".to_string(), "error".to_string()]
+}
+
+fn default_tmux_notification_protocol() -> String {
+    "osc-9".to_string()
+}
+
+/// Optional terminal attention notifications emitted by the runtime helper.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub struct TmuxNotificationsSection {
+    #[serde(default = "bool_false")]
+    pub enabled: bool,
+    #[serde(default = "default_tmux_notification_protocol")]
+    pub protocol: String,
+    #[serde(default = "default_tmux_notification_states")]
+    pub states: Vec<String>,
+    #[serde(default = "bool_true")]
+    pub include_message: bool,
+}
+
+impl Default for TmuxNotificationsSection {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            protocol: default_tmux_notification_protocol(),
+            states: default_tmux_notification_states(),
+            include_message: true,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -2696,6 +3019,10 @@ pub struct TmuxSection {
     #[serde(default)]
     pub status: TmuxStatusSection,
     #[serde(default)]
+    pub title: TmuxTitleSection,
+    #[serde(default)]
+    pub notifications: TmuxNotificationsSection,
+    #[serde(default)]
     pub layout_switch: TmuxLayoutSwitchSection,
     #[serde(default)]
     pub theme_switch: TmuxThemeSwitchSection,
@@ -2708,6 +3035,8 @@ impl Default for TmuxSection {
             prefix: default_tmux_prefix(),
             session_name: default_tmux_session_name(),
             status: TmuxStatusSection::default(),
+            title: TmuxTitleSection::default(),
+            notifications: TmuxNotificationsSection::default(),
             layout_switch: TmuxLayoutSwitchSection::default(),
             theme_switch: TmuxThemeSwitchSection::default(),
         }
@@ -2820,6 +3149,11 @@ pub struct CustomizationSection {
     /// Optional alternate variant override (per-family). Validated at resolve
     /// time; unknown values fall through to the family default.
     pub variant: Option<String>,
+    pub emphasis: ThemeEmphasis,
+    /// Optional semantic-role decoration overrides. Keys use the generated
+    /// role spelling (`code_comment`, `status_error`, ...); values are a
+    /// whitespace-separated attribute list.
+    pub emphasis_overrides: std::collections::BTreeMap<String, String>,
     pub prompt: StarshipPreset,
     pub layout: ConfigLayout,
     pub tmux: TmuxSection,
@@ -2835,13 +3169,15 @@ impl Serialize for CustomizationSection {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         use serde::ser::SerializeStruct;
         // Always serialize as the family form; legacy_theme is deliberately omitted.
-        let field_count = 5 + self.variant.is_some() as usize;
+        let field_count = 7 + self.variant.is_some() as usize;
         let mut s = serializer.serialize_struct("CustomizationSection", field_count)?;
         s.serialize_field("theme", &self.theme)?;
         s.serialize_field("mode", &self.mode)?;
         if let Some(ref v) = self.variant {
             s.serialize_field("variant", v)?;
         }
+        s.serialize_field("emphasis", &self.emphasis)?;
+        s.serialize_field("emphasis_overrides", &self.emphasis_overrides)?;
         s.serialize_field("prompt", &self.prompt)?;
         s.serialize_field("layout", &self.layout)?;
         s.serialize_field("tmux", &self.tmux)?;
@@ -2868,6 +3204,9 @@ impl<'de> serde::Deserialize<'de> for CustomizationSection {
                 let mut raw_theme: Option<String> = None;
                 let mut mode: Option<ThemeMode> = None;
                 let mut variant: Option<String> = None;
+                let mut emphasis: Option<ThemeEmphasis> = None;
+                let mut emphasis_overrides: Option<std::collections::BTreeMap<String, String>> =
+                    None;
                 let mut prompt: Option<StarshipPreset> = None;
                 let mut layout: Option<ConfigLayout> = None;
                 let mut tmux: Option<TmuxSection> = None;
@@ -2882,6 +3221,12 @@ impl<'de> serde::Deserialize<'de> for CustomizationSection {
                         }
                         "variant" => {
                             variant = Some(map.next_value()?);
+                        }
+                        "emphasis" => {
+                            emphasis = Some(map.next_value()?);
+                        }
+                        "emphasis_overrides" => {
+                            emphasis_overrides = Some(map.next_value()?);
                         }
                         "prompt" => {
                             prompt = Some(map.next_value()?);
@@ -2976,6 +3321,8 @@ impl<'de> serde::Deserialize<'de> for CustomizationSection {
                     // resolve to AyuDark via the auto fallback.
                     mode: derived_mode.unwrap_or_else(|| mode.unwrap_or_default()),
                     variant: derived_variant.or(variant),
+                    emphasis: emphasis.unwrap_or_default(),
+                    emphasis_overrides: emphasis_overrides.unwrap_or_default(),
                     prompt: prompt.unwrap_or_default(),
                     layout: layout.unwrap_or_else(default_layout),
                     tmux: tmux.unwrap_or_default(),
@@ -3019,12 +3366,174 @@ impl CustomizationSection {
     }
 }
 
+fn theme_selection_capabilities(
+    family: &ThemeFamily,
+) -> (
+    &'static [ThemeMode],
+    &'static [&'static str],
+    &'static [&'static str],
+) {
+    use ThemeFamily::*;
+    use ThemeMode::{Dark, Light};
+
+    const DARK: &[ThemeMode] = &[Dark];
+    const LIGHT: &[ThemeMode] = &[Light];
+    const BOTH: &[ThemeMode] = &[Dark, Light];
+    const NONE: &[&str] = &[];
+
+    match family {
+        Andromeeda | AuroraX | Houston | Laserwave | Monokai | Moonlight | Nord | Plastic
+        | Poimandres | Red | Synthwave84 | Vesper => (DARK, NONE, NONE),
+        Snazzy => (LIGHT, NONE, NONE),
+        Ayu => (BOTH, &["mirage"], NONE),
+        Catppuccin => (BOTH, &["macchiato", "frappe"], NONE),
+        Dracula => (DARK, &["soft"], NONE),
+        Everforest | Gruvbox | Min | Mono | NightOwl | OneDark | Solarized | VsCode => {
+            (BOTH, NONE, NONE)
+        }
+        Github => (
+            BOTH,
+            &["dimmed", "high-contrast-dark"],
+            &["high-contrast-light"],
+        ),
+        Kanagawa => (BOTH, &["dragon"], NONE),
+        Material => (BOTH, &["ocean", "palenight", "darker"], NONE),
+        Projectious => (
+            BOTH,
+            &["deep", "high-contrast-dark"],
+            &["high-contrast-light"],
+        ),
+        Contrast | ContrastMono => (BOTH, &["high", "max"], &["high", "max"]),
+        Borland | Norton | Phosphor => (DARK, &["classic", "optimized"], NONE),
+        RosePine => (BOTH, &["moon"], NONE),
+        Slack => (BOTH, NONE, &["ochin"]),
+        TokyoNight => (BOTH, &["storm"], NONE),
+        Vitesse => (BOTH, &["black"], NONE),
+    }
+}
+
+fn validate_theme_selection(customization: &CustomizationSection) -> Result<()> {
+    if customization.legacy_theme.is_some() {
+        return Ok(());
+    }
+
+    let (modes, dark_variants, light_variants) = theme_selection_capabilities(&customization.theme);
+    if customization.mode != ThemeMode::Auto && !modes.contains(&customization.mode) {
+        let available = modes
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(", ");
+        bail!(
+            "theme family \"{}\" does not support mode = \"{}\"; available mode: {}",
+            customization.theme,
+            customization.mode,
+            available
+        );
+    }
+
+    if let Some(variant) = customization.variant.as_deref() {
+        let allowed = match customization.mode {
+            ThemeMode::Dark => dark_variants,
+            ThemeMode::Light => light_variants,
+            ThemeMode::Auto => {
+                if dark_variants.contains(&variant) || light_variants.contains(&variant) {
+                    return Ok(());
+                }
+                &[]
+            }
+        };
+        if !allowed.contains(&variant) {
+            let mut available = dark_variants
+                .iter()
+                .chain(light_variants.iter())
+                .copied()
+                .collect::<Vec<_>>();
+            available.sort_unstable();
+            available.dedup();
+            let available = if available.is_empty() {
+                "no named variants".to_string()
+            } else {
+                format!("variants: {}", available.join(", "))
+            };
+            bail!(
+                "theme family \"{}\" does not support variant = \"{}\" with mode = \"{}\"; available {}",
+                customization.theme,
+                variant,
+                customization.mode,
+                available
+            );
+        }
+    }
+    Ok(())
+}
+
+fn validate_emphasis_overrides(customization: &CustomizationSection) -> Result<()> {
+    const ROLES: &[&str] = &[
+        "code_keyword",
+        "code_type",
+        "code_function",
+        "code_string",
+        "code_number",
+        "code_operator",
+        "code_comment",
+        "code_decorator",
+        "code_invalid",
+        "code_deprecated",
+        "diff_add",
+        "diff_delete",
+        "diff_change",
+        "diff_emphasis",
+        "diff_header",
+        "diff_hunk",
+        "status_error",
+        "status_warning",
+        "status_success",
+        "status_info",
+        "status_ok",
+        "status_disabled",
+        "active_foreground",
+        "pane_active_foreground",
+        "inactive_foreground",
+        "pane_inactive_foreground",
+        "border_active",
+        "border_inactive",
+        "search_match",
+        "search_current",
+        "git_modified",
+        "git_staged",
+        "git_untracked",
+        "git_ignored",
+        "git_conflicted",
+    ];
+    const ATTRIBUTES: &[&str] = &["bold", "italic", "dim", "underline", "strikethrough"];
+
+    for (role, value) in &customization.emphasis_overrides {
+        if !ROLES.contains(&role.as_str()) {
+            bail!(
+                "unknown customization.emphasis_overrides role \"{role}\"; use a documented semantic role"
+            );
+        }
+        for attribute in value.split_whitespace() {
+            if !ATTRIBUTES.contains(&attribute) {
+                bail!(
+                    "unknown decoration \"{attribute}\" for customization.emphasis_overrides.{role}; available: {}",
+                    ATTRIBUTES.join(", ")
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
 impl Default for CustomizationSection {
     fn default() -> Self {
         Self {
             theme: ThemeFamily::default(),
             mode: default_theme_mode(),
             variant: None,
+            emphasis: ThemeEmphasis::default(),
+            emphasis_overrides: std::collections::BTreeMap::new(),
             prompt: default_prompt(),
             layout: default_layout(),
             tmux: TmuxSection::default(),
@@ -3733,6 +4242,7 @@ impl AiboxConfig {
             .with_context(|| format!("Failed to parse config file: {}", path.display()))?;
         config.migrate_legacy_sections();
         config.resolve_ai_provider_addons();
+        config.resolve_addon_groups();
         config.validate()?;
         Ok(config)
     }
@@ -3959,6 +4469,7 @@ impl AiboxConfig {
             toml::from_str(toml_str).context("Failed to parse TOML config")?;
         config.migrate_legacy_sections();
         config.resolve_ai_provider_addons();
+        config.resolve_addon_groups();
         config.validate()?;
         Ok(config)
     }
@@ -4298,6 +4809,39 @@ impl AiboxConfig {
             )
         })?;
 
+        validate_theme_selection(&self.customization)?;
+        validate_emphasis_overrides(&self.customization)?;
+        let resolved_theme = self.customization.resolved_theme();
+        if matches!(
+            resolved_theme,
+            Theme::ContrastDarkMax
+                | Theme::ContrastLightMax
+                | Theme::ContrastMonoDarkMax
+                | Theme::ContrastMonoLightMax
+        ) && self.customization.emphasis != ThemeEmphasis::Full
+        {
+            bail!(
+                "max-contrast variants require customization.emphasis = \"full\"; typography is the primary channel for roles that share a color"
+            );
+        }
+        if matches!(
+            resolved_theme,
+            Theme::MonoDark
+                | Theme::MonoLight
+                | Theme::ContrastDark
+                | Theme::ContrastLight
+                | Theme::ContrastMonoDark
+                | Theme::ContrastMonoLight
+        ) && matches!(
+            self.customization.emphasis,
+            ThemeEmphasis::Minimal | ThemeEmphasis::None
+        ) {
+            bail!(
+                "theme family \"{}\" requires customization.emphasis = \"auto\", \"standard\", or \"full\"; typography distinguishes roles that share a color",
+                self.customization.theme
+            );
+        }
+
         // Validate published image version is valid semver (allow "latest" sentinel)
         if self.container.image.version != "latest" {
             semver::Version::parse(&self.container.image.version).with_context(|| {
@@ -4419,6 +4963,8 @@ impl AiboxConfig {
         self.validate_tmux_status_refresh()?;
         self.validate_tmux_status_forge()?;
         self.validate_tmux_model_provider_status()?;
+        self.validate_tmux_title()?;
+        self.validate_tmux_notifications()?;
 
         Ok(())
     }
@@ -4730,6 +5276,155 @@ impl AiboxConfig {
         Ok(())
     }
 
+    fn validate_tmux_title(&self) -> Result<()> {
+        const PLACEHOLDERS: &[&str] = &[
+            "state_symbol",
+            "state",
+            "project",
+            "session",
+            "window",
+            "window_index",
+            "pane",
+            "directory",
+            "directory_path",
+            "repository",
+            "branch",
+            "harness",
+            "agent",
+            "agent_suffix",
+            "task",
+            "message",
+            "elapsed",
+        ];
+        let title = &self.customization.tmux.title;
+        if title.format.trim().is_empty() {
+            bail!("customization.tmux.title.format cannot be empty");
+        }
+        let mut rest = title.format.as_str();
+        while let Some(open) = rest.find('{') {
+            if rest[..open].contains('}') {
+                bail!(
+                    "customization.tmux.title.format contains a closing brace without a placeholder"
+                );
+            }
+            let after_open = &rest[open + 1..];
+            let close = after_open.find('}').ok_or_else(|| {
+                anyhow::anyhow!(
+                    "customization.tmux.title.format contains an unterminated placeholder"
+                )
+            })?;
+            let placeholder = &after_open[..close];
+            if placeholder.contains('{') {
+                bail!("customization.tmux.title.format contains a nested opening brace");
+            }
+            if !PLACEHOLDERS.contains(&placeholder) {
+                bail!(
+                    "customization.tmux.title.format contains unknown placeholder '{{{placeholder}}}'; supported placeholders: {}",
+                    PLACEHOLDERS.join(", ")
+                );
+            }
+            if rest[..open]
+                .chars()
+                .any(|ch| ch.is_control() || matches!(ch as u32, 0x80..=0x9f))
+            {
+                bail!(
+                    "customization.tmux.title.format literals must not contain terminal control characters"
+                );
+            }
+            rest = &after_open[close + 1..];
+        }
+        if rest.contains('}') {
+            bail!("customization.tmux.title.format contains a closing brace without a placeholder");
+        }
+        if rest
+            .chars()
+            .any(|ch| ch.is_control() || matches!(ch as u32, 0x80..=0x9f))
+        {
+            bail!(
+                "customization.tmux.title.format literals must not contain terminal control characters"
+            );
+        }
+        if title.max_length == 0 || title.max_length > 240 {
+            bail!("customization.tmux.title.max-length must be between 1 and 240 characters");
+        }
+        if title.message_max_length == 0 || title.message_max_length > 256 {
+            bail!(
+                "customization.tmux.title.message-max-length must be between 1 and 256 characters"
+            );
+        }
+        if title.done_ttl_seconds > 86_400 {
+            bail!("customization.tmux.title.done-ttl-seconds must be between 0 and 86400 seconds");
+        }
+        if !matches!(
+            title.directory_style.as_str(),
+            "basename" | "abbreviated" | "full"
+        ) {
+            bail!(
+                "customization.tmux.title.directory-style '{}' is unsupported; expected basename, abbreviated, or full",
+                title.directory_style
+            );
+        }
+        if !matches!(title.repository_style.as_str(), "basename" | "full") {
+            bail!(
+                "customization.tmux.title.repository-style '{}' is unsupported; expected basename or full",
+                title.repository_style
+            );
+        }
+        if !matches!(title.agent_style.as_str(), "basename" | "full") {
+            bail!(
+                "customization.tmux.title.agent-style '{}' is unsupported; expected basename or full",
+                title.agent_style
+            );
+        }
+        let symbols = [
+            ("working", &title.states.working),
+            ("question", &title.states.question),
+            ("done", &title.states.done),
+            ("error", &title.states.error),
+            ("idle", &title.states.idle),
+        ];
+        for (state, symbol) in symbols {
+            if symbol
+                .chars()
+                .any(|ch| ch.is_control() || matches!(ch as u32, 0x80..=0x9f))
+            {
+                bail!("customization.tmux.title.states.{state} must be a single-line string");
+            }
+        }
+        Ok(())
+    }
+
+    fn validate_tmux_notifications(&self) -> Result<()> {
+        const STATES: &[&str] = &["working", "question", "done", "error", "idle"];
+        if !matches!(
+            self.customization.tmux.notifications.protocol.as_str(),
+            "osc-9" | "bell"
+        ) {
+            bail!(
+                "customization.tmux.notifications.protocol '{}' is unsupported; expected osc-9 or bell",
+                self.customization.tmux.notifications.protocol
+            );
+        }
+        let configured = &self.customization.tmux.notifications.states;
+        let mut seen = BTreeSet::new();
+        for state in configured {
+            if !STATES.contains(&state.as_str()) {
+                bail!(
+                    "customization.tmux.notifications.states contains unknown state '{}'; supported states: {}",
+                    state,
+                    STATES.join(", ")
+                );
+            }
+            if !seen.insert(state.as_str()) {
+                bail!(
+                    "customization.tmux.notifications.states contains duplicate state '{}'",
+                    state
+                );
+            }
+        }
+        Ok(())
+    }
+
     fn validate_known_addon_tools(&self) -> Result<()> {
         if crate::addon_loader::all_addons().is_empty() {
             return Ok(());
@@ -4757,6 +5452,46 @@ impl AiboxConfig {
                     message.push_str(&format!(". {suggestion}"));
                 }
                 bail!(message);
+            }
+            for (group_name, group_tools) in &addon_tools.groups {
+                let Some(target_name) = addon.groups.get(group_name) else {
+                    bail!(
+                        "unknown group '{}' in [addons.{}]; '{}' supports: {}",
+                        group_name,
+                        addon_name,
+                        addon_name,
+                        addon
+                            .groups
+                            .keys()
+                            .cloned()
+                            .collect::<BTreeSet<_>>()
+                            .into_iter()
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    );
+                };
+                let target = crate::addon_loader::get_addon(target_name).ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "addon '{}' group '{}' references unknown addon '{}'",
+                        addon_name,
+                        group_name,
+                        target_name
+                    )
+                })?;
+                let target_tools: BTreeSet<&str> =
+                    target.tools.iter().map(|tool| tool.name.as_str()).collect();
+                for tool_name in group_tools.tools.keys() {
+                    if !target_tools.contains(tool_name.as_str()) {
+                        bail!(
+                            "unknown tool '{}' in [addons.{}.{}.tools]; '{}' supports: {}",
+                            tool_name,
+                            addon_name,
+                            group_name,
+                            target_name,
+                            target_tools.iter().copied().collect::<Vec<_>>().join(", ")
+                        );
+                    }
+                }
             }
         }
 
@@ -4942,6 +5677,7 @@ impl AiboxConfig {
                     .entry(addon_name)
                     .or_insert_with(|| AddonToolsSection {
                         tools: HashMap::new(),
+                        groups: HashMap::new(),
                     });
             if let Some(version) = self.ai.harness_version(harness) {
                 addon_tools
@@ -4960,7 +5696,41 @@ impl AiboxConfig {
                 .entry("audio-voice".to_string())
                 .or_insert_with(|| AddonToolsSection {
                     tools: HashMap::new(),
+                    groups: HashMap::new(),
                 });
+        }
+    }
+
+    /// Expand `[addons.<language>.<group>]` aliases into canonical addons.
+    /// Existing flat selections remain authoritative; nested tool entries are
+    /// merged without overwriting explicitly configured flat overrides.
+    pub fn resolve_addon_groups(&mut self) {
+        let selected: Vec<(String, HashMap<String, AddonToolsSection>)> = self
+            .addons
+            .addons
+            .iter()
+            .map(|(name, section)| (name.clone(), section.groups.clone()))
+            .collect();
+
+        let mut expanded_targets = Vec::new();
+        for (parent_name, groups) in selected {
+            let Some(parent) = crate::addon_loader::get_addon(&parent_name) else {
+                continue;
+            };
+            for (group_name, group_section) in groups {
+                let Some(target_name) = parent.groups.get(&group_name) else {
+                    continue;
+                };
+                let target = self.addons.addons.entry(target_name.clone()).or_default();
+                for (tool, entry) in group_section.tools {
+                    target.tools.entry(tool).or_insert(entry);
+                }
+                expanded_targets.push(target_name.clone());
+            }
+        }
+
+        for addon_name in crate::container::expand_addon_requires(&expanded_targets) {
+            self.addons.addons.entry(addon_name).or_default();
         }
     }
 
@@ -5044,17 +5814,63 @@ fn check_customization_table(
     check_child_table(
         root,
         key,
-        &["theme", "mode", "variant", "prompt", "layout", "tmux"],
+        &[
+            "theme",
+            "mode",
+            "variant",
+            "emphasis",
+            "emphasis_overrides",
+            "prompt",
+            "layout",
+            "tmux",
+        ],
         mismatches,
     );
     if let Some(customization) = table_child(root, key) {
         check_child_table(
             customization,
             "tmux",
-            &["layout", "prefix", "session_name", "status"],
+            &[
+                "layout",
+                "prefix",
+                "session_name",
+                "status",
+                "title",
+                "notifications",
+            ],
             mismatches,
         );
         if let Some(tmux) = table_child(customization, "tmux") {
+            check_child_table(
+                tmux,
+                "title",
+                &[
+                    "enabled",
+                    "format",
+                    "max-length",
+                    "directory-style",
+                    "repository-style",
+                    "agent-style",
+                    "done-ttl-seconds",
+                    "message-max-length",
+                    "states",
+                ],
+                mismatches,
+            );
+            if let Some(title) = table_child(tmux, "title") {
+                check_child_table(
+                    title,
+                    "states",
+                    &["working", "question", "done", "error", "idle"],
+                    mismatches,
+                );
+            }
+            check_child_table(
+                tmux,
+                "notifications",
+                &["enabled", "protocol", "states", "include-message"],
+                mismatches,
+            );
             check_child_table(
                 tmux,
                 "status",
@@ -5230,12 +6046,14 @@ fn check_addons_table(root: &toml::map::Map<String, toml::Value>, mismatches: &m
         let Some(addon_table) = addon_value.as_table() else {
             continue;
         };
-        check_unknown_keys(
-            &format!("[addons.{addon_name}]"),
-            addon_table,
-            &["tools"],
-            mismatches,
-        );
+        let known_groups = crate::addon_loader::get_addon(addon_name)
+            .map(|addon| addon.groups.keys().cloned().collect::<BTreeSet<_>>())
+            .unwrap_or_default();
+        for key in addon_table.keys() {
+            if key != "tools" && !known_groups.contains(key) {
+                mismatches.push(format!("[addons.{addon_name}]: unknown key `{key}`"));
+            }
+        }
         let Some(tools) = table_child(addon_table, "tools") else {
             continue;
         };
@@ -5249,6 +6067,30 @@ fn check_addons_table(root: &toml::map::Map<String, toml::Value>, mismatches: &m
                 &["version", "enabled"],
                 mismatches,
             );
+        }
+        for group_name in known_groups {
+            let Some(group) = table_child(addon_table, &group_name) else {
+                continue;
+            };
+            check_unknown_keys(
+                &format!("[addons.{addon_name}.{group_name}]"),
+                group,
+                &["tools"],
+                mismatches,
+            );
+            let Some(group_tools) = table_child(group, "tools") else {
+                continue;
+            };
+            for (tool_name, tool_value) in group_tools {
+                if let Some(tool_table) = tool_value.as_table() {
+                    check_unknown_keys(
+                        &format!("[addons.{addon_name}.{group_name}.tools.{tool_name}]"),
+                        tool_table,
+                        &["version", "enabled"],
+                        mismatches,
+                    );
+                }
+            }
         }
     }
 }
@@ -5410,10 +6252,10 @@ uv = { version = "0.7" }
 
 [addons.node.tools]
 node = { version = "26" }
-pnpm = { version = "11.10.0" }
+pnpm = { version = "11.18.0" }
 
 [addons.rust.tools]
-rustc = { version = "1.96.1" }
+rustc = { version = "1.97.1" }
 clippy = {}
 rustfmt = {}
 
@@ -5570,7 +6412,7 @@ name = "my-project"
         // Check specific tool versions
         assert_eq!(config.addons.tool_version("python", "python"), Some("3.14"));
         assert_eq!(config.addons.tool_version("python", "uv"), Some("0.7"));
-        assert_eq!(config.addons.tool_version("rust", "rustc"), Some("1.96.1"));
+        assert_eq!(config.addons.tool_version("rust", "rustc"), Some("1.97.1"));
         assert_eq!(config.addons.tool_version("rust", "clippy"), None);
         assert_eq!(config.addons.tool_version("rust", "rustfmt"), None);
         assert!(config.addons.has_tool("kubernetes", "kubectl"));
@@ -6504,7 +7346,7 @@ harnesses = []
         assert!(config.addons.has_tool("python", "uv"));
         assert!(!config.addons.has_tool("python", "poetry"));
         assert_eq!(config.addons.tool_version("node", "node"), Some("26"));
-        assert_eq!(config.addons.tool_version("node", "pnpm"), Some("11.10.0"));
+        assert_eq!(config.addons.tool_version("node", "pnpm"), Some("11.18.0"));
         assert_eq!(config.addons.tool_version("cloud-aws", "aws-cli"), None);
     }
 
@@ -6811,7 +7653,7 @@ theme = "{input}"
 
     #[test]
     fn appearance_mode_resolves_concrete_theme() {
-        // Solo family (dracula): ignores mode, always returns Dracula.
+        // Dark-only families reject an explicit incompatible mode.
         let toml = r#"
 [aibox]
 version = "0.9.0"
@@ -6823,10 +7665,9 @@ name = "test"
 theme = "dracula"
 mode = "light"
 "#;
-        let config = parse_toml(toml).unwrap();
-        assert_eq!(config.customization.theme, ThemeFamily::Dracula);
-        assert_eq!(config.customization.mode, ThemeMode::Light);
-        assert_eq!(config.customization.resolved_theme(), Theme::Dracula);
+        let error = parse_toml(toml).unwrap_err().to_string();
+        assert!(error.contains("does not support mode = \"light\""));
+        assert!(error.contains("available mode: dark"));
 
         // Legacy concrete name (catppuccin-latte) is locked — mode override does NOT flip it.
         let toml = r#"
@@ -6927,17 +7768,180 @@ mode = "dark"
     }
 
     #[test]
-    fn resolved_theme_for_solo_family_ignores_mode_and_variant() {
-        // Nord stays Nord regardless of mode and variant.
+    fn projectious_and_accessibility_families_resolve_all_modes_and_variants() {
+        let mut config = test_config();
+        config.customization.theme = ThemeFamily::Projectious;
+        config.customization.mode = ThemeMode::Dark;
+        assert_eq!(
+            config.customization.resolved_theme(),
+            Theme::ProjectiousNavy
+        );
+        config.customization.variant = Some("deep".to_string());
+        assert_eq!(
+            config.customization.resolved_theme(),
+            Theme::ProjectiousDeep
+        );
+        config.customization.mode = ThemeMode::Light;
+        config.customization.variant = Some("high-contrast-light".to_string());
+        assert_eq!(
+            config.customization.resolved_theme(),
+            Theme::ProjectiousHCLight
+        );
+
+        config.customization.theme = ThemeFamily::ContrastMono;
+        config.customization.mode = ThemeMode::Dark;
+        config.customization.variant = Some("max".to_string());
+        assert_eq!(
+            config.customization.resolved_theme(),
+            Theme::ContrastMonoDarkMax
+        );
+    }
+
+    #[test]
+    fn period_terminal_families_default_to_optimized_and_accept_classic() {
+        for (family, optimized, classic) in [
+            (
+                ThemeFamily::Borland,
+                Theme::BorlandOptimized,
+                Theme::BorlandClassic,
+            ),
+            (
+                ThemeFamily::Norton,
+                Theme::NortonOptimized,
+                Theme::NortonClassic,
+            ),
+            (
+                ThemeFamily::Phosphor,
+                Theme::PhosphorOptimized,
+                Theme::PhosphorClassic,
+            ),
+        ] {
+            let mut config = test_config();
+            config.customization.theme = family;
+            config.customization.mode = ThemeMode::Dark;
+            assert_eq!(config.customization.resolved_theme(), optimized);
+            config.customization.variant = Some("classic".to_string());
+            assert_eq!(config.customization.resolved_theme(), classic);
+            config.validate().unwrap();
+
+            config.customization.mode = ThemeMode::Light;
+            assert!(config.validate().is_err());
+        }
+    }
+
+    #[test]
+    fn emphasis_parses_and_max_contrast_refuses_color_only_mode() {
+        let toml = r#"
+[aibox]
+version = "0.9.0"
+[container]
+name = "test"
+[customization]
+theme = "contrast-mono"
+mode = "dark"
+variant = "max"
+emphasis = "none"
+"#;
+        assert!(
+            parse_toml(toml)
+                .unwrap_err()
+                .to_string()
+                .contains("emphasis = \"full\"")
+        );
+
+        let high_without_typography = toml
+            .replace("variant = \"max\"\n", "")
+            .replace("emphasis = \"none\"", "emphasis = \"minimal\"");
+        assert!(
+            parse_toml(&high_without_typography)
+                .unwrap_err()
+                .to_string()
+                .contains("requires customization.emphasis")
+        );
+    }
+
+    #[test]
+    fn emphasis_overrides_parse_and_reject_unknown_roles_or_attributes() {
+        let toml = r#"
+[aibox]
+version = "0.9.0"
+[container]
+name = "test"
+[customization]
+theme = "github"
+emphasis = "standard"
+[customization.emphasis_overrides]
+code_comment = "italic dim"
+status_error = "bold underline"
+"#;
+        let config = parse_toml(toml).unwrap();
+        assert_eq!(
+            config.customization.emphasis_overrides["code_comment"],
+            "italic dim"
+        );
+
+        let mut invalid_role = config.clone();
+        invalid_role
+            .customization
+            .emphasis_overrides
+            .insert("made_up".to_string(), "bold".to_string());
+        assert!(
+            invalid_role
+                .validate()
+                .unwrap_err()
+                .to_string()
+                .contains("unknown customization.emphasis_overrides role")
+        );
+
+        let mut invalid_attribute = config;
+        invalid_attribute
+            .customization
+            .emphasis_overrides
+            .insert("code_comment".to_string(), "blink".to_string());
+        assert!(
+            invalid_attribute
+                .validate()
+                .unwrap_err()
+                .to_string()
+                .contains("unknown decoration \"blink\"")
+        );
+    }
+
+    #[test]
+    fn solo_family_rejects_incompatible_mode_and_unknown_variant() {
         let mut config = test_config();
         config.customization.theme = ThemeFamily::Nord;
         config.customization.mode = ThemeMode::Light;
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("available mode: dark"));
+
+        config.customization.mode = ThemeMode::Dark;
         config.customization.variant = Some("anything".to_string());
-        assert_eq!(config.customization.resolved_theme(), Theme::Nord);
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("no named variants"));
 
         config.customization.theme = ThemeFamily::Dracula;
         config.customization.mode = ThemeMode::Auto;
+        config.customization.variant = None;
+        config.validate().unwrap();
         assert_eq!(config.customization.resolved_theme(), Theme::Dracula);
+    }
+
+    #[test]
+    fn family_rejects_variant_from_the_other_mode_or_unknown_variant() {
+        let mut config = test_config();
+        config.customization.theme = ThemeFamily::Github;
+        config.customization.mode = ThemeMode::Light;
+        config.customization.variant = Some("dimmed".to_string());
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("variant = \"dimmed\""));
+        assert!(error.contains("mode = \"light\""));
+
+        config.customization.mode = ThemeMode::Dark;
+        config.customization.variant = Some("unknown".to_string());
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("high-contrast-dark"));
+        assert!(error.contains("high-contrast-light"));
     }
 
     #[test]
@@ -8025,5 +9029,72 @@ port = 8765
         config.latex.preview.bind = "0.0.0.0".to_string();
         let error = config.validate().unwrap_err().to_string();
         assert!(error.contains("allow_public"));
+    }
+
+    #[test]
+    fn tmux_title_defaults_are_enabled_and_validate() {
+        let config = test_config();
+        config.validate().unwrap();
+        assert!(config.customization.tmux.title.enabled);
+        assert!(!config.customization.tmux.notifications.enabled);
+        assert_eq!(config.customization.tmux.notifications.protocol, "osc-9");
+        assert_eq!(config.customization.tmux.title.states.question, "❓ ");
+        assert_eq!(config.customization.tmux.title.repository_style, "basename");
+        assert_eq!(config.customization.tmux.title.agent_style, "basename");
+    }
+
+    #[test]
+    fn tmux_title_rejects_unknown_placeholders_and_states() {
+        let mut config = test_config();
+        config.customization.tmux.title.format = "{not_a_token}".to_string();
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("unknown placeholder"));
+
+        let mut config = test_config();
+        config.customization.tmux.notifications.states = vec!["waiting".to_string()];
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("unknown state"));
+
+        let mut config = test_config();
+        config.customization.tmux.notifications.protocol = "ghostty".to_string();
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("expected osc-9 or bell"));
+
+        let mut config = test_config();
+        config.customization.tmux.title.repository_style = "host".to_string();
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("expected basename or full"));
+
+        let mut config = test_config();
+        config.customization.tmux.title.agent_style = "identity".to_string();
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("expected basename or full"));
+    }
+
+    #[test]
+    fn tmux_title_rejects_terminal_controls() {
+        let mut config = test_config();
+        config.customization.tmux.title.format = "prefix\u{1b}[31m{state}".to_string();
+        let error = config.validate().unwrap_err().to_string();
+        assert!(error.contains("control characters"));
+    }
+
+    #[test]
+    fn tmux_title_state_overrides_are_partial() {
+        let config = parse_toml(
+            r#"
+[aibox]
+config-schema = "1.0.0"
+project-name = "demo"
+[container]
+name = "demo"
+[customization.tmux.title.states]
+question = "? "
+"#,
+        )
+        .unwrap();
+        assert_eq!(config.customization.tmux.title.states.question, "? ");
+        assert_eq!(config.customization.tmux.title.states.working, "● ");
+        assert_eq!(config.customization.tmux.title.states.error, "! ");
     }
 }

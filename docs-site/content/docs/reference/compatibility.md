@@ -12,6 +12,47 @@ below shows the minimum compatible processkit version for each aibox release.
 
 | aibox version | Min. processkit | Notes |
 |--------------|-----------------|-------|
+| 0.35.3 | v0.28.8 | restores exact v0 development-to-main release promotion and retains required host checks |
+| 0.35.2 | v0.28.8 | fixes the macOS release-host Yazi smoke probe to check startup in a tmux PTY |
+| 0.35.1 | v0.28.8 | restores Rich Markdown preview in Yazi and refreshes v0 base-image and addon tool versions |
+| 0.35.0 | v0.28.8 | adds Borland, Norton, and Phosphor terminal theme families plus opt-in D2, Graphviz, Vega, Vega-Lite, and Mermaid build-time graphics addons |
+| 0.34.7 | v0.28.8 | adds persistent Yazi line-number and wrapping controls, explicit preview scrolling, and tabular recursive directory-size reports with visible hierarchy totals |
+| 0.34.6 | v0.28.8 | makes the PowerKit separator compatibility patch accept the expanded pinned renderer while retaining structural format validation, restoring host runtime image builds |
+| 0.34.5 | v0.28.8 | restores PowerKit window-separator color continuity across every theme, makes isolated visual regressions mandatory for releases, and refreshes deferred tool pins |
+| 0.34.4 | v0.28.8 | updates the bundled Yazi pane-toggle plugin to the current indexed ratio API and removes runtime deprecation warnings |
+| 0.34.3 | v0.28.8 | restores readable Yazi marked items across every theme, repairs PowerKit separator colors, preserves active-pane emphasis, uses supported Codex lifecycle hooks, and reliably restores the outer terminal title |
+| 0.34.2 | v0.28.8 | publishes the generated theme gallery and chooser, aligns terminal themes with the design reference, reliably clears answered Codex question state, and improves active tmux pane visibility |
+| 0.34.1 | v0.28.8 | expands theme palettes across the managed terminal toolchain, adds exact Codex syntax themes, restores the visual theme gallery, and clears Codex question state after permission answers |
+| 0.34.0 | v0.28.8 | adds configurable agent-aware tmux headers and replaces the legacy documentation stack with the projectious.work Hugo brand theme |
+| 0.33.2 | v0.28.8 | updates the default processkit release to v0.28.8, refreshes generated runtime metadata for Codex 0.148.0, and reconciles the completed live tmux layout and theme switching work |
+| 0.33.1 | v0.28.6 | restores generated AI harness startup under nounset, keeps Yazi directory previews compatible across supported image pins, and aligns PowerKit plugin spacing with window tabs |
+| 0.33.0 | v0.28.6 | adds configurable, terminal-neutral tmux titles and lifecycle attention signals for AI harness panes, with optional notifications |
+| 0.32.6 | v0.28.6 | refreshes curated tool pins, including Go 1.26.6, and routes every Yazi copy action through the tmux and host clipboard bridge |
+| 0.32.5 | v0.28.6 | embeds the canonical addon catalog so stale host installs cannot hide shipped tools, refreshes same-version installs, and adds Yazi/Vim clipboard and selectable-preview workflows |
+| 0.32.4 | v0.28.6 | keeps `latest` image resolution on the active v0 line, refreshes generated addon comments when the catalog changes, and fixes stale or collapsed Yazi Markdown previews |
+| 0.32.3 | v0.28.6 | makes the axe host fixture accessibility-clean and records structured violation diagnostics when a future browser probe fails |
+| 0.32.2 | v0.28.6 | uses an explicit Playwright BrowserContext for axe host validation and makes safe release-host caches and candidate-bound retries available by default |
+| 0.32.1 | v0.28.6 | makes the browser-testing host gate launch the full Chromium channel installed by Playwright `--no-shell` instead of requesting the omitted headless-shell executable |
+| 0.32.0 | v0.28.6 | adds a pinned Chromium-first Playwright and axe browser-testing addon with optional Firefox/WebKit, live release-host browser evidence, and a cleaner full-width Textual release dashboard |
+| 0.31.5 | v0.28.6 | retries transient OpenCode release downloads and makes Textual yanks selection-aware while preserving actionable failed-task diagnostics |
+| 0.31.4 | v0.28.6 | makes Hugo downloads resilient to transient network failures, improves the release-host Textual problem workflow, and serializes contention-sensitive E2E gates |
+| 0.31.3 | v0.28.6 | adds a locked Textual dashboard and reviewed content-addressed cache reuse to the restricted macOS host gate |
+| 0.31.2 | v0.28.6 | replaces privileged companion E2E coverage with isolated local contracts and an owner-controlled, evidence-producing macOS host gate |
+| 0.31.1 | v0.28.6 | repairs incomplete processkit upgrade caches, installs declared skill dependencies, removes stale `pk-*` command projections, and consumes source-specific MCP header manifests |
+| 0.31.0 | v0.28.5 | adds optional rootless Podman and Podman Compose tooling to the infrastructure addon, documents the Go supply-chain and release bundles, and repairs minimal infrastructure addon rendering |
+| 0.30.1 | v0.28.5 | refreshes the companion E2E contract, repairs Starship cache isolation, resolves Codex `latest` pins before container builds, and updates security-relevant pnpm and Tau curated defaults |
+| 0.30.0 | v0.28.5 | adds nested language addon groups, production Go quality tooling, and language-neutral supply-chain and release bundles with pinned versions, checksum verification, and per-tool overrides |
+| 0.29.0 | v0.28.5 | adds Tau as a first-class multi-provider coding-agent harness with pinned installation, persistent runtime state, AGENTS.md discovery, Agent Skills projection, and explicit reporting that Tau does not currently expose a built-in MCP client |
+| 0.28.19 | v0.28.5 | preserves prerelease identifiers when resolving the latest published GHCR image so `v1.0.0-alpha.1` is not rewritten to the nonexistent `v1.0.0` tag |
+| 0.28.18 | v0.28.5 | restores Codex processkit MCP startup by preserving `uv run --script` in gateway daemon-proxy commands, integrates processkit's MCP 1.x compatibility bound, and restores zero-warning clippy under Rust 1.97 |
+| 0.28.17 | v0.28.4 | repairs Go, Typst, AWS CLI, and Node.js add-on installers and adds a clean companion-container build gate for download-based add-on defaults |
+| 0.28.16 | v0.28.4 | installs Node.js from checksum-verified official release archives after the NodeSource signing-key endpoint became unavailable and refreshes generated runtime and processkit package-selection state |
+| 0.28.14 | v0.28.4 | ensures `pk-reconcile` and `pk-repo-reconcile` install their `project-reconciliation` and `repo-management` skill dependencies |
+| 0.28.15 | v0.28.4 | refreshes bundled maintenance tools, locks `cargo-audit` installation for Rust compatibility, and publishes the Hugo/Docsy documentation site |
+| 0.28.13 | v0.28.4 | adds open GitHub Discussion counts to the tmux Forge status segment and restores the complete generated Codex command projection set |
+| 0.28.12 | v0.28.4 | integrates processkit v0.28.4 and makes companion E2E validation work from linked release worktrees |
+| 0.28.11 | v0.28.3 | adds the `cloudflare` addon, which installs cloudflared from Cloudflare's signed package repository rather than Debian's archive |
+| 0.28.10 | v0.28.3 | reconciles standard processkit skills, recommends tooling-linked skills interactively, upgrades prerelease processkit surfaces, and serializes release Tier 2 E2E validation |
 | 0.28.6 | v0.28.3 | fixes Kubernetes addon checksum verification for Helm, Kustomize, and k9s archives on amd64 and arm64; and integrates processkit v0.28.3 authenticated GitHub repository reconciliation |
 | 0.28.5 | v0.28.1 | fixes Hermes Agent installation under the non-root runtime model; restores configured lazygit runtime surfaces; completes processkit reconciliation; and enforces traceable ports between maintained v0.x and v1.x lines |
 | 0.28.4 | v0.28.1 | integrates processkit v0.28.1 and refreshes the maintained v0.x processkit compatibility baseline |

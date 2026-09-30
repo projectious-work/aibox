@@ -65,10 +65,10 @@ schema_version = "1.0.0"              # Context schema version (semver)
 
 [addons.python.tools]                 # Addon: Python runtime
 python = { version = "3.14" }
-uv     = { version = "0.11.26" }
+uv     = { version = "0.12.20" }
 
 [addons.rust.tools]                   # Addon: Rust toolchain
-rustc   = { version = "1.96.1" }
+rustc   = { version = "1.98.1" }
 clippy  = {}
 rustfmt = {}
 
@@ -102,13 +102,41 @@ args    = ["-y", "@acme/team-server"] # Arguments
 # API_KEY = "..."
 
 [customization]
-theme  = "gruvbox"                    # Theme family; concrete legacy names still parse
+theme  = "ayu"                        # Theme family; concrete legacy names still parse
 mode   = "auto"                       # Theme mode: auto, light, dark
+variant = "mirage"                    # Optional family-specific variant
+emphasis = "auto"                     # auto, full, standard, minimal, none
 prompt = "default"                    # Starship preset (8 options)
 layout = "dev"                        # tmux layout (4 options)
 
+[customization.emphasis_overrides]
+code_comment = "italic dim"           # Optional semantic role override
+status_error = "bold underline"
+
 [customization.tmux.status]
 mode = "extended"                     # extended | plain | disabled (legacy: powerline -> extended)
+
+[customization.tmux.title]
+# The terminal tab title is owned by tmux while inside tmux.
+enabled = true
+format = "{state_symbol}{project}:{window} — {directory}"
+max-length = 60
+directory-style = "basename"           # basename | abbreviated | full
+done-ttl-seconds = 10
+message-max-length = 32
+
+[customization.tmux.title.states]
+working = "● "
+question = "❓ "
+done = "✓ "
+error = "! "
+idle = ""
+
+[customization.tmux.notifications]
+enabled = false
+protocol = "osc-9"                    # osc-9 | bell
+states = ["question", "error"]
+include-message = true
 
 [customization.tmux.status.layout]
 # Row lists are ordered. Removing a name disables that status element.
@@ -188,7 +216,7 @@ elements-spacing = "both"
 # netspeed-cache-ttl-seconds: network throughput cache TTL.
 # kubernetes-cache-ttl-seconds: local kubeconfig context cache TTL.
 # cloud-cache-ttl-seconds: local cloud CLI/context cache TTL.
-# github-cache-ttl-seconds: local repo + GitHub issue/PR count cache TTL.
+# github-cache-ttl-seconds: local repo + GitHub issue/PR/discussion count cache TTL.
 interval-seconds = 15
 aibox-metrics-cache-ttl-seconds = 30
 netspeed-cache-ttl-seconds = 10
@@ -340,11 +368,11 @@ volume: `/home/aibox/.config/gh` is already persisted through the managed
 `.aibox-home/.config` mount. See [GitHub authentication](./local-config.md#github-authentication)
 for the least-privilege PAT and persistent-login options.
 
-{{% alert title="Customizing ports, packages, volumes, and environment variables" color="success" %}}
+{{< callout type="success" title="Customizing ports, packages, volumes, and environment variables" >}}
 Use `Dockerfile.local` for installing additional packages, and `docker-compose.override.yml` for ports and additional services. Both files are scaffolded by `aibox init` and are never overwritten by `aibox apply`.
 
 Environment variables and bind mounts can also be configured directly in `[container.environment]` / `[[container.extra_volumes]]` in `aibox.toml`, or — for secrets and per-developer settings that should not be committed — in [`.aibox-local.toml`](./local-config.md).
-{{% /alert %}}
+{{< /callout >}}
 
 ### .aibox-local.toml
 
@@ -446,7 +474,7 @@ to install their CLIs.
 ```toml
 [addons.python.tools]
 python = { version = "3.14" }
-uv = { version = "0.11.26" }
+uv = { version = "0.12.20" }
 ```
 
 For interactive Git tooling:
@@ -463,12 +491,41 @@ not required for every generated project.
 
 Run `aibox get addon` to see all available addons, or `aibox describe addon <name>` for tool details and supported versions. See the [Addons page](../addons/overview.md) for full documentation.
 
+Language-scoped groups compose shared tooling and automatically expand their
+dependencies:
+
+```toml
+[addons.go]
+[addons.go.infrastructure]
+[addons.go.quality]
+[addons.go.supply-chain]
+[addons.go.release]
+
+[addons.go.quality.tools]
+staticcheck = { enabled = false }
+golangci-lint = { version = "v2.12.2" }
+```
+
+Every language addon supports `infrastructure`, `security`/`supply-chain`, and
+`release`; Go also supports `quality` and `lint`. Existing flat selections such
+as `[addons.infrastructure.tools]` and `[addons.supply-chain.tools]` remain
+valid and require no migration. To adopt language scoping, move only the table
+prefix—for example, `[addons.supply-chain.tools]` becomes
+`[addons.go.supply-chain.tools]`; tool entries and overrides are unchanged.
+
 ### [skills]
 
 Controls which skills from processkit are installed into `context/skills/`.
 Fresh `aibox.toml` scaffolds list the standard processkit operating skills in
 `include`. If `include` is empty, aibox falls back to installing every skill in
 the pinned processkit version minus anything listed in `exclude`.
+
+`aibox apply` reconciles newly introduced standard skills into existing
+processkit projects while respecting explicit `exclude` entries. Tooling-linked
+skills remain opt-in: an interactive apply asks before persisting a
+recommendation. For example, selecting the `latex` addon offers to add
+`latex-authoring`; a non-interactive apply prints the recommendation without
+changing skill selection.
 
 ```toml
 [skills]
@@ -494,7 +551,7 @@ controlled independently by `install = true`.
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `harnesses[].harness` | String | Yes for each entry | none | Harness id. Supported values: `claude`, `codex`, `gemini`, `aider`, `continue`, `cursor`, `copilot`, `opencode`, `hermes`. |
+| `harnesses[].harness` | String | Yes for each entry | none | Harness id. Supported values: `claude`, `codex`, `gemini`, `aider`, `continue`, `cursor`, `copilot`, `opencode`, `hermes`, `tau`. Tau reads project instructions from `AGENTS.md` and Agent Skills from `.agents/skills/`; Tau does not currently expose a built-in MCP client. |
 | `harnesses[].enable` | Boolean | No | `false` | Include this harness in generated runtime, agent, and MCP config. Alias: `enabled`. |
 | `harnesses[].install` | Boolean | No | `false` | Install the matching in-container CLI recipe when available. Cursor has no container CLI, so keep this false for `cursor`. |
 | `harnesses[].version` | String | No | addon's default | Optional CLI version pin. |
@@ -723,9 +780,9 @@ deny_patterns   = ["mcp__processkit-dangerous-admin"]  # Deny a specific pattern
 default_mode = "allow"
 ```
 
-{{% alert title="Personal MCP servers" color="success" %}}
+{{< callout type="success" title="Personal MCP servers" >}}
 Servers that require personal credentials or are not relevant to all team members belong in `[[mcp.servers]]` in `.aibox-local.toml`, not committed `[[ai.mcp.servers]]`. See [Local Config](./local-config.md).
-{{% /alert %}}
+{{< /callout >}}
 
 ### [ai.execution]
 
@@ -788,11 +845,25 @@ Visual and layout configuration. See [Themes](../customization/themes.md) and [L
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `theme` | String | No | `"gruvbox-dark"` | Color theme. Supports the tmux-powerkit popular theme roster and variants, plus `projectious`; see [Themes](../customization/themes.md). |
+| `theme` | String | No | `"gruvbox"` | One of 37 theme families, including Projectious, accessibility, and period-terminal families; see [Themes](../customization/themes.md). |
 | `mode` | String | No | `"auto"` | Global theme mode overlay: `auto`, `light`, `dark`. `auto` follows the host OS appearance when detectable during `aibox apply`, `aibox up`, or `aibox set theme.*`; otherwise it preserves the selected concrete theme. |
+| `variant` | String | No | unset | Optional family-specific variant such as `mirage`, `deep`, `high-contrast-dark`, or `max`. Invalid variants and incompatible explicit modes are rejected with the available choices. |
+| `emphasis` | String | No | `"auto"` | Semantic font-decoration level: `auto`, `full`, `standard`, `minimal`, or `none`. `auto` probes terminal capabilities; `NO_COLOR` forces `none`. Max-contrast variants reject `none`. |
+| `emphasis_overrides.*` | String | No | unset | Per-role whitespace-separated attributes (`bold`, `italic`, `dim`, `underline`, `strikethrough`). Unsupported attributes degrade according to the selected emphasis level and each tool's capabilities. |
 | `prompt` | String | No | `"default"` | Starship preset: `default`, `plain`, `arrow`, `minimal`, `nerd-font`, `pastel`, `powerline-pastel`, `bracketed`. Legacy `pastel-powerline` is accepted as an alias. |
 | `layout` | String | No | `"dev"` | tmux layout: `dev`, `focus`, `cowork`, `ai` |
 | `tmux.status.mode` | String | No | `"extended"` | tmux status presentation: `extended` uses the themed multi-line PowerKit status, `plain` keeps minimal tmux text, `disabled` turns the status line off. Legacy `powerline` is accepted as an alias for `extended`. |
+| `tmux.title.enabled` | Boolean | No | `true` | Emit a configurable, state-aware terminal tab title from tmux. Set `false` to leave terminal title ownership to the terminal or shell. |
+| `tmux.title.format` | String | No | `"{state_symbol}{project}:{window} — {directory}"` | Title template. Supported values are documented in [Agent attention titles](../customization/agent-attention-titles.md). |
+| `tmux.title.max-length` | Integer | No | `60` | Maximum rendered title length. Values are truncated safely. |
+| `tmux.title.directory-style` | String | No | `"basename"` | Directory rendering: `basename`, `abbreviated`, or `full`. |
+| `tmux.title.done-ttl-seconds` | Integer | No | `10` | How long a completion marker remains visible before returning to idle. |
+| `tmux.title.message-max-length` | Integer | No | `32` | Maximum length of an agent question/error message inserted into a title. Escape/control characters are removed. |
+| `tmux.title.states.*` | String | No | state symbols | Per-state symbols for `idle`, `working`, `question`, `done`, and `error`. |
+| `tmux.notifications.enabled` | Boolean | No | `false` | Emit optional terminal attention notifications from tmux on configured state transitions. |
+| `tmux.notifications.protocol` | String | No | `"osc-9"` | Notification backend: message-bearing `osc-9` on supporting terminals, or portable `bell`. |
+| `tmux.notifications.states` | Array of strings | No | `["question", "error"]` | Attention states that trigger notifications: `working`, `question`, `done`, `error`, or `idle`. |
+| `tmux.notifications.include-message` | Boolean | No | `true` | Include sanitized question/error text in a notification when available. |
 | `tmux.status.separators.style` | String | No | `"rounded"` | PowerKit separator style: `normal`, `rounded`, `slant`, `slantup`, `trapezoid`, `flame`, `pixel`, `honeycomb`, `none`. |
 | `tmux.status.separators.edge-style` | String | No | `"rounded"` | PowerKit edge separator style for status boundaries. Uses the same values as `style`. |
 | `tmux.status.separators.elements-spacing` | String | No | `"both"` | PowerKit spacing mode: `false`, `true`, `both`, `windows`, `plugins`. |

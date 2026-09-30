@@ -382,10 +382,10 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
                cross-version sync auto-recovers corrupted managed runtime files (off_RIGHT fix, commit e0ee7bc); \
                generic purge-on-disable for all addon tools — kubernetes, cloud-aws/azure/gcp, infrastructure, audio-voice, preview-archive, preview-enhanced, data-preview, yazi-omp, and existing git-ui pattern; \
                new [apply].purge_disabled_harness_state toml key (default false); \
-               BREAKING: [customization.zellij_status] is now schema-rejected — remove from aibox.toml before upgrade (see docs-site/docs/migrations/zellij-eol.md); \
+               BREAKING: [customization.zellij_status] is now schema-rejected — remove from aibox.toml before upgrade (see docs-site/content/docs/migrations/zellij-eol.md); \
                six new doctor checks + semver-aware version-skew reporting; \
                addon download integrity hardening — 11 addons use SHA-256/GPG/.sha256 sidecar verification; ai-opencode pinned to GitHub release assets (vendor publishes no SHA256SUMS — see TODO annotations); \
-               BREAKING: seccomp=unconfined now requires [security].acknowledge_seccomp_unconfined = true in aibox.toml; aibox init --harness codex auto-sets this; existing Codex projects must add it manually (see docs-site/docs/reference/security.md); \
+               BREAKING: seccomp=unconfined now requires [security].acknowledge_seccomp_unconfined = true in aibox.toml; aibox init --harness codex auto-sets this; existing Codex projects must add it manually (see docs-site/content/docs/reference/security.md); \
                aibox.toml [skills] dedup — single array of strings, comment-out to disable; \
                two-line powerline status bar with six chevron-styled aibox metrics segments (slot order fixed per DEC-20260508_2115-SilentFern); \
                internal: cli/src/seed.rs split into cli/src/tmux/ module (3,613 → 2,929 lines); \
@@ -582,6 +582,216 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         aibox_version: "0.28.8",
         processkit_version: "v0.28.3",
         note: "Patch release: makes the infrastructure addon self-sufficient by installing python3-pip before installing Ansible, so generated Dockerfiles build without the Python addon.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.9",
+        processkit_version: "v0.28.3",
+        note: "Patch release: installs Ansible, Poetry, PDM, and Azure CLI in isolated virtual environments so generated Debian trixie Dockerfiles comply with PEP 668 while keeping their commands available on PATH.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.10",
+        processkit_version: "v0.28.3",
+        note: "Patch release: reconciles the standard processkit skills, recommends tooling-linked skills interactively, upgrades prerelease processkit surfaces, and serializes release Tier 2 E2E validation for the shared companion.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.11",
+        processkit_version: "v0.28.3",
+        note: "Patch release: adds the Cloudflare addon, installing cloudflared from Cloudflare's signed repository instead of Debian's archive so generated trixie images build on amd64 and arm64.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.12",
+        processkit_version: "v0.28.4",
+        note: "Patch release: integrates processkit v0.28.4 and makes companion E2E validation work from linked release worktrees.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.13",
+        processkit_version: "v0.28.4",
+        note: "Patch release: adds open GitHub Discussion counts to the tmux Forge status segment and restores the complete generated Codex command projection set.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.14",
+        processkit_version: "v0.28.4",
+        note: "Patch release: ensures pk-reconcile and pk-repo-reconcile install their project-reconciliation and repo-management skill dependencies.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.15",
+        processkit_version: "v0.28.4",
+        note: "Patch release: refreshes the bundled maintenance tools, locks cargo-audit installation for Rust compatibility, and publishes the Hugo/Docsy documentation site.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.16",
+        processkit_version: "v0.28.4",
+        note: "Patch release: installs Node.js from checksum-verified official release archives after the NodeSource signing-key endpoint became unavailable and refreshes generated runtime and processkit package-selection state.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.17",
+        processkit_version: "v0.28.4",
+        note: "Patch release: repairs Go, Typst, AWS CLI, and Node.js add-on installers and adds a clean companion-container build gate for download-based add-on defaults.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.18",
+        processkit_version: "v0.28.5",
+        note: "Patch release: restores Codex processkit MCP startup by preserving uv run --script in gateway daemon-proxy commands, integrates processkit v0.28.5's MCP 1.x compatibility bound, and restores zero-warning clippy under Rust 1.97.",
+    },
+    CompatEntry {
+        aibox_version: "0.28.19",
+        processkit_version: "v0.28.5",
+        note: "Patch release: preserves prerelease identifiers when resolving the latest published GHCR image so v1.0.0-alpha.1 is not rewritten to the nonexistent v1.0.0 tag.",
+    },
+    CompatEntry {
+        aibox_version: "0.29.0",
+        processkit_version: "v0.28.5",
+        note: "Minor release: adds Tau as a first-class multi-provider coding-agent harness with pinned installation, persistent runtime state, AGENTS.md discovery, Agent Skills projection, and explicit MCP capability reporting.",
+    },
+    CompatEntry {
+        aibox_version: "0.30.0",
+        processkit_version: "v0.28.5",
+        note: "Minor release: adds nested language addon groups, production Go quality tooling, and language-neutral supply-chain and release bundles with pinned versions, checksum verification, and per-tool overrides.",
+    },
+    CompatEntry {
+        aibox_version: "0.30.1",
+        processkit_version: "v0.28.5",
+        note: "Patch release: refreshes the companion E2E contract, repairs Starship cache isolation, resolves Codex latest pins before container builds, and updates security-relevant pnpm and Tau curated defaults.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.0",
+        processkit_version: "v0.28.5",
+        note: "Minor release: adds optional rootless Podman and Podman Compose tooling to the infrastructure addon, documents the Go supply-chain and release bundles, and repairs minimal infrastructure addon rendering.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.1",
+        processkit_version: "v0.28.6",
+        note: "Patch release: repairs incomplete processkit upgrade caches, installs declared skill dependencies, removes stale pk command projections, and consumes source-specific MCP header manifests.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.2",
+        processkit_version: "v0.28.6",
+        note: "Patch release: replaces privileged companion E2E coverage with isolated local contracts and an owner-controlled, evidence-producing macOS host gate.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.3",
+        processkit_version: "v0.28.6",
+        note: "Patch release: adds a locked Textual dashboard and reviewed content-addressed cache reuse to the restricted macOS host gate.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.4",
+        processkit_version: "v0.28.6",
+        note: "Patch release: makes Hugo downloads resilient to transient network failures, improves the release-host Textual problem workflow, and serializes contention-sensitive E2E gates.",
+    },
+    CompatEntry {
+        aibox_version: "0.31.5",
+        processkit_version: "v0.28.6",
+        note: "Patch release: retries OpenCode release downloads and makes Textual yanks selection-aware while preserving actionable failed-task diagnostics.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.0",
+        processkit_version: "v0.28.6",
+        note: "Minor release: adds a pinned Chromium-first Playwright and axe browser-testing addon with optional Firefox/WebKit, live release-host browser evidence, and a cleaner full-width Textual release dashboard.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.1",
+        processkit_version: "v0.28.6",
+        note: "Patch release: makes the browser-testing host gate launch the full Chromium channel installed by Playwright --no-shell instead of requesting the omitted headless-shell executable.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.2",
+        processkit_version: "v0.28.6",
+        note: "Patch release: uses an explicit Playwright BrowserContext for axe host validation and makes safe release-host caches and candidate-bound retries available by default.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.3",
+        processkit_version: "v0.28.6",
+        note: "Patch release: makes the axe host fixture accessibility-clean and records structured violation diagnostics when a future browser probe fails.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.4",
+        processkit_version: "v0.28.6",
+        note: "Patch release: keeps latest image resolution on the active v0 line, refreshes generated addon comments when the catalog changes, and fixes stale or collapsed Yazi Markdown previews.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.5",
+        processkit_version: "v0.28.6",
+        note: "Patch release: embeds the canonical addon catalog so stale host installs cannot hide shipped tools, refreshes same-version installs, and adds Yazi/Vim clipboard and selectable-preview workflows.",
+    },
+    CompatEntry {
+        aibox_version: "0.32.6",
+        processkit_version: "v0.28.6",
+        note: "Patch release: refreshes curated tool pins, including Go 1.26.6, and routes every Yazi copy action through the tmux and host clipboard bridge.",
+    },
+    CompatEntry {
+        aibox_version: "0.33.0",
+        processkit_version: "v0.28.6",
+        note: "Minor release: adds configurable, terminal-neutral tmux titles and lifecycle attention signals for AI harness panes, with optional notifications.",
+    },
+    CompatEntry {
+        aibox_version: "0.33.1",
+        processkit_version: "v0.28.6",
+        note: "Patch release: restores generated AI harness startup under nounset, keeps Yazi directory previews compatible across supported image pins, and aligns PowerKit plugin spacing with window tabs.",
+    },
+    CompatEntry {
+        aibox_version: "0.33.2",
+        processkit_version: "v0.28.8",
+        note: "Patch release: updates the default processkit release to v0.28.8, refreshes generated runtime metadata for Codex 0.148.0, and reconciles the completed live tmux layout and theme switching work.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.0",
+        processkit_version: "v0.28.8",
+        note: "Minor release: adds configurable agent-aware tmux headers and replaces the legacy documentation stack with the projectious.work Hugo brand theme.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.1",
+        processkit_version: "v0.28.8",
+        note: "Patch release: expands theme palettes across the managed terminal toolchain, adds exact Codex syntax themes, restores the visual theme gallery, and clears Codex question state after permission answers.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.2",
+        processkit_version: "v0.28.8",
+        note: "Patch release: publishes the generated theme gallery and chooser, aligns terminal themes with the design reference, reliably clears answered Codex question state, and improves active tmux pane visibility.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.3",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores readable Yazi marked items across every theme, repairs PowerKit separator colors, preserves active-pane emphasis, uses supported Codex lifecycle hooks, and reliably restores the outer terminal title.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.4",
+        processkit_version: "v0.28.8",
+        note: "Patch release: updates the bundled Yazi pane-toggle plugin to the current indexed ratio API and removes runtime deprecation warnings.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.5",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores PowerKit window-separator color continuity across every theme, makes isolated visual regressions mandatory for releases, and refreshes deferred tool pins.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.6",
+        processkit_version: "v0.28.8",
+        note: "Patch release: makes the PowerKit separator compatibility patch accept the expanded pinned renderer while retaining structural format validation, restoring host runtime image builds.",
+    },
+    CompatEntry {
+        aibox_version: "0.34.7",
+        processkit_version: "v0.28.8",
+        note: "Patch release: adds persistent Yazi line-number and wrapping controls, explicit preview scrolling, and tabular recursive directory-size reports with visible hierarchy totals.",
+    },
+    CompatEntry {
+        aibox_version: "0.35.0",
+        processkit_version: "v0.28.8",
+        note: "Minor release: adds Borland, Norton, and Phosphor terminal theme families plus opt-in D2, Graphviz, Vega, Vega-Lite, and Mermaid build-time graphics addons.",
+    },
+    CompatEntry {
+        aibox_version: "0.35.1",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores Rich Markdown preview in Yazi and refreshes v0 base-image and addon tool versions.",
+    },
+    CompatEntry {
+        aibox_version: "0.35.2",
+        processkit_version: "v0.28.8",
+        note: "Patch release: runs the release-host Yazi startup check in the generated tmux PTY instead of calling interactive debug mode without a terminal.",
+    },
+    CompatEntry {
+        aibox_version: "0.35.3",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores the v0 development-to-main release promotion chain and retains the host-gate checks.",
     },
 ];
 

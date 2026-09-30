@@ -8,11 +8,11 @@ prepend_keymap = [
     # Enter: open in vim in-place (suspends yazi, :q returns)
     { on = "<Enter>", run = "open",              desc = "Edit in-place" },
     # e: open in the adjacent vim pane (stays in yazi)
-    { on = "e",       run = "shell 'open-in-editor \"$1\"'", desc = "Open in vim pane" },
+    { on = "e",       run = "shell 'open-in-editor %h'", desc = "Open in vim pane" },
     # O: interactive opener selection
     { on = "O",       run = "open --interactive", desc = "Open interactively" },
     # p: full-pane rich preview for Markdown, code/text, and PDF
-    { on = "p",       run = "shell 'aibox-preview \"$1\"' --block", desc = "Full-pane preview" },
+    { on = "p",       run = "shell 'aibox-preview %h' --block", desc = "Full-pane preview" },
     # z h/z l: hide or restore the parent/preview columns
     { on = [ "z", "h" ], run = "plugin toggle-pane min-parent", desc = "Toggle parent pane" },
     { on = [ "z", "l" ], run = "plugin toggle-pane min-preview", desc = "Toggle preview pane" },
@@ -20,17 +20,27 @@ prepend_keymap = [
     { on = [ "z", "m" ], run = "plugin toggle-pane max-preview", desc = "Maximize preview pane" },
     { on = [ "z", "c" ], run = "plugin toggle-pane max-current", desc = "Maximize current pane" },
     { on = [ "z", "0" ], run = "plugin toggle-pane", desc = "Reset pane layout" },
-    # w s: cumulative size for selected files
-    { on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block", desc = "Size selected files" },
+    # w s: recursive ls-like table with directory disk-usage totals
+    { on = [ "w", "s" ], run = "shell 'aibox-size-tree %s | ${PAGER:-less} -R -S' --block", desc = "Tree size details" },
     # w h: open the hovered file in a horizontal-scroll pager
-    { on = [ "w", "h" ], run = "shell 'bat --color=always --style=plain --paging=never \"$1\" | less -R -S' --block", desc = "Preview with horizontal scroll" },
+    { on = [ "w", "h" ], run = "shell 'bat --color=always --style=plain --paging=never %h | less -R -S' --block", desc = "Preview with horizontal scroll" },
+    # w v: use Vim as the selectable raw-text preview surface
+    { on = [ "w", "v" ], run = "shell 'vim -R %h' --block", desc = "Select preview text in read-only Vim" },
     # w p: live-watch the hovered PDF and re-render when it changes
-    { on = [ "w", "p" ], run = "shell 'if [ -f \"$HOME/.local/bin/pdf-watch\" ]; then bash \"$HOME/.local/bin/pdf-watch\" \"$1\"; else pdf-watch \"$1\"; fi' --block", desc = "Watch PDF preview" },
-    # c *: copy selected path components to the clipboard via Yazi's native copy action
-    { on = [ "c", "p" ], run = "copy path", desc = "Copy selected paths" },
-    { on = [ "c", "d" ], run = "copy dirname", desc = "Copy selected directories" },
-    { on = [ "c", "f" ], run = "copy filename", desc = "Copy selected filenames" },
-    { on = [ "c", "n" ], run = "copy name_without_ext", desc = "Copy names without extension" },
+    { on = [ "w", "p" ], run = "shell 'if [ -f \"$HOME/.local/bin/pdf-watch\" ]; then bash \"$HOME/.local/bin/pdf-watch\" %h; else pdf-watch %h; fi' --block", desc = "Watch PDF preview" },
+    # w n/w l: persistent textual preview presentation toggles
+    { on = [ "w", "n" ], run = "plugin preview-options toggle-numbers", desc = "Toggle preview line numbers" },
+    { on = [ "w", "l" ], run = "plugin preview-options toggle-wrap", desc = "Toggle preview line wrapping" },
+    # J/K: scroll the preview without moving the hovered file
+    { on = "J", run = "seek 5",  desc = "Scroll preview down" },
+    { on = "K", run = "seek -5", desc = "Scroll preview up" },
+    # c *: bridge selected path components through tmux/OSC52 to the host clipboard
+    { on = [ "c", "p" ], run = "shell 'printf \"%s\\n\" %s | aibox-copy'", desc = "Copy selected paths" },
+    { on = [ "c", "d" ], run = "shell 'for path in %s; do dirname \"$path\"; done | aibox-copy'", desc = "Copy selected directories" },
+    { on = [ "c", "f" ], run = "shell 'for path in %s; do basename \"$path\"; done | aibox-copy'", desc = "Copy selected filenames" },
+    { on = [ "c", "n" ], run = "shell 'for path in %s; do name=${path##*/}; printf \"%s\\n\" \"${name%.*}\"; done | aibox-copy'", desc = "Copy names without extension" },
+    # c c: copy the hovered file contents through tmux/OSC52
+    { on = [ "c", "c" ], run = "shell 'aibox-copy < %h'", desc = "Copy file contents to host clipboard" },
     # g s: repo-level git summary (branch + totals)
     { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
     # g c: detailed changed-files view for the current repository

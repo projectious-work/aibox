@@ -50,6 +50,8 @@ prepend_previewers = [
     { url = "*.svg", run = "svg" },
     # EPS: convert to PNG with ghostscript, then display as image
     { url = "*.eps", run = "eps" },
+    # Text: aibox presentation toggles (w n line numbers, w l wrapping)
+    { mime = "text/*", run = "preview-options" },
     # Raster images — explicit name rules ensure all extensions are covered
     # even if MIME detection fails (e.g. for BMP/TIFF without magic bytes).
     { url = "*.jpg",  run = "image" },
@@ -67,11 +69,11 @@ prepend_previewers = [
 [opener]
 # Enter: open in vim in-place (suspends yazi, returns on :q)
 edit = [
-    { run = 'vim --cmd "set t_u7=" --cmd "set t_RV=" "$@"', desc = "Edit in-place", block = true },
+    { run = 'vim --cmd "set t_u7=" --cmd "set t_RV=" %s', desc = "Edit in-place", block = true },
 ]
 # For opening in the adjacent vim pane (dev layout: vim is right of yazi)
 edit-pane = [
-    { run = 'open-in-editor "$1"', desc = "Open in vim pane", block = false },
+    { run = 'open-in-editor %s1', desc = "Open in vim pane", block = false },
 ]
 
 [open]

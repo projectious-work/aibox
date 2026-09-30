@@ -131,7 +131,7 @@ Since v0.16.0 it has a strict two-part scope:
 permission files for all MCP servers. Configure `[mcp.permissions]` in `aibox.toml`
 to eliminate repetitive permission prompts. Glob patterns expand into concrete
 server names; deny patterns take precedence over allow for security. See
-[Configuration / MCP Permissions](./docs-site/docs/reference/configuration.md#permission-configuration-mcppermissions).
+[Configuration / MCP Permissions](./docs-site/content/docs/reference/configuration.md#permission-configuration-mcppermissions).
 
 Target users: solo developers, small teams, and consultants who want
 reproducible AI-ready dev environments without manual Docker/devcontainer setup.
@@ -333,7 +333,7 @@ output.
 
 **We are in a dev-container building dev-containers.** Never confuse:
 
-- **`.devcontainer/`** — THIS project's own dev environment (Rust + Python/uv + Hugo/Docsy).
+- **`.devcontainer/`** — THIS project's own dev environment (Rust + Python/uv + Hugo and its module toolchain).
 - **`images/`** — Published images for OTHER projects (pushed to GHCR). They do NOT include Rust toolchain or MkDocs.
 
 Changes to `.devcontainer/` affect our development. Changes to `images/` affect downstream projects.
@@ -345,7 +345,7 @@ Changes to `.devcontainer/` affect our development. Changes to `images/` affect 
 | `cli/` | The Rust CLI (`aibox` binary) — the only shipped artifact besides addon YAMLs |
 | `addons/` | YAML addon definitions (python, rust, node, latex, …) |
 | `images/` | Container image build recipes published to GHCR |
-| `docs-site/` | Hugo/Docsy documentation site |
+| `docs-site/` | Hugo documentation using the projectious.work brand theme |
 | `context/` | This project's context (backlog, decisions, research, …) |
 | `scripts/` | Release and maintenance tooling (`maintain.sh`, `record-asciinema.sh`, …) |
 

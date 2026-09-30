@@ -169,6 +169,7 @@ mod tests {
         assert!(get_addon("latex").is_some());
         assert!(get_addon("kubernetes").is_some());
         assert!(get_addon("cloud-aws").is_some());
+        assert!(get_addon("cloudflare").is_some());
         assert!(get_addon("docs-zensical").is_some());
     }
 
@@ -189,8 +190,8 @@ mod tests {
         assert!(py.supported_versions.contains(&"3.14"));
         assert_eq!(py.default_version, "3.14");
         let uv = addon.tools.iter().find(|t| t.name == "uv").unwrap();
-        assert!(uv.supported_versions.contains(&"0.11.26"));
-        assert_eq!(uv.default_version, "0.11.26");
+        assert!(uv.supported_versions.contains(&"0.12.20"));
+        assert_eq!(uv.default_version, "0.12.20");
     }
 
     #[test]
@@ -198,8 +199,34 @@ mod tests {
         ensure_loaded();
         let addon = get_addon("rust").unwrap();
         let rustc = addon.tools.iter().find(|t| t.name == "rustc").unwrap();
-        assert!(rustc.supported_versions.contains(&"1.96.1"));
-        assert_eq!(rustc.default_version, "1.96.1");
+        assert!(rustc.supported_versions.contains(&"1.98.1"));
+        assert_eq!(rustc.default_version, "1.98.1");
+    }
+
+    #[test]
+    fn deferred_v0_dependency_defaults_are_consolidated() {
+        ensure_loaded();
+        for (addon_name, tool_name, expected) in [
+            ("docs-zensical", "zensical", "0.0.66"),
+            ("go", "go", "1.27.1"),
+            ("node", "bun", "1.4.2"),
+            ("python", "pdm", "2.29.2"),
+            ("infrastructure", "opentofu", "1.12.6"),
+            ("kubernetes", "kubectl", "1.37.1"),
+            ("ai-tau", "tau", "0.4.6"),
+        ] {
+            let addon = get_addon(addon_name).unwrap();
+            let tool = addon
+                .tools
+                .iter()
+                .find(|candidate| candidate.name == tool_name)
+                .unwrap();
+            assert_eq!(tool.default_version, expected, "{addon_name}/{tool_name}");
+            assert!(
+                tool.supported_versions.contains(&expected),
+                "{addon_name}/{tool_name} does not support its default {expected}"
+            );
+        }
     }
 
     #[test]
@@ -217,9 +244,10 @@ mod tests {
     fn rust_has_builder_stage() {
         ensure_loaded();
         let tools = tc(&[
-            ("rustc", true, "1.96.1"),
+            ("rustc", true, "1.97.1"),
             ("clippy", true, ""),
             ("rustfmt", true, ""),
+            ("cargo-audit", true, ""),
         ]);
         let stage = generate_builder_stage("rust", &tools);
         assert!(stage.is_some());
@@ -229,8 +257,12 @@ mod tests {
             "missing rust-builder in:\n{stage}"
         );
         assert!(
-            stage.contains("1.96.1"),
-            "missing version 1.96.1 in:\n{stage}"
+            stage.contains("1.97.1"),
+            "missing version 1.97.1 in:\n{stage}"
+        );
+        assert!(
+            stage.contains("cargo install cargo-audit --locked"),
+            "cargo-audit must use its published lockfile to avoid MSRV drift:\n{stage}"
         );
     }
 
@@ -246,7 +278,7 @@ mod tests {
     #[test]
     fn python_runtime_uses_base_python_uv_without_extra_layers() {
         ensure_loaded();
-        let tools = tc(&[("python", true, "3.13"), ("uv", true, "0.11.26")]);
+        let tools = tc(&[("python", true, "3.13"), ("uv", true, "0.12.0")]);
         let cmds = generate_runtime_commands("python", &tools);
         assert!(
             !cmds.contains("python3-pip"),
@@ -261,7 +293,7 @@ mod tests {
     #[test]
     fn python_runtime_installs_alternate_python_with_uv() {
         ensure_loaded();
-        let tools = tc(&[("python", true, "3.14"), ("uv", true, "0.11.26")]);
+        let tools = tc(&[("python", true, "3.14"), ("uv", true, "0.12.0")]);
         let cmds = generate_runtime_commands("python", &tools);
         assert!(
             cmds.contains("uv python install 3.14"),
@@ -284,7 +316,7 @@ mod tests {
     #[test]
     fn rust_runtime_copies_from_builder() {
         ensure_loaded();
-        let tools = tc(&[("rustc", true, "1.96.1"), ("x86_64-cross", true, "")]);
+        let tools = tc(&[("rustc", true, "1.97.1"), ("x86_64-cross", true, "")]);
         let cmds = generate_runtime_commands("rust", &tools);
         assert!(
             cmds.contains("COPY --from=rust-builder"),
@@ -373,8 +405,8 @@ mod tests {
         let mistral = generate_runtime_commands("ai-mistral", &tc(&[("mistral", true, "2.4.4")]));
         assert!(mistral.contains("mistralai==2.4.4"), "{mistral}");
 
-        let hermes = generate_runtime_commands("ai-hermes", &tc(&[("hermes", true, "0.18.0")]));
-        assert!(hermes.contains("hermes-agent==0.18.0"), "{hermes}");
+        let hermes = generate_runtime_commands("ai-hermes", &tc(&[("hermes", true, "0.19.0")]));
+        assert!(hermes.contains("hermes-agent==0.19.0"), "{hermes}");
         assert!(
             hermes.contains("UV_TOOL_DIR=/opt/aibox/uv-tools"),
             "Hermes tool environment must remain traversable by the runtime user: {hermes}"
@@ -382,6 +414,12 @@ mod tests {
         assert!(
             !hermes.contains("USER aibox"),
             "Hermes installation must retain root access to /usr/local/bin: {hermes}"
+        );
+        let tau = generate_runtime_commands("ai-tau", &tc(&[("tau", true, "0.3.11")]));
+        assert!(tau.contains("tau-ai==0.3.11"), "{tau}");
+        assert!(
+            tau.contains("UV_TOOL_DIR=/opt/aibox/uv-tools"),
+            "Tau tool environment must use the shared uv path: {tau}"
         );
     }
 }

@@ -7,6 +7,33 @@ title: "Tool Bundles"
 
 Tool bundles install infrastructure, orchestration, and cloud CLI tools.
 
+## Supply Chain
+
+```toml
+[addons.supply-chain.tools]
+gitleaks = {}
+osv-scanner = {}
+syft = {}
+grype = {}
+cosign = {}
+```
+
+This language-neutral bundle covers secret scanning, dependency and artifact
+vulnerability checks, SBOM generation, and Sigstore signing. Release archives
+are pinned and checked against upstream-published checksums.
+
+## Release Validation
+
+```toml
+[addons.release.tools]
+shellcheck = {}
+hadolint = {}
+```
+
+The language-neutral `release` bundle validates shell scripts and Dockerfiles.
+Go projects should normally select `[addons.go.release]`, which composes this
+bundle with the `go-release` recipe and GoReleaser.
+
 ## Git UI
 
 ```toml
@@ -20,6 +47,109 @@ automation or lazygit inside the container; omit it to avoid installing those
 tools. This aibox repo may enable it for maintenance workflows such as release
 checks and GitHub issue/release work, but downstream projects do not need it by
 default.
+
+## Browser Visual Testing
+
+The `browser-testing` addon provides a pinned Node-based Playwright Test stack
+(`@playwright/test` plus `@axe-core/playwright`) for headless browser checks.
+Playwright-managed full Chromium is enabled by default; Firefox and WebKit are
+opt-in so a project can keep its image smaller when cross-engine coverage is
+not required.
+
+```toml
+[addons.browser-testing.tools]
+# Playwright Test and @axe-core/playwright are enabled by default.
+# Optional cross-engine coverage:
+firefox = { enabled = true }
+webkit = { enabled = true }
+```
+
+The v0.x catalog currently couples Playwright `1.63.0` with
+`@axe-core/playwright` `4.13.0` and the matching browser revisions. The addon
+provides that pinned runner/browser environment; keep the derived project's
+`package.json` and lockfile authoritative, and install the packages locally
+when the project's package manager does not resolve the environment's global
+packages. After applying the configuration, a derived project can keep its
+tests and baselines beside the application, for example:
+
+```ts
+// playwright.config.ts
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests/browser",
+  use: {
+    baseURL: "http://127.0.0.1:4173",
+    ...devices["Desktop Chrome"],
+    colorScheme: "light",
+    reducedMotion: "reduce",
+  },
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+});
+```
+
+```ts
+// tests/browser/home.spec.ts
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+test("home page is keyboard reachable and accessible", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("main")).toBeVisible();
+  await page.keyboard.press("Tab");
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+```
+
+The example is only a starting point. The derived project owns the responsive
+viewport set, focus and keyboard flows, light/dark themes, reduced-motion
+behavior, accessibility assertions, and screenshot-baseline matrix. aibox
+tests validate the addon installation, generated contract, browser launch, and
+a minimal fixture; they do not prescribe an application's visual matrix.
+
+## Build-time Graphics Rendering
+
+Graphics renderers are separate opt-in addons. They are not implicit
+dependencies of `docs-hugo`, so a documentation project installs only the
+renderers used by its Hugo hooks or shortcodes.
+
+```toml
+[addons.diagramming.tools]
+d2 = { version = "0.9.0" }
+graphviz = {}
+
+[addons.data-visualization.tools]
+vega-cli = { version = "6.4.0" }
+vega-lite = { version = "6.4.3" }
+
+[addons.mermaid.tools]
+mermaid-cli = { version = "12.0.0" }
+puppeteer = { version = "25.12.0" }
+```
+
+`diagramming` installs the checksum-verified D2 release for Linux AMD64 or
+ARM64 and the Graphviz command family (`dot`, `neato`, `fdp`, `sfdp`, `circo`,
+and `twopi`). A minimal Hugo build hook can invoke `d2 input.d2 output.svg` or
+`dot -Tsvg input.dot -o output.svg`.
+
+`data-visualization` requires the `node` addon. It installs the pinned
+`vega-cli` commands (`vg2svg`, `vg2png`, and `vg2pdf`) and the pinned
+`vega-lite` commands (`vl2vg`, `vl2svg`, `vl2png`, and `vl2pdf`). For example,
+`vl2svg chart.vl.json > chart.svg` produces a static asset during the Hugo
+build.
+
+`mermaid` also requires `node` version 22.13 or newer for the current
+Mermaid CLI and Puppeteer defaults. By default it installs `mmdc`, pinned
+Puppeteer, and Puppeteer's compatible Chrome headless shell plus its Linux
+system dependencies. This is intentionally a heavy, opt-in addon. Projects
+that provide their own compatible Chrome executable may disable the
+`puppeteer` tool and pass an appropriate Puppeteer configuration to `mmdc`.
+
+CeTZ does not need another executable: it remains a Typst package loaded by
+the existing `typst` addon. Projects that require offline builds should pin
+the CeTZ package version in their Typst source and pre-populate the package
+cache as part of their own reproducible build inputs.
 
 ## Preview and Archive Tools
 
@@ -72,10 +202,16 @@ automatically when `[audio] enabled = true` and `install = true`; projects norma
 opentofu = {}      # Infrastructure-as-code (Terraform alternative)
 ansible = {}       # Configuration management
 packer = {}        # Machine image builder
+podman = {}        # Optional rootless container engine + Compose
 ```
 
-OpenTofu defaults to 1.12.0, Packer to 1.15.3, and Ansible to 13.7.0.
+OpenTofu defaults to 1.12.6, Packer to 1.16.1, and Ansible to 14.4.0.
 OpenTofu and Packer are installed in a multi-stage builder. Ansible is installed via pip.
+Podman is optional and installs the Debian-packaged rootless engine, Compose
+provider, user-namespace helpers, and overlay/networking prerequisites. Nested
+containers still depend on the outer runtime allowing user namespaces; FUSE
+overlay is used when `/dev/fuse` is available, with Podman's normal fallback
+otherwise.
 
 ## Kubernetes
 
@@ -87,7 +223,7 @@ kustomize = {}     # Configuration customization
 # k9s = {}         # Optional: terminal UI for Kubernetes
 ```
 
-kubectl defaults to 1.36.2, Helm to 4.2.2, Kustomize to 5.8.1, and k9s to 0.51.0.
+kubectl defaults to 1.37.1, Helm to 4.3.0, Kustomize to 5.8.1, and k9s to 0.51.0.
 All tools are downloaded as static binaries in a multi-stage builder.
 
 ## Cloud Providers

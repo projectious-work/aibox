@@ -46,8 +46,8 @@ tools:
   - name: resvg
     description: "High-quality SVG rasterizer for Yazi previews"
     default_enabled: true
-    default_version: "0.47.0"
-    supported_versions: ["0.47.0"]
+    default_version: "0.48.1"
+    supported_versions: ["0.47.0", "0.48.1"]
 
 builder: |
   # Addon: preview-archive (static preview/archive binaries)
@@ -60,13 +60,17 @@ builder: |
       && rm -rf /var/lib/apt/lists/*
 
   {% if tools.resvg.enabled %}
-  ARG RESVG_SHA256_X86_64=5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7
   RUN ARCH=$(uname -m) && \
       if [ "$ARCH" = "x86_64" ]; then \
+        case "{{ tools.resvg.version }}" in \
+          0.47.0) RESVG_SHA256="5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7" ;; \
+          0.48.1) RESVG_SHA256="fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d" ;; \
+          *) echo "Unsupported resvg version" >&2; exit 1 ;; \
+        esac && \
         curl -fsSL \
           "https://github.com/linebender/resvg/releases/download/v{{ tools.resvg.version }}/resvg-linux-${ARCH}.tar.gz" \
           -o /tmp/resvg.tar.gz && \
-        echo "${RESVG_SHA256_X86_64}  /tmp/resvg.tar.gz" | sha256sum -c - && \
+        echo "${RESVG_SHA256}  /tmp/resvg.tar.gz" | sha256sum -c - && \
         tar -xz -C /usr/local/bin -f /tmp/resvg.tar.gz resvg && \
         chmod +x /usr/local/bin/resvg && \
         rm /tmp/resvg.tar.gz; \

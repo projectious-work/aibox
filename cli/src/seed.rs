@@ -4,7 +4,7 @@ use std::fs;
 use std::os::unix::fs::PermissionsExt;
 #[cfg(unix)]
 use std::os::unix::fs::symlink;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::config::{AiboxConfig, ConfigLayout, GithubCredentialHelper};
 use crate::output;
@@ -245,7 +245,11 @@ pub(crate) fn include_github_credential_helper(config: &AiboxConfig) -> bool {
 
 fn managed_git_config(config: &AiboxConfig) -> String {
     let theme = config.customization.resolved_theme();
-    let mut gitconfig = crate::themes::gitconfig_with_delta(&theme);
+    let mut gitconfig = crate::themes::gitconfig_with_delta_and_style(
+        &theme,
+        config.customization.emphasis,
+        &config.customization.emphasis_overrides,
+    );
     if include_github_credential_helper(config) {
         if !gitconfig.ends_with('\n') {
             gitconfig.push('\n');
@@ -321,6 +325,7 @@ prepend_previewers = [
 AIBOX_YAZI_EXTRA_PREVIEWERS
     { url = "*.svg",  run = "svg" },
     { url = "*.eps",  run = "eps" },
+    { mime = "text/*", run = "preview-options" },
     { url = "*.jpg",  run = "image" },
     { url = "*.jpeg", run = "image" },
     { url = "*.png",  run = "image" },
@@ -334,10 +339,10 @@ AIBOX_YAZI_EXTRA_PREVIEWERS
 
 [opener]
 edit = [
-    { run = 'vim --cmd "set t_u7=" --cmd "set t_RV=" "$@"', desc = "Edit in-place", block = true },
+    { run = 'vim --cmd "set t_u7=" --cmd "set t_RV=" %s', desc = "Edit in-place", block = true },
 ]
 edit-pane = [
-    { run = 'open-in-editor "$1"', desc = "Open in vim popup", block = false },
+    { run = 'open-in-editor %s1', desc = "Open in vim popup", block = false },
 ]
 
 [open]
@@ -531,14 +536,21 @@ local function fmt_size(n)
 	if not n or n < 0 then s = "-"
 	elseif n < 1024 then s = string.format("%d", n)
 	elseif n < 1048576 then s = string.format("%.0fK", n / 1024)
-	elseif n < 1073741824 then s = string.format("%.1fM", n / 1048576)
-	else s = string.format("%.1fG", n / 1073741824)
+	elseif n < 1024 * 1024 * 1024 then s = string.format("%.1fM", n / 1048576)
+	else s = string.format("%.1fG", n / (1024 * 1024 * 1024))
 	end
 	return string.format("%6s", s)
 end
 
 local function pad(s, w) return s .. string.rep(" ", math.max(0, w - #s)) end
 local function trunc(s, w) return #s <= w and s or s:sub(1, w - 1) .. "~" end
+
+-- th.icon was added after Yazi 26.5.6. A newer aibox CLI can refresh this
+-- managed plugin while a derived project still runs an older configured image,
+-- so omit the icon there instead of crashing or calling the deprecated method.
+local function file_icon(file)
+	return th.icon and th.icon.match and th.icon:match(file) or nil
+end
 
 function M:peek(job)
 	local files, err = fs.read_dir(job.file.url, { resolve = true })
@@ -570,7 +582,7 @@ function M:peek(job)
 		local gs_style = is_inherited and GIT_STYLES_DIM[gs] or GIT_STYLES[gs]
 		local ignored = direct == "I"
 		gs = is_inherited and (gs:lower() .. " ") or (gs ~= "" and (gs .. " ") or "  ")
-		local icon = f:icon()
+		local icon = file_icon(f)
 		local size
 		if c.is_dir then
 			local children = fs.read_dir(f.url, {})
@@ -684,6 +696,10 @@ const DEFAULT_YAZI_PLUGIN_STATUS_GIT: &str =
 const DEFAULT_YAZI_PLUGIN_TOGGLE_PANE: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/toggle-pane.yazi/main.lua");
 
+/// preview-options.yazi plugin — persistent line-number and wrapping toggles.
+const DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS: &str =
+    include_str!("../../images/base-debian/config/yazi/plugins/preview-options.yazi/main.lua");
+
 /// rich-preview.yazi plugin — terminal-rich preview for markdown and data files.
 const DEFAULT_YAZI_PLUGIN_RICH_PREVIEW: &str =
     include_str!("../../images/base-debian/config/yazi/plugins/rich-preview.yazi/main.lua");
@@ -704,6 +720,9 @@ const DEFAULT_OPEN_IN_EDITOR_SH: &str =
 /// aibox-preview helper — full-pane rich previews from Yazi.
 const DEFAULT_AIBOX_PREVIEW_SH: &str =
     include_str!("../../images/base-debian/config/bin/aibox-preview.sh");
+/// aibox-size-tree helper — tabular recursive disk-usage report for Yazi.
+const DEFAULT_AIBOX_SIZE_TREE_PY: &str =
+    include_str!("../../images/base-debian/config/bin/aibox-size-tree.py");
 /// aibox-status-toggle helper — toggle the tmux runtime status line.
 const DEFAULT_AIBOX_STATUS_TOGGLE_SH: &str =
     include_str!("../../images/base-debian/config/bin/aibox-status-toggle.sh");
@@ -754,6 +773,14 @@ else
 fi
 "#;
 
+/// Provider-neutral agent lifecycle/attention signal helper.  Harness hooks
+/// call this through PATH; it is also available for manual integrations.
+const DEFAULT_AIBOX_AGENT_SIGNAL_SH: &str = include_str!("templates/aibox-agent-signal.sh");
+
+/// Codex's `notify` callback is the reliable end-of-turn signal. This adapter
+/// translates `agent-turn-complete` into the provider-neutral attention state.
+const DEFAULT_AIBOX_CODEX_NOTIFY_SH: &str = include_str!("templates/aibox-codex-notify.sh");
+
 /// lnav format file describing the aibox NDJSON log shape — read by
 /// `Prefix L` in tmux to surface logs with timestamps, levels, and
 /// search/filter (BR-LOG-PANEL, v0.25.6).
@@ -764,21 +791,27 @@ const DEFAULT_LNAV_FORMAT_AIBOX: &str =
 const DEFAULT_YAZI_KEYMAP: &str = r#"[mgr]
 prepend_keymap = [
     { on = "<Enter>", run = "open", desc = "Edit in-place" },
-    { on = "e", run = "shell 'open-in-editor \"$1\"'", desc = "Open in vim popup" },
+    { on = "e", run = "shell 'open-in-editor %h'", desc = "Open in vim popup" },
     { on = "O", run = "open --interactive", desc = "Open interactively" },
-    { on = "p", run = "shell 'aibox-preview \"$1\"' --block", desc = "Full-pane preview" },
+    { on = "p", run = "shell 'aibox-preview %h' --block", desc = "Full-pane preview" },
     { on = [ "z", "h" ], run = "plugin toggle-pane min-parent", desc = "Toggle parent pane" },
     { on = [ "z", "l" ], run = "plugin toggle-pane min-preview", desc = "Toggle preview pane" },
     { on = [ "z", "m" ], run = "plugin toggle-pane max-preview", desc = "Maximize preview pane" },
     { on = [ "z", "c" ], run = "plugin toggle-pane max-current", desc = "Maximize current pane" },
     { on = [ "z", "0" ], run = "plugin toggle-pane", desc = "Reset pane layout" },
-    { on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block", desc = "Size selected files" },
-    { on = [ "w", "h" ], run = "shell 'bat --color=always --style=plain --paging=never \"$1\" | less -R -S' --block", desc = "Preview with horizontal scroll" },
-    { on = [ "w", "p" ], run = "shell 'if [ -f \"$HOME/.local/bin/pdf-watch\" ]; then bash \"$HOME/.local/bin/pdf-watch\" \"$1\"; else pdf-watch \"$1\"; fi' --block", desc = "Watch PDF preview" },
-    { on = [ "c", "p" ], run = "copy path", desc = "Copy selected paths" },
-    { on = [ "c", "d" ], run = "copy dirname", desc = "Copy selected directories" },
-    { on = [ "c", "f" ], run = "copy filename", desc = "Copy selected filenames" },
-    { on = [ "c", "n" ], run = "copy name_without_ext", desc = "Copy names without extension" },
+    { on = [ "w", "s" ], run = "shell 'aibox-size-tree %s | ${PAGER:-less} -R -S' --block", desc = "Tree size details" },
+    { on = [ "w", "h" ], run = "shell 'bat --color=always --style=plain --paging=never %h | less -R -S' --block", desc = "Preview with horizontal scroll" },
+    { on = [ "w", "v" ], run = "shell 'vim -R %h' --block", desc = "Select preview text in read-only Vim" },
+    { on = [ "w", "p" ], run = "shell 'if [ -f \"$HOME/.local/bin/pdf-watch\" ]; then bash \"$HOME/.local/bin/pdf-watch\" %h; else pdf-watch %h; fi' --block", desc = "Watch PDF preview" },
+    { on = [ "w", "n" ], run = "plugin preview-options toggle-numbers", desc = "Toggle preview line numbers" },
+    { on = [ "w", "l" ], run = "plugin preview-options toggle-wrap", desc = "Toggle preview line wrapping" },
+    { on = "J", run = "seek 5",  desc = "Scroll preview down" },
+    { on = "K", run = "seek -5", desc = "Scroll preview up" },
+    { on = [ "c", "p" ], run = "shell 'printf \"%s\\n\" %s | aibox-copy'", desc = "Copy selected paths" },
+    { on = [ "c", "d" ], run = "shell 'for path in %s; do dirname \"$path\"; done | aibox-copy'", desc = "Copy selected directories" },
+    { on = [ "c", "f" ], run = "shell 'for path in %s; do basename \"$path\"; done | aibox-copy'", desc = "Copy selected filenames" },
+    { on = [ "c", "n" ], run = "shell 'for path in %s; do name=${path##*/}; printf \"%s\\n\" \"${name%.*}\"; done | aibox-copy'", desc = "Copy names without extension" },
+    { on = [ "c", "c" ], run = "shell 'aibox-copy < %h'", desc = "Copy file contents to host clipboard" },
     { on = [ "g", "s" ], run = "shell 'git -c color.status=always status --short --branch --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Git summary" },
     { on = [ "g", "c" ], run = "shell 'git -c color.status=always status --short --ignored=matching --untracked-files=all | ${PAGER:-less} -R' --block", desc = "Show git changes" },
     { on = [ "g", "r" ], run = "cd .", desc = "Refresh directory" },
@@ -797,9 +830,13 @@ const DEFAULT_CHEATSHEET: &str = r#"  aibox Quick Reference  (prefix = Ctrl+g)
   prefix x        Kill pane   g s      Git summary
   prefix f/z      Zoom pane   g c      Git changes
   prefix c        New window  w s      Size selection
-  prefix 1-9      Jump window w h      Horizontal preview
+  prefix 1-9      Jump window J/K      Scroll preview vertically
+                              w h      Horizontal preview
+                              w n/l    Toggle line numbers/wrap
+                              w v      Select/yank preview text
   prefix g/s      lazygit/shell win
   prefix L        Layout menu c p/d/f  Copy path/dir/name
+                              c c      Copy file contents
   prefix T        Theme menu  g r      Refresh git
   prefix [        Copy mode
   prefix o        Log viewer
@@ -865,6 +902,22 @@ const DEFAULT_OPENCODE_PROCESSKIT_GATE_TS: &str = r#"// Generated by aibox — d
 
 import type { Plugin } from "@opencode-ai/plugin";
 
+// Attention is deliberately emitted through the shared shell helper.  This
+// keeps OpenCode provider-neutral and lets the helper safely no-op outside
+// tmux.  Bun is the documented OpenCode plugin runtime.
+function signalAttention(state: string, message?: string, model?: string, effort?: string): void {
+  const args = ["aibox-agent-signal", state, "--harness", "opencode"];
+  if (message) args.push("--message", message.slice(0, 160));
+  if (model) args.push("--agent", model);
+  if (effort) args.push("--effort", effort);
+  try {
+    const child = Bun.spawn(args, { stdout: "ignore", stderr: "ignore" });
+    child.unref();
+  } catch {
+    // Signalling must never prevent the harness from running.
+  }
+}
+
 // Tool names whose invocation counts as "this session has acknowledged
 // the contract." Calling skill-gate's acknowledge_contract is the
 // canonical path; route_task / find_skill / list_skills also count
@@ -917,8 +970,68 @@ export const ProcesskitGate: Plugin = async ({ project: _project }) => {
         );
       }
     },
+    // OpenCode's documented event stream provides native permission and
+    // lifecycle events.  Unlike process idleness, these are explicit user- or
+    // harness-generated transitions and are safe to map to attention state.
+    event: async ({ event }: { event?: { type?: string; properties?: Record<string, unknown> } }) => {
+      const type = String(event?.type ?? "");
+      const properties = event?.properties ?? {};
+      const info = (properties.info ?? properties.message ?? properties) as Record<string, unknown>;
+      const model = String(info.modelID ?? info.modelId ?? info.model ?? "");
+      const effort = String(info.reasoningEffort ?? info.reasoning_effort ?? info.effort ?? "");
+      if (model) signalAttention("working", undefined, model, effort);
+      if (type === "permission.asked" || type === "question.asked") {
+        signalAttention("question", String(properties.message ?? ""));
+      } else if (
+        type === "permission.replied" ||
+        type === "question.replied" ||
+        type === "question.rejected"
+      ) {
+        signalAttention("working");
+      } else if (type === "session.error") {
+        signalAttention("error", String(properties.message ?? ""));
+      } else if (type === "session.idle") {
+        signalAttention("done");
+      } else if (type === "session.status") {
+        const status = String(properties.status ?? "");
+        if (status === "busy" || status === "working" || status === "retry") {
+          signalAttention("working");
+        } else if (status === "idle") {
+          signalAttention("done");
+        }
+      }
+    },
   };
 };
+"#;
+
+/// GitHub Copilot CLI attention hooks. Copilot discovers all JSON hook files
+/// below `~/.copilot/hooks`, so this dedicated aibox-owned file coexists with
+/// user hook files without requiring a destructive settings merge.
+const DEFAULT_COPILOT_ATTENTION_HOOKS_JSON: &str = r#"{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      { "type": "command", "bash": "aibox-agent-signal working --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ],
+    "permissionRequest": [
+      { "type": "command", "bash": "aibox-agent-signal question --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ],
+    "notification": [
+      { "type": "command", "matcher": "permission_prompt|elicitation_dialog", "bash": "aibox-agent-signal question --harness copilot --hook-input >/dev/null 2>&1 || true" },
+      { "type": "command", "matcher": "agent_idle", "bash": "aibox-agent-signal done --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ],
+    "agentStop": [
+      { "type": "command", "bash": "aibox-agent-signal done --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ],
+    "errorOccurred": [
+      { "type": "command", "bash": "aibox-agent-signal error --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ],
+    "sessionEnd": [
+      { "type": "command", "bash": "aibox-agent-signal idle --harness copilot --hook-input >/dev/null 2>&1 || true" }
+    ]
+  }
+}
 "#;
 
 /// Create the managed `.aibox-home/` directory structure without writing files.
@@ -927,11 +1040,48 @@ pub fn ensure_runtime_dirs(config: &AiboxConfig) -> Result<()> {
     let root = config.host_root_dir();
     for rel_dir in crate::runtime_home::runtime_home_scaffold_dirs(config) {
         let dir = root.join(rel_dir);
-        fs::create_dir_all(&dir)
-            .with_context(|| format!("Failed to create directory: {}", dir.display()))?;
+        ensure_runtime_dir(&dir)?;
     }
 
     Ok(())
+}
+
+/// Ensure a runtime-home path is a directory, preserving a blocking file.
+///
+/// `.aibox-home` is user-editable and bind-mounted into the container. A file
+/// at a cache/config directory path would otherwise make tools fail on every
+/// shell startup (for example, Starship's log directory). Keep the file under
+/// a deterministic conflict name instead of discarding user data.
+fn ensure_runtime_dir(dir: &Path) -> Result<()> {
+    if fs::symlink_metadata(dir).is_ok() && !dir.is_dir() {
+        let backup = runtime_dir_conflict_backup(dir);
+        fs::rename(dir, &backup).with_context(|| {
+            format!(
+                "Failed to preserve file blocking runtime directory {}",
+                dir.display()
+            )
+        })?;
+        output::warn(&format!(
+            "Moved file blocking runtime directory {} to {}",
+            dir.display(),
+            backup.display()
+        ));
+    }
+    fs::create_dir_all(dir)
+        .with_context(|| format!("Failed to create directory: {}", dir.display()))
+}
+
+fn runtime_dir_conflict_backup(dir: &Path) -> PathBuf {
+    let parent = dir.parent().unwrap_or_else(|| Path::new("."));
+    let name = dir.file_name().unwrap_or_default().to_string_lossy();
+    let base = format!("{name}.aibox-conflict");
+    let mut candidate = parent.join(&base);
+    let mut suffix = 2;
+    while candidate.exists() || candidate.is_symlink() {
+        candidate = parent.join(format!("{base}.{suffix}"));
+        suffix += 1;
+    }
+    candidate
 }
 
 /// Return the managed runtime files that aibox generates inside `.aibox-home/`.
@@ -957,7 +1107,11 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".vim/colors/aibox.vim"),
-            crate::themes::vim_aibox_colorscheme(&theme),
+            crate::themes::vim_aibox_colorscheme_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
         ),
         (
             std::path::PathBuf::from(".config/git/config"),
@@ -965,11 +1119,31 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".config/aibox/theme-env.sh"),
-            crate::themes::theme_env_script(&theme),
+            crate::themes::theme_env_script_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
+        ),
+        (
+            std::path::PathBuf::from(".config/bat/themes/aibox.tmTheme"),
+            crate::themes::bat_tmtheme_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
         ),
         (
             std::path::PathBuf::from(".config/lnav/config.json"),
-            crate::themes::lnav_config(&theme),
+            crate::themes::lnav_config_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
+        ),
+        (
+            std::path::PathBuf::from(".config/opencode/themes/aibox.json"),
+            crate::themes::opencode_custom_theme(&theme),
         ),
         (
             std::path::PathBuf::from(".config/tmux/tmux.conf"),
@@ -981,7 +1155,11 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".config/tmux/aibox-powerkit-theme.sh"),
-            crate::themes::tmux_powerkit_custom_theme(&theme),
+            crate::themes::tmux_powerkit_custom_theme_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
         ),
         (
             std::path::PathBuf::from(".config/tmux/layouts/dev.sh"),
@@ -1037,7 +1215,7 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ),
         (
             std::path::PathBuf::from(".config/yazi/theme.toml"),
-            crate::themes::yazi_theme_with_separator(
+            crate::themes::yazi_theme_with_style(
                 &theme,
                 &config
                     .customization
@@ -1046,6 +1224,8 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
                     .separators
                     .style
                     .to_string(),
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
             ),
         ),
         (
@@ -1081,12 +1261,21 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
             DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.to_string(),
         ),
         (
+            std::path::PathBuf::from(".config/yazi/plugins/preview-options.yazi/main.lua"),
+            DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.to_string(),
+        ),
+        (
             std::path::PathBuf::from(".config/cheatsheet.txt"),
             DEFAULT_CHEATSHEET.to_string(),
         ),
         (
             std::path::PathBuf::from(".config/starship.toml"),
-            crate::themes::starship_config(&config.customization.prompt, &theme),
+            crate::themes::starship_config_with_style(
+                &config.customization.prompt,
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
         ),
         (
             std::path::PathBuf::from(".local/bin/pdf-watch"),
@@ -1099,6 +1288,10 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         (
             std::path::PathBuf::from(".local/bin/aibox-preview"),
             DEFAULT_AIBOX_PREVIEW_SH.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".local/bin/aibox-size-tree"),
+            DEFAULT_AIBOX_SIZE_TREE_PY.to_string(),
         ),
         (
             std::path::PathBuf::from(".local/bin/aibox-status-toggle"),
@@ -1125,6 +1318,14 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
             DEFAULT_AIBOX_COPY_SH.to_string(),
         ),
         (
+            std::path::PathBuf::from(".local/bin/aibox-agent-signal"),
+            DEFAULT_AIBOX_AGENT_SIGNAL_SH.to_string(),
+        ),
+        (
+            std::path::PathBuf::from(".local/bin/aibox-codex-notify"),
+            DEFAULT_AIBOX_CODEX_NOTIFY_SH.to_string(),
+        ),
+        (
             std::path::PathBuf::from(".local/bin/aibox-powerkit-render-list"),
             POWERKIT_RENDER_LIST_SH.to_string(),
         ),
@@ -1148,10 +1349,25 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         ));
     }
 
+    if providers.contains(&crate::config::AiProvider::Codex) {
+        files.push((
+            std::path::PathBuf::from(".codex/themes/aibox.tmTheme"),
+            crate::themes::bat_tmtheme_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
+        ));
+    }
+
     if include_lazygit {
         files.push((
             std::path::PathBuf::from(".config/lazygit/config.yml"),
-            crate::themes::lazygit_theme(&theme).to_string(),
+            crate::themes::lazygit_theme_with_style(
+                &theme,
+                config.customization.emphasis,
+                &config.customization.emphasis_overrides,
+            ),
         ));
     }
 
@@ -1166,10 +1382,17 @@ pub fn managed_runtime_files(config: &AiboxConfig) -> Vec<(std::path::PathBuf, S
         files.push((std::path::PathBuf::from(".claude.json"), "{}\n".to_string()));
     }
 
-    if config.processkit_enabled() && providers.contains(&crate::config::AiProvider::OpenCode) {
+    if providers.contains(&crate::config::AiProvider::OpenCode) {
         files.push((
             std::path::PathBuf::from(".opencode/plugins/processkit-gate.ts"),
             DEFAULT_OPENCODE_PROCESSKIT_GATE_TS.to_string(),
+        ));
+    }
+
+    if providers.contains(&crate::config::AiProvider::Copilot) {
+        files.push((
+            std::path::PathBuf::from(".copilot/hooks/aibox-attention.json"),
+            DEFAULT_COPILOT_ATTENTION_HOOKS_JSON.to_string(),
         ));
     }
 
@@ -1334,6 +1557,7 @@ fn cleanup_disabled_harness_state(config: &AiboxConfig, root: &Path) -> Result<V
             AiHarness::Claude => vec![".claude", ".mcp.json"],
             AiHarness::Copilot => vec![".copilot"],
             AiHarness::Hermes => vec![".hermes"],
+            AiHarness::Tau => vec![".tau"],
             AiHarness::Mistral => vec![],
         }
     }
@@ -1945,12 +2169,15 @@ fn is_executable_managed_runtime_file(rel_path: &Path) -> bool {
     rel_path == Path::new(".local/bin/pdf-watch")
         || rel_path == Path::new(".local/bin/open-in-editor")
         || rel_path == Path::new(".local/bin/aibox-preview")
+        || rel_path == Path::new(".local/bin/aibox-size-tree")
         || rel_path == Path::new(".local/bin/aibox-status-toggle")
         || rel_path == Path::new(".local/bin/aibox-tmux-switch-layout")
         || rel_path == Path::new(".local/bin/aibox-tmux-confirm-and-switch")
         || rel_path == Path::new(".local/bin/aibox-tmux-refresh-theme")
         || rel_path == Path::new(".local/bin/aibox-tmux-cheatsheet")
         || rel_path == Path::new(".local/bin/aibox-copy")
+        || rel_path == Path::new(".local/bin/aibox-agent-signal")
+        || rel_path == Path::new(".local/bin/aibox-codex-notify")
         || rel_path == Path::new(".local/bin/aibox-powerkit-render-list")
         || rel_path == Path::new(".local/bin/aibox-powerkit-render-session")
         || rel_path == Path::new(crate::latex::BUILD_SCRIPT_PATH)
@@ -1982,7 +2209,9 @@ fn sync_codex_theme_config(config: &AiboxConfig) -> Result<bool> {
     if !doc.contains_key("tui") {
         doc["tui"] = toml_edit::table();
     }
-    doc["tui"]["theme"] = toml_edit::value(config.customization.resolved_theme().to_string());
+    // Codex resolves custom themes by filename from $CODEX_HOME/themes.
+    // Keep the configured name stable while aibox regenerates the palette.
+    doc["tui"]["theme"] = toml_edit::value("aibox");
     doc["tui"]["status_line_use_colors"] = toml_edit::value(true);
     doc["tui"]["use_theme_colors"] = toml_edit::value(true);
 
@@ -2135,8 +2364,7 @@ fn sync_opencode_theme_config(config: &AiboxConfig) -> Result<bool> {
         .join(".config")
         .join("opencode")
         .join("opencode.json");
-    let theme = config.customization.resolved_theme();
-    let value = crate::themes::opencode_theme(&theme);
+    let value = "aibox";
 
     let mut doc: serde_json::Value = if path.is_file() {
         let body = fs::read_to_string(&path)
@@ -2210,6 +2438,7 @@ pub fn sync_managed_runtime_permissions(config: &AiboxConfig) -> Result<Vec<Stri
         ".local/bin/pdf-watch",
         ".local/bin/open-in-editor",
         ".local/bin/aibox-preview",
+        ".local/bin/aibox-size-tree",
         ".local/bin/aibox-status-toggle",
         ".local/bin/aibox-tmux-switch-layout",
         ".local/bin/aibox-tmux-confirm-and-switch",
@@ -2289,6 +2518,26 @@ mod tests {
 
     #[test]
     #[serial]
+    fn ensure_runtime_dirs_preserves_file_blocking_starship_cache() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let config = make_config(false, root.clone());
+        let starship_cache = root.join(".cache/starship");
+        fs::create_dir_all(starship_cache.parent().unwrap()).unwrap();
+        fs::write(&starship_cache, "preserve this cache file").unwrap();
+
+        ensure_runtime_dirs(&config).unwrap();
+
+        assert!(starship_cache.is_dir());
+        assert_eq!(
+            fs::read_to_string(root.join(".cache/starship.aibox-conflict")).unwrap(),
+            "preserve this cache file"
+        );
+        clear_test_host_root();
+    }
+
+    #[test]
+    #[serial]
     fn seed_root_dir_creates_lazygit_state_directory_when_enabled() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path().join("root");
@@ -2301,10 +2550,13 @@ mod tests {
                 enabled: Some(true),
             },
         );
-        config
-            .addons
-            .addons
-            .insert("git-ui".to_string(), AddonToolsSection { tools });
+        config.addons.addons.insert(
+            "git-ui".to_string(),
+            AddonToolsSection {
+                tools,
+                ..Default::default()
+            },
+        );
 
         seed_root_dir(&config).unwrap();
 
@@ -2338,6 +2590,12 @@ mod tests {
                 && DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.contains("local ignored = direct == \"I\"")
                 && DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.contains("gs:lower()"),
             "Directory previews must distinguish direct git status from inherited child status"
+        );
+        assert!(
+            DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.contains("th.icon:match(file)")
+                && DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.contains("th.icon and th.icon.match")
+                && !DEFAULT_YAZI_PLUGIN_DIR_PREVIEW.contains(":icon()"),
+            "Yazi 26 directory previews must use the theme icon matcher rather than deprecated File:icon()"
         );
     }
 
@@ -2376,12 +2634,14 @@ mod tests {
 
         assert!(root.join(".codex").is_dir());
         let codex_config = fs::read_to_string(root.join(".codex").join("config.toml")).unwrap();
-        assert!(
-            codex_config.contains("theme = \"nord\""),
-            "Codex home config should inherit the selected aibox theme:\n{codex_config}"
-        );
+        assert!(codex_config.contains("theme = \"aibox\""));
         assert!(codex_config.contains("status_line_use_colors = true"));
         assert!(codex_config.contains("use_theme_colors = true"));
+        let codex_theme = fs::read_to_string(root.join(".codex/themes/aibox.tmTheme")).unwrap();
+        assert!(
+            codex_theme.contains("#88C0D0"),
+            "Codex custom theme should contain the selected Nord palette:\n{codex_theme}"
+        );
         assert!(!root.join(".claude").exists());
         clear_test_host_root();
     }
@@ -2413,7 +2673,12 @@ mod tests {
         assert!(codex_config.contains("model = \"gpt-5.5\""));
         assert!(codex_config.contains("status_line_use_colors = true"));
         assert!(codex_config.contains("use_theme_colors = true"));
-        assert!(codex_config.contains("theme = \"tokyo-night\""));
+        assert!(codex_config.contains("theme = \"aibox\""));
+        let codex_theme = fs::read_to_string(root.join(".codex/themes/aibox.tmTheme")).unwrap();
+        assert!(
+            codex_theme.contains("#7AA2F7"),
+            "Codex custom theme should contain the selected Tokyo Night palette:\n{codex_theme}"
+        );
         clear_test_host_root();
     }
 
@@ -2447,10 +2712,45 @@ mod tests {
             body.contains("session.created") && body.contains("tool.execute.before"),
             "plugin must wire both lifecycle hooks"
         );
+        assert!(body.contains("question.asked"));
+        assert!(body.contains("question.replied"));
+        assert!(body.contains("question.rejected"));
         assert!(
             body.contains("acknowledge_contract"),
             "plugin must reference acknowledge_contract as the gate"
         );
+        clear_test_host_root();
+    }
+
+    #[test]
+    #[serial]
+    fn seed_root_dir_seeds_copilot_attention_hooks_when_enabled() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("root");
+        let mut config = make_config(false, root.clone());
+        config.ai.harnesses = vec![AiProvider::Copilot];
+        seed_root_dir(&config).unwrap();
+
+        let hook_path = root.join(".copilot/hooks/aibox-attention.json");
+        let body = fs::read_to_string(hook_path).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(parsed["version"].as_u64(), Some(1));
+        assert!(
+            parsed["hooks"]["userPromptSubmitted"]
+                .to_string()
+                .contains("working")
+        );
+        assert!(
+            parsed["hooks"]["permissionRequest"]
+                .to_string()
+                .contains("question")
+        );
+        assert!(
+            parsed["hooks"]["errorOccurred"]
+                .to_string()
+                .contains("error")
+        );
+        assert!(parsed["hooks"]["sessionEnd"].to_string().contains("idle"));
         clear_test_host_root();
     }
 
@@ -2520,6 +2820,12 @@ mod tests {
                 .exists()
         );
         assert!(
+            root.join(".local")
+                .join("bin")
+                .join("aibox-size-tree")
+                .exists()
+        );
+        assert!(
             !root
                 .join(".local")
                 .join("bin")
@@ -2563,6 +2869,16 @@ mod tests {
             0,
             "aibox-preview should be executable"
         );
+        #[cfg(unix)]
+        assert_ne!(
+            fs::metadata(root.join(".local").join("bin").join("aibox-size-tree"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o111,
+            0,
+            "aibox-size-tree should be executable"
+        );
         let open_in_editor =
             fs::read_to_string(root.join(".local").join("bin").join("open-in-editor")).unwrap();
         // BR-VIM-HARDCUT (DEC-20260508_1604-LuckySeal, v0.25.6):
@@ -2595,6 +2911,8 @@ mod tests {
             aibox_preview.contains("preview_rich")
                 && aibox_preview.contains("_aibox_preview_have_rich")
                 && aibox_preview.contains("from rich.markdown import Markdown")
+                && aibox_preview.contains("def split_front_matter(value):")
+                && aibox_preview.contains("Syntax(front_matter, lexer")
                 && aibox_preview.contains("glow -s")
                 && aibox_preview.contains("bat --paging=never")
                 && aibox_preview.contains("--mouse"),
@@ -2604,6 +2922,12 @@ mod tests {
         assert!(
             aibox_preview.contains("pdf-watch"),
             "aibox-preview should dispatch PDF previews to pdf-watch"
+        );
+        assert!(
+            aibox_preview.contains("/usr/bin/python3")
+                && aibox_preview.contains("rich_python")
+                && aibox_preview.contains("if [ \"${pager##*/}\" = \"less\" ]; then"),
+            "aibox-preview should find Debian's Rich installation and pass less-only flags only to less"
         );
         assert!(
             !root
@@ -2747,10 +3071,13 @@ mod tests {
                 enabled: Some(false),
             },
         );
-        config
-            .addons
-            .addons
-            .insert("git-ui".to_string(), AddonToolsSection { tools });
+        config.addons.addons.insert(
+            "git-ui".to_string(),
+            AddonToolsSection {
+                tools,
+                ..Default::default()
+            },
+        );
 
         let files = managed_runtime_files(&config);
         let generated_layouts: Vec<_> = files
@@ -2800,10 +3127,13 @@ mod tests {
                 enabled: None,
             },
         );
-        config
-            .addons
-            .addons
-            .insert("git-ui".to_string(), AddonToolsSection { tools });
+        config.addons.addons.insert(
+            "git-ui".to_string(),
+            AddonToolsSection {
+                tools,
+                ..Default::default()
+            },
+        );
 
         let files = managed_runtime_files(&config);
         let git_config = files
@@ -2819,6 +3149,24 @@ mod tests {
                 )
         }));
         clear_test_host_root();
+    }
+
+    #[test]
+    fn managed_runtime_files_only_emit_codex_theme_for_codex() {
+        let mut config = crate::config::test_config();
+        config.ai.harnesses = vec![AiProvider::Claude];
+        assert!(
+            !managed_runtime_files(&config)
+                .iter()
+                .any(|(path, _)| path == std::path::Path::new(".codex/themes/aibox.tmTheme"))
+        );
+
+        config.ai.harnesses = vec![AiProvider::Codex];
+        assert!(
+            managed_runtime_files(&config)
+                .iter()
+                .any(|(path, _)| path == std::path::Path::new(".codex/themes/aibox.tmTheme"))
+        );
     }
 
     #[test]
@@ -3406,17 +3754,36 @@ rules = [
     }
 
     #[test]
+    fn yazi_toggle_pane_uses_current_ratio_api() {
+        assert!(DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R[1]"));
+        assert!(DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R[2]"));
+        assert!(DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R[3]"));
+        assert!(!DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R.parent"));
+        assert!(!DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R.current"));
+        assert!(!DEFAULT_YAZI_PLUGIN_TOGGLE_PANE.contains("R.preview"));
+    }
+
+    #[test]
     fn yazi_navigation_keybindings_seeded() {
         assert!(
-            DEFAULT_YAZI_KEYMAP
-                .contains(r#"{ on = "p", run = "shell 'aibox-preview \"$1\"' --block""#),
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = "p", run = "shell 'aibox-preview %h' --block""#),
             "default yazi keymap should expose full-pane preview"
         );
         assert!(
             DEFAULT_YAZI_KEYMAP.contains(
-                r#"{ on = [ "w", "s" ], run = "shell 'du -sch \"$@\" | ${PAGER:-less}' --block""#
+                r#"{ on = [ "w", "s" ], run = "shell 'aibox-size-tree %s | ${PAGER:-less} -R -S' --block""#
             ),
-            "default yazi keymap should expose selected-size calculation"
+            "default yazi keymap should expose tabular tree-size details"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains("plugin preview-options toggle-numbers")
+                && DEFAULT_YAZI_KEYMAP.contains("plugin preview-options toggle-wrap"),
+            "default yazi keymap should expose line-number and wrapping toggles"
+        );
+        assert!(
+            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = "J", run = "seek 5""#)
+                && DEFAULT_YAZI_KEYMAP.contains(r#"{ on = "K", run = "seek -5""#),
+            "default yazi keymap should scroll the preview with uppercase J/K"
         );
         assert!(
             DEFAULT_YAZI_KEYMAP.contains("less -R -S"),
@@ -3427,28 +3794,59 @@ rules = [
             "default yazi keymap should expose PDF watch helper"
         );
         assert!(
-            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "p" ], run = "copy path""#),
-            "default yazi keymap should expose path copy"
+            DEFAULT_YAZI_KEYMAP.contains(r#"printf \"%s\\n\" %s | aibox-copy"#),
+            "default yazi keymap should bridge path copy to the host clipboard"
         );
         assert!(
-            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "d" ], run = "copy dirname""#),
-            "default yazi keymap should expose directory copy"
+            DEFAULT_YAZI_KEYMAP.contains(r#"dirname \"$path\"; done | aibox-copy"#),
+            "default yazi keymap should bridge directory copy to the host clipboard"
         );
         assert!(
-            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "f" ], run = "copy filename""#),
-            "default yazi keymap should expose filename copy"
+            DEFAULT_YAZI_KEYMAP.contains(r#"basename \"$path\"; done | aibox-copy"#),
+            "default yazi keymap should bridge filename copy to the host clipboard"
         );
         assert!(
-            DEFAULT_YAZI_KEYMAP.contains(r#"{ on = [ "c", "n" ], run = "copy name_without_ext""#),
-            "default yazi keymap should expose stem copy"
+            DEFAULT_YAZI_KEYMAP.contains(r#"\"${name%.*}\"; done | aibox-copy"#),
+            "default yazi keymap should bridge stem copy to the host clipboard"
         );
+    }
+
+    #[test]
+    fn yazi_preview_options_are_shared_and_refresh_preview() {
+        assert!(DEFAULT_YAZI_CONFIG.contains(r#"{ mime = "text/*", run = "preview-options" }"#));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains("aibox-yazi-preview-options"));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains("fs.cha"));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains("fs.write"));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains("toggle-numbers"));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains("toggle-wrap"));
+        assert!(DEFAULT_YAZI_PLUGIN_PREVIEW_OPTIONS.contains(r#"ya.emit("peek""#));
+        assert!(DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains(r#"require("preview-options")"#));
+        assert!(!DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("line_numbers=True"));
+    }
+
+    #[test]
+    fn yazi_size_tree_is_tabular_with_indented_terminal_size_column() {
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("TREE"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("MODE"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("LINKS"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("OWNER"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("GROUP"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains("MODIFIED"));
+        assert!(DEFAULT_AIBOX_SIZE_TREE_PY.contains(r#"size = "  " * row.depth + row.size"#));
     }
 
     #[test]
     fn yazi_vim_openers_harden_terminal_handoff() {
         assert!(
-            DEFAULT_YAZI_CONFIG.contains(r#"vim --cmd "set t_u7=" --cmd "set t_RV=" "$@""#),
+            DEFAULT_YAZI_CONFIG.contains(r#"vim --cmd "set t_u7=" --cmd "set t_RV=" %s"#),
             "in-place Yazi opener should use Vim terminal-query hardening"
+        );
+        assert!(
+            !DEFAULT_YAZI_CONFIG.contains("$@")
+                && !DEFAULT_YAZI_CONFIG.contains("$1")
+                && !DEFAULT_YAZI_KEYMAP.contains("$@")
+                && !DEFAULT_YAZI_KEYMAP.contains("$1"),
+            "Yazi 26.8 templates must use percent-format parameters"
         );
         assert!(
             DEFAULT_VIMRC.contains("set t_u7=")
@@ -3508,6 +3906,24 @@ rules = [
             DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("aibox-yazi-rich-preview")
                 && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("read_window"),
             "rich-preview must cache rendered output and read windowed slices on re-peek"
+        );
+        assert!(
+            DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("/usr/bin/python3")
+                && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("rich2"),
+            "rich-preview must use the Rich-enabled interpreter and invalidate stale plain-text caches"
+        );
+        assert!(
+            DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("h1 = (h1 * 33 + byte)")
+                && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("h2 = (h2 * 65599 + byte)")
+                && !DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains(":sub(1, 32)"),
+            "rich-preview cache identity must hash the entire selected path instead of truncating its shared directory prefix"
+        );
+        assert!(
+            DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("def split_front_matter(value):")
+                && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW
+                    .contains("Syntax(front_matter, lexer, theme=\"ansi_dark\", word_wrap=False)")
+                && DEFAULT_YAZI_PLUGIN_RICH_PREVIEW.contains("console.print(Markdown(body))"),
+            "rich-preview must preserve Hugo TOML/YAML front-matter rows before rendering the Markdown body"
         );
     }
 

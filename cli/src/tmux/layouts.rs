@@ -138,9 +138,34 @@ mkdir -p "$(dirname "$socket")"
 # tool_or_shell <tool>: print the bash -lc invocation that the new pane
 # will run. In rebuild mode the yazi wait-for-client trick is omitted —
 # the session is already attached and tmux is alive.
+is_agent_tool() {{
+  case "$1" in
+    claude|codex|gemini|aider|cn|copilot|opencode|hermes|tau|cursor) return 0 ;;
+    *) return 1 ;;
+  esac
+}}
+
+agent_harness_name() {{
+  [[ "$1" == cn ]] && printf 'continue' || printf '%s' "$1"
+}}
+
+agent_tool_shell() {{
+  local tool="$1" harness
+  harness="$(agent_harness_name "$tool")"
+  # An interactive harness process can live for hours, so its process lifetime
+  # is not a useful "working" signal. Start idle and let native lifecycle hooks
+  # report working/question/done while it runs. Process exit remains a fallback
+  # for done/error. Always return to a usable bash pane.
+  printf "bash -lc 'aibox-agent-signal idle --harness %q >/dev/null 2>&1 || true; if command -v %q >/dev/null 2>&1; then if %q; then aibox-agent-signal done --harness %q >/dev/null 2>&1 || true; else aibox-agent-signal error --harness %q >/dev/null 2>&1 || true; fi; else aibox-agent-signal error --harness %q >/dev/null 2>&1 || true; fi; exec bash'" "$harness" "$tool" "$tool" "$harness" "$harness" "$harness"
+}}
+
 if [[ "${{AIBOX_LAYOUT_MODE:-}}" == "rebuild" ]]; then
   tool_or_shell() {{
     local tool="$1"
+    if is_agent_tool "$tool"; then
+      agent_tool_shell "$tool"
+      return
+    fi
     if [[ "$tool" == "yazi" ]]; then
       printf "bash -lc 'if command -v yazi >/dev/null 2>&1; then exec yazi; fi; exec bash'"
       return
@@ -150,6 +175,10 @@ if [[ "${{AIBOX_LAYOUT_MODE:-}}" == "rebuild" ]]; then
 else
   tool_or_shell() {{
     local tool="$1"
+    if is_agent_tool "$tool"; then
+      agent_tool_shell "$tool"
+      return
+    fi
     if [[ "$tool" == "yazi" ]]; then
       printf "bash -lc 'for _ in {{1..50}}; do tmux -S %q list-clients -t %q >/dev/null 2>&1 && break; sleep 0.1; done; if command -v yazi >/dev/null 2>&1; then exec yazi; fi; exec bash'" "$socket" "$session"
       return
@@ -185,10 +214,12 @@ fi
 # Fresh mode: short-circuit if the session is already up; otherwise build
 # from scratch and attach.
 if tmux -S "$socket" -f "$config" has-session -t "$session" 2>/dev/null; then
+  printf '\033[22;0t' > /dev/tty 2>/dev/null || true
   exec tmux -S "$socket" -f "$config" attach-session -t "$session"
 fi
 
-{layout_body}exec tmux -S "$socket" -f "$config" attach-session -t "$session"
+{layout_body}printf '\033[22;0t' > /dev/tty 2>/dev/null || true
+exec tmux -S "$socket" -f "$config" attach-session -t "$session"
 "#
     )
 }
@@ -235,6 +266,7 @@ exec env AIBOX_TMUX_SESSION="${{session}}" AIBOX_TMUX_SOCKET="${{socket}}" "${{s
 mod tests {
     use super::*;
     use crate::config::AiProvider;
+    use std::process::Command;
 
     fn no_tools() -> Vec<(&'static str, &'static str)> {
         vec![]
@@ -302,6 +334,46 @@ mod tests {
             body.contains(r#"new-session -d -s "$session""#),
             "fresh mode must still create the session"
         );
+        assert!(body.contains("aibox-agent-signal idle"));
+        assert!(body.contains("aibox-agent-signal done"));
+        assert!(body.contains("aibox-agent-signal error"));
+        assert!(!body.contains("rc="));
+        assert!(body.contains("exec bash"));
+    }
+
+    #[test]
+    fn layout_lifecycle_wraps_only_agent_tools() {
+        let providers = vec![AiProvider::Codex];
+        let body = tmux_layout_script(&ConfigLayout::Ai, &providers, true, &no_tools(), "aibox");
+        assert!(body.contains("is_agent_tool"));
+        assert!(body.contains("claude|codex|gemini"));
+        assert!(body.contains("tool_or_shell yazi"));
+        assert!(body.contains("aibox-agent-signal idle"));
+        assert!(body.contains("aibox-agent-signal done"));
+        assert!(body.contains("aibox-agent-signal error"));
+    }
+
+    #[test]
+    fn agent_tool_shell_renders_under_nounset() {
+        let providers = vec![AiProvider::Codex];
+        let body = tmux_layout_script(&ConfigLayout::Ai, &providers, true, &no_tools(), "aibox");
+        let start = body.find("is_agent_tool()").unwrap();
+        let end = body.find("if [[").unwrap();
+        let helpers = &body[start..end];
+        let output = Command::new("bash")
+            .args(["-u", "-c", &format!("{helpers}\nagent_tool_shell codex")])
+            .output()
+            .unwrap();
+
+        assert!(
+            output.status.success(),
+            "agent wrapper expanded an unset variable: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let rendered = String::from_utf8(output.stdout).unwrap();
+        assert!(rendered.contains("aibox-agent-signal idle"));
+        assert!(!rendered.contains("aibox-agent-signal working"));
+        assert!(rendered.contains("if codex; then"));
     }
 
     #[test]

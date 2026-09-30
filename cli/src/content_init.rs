@@ -119,6 +119,7 @@ pub fn build_effective_skill_set(
         } else {
             config.skills.include.iter().cloned().collect()
         };
+        expand_skill_dependencies(&skills_dir, &mut effective);
         for skill in &config.skills.exclude {
             effective.remove(skill);
         }
@@ -128,41 +129,55 @@ pub fn build_effective_skill_set(
         return Ok(Some(effective));
     };
 
-    // Step 1: walk every selected [context].packages package, recursively
-    // expand `extends:`, collect the union of skill names.
-    let mut effective: HashSet<String> = HashSet::new();
-    let mut queue: VecDeque<String> = config.context.packages.iter().cloned().collect();
-    let mut visited: HashSet<String> = HashSet::new();
-    while let Some(pkg_name) = queue.pop_front() {
-        if !visited.insert(pkg_name.clone()) {
-            // Already processed — cycle protection.
-            continue;
+    // Alpha releases are evaluated as a coherent preview surface. Package
+    // manifests may lag newly introduced skills, so installing only their
+    // package subset leaves the release's MCP/preauth manifest inconsistent.
+    // Explicit excludes remain authoritative below.
+    let mut effective: HashSet<String> = if is_prerelease_version(&config.processkit.version) {
+        let skills_dir =
+            mirror_skills_dir(project_root, &config.processkit.version).unwrap_or_default();
+        collect_available_skill_names(&skills_dir)
+    } else {
+        // Step 1: walk every selected [context].packages package, recursively
+        // expand `extends:`, collect the union of skill names.
+        let mut selected = HashSet::new();
+        let mut queue: VecDeque<String> = config.context.packages.iter().cloned().collect();
+        let mut visited: HashSet<String> = HashSet::new();
+        while let Some(pkg_name) = queue.pop_front() {
+            if !visited.insert(pkg_name.clone()) {
+                continue;
+            }
+            let pkg_path = packages_dir.join(format!("{}.yaml", pkg_name));
+            if !pkg_path.is_file() {
+                anyhow::bail!(
+                    "package '{}' selected in [context].packages does not exist at {}",
+                    pkg_name,
+                    pkg_path.display()
+                );
+            }
+            let body = fs::read_to_string(&pkg_path)
+                .with_context(|| format!("failed to read {}", pkg_path.display()))?;
+            let parsed: PackageYaml = serde_yaml::from_str(&body)
+                .with_context(|| format!("failed to parse package YAML {}", pkg_path.display()))?;
+            selected.extend(parsed.spec.includes.skills);
+            queue.extend(parsed.spec.extends);
         }
-        let pkg_path = packages_dir.join(format!("{}.yaml", pkg_name));
-        if !pkg_path.is_file() {
-            anyhow::bail!(
-                "package '{}' selected in [context].packages does not exist at {}",
-                pkg_name,
-                pkg_path.display()
-            );
-        }
-        let body = fs::read_to_string(&pkg_path)
-            .with_context(|| format!("failed to read {}", pkg_path.display()))?;
-        let parsed: PackageYaml = serde_yaml::from_str(&body)
-            .with_context(|| format!("failed to parse package YAML {}", pkg_path.display()))?;
-
-        for skill in parsed.spec.includes.skills {
-            effective.insert(skill);
-        }
-        for parent in parsed.spec.extends {
-            queue.push_back(parent);
-        }
-    }
+        selected
+    };
 
     // Step 2: add user includes.
     for skill in &config.skills.include {
         effective.insert(skill.clone());
     }
+
+    let skills_for_core =
+        mirror_skills_dir(project_root, &config.processkit.version).unwrap_or_default();
+
+    // Package manifests select the top-level capability surface. Close that
+    // selection over each skill's declared dependencies before honoring
+    // explicit excludes, otherwise derived projects can install skills whose
+    // DAG references point at absent prerequisites.
+    expand_skill_dependencies(&skills_for_core, &mut effective);
 
     // Step 3: remove user excludes.
     for skill in &config.skills.exclude {
@@ -174,14 +189,17 @@ pub fn build_effective_skill_set(
     // are added back unconditionally after the exclude pass. `aibox doctor`
     // warns separately when a core skill appears in [skills].exclude.
     // See processkit/aibox#36 for the proposed convention.
-    let skills_for_core =
-        mirror_skills_dir(project_root, &config.processkit.version).unwrap_or_default();
     let core_skills = collect_core_skills(&skills_for_core);
     for skill in core_skills {
         effective.insert(skill);
     }
 
     Ok(Some(effective))
+}
+
+fn is_prerelease_version(version: &str) -> bool {
+    semver::Version::parse(version.trim_start_matches('v'))
+        .is_ok_and(|parsed| !parsed.pre.is_empty())
 }
 
 fn collect_available_skill_names(skills_dir: &Path) -> HashSet<String> {
@@ -209,6 +227,55 @@ fn collect_available_skill_names_inner(root: &Path, names: &mut HashSet<String>)
             names.insert(name.to_string());
         } else {
             collect_available_skill_names_inner(&path, names);
+        }
+    }
+}
+
+fn expand_skill_dependencies(skills_dir: &Path, effective: &mut HashSet<String>) {
+    let mut dependencies = HashMap::<String, Vec<String>>::new();
+    collect_skill_dependencies_inner(skills_dir, &mut dependencies);
+
+    let mut queue: VecDeque<String> = effective.iter().cloned().collect();
+    while let Some(skill) = queue.pop_front() {
+        let Some(required) = dependencies.get(&skill) else {
+            continue;
+        };
+        for dependency in required {
+            if dependencies.contains_key(dependency) && effective.insert(dependency.clone()) {
+                queue.push_back(dependency.clone());
+            }
+        }
+    }
+}
+
+fn collect_skill_dependencies_inner(root: &Path, dependencies: &mut HashMap<String, Vec<String>>) {
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let skill_md = path.join(SKILL_FILENAME);
+        if skill_md.is_file() {
+            let frontmatter =
+                processkit_vocab::parse_skill_frontmatter(&skill_md).unwrap_or_default();
+            let name = if frontmatter.name.is_empty() {
+                path.file_name()
+                    .and_then(|value| value.to_str())
+                    .unwrap_or_default()
+                    .to_string()
+            } else {
+                frontmatter.name.clone()
+            };
+            let uses = frontmatter
+                .processkit_meta()
+                .map(|meta| meta.uses.iter().map(|item| item.skill.clone()).collect())
+                .unwrap_or_default();
+            dependencies.insert(name, uses);
+        } else {
+            collect_skill_dependencies_inner(&path, dependencies);
         }
     }
 }
@@ -403,18 +470,27 @@ pub fn install_content_source(project_root: &Path, config: &AiboxConfig) -> Resu
         )
     })?;
 
-    // 3. Walk cache and install live files. Templated files are
+    // 3. Materialize the new immutable mirror before selecting skills. Skill
+    //    packages and dependency declarations must come from the version being
+    //    installed, not from the previous version's mirror. Using the old
+    //    mirror during an upgrade can omit newly required skills and leave a
+    //    derived project with dangling DAG references.
+    let template_vars = context::build_substitution_map(config);
+    copy_templates_from_cache_with_vars(
+        &fetched.src_path,
+        project_root,
+        install_version,
+        &template_vars,
+    )
+    .context("failed to copy cache to templates dir")?;
+
+    // 4. Walk cache and install live files. Templated files are
     //    rendered through the Class A substitution vocabulary at copy
     //    time — see DEC-032. Skill files are filtered through the
     //    effective skill set computed from [context].packages plus
     //    [skills].include/exclude — see DEC-035 / BACK-118.
-    let template_vars = context::build_substitution_map(config);
-    // The effective skill set requires the templates mirror, which
-    // doesn't exist on the FIRST install (it's about to be created
-    // below). For the very first install, we install ALL skills the
-    // cache ships and let the next sync's filter take effect once the
-    // mirror is in place. Subsequent installs read the OLD mirror
-    // (still on disk from the previous install) for filtering.
+    // The effective skill set now reads the just-fetched version's complete
+    // mirror, including its package manifests and declared skill dependencies.
     let effective_skills = build_effective_skill_set(project_root, config)
         .ok()
         .flatten();
@@ -424,20 +500,6 @@ pub fn install_content_source(project_root: &Path, config: &AiboxConfig) -> Resu
         &template_vars,
         effective_skills.as_ref(),
     )?;
-
-    // 4. Copy the full cache into context/templates/processkit/<version>/
-    //    so the 3-way diff has an immutable "as-installed" reference.
-    //    Templated files (e.g. scaffolding/AGENTS.md) are rendered
-    //    through the SAME Class A vocabulary that the live install
-    //    used, so the mirror's templated content matches the live
-    //    file SHA-for-SHA. See DEC-034.
-    copy_templates_from_cache_with_vars(
-        &fetched.src_path,
-        project_root,
-        install_version,
-        &template_vars,
-    )
-    .context("failed to copy cache to templates dir")?;
 
     // 5. Write the top-level aibox.lock — but only when something actually
     //    changed. v0.18.7: previously this regenerated `synced_at` and
@@ -1270,6 +1332,63 @@ mod tests {
         assert_eq!(set.len(), 2);
         assert!(set.contains("workitem-management"));
         assert!(set.contains("decision-record"));
+    }
+
+    #[test]
+    fn effective_skill_set_expands_declared_skill_dependencies() {
+        let tmp = TempDir::new().unwrap();
+        let version = crate::processkit_vocab::PROCESSKIT_DEFAULT_VERSION;
+        write_synth_packages_dir(tmp.path(), version, &[("software", &[], &["changelog"])]);
+        write_synth_skills_dir(tmp.path(), version, &["changelog", "release-semver"]);
+
+        let changelog = tmp
+            .path()
+            .join(TEMPLATES_PROCESSKIT_DIR)
+            .join(version)
+            .join(processkit_vocab::src::CONTEXT_DIR)
+            .join(processkit_vocab::src::SKILLS)
+            .join("processkit/changelog/SKILL.md");
+        fs::write(
+            changelog,
+            "---\nname: changelog\nmetadata:\n  processkit:\n    uses:\n      - skill: release-semver\n        purpose: release notes\n---\n",
+        )
+        .unwrap();
+
+        let config = config_with_packages_and_skills(version, &["software"], &[], &[]);
+        let set = build_effective_skill_set(tmp.path(), &config)
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(set.len(), 2);
+        assert!(set.contains("changelog"));
+        assert!(set.contains("release-semver"));
+    }
+
+    #[test]
+    fn effective_skill_set_installs_complete_prerelease_surface() {
+        let tmp = TempDir::new().unwrap();
+        let version = "v1.0.0-alpha.1";
+        write_synth_packages_dir(
+            tmp.path(),
+            version,
+            &[("product", &[], &["decision-record"])],
+        );
+        write_synth_skills_dir(
+            tmp.path(),
+            version,
+            &[
+                "decision-record",
+                "capability-management",
+                "okf-compatibility",
+            ],
+        );
+        let config = config_with_packages_and_skills(version, &["product"], &[], &[]);
+        let set = build_effective_skill_set(tmp.path(), &config)
+            .unwrap()
+            .unwrap();
+        assert!(set.contains("decision-record"));
+        assert!(set.contains("capability-management"));
+        assert!(set.contains("okf-compatibility"));
     }
 
     #[test]

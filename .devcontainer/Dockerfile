@@ -45,14 +45,14 @@ RUN ARCH="$(uname -m)" && \
     (cd /tmp && sha256sum -c rustup-init.sha256) && \
     chmod +x /tmp/rustup-init && \
     /tmp/rustup-init -y \
-      --default-toolchain 1.96.1 \
+      --default-toolchain 1.98.1 \
       --component clippy \
       --component rustfmt && \
     rm /tmp/rustup-init /tmp/rustup-init.sha256
 
 ENV PATH="/home/aibox/.cargo/bin:${PATH}"
 
-RUN cargo install cargo-audit
+RUN cargo install cargo-audit --locked
 
 RUN install -d /usr/local/bin && \
     for bin in /home/aibox/.cargo/bin/*; do \
@@ -73,13 +73,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG RESVG_SHA256_X86_64=5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
+      case "0.48.1" in \
+        0.47.0) RESVG_SHA256="5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7" ;; \
+        0.48.1) RESVG_SHA256="fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d" ;; \
+        *) echo "Unsupported resvg version" >&2; exit 1 ;; \
+      esac && \
       curl -fsSL \
-        "https://github.com/linebender/resvg/releases/download/v0.47.0/resvg-linux-${ARCH}.tar.gz" \
+        "https://github.com/linebender/resvg/releases/download/v0.48.1/resvg-linux-${ARCH}.tar.gz" \
         -o /tmp/resvg.tar.gz && \
-      echo "${RESVG_SHA256_X86_64}  /tmp/resvg.tar.gz" | sha256sum -c - && \
+      echo "${RESVG_SHA256}  /tmp/resvg.tar.gz" | sha256sum -c - && \
       tar -xz -C /usr/local/bin -f /tmp/resvg.tar.gz resvg && \
       chmod +x /usr/local/bin/resvg && \
       rm /tmp/resvg.tar.gz; \
@@ -90,7 +94,7 @@ RUN ARCH=$(uname -m) && \
     fi
 
 
-FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.28.8 AS aibox
+FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.35.0 AS aibox
 
 ENV SHELL=/bin/bash
 ENV UV_CACHE_DIR=/tmp/aibox/uv-cache
@@ -130,6 +134,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ── Variant 1 disable-then-purge guards ───────────────────────────────
 
 
+# Addon: docs-hugo
+RUN DEB_ARCH="$(dpkg --print-architecture)" && \
+    case "${DEB_ARCH}" in \
+      amd64) HUGO_ARCH="amd64" ;; \
+      arm64) HUGO_ARCH="arm64" ;; \
+      *) echo "Unsupported Hugo architecture: ${DEB_ARCH}" >&2; exit 1 ;; \
+    esac && \
+    HUGO_VERSION="0.167.0" && \
+    HUGO_ASSET="hugo_extended_${HUGO_VERSION}_linux-${HUGO_ARCH}.tar.gz" && \
+    curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30 \
+      "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_ASSET}" \
+      -o /tmp/hugo.tar.gz && \
+    curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30 \
+      "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_checksums.txt" \
+      -o /tmp/hugo_checksums.txt && \
+    grep " ${HUGO_ASSET}$" /tmp/hugo_checksums.txt | sed 's#  .*#  /tmp/hugo.tar.gz#' | sha256sum -c && \
+    tar -xz -C /usr/local/bin -f /tmp/hugo.tar.gz hugo && \
+    rm /tmp/hugo.tar.gz /tmp/hugo_checksums.txt
+
+
 # Addon: git-ui — GitHub CLI and lazygit
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -138,15 +162,56 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Addon: node (runtime)
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gpg && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_26.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && apt-get install -y --no-install-recommends nodejs && \
-    rm -rf /var/lib/apt/lists/*
+# Addon: go (runtime)
+RUN ARCH=$(dpkg --print-architecture) && \
+    GO_VERSION="1.27.1" && \
+    case "${GO_VERSION}:${ARCH}" in \
+      1.25.12:amd64) GO_SHA256="234828b7a89e0e303d2556310ee549fbcf253d28de937bac3da13d6294262ac1" ;; \
+      1.25.12:arm64) GO_SHA256="8b5884aef89600aef5b0b051fb971f11f49bb996521e911f30f02a66884f7bd2" ;; \
+      1.26.3:amd64) GO_SHA256="2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556" ;; \
+      1.26.3:arm64) GO_SHA256="9d89a3ea57d141c2b22d70083f2c8459ba3890f2d9e818e7e933b75614936565" ;; \
+      1.26.4:amd64) GO_SHA256="1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f" ;; \
+      1.26.4:arm64) GO_SHA256="ef758ae7c6cf9267c9c0ef080b8965f453d89ab2d25d9eb22de4405925238768" ;; \
+      1.26.5:amd64) GO_SHA256="5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053" ;; \
+      1.26.5:arm64) GO_SHA256="fe4789e92b1f33358680864bbe8704289e7bb5fc207d80623c308935bd696d49" ;; \
+      1.26.6:amd64) GO_SHA256="708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89" ;; \
+      1.26.6:arm64) GO_SHA256="d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e" ;; \
+      1.27.0:amd64) GO_SHA256="675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685" ;; \
+      1.27.0:arm64) GO_SHA256="51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda" ;; \
+      1.27.1:amd64) GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445" ;; \
+      1.27.1:arm64) GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec" ;; \
+      *) echo "Unsupported Go version/architecture: ${GO_VERSION}/${ARCH}" >&2; exit 1 ;; \
+    esac && \
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" \
+      -o /tmp/go.tar.gz && \
+    echo "${GO_SHA256}  /tmp/go.tar.gz" | sha256sum -c - && \
+    tar -xz -C /usr/local -f /tmp/go.tar.gz && \
+    rm /tmp/go.tar.gz && \
+    ln -sf /usr/local/go/bin/* /usr/local/bin/
 
-RUN npm install -g pnpm@11.10.0 && \
+ENV GOPATH="/home/aibox/go"
+ENV PATH="${GOPATH}/bin:${PATH}"
+
+# Addon: node (runtime)
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl libatomic1 xz-utils && \
+    rm -rf /var/lib/apt/lists/* && \
+    DEB_ARCH="$(dpkg --print-architecture)" && \
+    case "${DEB_ARCH}" in \
+      amd64) NODE_ARCH="x64" ;; \
+      arm64) NODE_ARCH="arm64" ;; \
+      *) echo "Unsupported Node.js architecture: ${DEB_ARCH}" >&2; exit 1 ;; \
+    esac && \
+    NODE_DIST_URL="https://nodejs.org/dist/latest-v26.x" && \
+    curl -fsSL "${NODE_DIST_URL}/SHASUMS256.txt" -o /tmp/node-shasums.txt && \
+    NODE_ARCHIVE="$(awk -v arch="${NODE_ARCH}" '$2 ~ ("node-v[0-9.]+-linux-" arch "\\.tar\\.xz$") { print $2; exit }' /tmp/node-shasums.txt)" && \
+    test -n "${NODE_ARCHIVE}" && \
+    curl -fsSL "${NODE_DIST_URL}/${NODE_ARCHIVE}" -o "/tmp/${NODE_ARCHIVE}" && \
+    (cd /tmp && grep "  ${NODE_ARCHIVE}$" node-shasums.txt | sha256sum -c -) && \
+    tar -xJf "/tmp/${NODE_ARCHIVE}" -C /usr/local --strip-components=1 && \
+    rm -f "/tmp/${NODE_ARCHIVE}" /tmp/node-shasums.txt && \
+    node --version && npm --version
+
+RUN npm install -g pnpm@12.8.1 && \
     npm cache clean --force
 
 
@@ -155,11 +220,11 @@ RUN npm install -g pnpm@11.10.0 && \
 # npm package: @openai/codex | Binary: codex | Config: ~/.codex/
 # Auth: OPENAI_API_KEY (or ChatGPT Plus/Pro/Team/Enterprise account)
 # To pin a version: set [ai.harness.codex] version in aibox.toml
-RUN npm install -g @openai/codex
+RUN npm install -g @openai/codex@0.159.0
 
 
 # Addon: docs-docusaurus
-RUN npm install -g @docusaurus/core@3.10.1 && \
+RUN npm install -g @docusaurus/core@3.10.2 && \
     npm cache clean --force
 
 # Addon: preview-archive — Yazi preview helpers and archive tools.
@@ -262,6 +327,6 @@ EOF
 
 # Record image version inside container for runtime checks
 USER root
-LABEL aibox.version="0.28.8"
+LABEL aibox.version="0.35.0"
 LABEL aibox.profile="human-dev"
-RUN echo "0.28.8" > /etc/aibox-version
+RUN echo "0.35.0" > /etc/aibox-version

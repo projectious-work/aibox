@@ -45,6 +45,9 @@ and only reproducible on one machine. aibox keeps the moving parts explicit:
   remain understandable to Docker, Podman, OrbStack, and VS Code.
 - **Composable tools:** addons install language runtimes, AI CLIs, preview
   tools, infrastructure CLIs, and documentation frameworks only when selected.
+- **Build-time graphics:** opt-in D2, Graphviz, Vega, Vega-Lite, and Mermaid
+  addons render diagrams and visualizations alongside Hugo without making
+  browser-heavy tooling a universal documentation dependency.
 - **Provider-neutral context:** `AGENTS.md` is the canonical agent entry point;
   provider files such as `CLAUDE.md` are thin pointers.
 - **Pinned process layer:** processkit supplies skills, schemas, state machines,
@@ -52,6 +55,13 @@ and only reproducible on one machine. aibox keeps the moving parts explicit:
 - **Runtime visibility:** `aibox get runtime --resources` and `aibox doctor`
   surface memory pressure, OOM signals, and process count risks before they turn
   into unexplained agent exits.
+- **Coherent terminal themes:** the audited palette drives tmux, Yazi, Vim, and
+  the wider managed toolchain together. Marked files remain readable, active
+  panes stay prominent, and status separators use the selected theme's colors,
+  including classic and optimized Borland, Norton, and Phosphor variants.
+- **Practical file inspection:** Yazi previews support persistent line-number
+  and pane-width wrapping toggles, dedicated preview scrolling, selectable
+  pager/Vim views, and recursive tabular directory-size reports.
 
 ## Install
 
@@ -173,7 +183,7 @@ Release quality expectations are strict:
 | `cli/` | Rust CLI source for the `aibox` binary |
 | `addons/` | YAML addon definitions for runtimes, tools, docs frameworks, and AI CLIs |
 | `images/` | Base image recipes published for downstream projects |
-| `docs-site/` | Hugo/Docsy documentation site |
+| `docs-site/` | Hugo documentation using the projectious.work brand theme |
 | `context/` | This repository's processkit-managed project context |
 | `scripts/` | Release, install, and maintenance tooling |
 | `.devcontainer/` | This repository's own development container |
