@@ -40,9 +40,12 @@ schema validation remain to be implemented. The
 [canonical architecture contract](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)
 defines those acceptance conditions.
 
-V1-03 now has its first executable journey but still needs the remaining
-operation-core and conformance evidence before completion. Each later roadmap phase must keep
-that executable working and add a customer-runnable, documented demo. Public
+The V1-03 implementation candidate has a repeatable local verification gate:
+`./scripts/verify-v1-03.sh` builds the Go binary, exercises the successful
+inspection and an invalid-project refusal, validates their result schemas, and
+builds this site. Publication evidence is still required before the roadmap
+can call V1-03 shipped. Each later roadmap phase must keep this executable
+working and add a customer-runnable, documented demo. Public
 alpha/beta releases are prepared at verified checkpoints, not automatically
 after every phase; until publication, the demo is a preview, not a shipped
 support claim.

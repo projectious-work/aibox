@@ -75,10 +75,26 @@ inspects `spec/v1/examples/minimal`; its successful result binds the native
 declaration digest and reports runtime state as unknown. No host authority or
 v1 runtime compatibility claim is exposed by this slice.
 
-## Open V1-03 work
+## Completion boundary and later phases
 
-V1-03 still owns policy loading and authorization, upstream-assisted complete input discovery,
-operation record recovery reads, runtime-specific effect inspection,
-operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
-and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
-work depend on these foundations.
+V1-03's executable acceptance boundary is the source-built read-only Go CLI:
+version/help, local inspection of the minimal native example, a schema-valid
+result, an invalid-input refusal with no host effect, offline black-box tests,
+the supporting safe operation primitives, and a successful build of the v1
+documentation. `./scripts/verify-v1-03.sh` records the exact source commit,
+binary digests, both observed journeys, specification and contract checks, and
+documentation build in its evidence directory. Publication remains a separate
+gate before the roadmap can call the phase `shipped`.
+
+The following work belongs to later capability phases under the canonical
+[verification plan](../spec/v1/14-verification-and-release.md):
+
+- V1-08 owns operator policy loading and authorization, runtime-specific effect
+  inspection, complete upstream-assisted input discovery, recovery reads for
+  mutating operation records, and verified Dev Container delegation. Its host
+  mutations stay unavailable until these checks are in place.
+- V1-09 owns CLI/MCP equivalence, fixed SDK tool schemas, and the complete
+  operation-specific conformance corpus.
+- V1-21 owns host trust-boundary qualification. The existing executable
+  resolver and input-manifest builder are foundations for that work, not
+  grants of host authority.
