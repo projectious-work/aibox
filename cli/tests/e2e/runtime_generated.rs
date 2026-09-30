@@ -121,14 +121,8 @@ if grep -R 'name = "' "$HOME/.config/yazi"/*.toml "$HOME/.config/yazi/themes"/*.
   cat /tmp/{test_name}-yazi-invalid.txt
   fail=1
 fi
-if yazi --debug >/tmp/{test_name}-yazi-debug.txt 2>&1; then
-  sed -n '1,100p' /tmp/{test_name}-yazi-debug.txt
-else
-  code=$?
-  sed -n '1,160p' /tmp/{test_name}-yazi-debug.txt
-  echo "yazi --debug failed with $code"
-  fail=1
-fi
+# Interactive startup is checked in a tmux pane by the visual and host
+# smoke tests. A non-PTY container command is not a valid Yazi probe.
 
 echo "== lazygit state =="
 git init -q
@@ -404,7 +398,7 @@ exit "$fail"
 // ─── M3: Yazi clean startup (no terminal-response timeout) ───────────────────
 #[test]
 #[ntest::timeout(180_000)]
-fn m3_yazi_debug_no_terminal_timeout() {
+fn m3_yazi_pty_startup_has_no_terminal_timeout() {
     let runner = LocalProject::empty();
 
     let test_name = "m3-yazi-clean";
@@ -450,11 +444,11 @@ export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 export XDG_STATE_HOME="$HOME/.local/state"
 
 fail=0
-echo "== M3: yazi --debug terminal-response probe =="
-timeout 6s yazi --debug >/tmp/{test_name}-m3-yazi.txt 2>&1
+echo "== M3: Yazi PTY terminal-response probe =="
+script -q -e -c "LINES=24 COLUMNS=80 timeout 6s yazi" /dev/null >/tmp/{test_name}-m3-yazi.txt 2>&1
 code=$?
 if [ "$code" -ne 0 ] && [ "$code" -ne 124 ]; then
-  echo "yazi --debug exited with unexpected code $code (not 0 or 124/timeout)"
+  echo "yazi exited with unexpected code $code (not 0 or 124/timeout)"
   sed -n '1,60p' /tmp/{test_name}-m3-yazi.txt
   fail=1
 fi

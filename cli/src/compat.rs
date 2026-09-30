@@ -788,6 +788,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.28.8",
         note: "Patch release: runs the release-host Yazi startup check in the generated tmux PTY instead of calling interactive debug mode without a terminal.",
     },
+    CompatEntry {
+        aibox_version: "0.35.3",
+        processkit_version: "v0.28.8",
+        note: "Patch release: restores the v0 development-to-main release promotion chain and retains the host-gate checks.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

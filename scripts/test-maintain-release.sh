@@ -48,6 +48,58 @@ grep -Fq 'PowerKit palette mismatch' "${SCRIPT_DIR}/test-screencasts.sh" \
 test_root="$(mktemp -d)"
 trap 'rm -rf "${test_root}"' EXIT
 
+promotion_remote="${test_root}/promotion.git"
+promotion_checkout="${test_root}/promotion"
+git init --bare -b main "${promotion_remote}" >/dev/null
+git init -b main "${promotion_checkout}" >/dev/null
+git -C "${promotion_checkout}" config user.name "Release Test"
+git -C "${promotion_checkout}" config user.email "release-test@example.invalid"
+git -C "${promotion_checkout}" remote add origin "${promotion_remote}"
+git -C "${promotion_checkout}" commit --allow-empty -m "stable baseline" >/dev/null
+git -C "${promotion_checkout}" branch v0.x-dev
+git -C "${promotion_checkout}" branch v0.x-release
+git -C "${promotion_checkout}" push origin main v0.x-dev v0.x-release >/dev/null
+git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
+git -C "${promotion_checkout}" commit --allow-empty -m "reviewed v0 candidate" >/dev/null
+git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
+promotion_sha="$(git -C "${promotion_checkout}" rev-parse HEAD)"
+(
+  cd "${promotion_checkout}"
+  RELEASE_CANDIDATE_SHA="${promotion_sha}"
+  publish_v0_release_candidate 0.35.3 >/dev/null
+  publish_v0_release_candidate 0.35.3 >/dev/null
+)
+for promotion_branch in v0.x-dev v0.x-pre-release v0.x-release main; do
+  [[ "$(git --git-dir="${promotion_remote}" rev-parse "refs/heads/${promotion_branch}")" == "${promotion_sha}" ]] \
+    || die "v0 promotion did not retain exact commit identity on ${promotion_branch}"
+done
+git -C "${promotion_checkout}" commit --allow-empty -m "unreviewed next change" >/dev/null
+if (
+  cd "${promotion_checkout}"
+  RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
+  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
+); then
+  die "v0 promotion accepted a local commit absent from origin/v0.x-dev"
+fi
+[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/main)" == "${promotion_sha}" ]] \
+  || die "rejected v0 promotion changed main"
+git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
+git -C "${promotion_checkout}" switch main >/dev/null
+git -C "${promotion_checkout}" fetch origin main >/dev/null
+git -C "${promotion_checkout}" merge --ff-only origin/main >/dev/null
+git -C "${promotion_checkout}" commit --allow-empty -m "independent main change" >/dev/null
+git -C "${promotion_checkout}" push origin main >/dev/null
+git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
+if (
+  cd "${promotion_checkout}"
+  RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
+  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
+); then
+  die "v0 promotion accepted a main commit absent from the development candidate"
+fi
+[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/v0.x-pre-release)" == "${promotion_sha}" ]] \
+  || die "divergent main changed the staging pointer before preflight failed"
+
 changelog_project="${test_root}/changelog-project"
 mkdir -p "${changelog_project}/docs-site/content/changelog"
 cat > "${changelog_project}/docs-site/content/changelog/release-v9-9-8.md" <<'EOF'

@@ -1563,7 +1563,7 @@ Concrete release steps:
   audit           Run cargo audit
   build-linux     Build Linux release archives and checksums
   version-smoke   Verify the native release binary reports the requested version
-  push-main       Promote the candidate to its protected release branch
+  push-main       Promote an exact v0 dev candidate through staging, release, and main
   notes           Prepare or reuse dist/RELEASE-NOTES.md
   tag             Create and push the annotated release tag
   github-release  Create the GitHub release with Linux archives
@@ -2356,6 +2356,9 @@ cmd_release() {
     local current_cargo_version
     current_cargo_version=$(grep -m1 '^version = ' "${CLI_DIR}/Cargo.toml" | sed -E 's/version = "(.+)"/\1/')
     if [[ "${current_cargo_version}" != "${version}" ]]; then
+      if [[ "${version}" == 0.* ]]; then
+        die "Prepare the v0 version bump on a topic branch, merge it into v0.x-dev, then run the release from the exact v0.x-dev tip."
+      fi
       info "Bumping cli/Cargo.toml ${current_cargo_version} → ${version}..."
       # macOS/BSD sed and GNU sed differ on -i; write atomically via a tmp file.
       local tmp_cargo
@@ -2457,6 +2460,11 @@ cmd_release() {
   fi
 
   if release_step_requested tag; then
+    if [[ "${version}" == 0.* ]]; then
+      git fetch origin main
+      [[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] \
+        || die "Refusing to tag v0 candidate: main does not point at the validated commit."
+    fi
     info "Tagging and pushing ${tag}..."
     git tag -a "${tag}" -m "Release ${tag}"
     git push origin "${tag}"
@@ -2550,6 +2558,11 @@ publish_release_candidate() {
   local version="$1" release_branch="$2"
   local candidate_branch="chore/release-v${version}" pr_url
 
+  if [[ "${version}" == 0.* ]]; then
+    publish_v0_release_candidate "${version}"
+    return
+  fi
+
   [[ "$(git branch --show-current)" == "${release_branch}" ]] \
     || die "Release ${version} must be published from ${release_branch}."
 
@@ -2580,6 +2593,40 @@ publish_release_candidate() {
   git switch "${release_branch}"
   git pull --ff-only origin "${release_branch}"
   ok "Release candidate merged into ${release_branch}"
+}
+
+publish_v0_release_candidate() {
+  local version="$1" candidate_sha branch remote_sha
+  [[ "$(git branch --show-current)" == "v0.x-dev" ]] \
+    || die "Release ${version} must be validated from v0.x-dev."
+  candidate_sha="$(git rev-parse HEAD)"
+  [[ "${candidate_sha}" == "${RELEASE_CANDIDATE_SHA}" ]] \
+    || die "Release candidate changed after validation."
+  git fetch origin v0.x-dev
+  [[ "${candidate_sha}" == "$(git rev-parse origin/v0.x-dev)" ]] \
+    || die "Merge all v0 changes into v0.x-dev before release validation."
+
+  # Preflight every destination before moving any pointer. Repeated calls may
+  # resume a partial promotion, but no destination may diverge from the
+  # validated commit.
+  for branch in v0.x-pre-release v0.x-release main; do
+    remote_sha="$(git ls-remote --heads origin "${branch}" | cut -f1)"
+    if [[ -n "${remote_sha}" ]]; then
+      git fetch origin "refs/heads/${branch}:refs/remotes/origin/${branch}"
+      git merge-base --is-ancestor "${remote_sha}" "${candidate_sha}" \
+        || die "Cannot fast-forward ${branch} to the validated v0 candidate."
+    fi
+  done
+  for branch in v0.x-pre-release v0.x-release main; do
+    remote_sha="$(git ls-remote --heads origin "${branch}" | cut -f1)"
+    if [[ "${remote_sha}" != "${candidate_sha}" ]]; then
+      git push origin "${candidate_sha}:refs/heads/${branch}" \
+        || die "Could not fast-forward ${branch}; check branch protection and resume after reconciling it."
+    fi
+    [[ "$(git ls-remote --heads origin "${branch}" | cut -f1)" == "${candidate_sha}" ]] \
+      || die "Promotion verification failed for ${branch}."
+  done
+  ok "v0.x-dev, v0.x-pre-release, v0.x-release, and main identify ${candidate_sha}"
 }
 
 cmd_release_finalize_runtime() {

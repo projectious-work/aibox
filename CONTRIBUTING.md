@@ -103,10 +103,17 @@ Include `Cargo.lock` in version bump commits.
 
 ## Release
 
-See `context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md` for the full release process.
-Quick summary: `./scripts/maintain.sh release X.Y.Z` in the container prepares
-an immutable run directory. On macOS, run the single run-directory command
-printed in `dist/RELEASE-PROMPT.md`.
+For v0, merge every code, documentation, and version change from a topic
+branch into `v0.x-dev` first. Validate the exact remote `v0.x-dev` commit
+with `./scripts/maintain.sh release X.Y.Z` in the container. The release
+command fast-forwards that commit through `v0.x-pre-release` and
+`v0.x-release` to `main`, then creates the annotated stable tag on that
+same commit. A divergent branch or protected-branch refusal stops promotion;
+do not replace a fast-forward with a merge commit on a promotion branch.
+Published tags stay immutable. Keep v1 changes on the independent v1 line.
+
+The container-side release prepares an immutable host handover. On macOS,
+run the version-bound command printed in `dist/RELEASE-PROMPT.md`.
 
 Before publication, the release checks also require
 `docs-site/content/changelog/release-vX-Y-Z.md` to contain the exact version,
