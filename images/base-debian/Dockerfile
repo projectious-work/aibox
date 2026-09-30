@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV CARGO_HOME=/cargo RUSTUP_HOME=/rustup PATH="/cargo/bin:${PATH}"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-    sh -s -- -y --profile minimal --default-toolchain 1.96.1
+    sh -s -- -y --profile minimal --default-toolchain 1.98.1
 
 COPY config/bin/aibox_status_core.rs config/bin/aibox-status.rs config/bin/aibox-diagnostics.rs /build/aibox-runtime-tools/
 RUN mkdir -p /build/aibox-runtime-tools/bin && \
@@ -57,7 +57,7 @@ RUN mkdir -p /build/aibox-runtime-tools/bin && \
 
 # ── Yazi ─────────────────────────────────────────────────────────────────────
 FROM fetch-base AS fetch-yazi
-ARG YAZI_VERSION=26.5.6
+ARG YAZI_VERSION=26.9.1
 RUN ARCH=$(uname -m) && \
     curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
       "https://github.com/sxyazi/yazi/releases/download/v${YAZI_VERSION}/yazi-${ARCH}-unknown-linux-musl.zip" \
@@ -70,7 +70,7 @@ RUN ARCH=$(uname -m) && \
 
 # ── ripgrep (no aarch64 musl build — use gnu) ────────────────────────────────
 FROM fetch-base AS fetch-ripgrep
-ARG RIPGREP_VERSION=15.1.0
+ARG RIPGREP_VERSION=15.2.0
 RUN ARCH=$(uname -m) && \
     RG_LIBC=$(case $ARCH in x86_64) echo musl;; *) echo gnu;; esac) && \
     curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
@@ -81,7 +81,7 @@ RUN ARCH=$(uname -m) && \
 
 # ── fd ───────────────────────────────────────────────────────────────────────
 FROM fetch-base AS fetch-fd
-ARG FD_VERSION=10.4.2
+ARG FD_VERSION=10.5.0
 RUN ARCH=$(uname -m) && \
     curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
       "https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-v${FD_VERSION}-${ARCH}-unknown-linux-musl.tar.gz" \
@@ -101,7 +101,7 @@ RUN ARCH=$(uname -m) && \
 
 # ── eza (no aarch64 musl build — use gnu) ────────────────────────────────────
 FROM fetch-base AS fetch-eza
-ARG EZA_VERSION=0.23.4
+ARG EZA_VERSION=0.23.5
 RUN ARCH=$(uname -m) && \
     EZA_SUFFIX=$(case $ARCH in x86_64) echo "unknown-linux-musl";; aarch64) echo "unknown-linux-gnu";; esac) && \
     curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
@@ -120,7 +120,7 @@ RUN ARCH=$(uname -m) && \
 
 # ── fzf (uses amd64/arm64 instead of x86_64/aarch64) ────────────────────────
 FROM fetch-base AS fetch-fzf
-ARG FZF_VERSION=0.73.1
+ARG FZF_VERSION=0.74.4
 RUN ARCH=$(uname -m) && \
     FZF_ARCH=$(case $ARCH in aarch64) echo arm64;; x86_64) echo amd64;; esac) && \
     curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
@@ -278,7 +278,7 @@ COPY --from=build-aibox-runtime-tools /build/aibox-runtime-tools/bin/aibox-diagn
 # image since v0.16.5 (DEC-036) so processkit's PEP 723 MCP server
 # scripts run via `uv run` out of the box. Works against the
 # externally-installed python3 from apt above.
-COPY --from=ghcr.io/astral-sh/uv:0.11.26 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.20 /uv /uvx /usr/local/bin/
 ENV UV_CACHE_DIR=/tmp/aibox/uv-cache
 
 ARG AIBOX_IMAGE_SOURCE_SHA=unknown
@@ -333,20 +333,22 @@ RUN mkdir -p /home/aibox/.config/tmux \
 # tmux
 RUN mkdir -p /usr/local/share/aibox/tmux/plugins
 COPY --from=fetch-tmux-plugins /tmux-plugins/ /usr/local/share/aibox/tmux/plugins/
-# ── Temporary local patch: surface-spacer fix for adjacent segment separators ──
-# When @powerkit_elements_spacing="both" the closing separator glyph and the
-# next segment's opening glyph are adjacent with mismatched backgrounds,
-# producing a doubled-arrow rendering artefact.  The fix emits a space cell at
-# spacing_bg between them so both the I2 invariant and the powerline convention
-# are satisfied.
+# ── Temporary local patch: side-aware plugin spacing ─────────────────────────
+# PowerKit's window renderer swaps separator colors for left- versus
+# right-aligned elements, but its plugin-spacing branch uses the right-side
+# orientation on both sides. Patch that branch so plugin gaps use the same
+# two-chevron transition as window tabs without an extra rectangular cell.
 #
 # Tracked by BACK-20260515_1503-RefinedIvy.  Drop this patch block (and bump
 # TMUX_POWERKIT_REF past the fix) once the upstream PR is merged.
-RUN _f=/usr/local/share/aibox/tmux/plugins/tmux-powerkit/src/renderer/segment_builder.sh; \
-    grep -q "AIBOX-FIX-GH-SEPARATOR-MARKER" "$_f" || \
-    sed -i \
-      's|output+="#\[fg=\${current_spacing_fg},bg=\${prev_bg}\]\${spacing_sep}#\[none\]"|output+="#[fg=${current_spacing_fg},bg=${prev_bg}]${spacing_sep}" # AIBOX-FIX-GH-SEPARATOR-MARKER\n                output+="#[fg=${current_spacing_fg},bg=${current_spacing_bg}] #[none]"|' \
-      "$_f"
+COPY config/tmux/patch-powerkit-plugin-spacing.sh /tmp/patch-powerkit-plugin-spacing.sh
+RUN /tmp/patch-powerkit-plugin-spacing.sh \
+      /usr/local/share/aibox/tmux/plugins/tmux-powerkit/src/renderer/segment_builder.sh && \
+    rm -f /tmp/patch-powerkit-plugin-spacing.sh
+COPY config/tmux/patch-powerkit-window-separators.sh /tmp/patch-powerkit-window-separators.sh
+RUN /tmp/patch-powerkit-window-separators.sh \
+      /usr/local/share/aibox/tmux/plugins/tmux-powerkit/src/renderer/entities/windows.sh && \
+    rm -f /tmp/patch-powerkit-window-separators.sh
 COPY config/tmux/powerkit-plugins/aibox.sh /usr/local/share/aibox/tmux/plugins/tmux-powerkit/src/plugins/aibox.sh
 # aibox-metrics path-a split: one plugin script per metric segment so each
 # renders with chevron/color-rotation styling (BACK-20260508_1603-QuietCedar).
@@ -398,6 +400,7 @@ COPY config/yazi/plugins/              /home/aibox/.config/yazi/plugins/
 # Helper scripts (chmod via COPY --chmod to avoid extra layer)
 COPY --chmod=755 config/bin/open-in-editor.sh /usr/local/bin/open-in-editor
 COPY --chmod=755 config/bin/aibox-preview.sh   /usr/local/bin/aibox-preview
+COPY --chmod=755 config/bin/aibox-size-tree.py /usr/local/bin/aibox-size-tree
 COPY --chmod=755 config/bin/vim-loop.sh       /usr/local/bin/vim-loop
 COPY --chmod=755 config/bin/pdf-watch.sh      /usr/local/bin/pdf-watch
 COPY --chmod=755 config/bin/aibox-latex-preview.py /usr/local/bin/aibox-latex-preview

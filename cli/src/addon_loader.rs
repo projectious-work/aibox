@@ -1,7 +1,8 @@
 //! Loads addon definitions from YAML files and renders Dockerfile templates.
 //!
-//! Addon YAML files are stored in `$XDG_CONFIG_HOME/aibox/addons/` with
-//! category subdirectories (languages/, tools/, docs/, ai/).
+//! Canonical addon YAML files are embedded in the executable. Optional files
+//! in `$XDG_CONFIG_HOME/aibox/addons/` (or `AIBOX_ADDONS_DIR`) override matching
+//! canonical definitions and may add custom definitions.
 //!
 //! Each YAML file defines:
 //! - Metadata (name, version, builder_weight)
@@ -14,12 +15,17 @@
 
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::OnceLock;
 
 use crate::addon_registry::{ToolConfig, ToolDef};
+
+mod embedded {
+    include!(concat!(env!("OUT_DIR"), "/embedded_addons.rs"));
+}
 
 pub const ADDON_CATALOG_SCHEMA_VERSION: &str = "aibox.addon-catalog.v0";
 
@@ -48,6 +54,10 @@ pub struct AddonYaml {
     pub tools: Vec<ToolYaml>,
     #[serde(default)]
     pub requires: Vec<String>,
+    /// Nested configuration aliases exposed below `[addons.<language>]`.
+    /// Values are canonical addon names, e.g. `supply-chain: supply-chain`.
+    #[serde(default)]
+    pub groups: HashMap<String, String>,
     /// Tolerated for backwards-compat with addon YAML files that still
     /// declare a `skills:` block. Ignored since v0.16.0 — skills are
     /// owned by processkit and installed via the content-source pipeline.
@@ -194,6 +204,7 @@ pub struct LoadedAddon {
     pub builder_weight: Option<String>,
     pub tools: Vec<LoadedTool>,
     pub requires: Vec<String>,
+    pub groups: HashMap<String, String>,
     pub builder_template: Option<String>,
     pub runtime_template: Option<String>,
 }
@@ -226,6 +237,7 @@ pub struct AddonCatalogEntry {
     pub profiles: Vec<String>,
     pub exported_surfaces: Vec<String>,
     pub requires: Vec<String>,
+    pub groups: HashMap<String, String>,
     pub tools: Vec<AddonCatalogTool>,
 }
 
@@ -244,27 +256,6 @@ static ADDONS: OnceLock<Vec<LoadedAddon>> = OnceLock::new();
 // ---------------------------------------------------------------------------
 // Loading
 // ---------------------------------------------------------------------------
-
-/// Get the addons directory path.
-///
-/// Checks `AIBOX_ADDONS_DIR` first. In source checkouts, fall back to the
-/// repository's bundled `addons/` directory so `cargo run ... -- doctor` works
-/// without requiring a separate global install. Packaged binaries still use the
-/// XDG install path from `scripts/install.sh`.
-pub fn addons_dir() -> Result<PathBuf> {
-    if let Ok(dir) = std::env::var("AIBOX_ADDONS_DIR") {
-        return Ok(PathBuf::from(dir));
-    }
-
-    let repo_addons = Path::new(env!("CARGO_MANIFEST_DIR")).join("../addons");
-    if repo_addons.is_dir() {
-        return Ok(repo_addons);
-    }
-
-    crate::dirs::config_dir()
-        .map(|d| d.join("addons"))
-        .ok_or_else(|| anyhow::anyhow!("Could not determine XDG config directory"))
-}
 
 /// Load all addon YAML files from the addons directory.
 /// Walks subdirectories (languages/, tools/, docs/, ai/).
@@ -336,9 +327,6 @@ fn category_from_dir_name(dir_name: &str) -> &'static str {
 fn load_yaml_file(path: &Path) -> Result<LoadedAddon> {
     let content = fs::read_to_string(path)
         .with_context(|| format!("Failed to read addon file: {}", path.display()))?;
-    let yaml: AddonYaml = serde_yaml::from_str(&content)
-        .with_context(|| format!("Failed to parse addon YAML: {}", path.display()))?;
-
     let category = path
         .parent()
         .and_then(|p| p.file_name())
@@ -346,6 +334,13 @@ fn load_yaml_file(path: &Path) -> Result<LoadedAddon> {
         .map(category_from_dir_name)
         .unwrap_or("Other")
         .to_string();
+
+    load_yaml_content(&content, &category, &path.display().to_string())
+}
+
+fn load_yaml_content(content: &str, category: &str, source: &str) -> Result<LoadedAddon> {
+    let yaml: AddonYaml = serde_yaml::from_str(content)
+        .with_context(|| format!("Failed to parse addon YAML: {source}"))?;
 
     Ok(LoadedAddon {
         name: yaml.name,
@@ -355,9 +350,10 @@ fn load_yaml_file(path: &Path) -> Result<LoadedAddon> {
         usage_class: yaml.usage_class,
         profiles: yaml.profiles,
         exported_surfaces: yaml.exported_surfaces,
-        category,
+        category: category.to_string(),
         builder_weight: yaml.builder_weight,
         requires: yaml.requires,
+        groups: yaml.groups,
         tools: yaml
             .tools
             .into_iter()
@@ -374,18 +370,66 @@ fn load_yaml_file(path: &Path) -> Result<LoadedAddon> {
     })
 }
 
+fn load_embedded_catalog() -> Result<Vec<LoadedAddon>> {
+    let mut addons = embedded::EMBEDDED_ADDON_YAMLS
+        .iter()
+        .map(|(category, source, content)| {
+            load_yaml_content(content, category_from_dir_name(category), source)
+        })
+        .collect::<Result<Vec<_>>>()?;
+    addons.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(addons)
+}
+
+fn merge_catalogs(embedded: Vec<LoadedAddon>, overrides: Vec<LoadedAddon>) -> Vec<LoadedAddon> {
+    let mut by_name: HashMap<String, LoadedAddon> = embedded
+        .into_iter()
+        .map(|addon| (addon.name.clone(), addon))
+        .collect();
+    for addon in overrides {
+        by_name.insert(addon.name.clone(), addon);
+    }
+    let mut addons: Vec<_> = by_name.into_values().collect();
+    addons.sort_by(|a, b| a.name.cmp(&b.name));
+    addons
+}
+
 // ---------------------------------------------------------------------------
 // Global access
 // ---------------------------------------------------------------------------
 
-/// Initialize the addon store from the default XDG path. Call once at startup.
+/// Initialize the embedded addon store plus optional filesystem overrides.
 pub fn init() -> Result<()> {
-    let dir = addons_dir()?;
-    init_from_dir(&dir)
+    if let Ok(dir) = std::env::var("AIBOX_ADDONS_DIR") {
+        let addons = merge_catalogs(load_embedded_catalog()?, load_from_dir(Path::new(&dir))?);
+        ADDONS
+            .set(addons)
+            .map_err(|_| anyhow::anyhow!("Addon store already initialized"))?;
+        return Ok(());
+    }
+
+    let repo_addons = Path::new(env!("CARGO_MANIFEST_DIR")).join("../addons");
+    let addons = if repo_addons.is_dir() {
+        load_from_dir(&repo_addons)?
+    } else {
+        let embedded = load_embedded_catalog()?;
+        let installed = crate::dirs::config_dir()
+            .map(|dir| dir.join("addons"))
+            .filter(|dir| dir.is_dir())
+            .map(|dir| load_from_dir(&dir))
+            .transpose()?
+            .unwrap_or_default();
+        merge_catalogs(embedded, installed)
+    };
+    ADDONS
+        .set(addons)
+        .map_err(|_| anyhow::anyhow!("Addon store already initialized"))?;
+    Ok(())
 }
 
 /// Initialize the addon store from a specific directory.
 /// Used by tests to point at the repo's addons/ directory.
+#[cfg(test)]
 pub fn init_from_dir(dir: &Path) -> Result<()> {
     let addons = load_from_dir(dir)?;
     ADDONS
@@ -397,6 +441,40 @@ pub fn init_from_dir(dir: &Path) -> Result<()> {
 /// Get all loaded addons.
 pub fn all_addons() -> &'static [LoadedAddon] {
     ADDONS.get().map(|v| v.as_slice()).unwrap_or(&[])
+}
+
+/// Stable fingerprint of the loaded addon option catalog.
+///
+/// Generated `aibox.toml` files record this value so a newly shipped addon or
+/// tool causes the comment catalog to be refreshed even when the config schema
+/// itself did not change.
+pub fn catalog_fingerprint() -> String {
+    let mut addons: Vec<_> = all_addons().iter().collect();
+    addons.sort_by(|a, b| a.name.cmp(&b.name));
+
+    let mut hasher = Sha256::new();
+    hasher.update(ADDON_CATALOG_SCHEMA_VERSION.as_bytes());
+    for addon in addons {
+        hasher.update([0]);
+        hasher.update(addon.name.as_bytes());
+        hasher.update([0]);
+        hasher.update(addon.addon_version.as_bytes());
+        for tool in &addon.tools {
+            hasher.update([0]);
+            hasher.update(tool.name.as_bytes());
+            hasher.update([tool.default_enabled as u8]);
+            hasher.update(tool.default_version.as_bytes());
+            for version in &tool.supported_versions {
+                hasher.update([0]);
+                hasher.update(version.as_bytes());
+            }
+        }
+    }
+    hasher
+        .finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 /// Find an addon by name.
@@ -425,6 +503,7 @@ pub fn addon_catalog_index(addons: &[LoadedAddon]) -> AddonCatalogIndex {
                 .map(|surface| surface.as_str().to_string())
                 .collect(),
             requires: addon.requires.clone(),
+            groups: addon.groups.clone(),
             tools: addon
                 .tools
                 .iter()
@@ -666,19 +745,6 @@ mod tests {
     }
 
     #[test]
-    fn addons_dir_defaults_to_repo_addons_in_source_checkout() {
-        unsafe {
-            std::env::remove_var("AIBOX_ADDONS_DIR");
-        }
-        let dir = addons_dir().unwrap();
-        assert!(
-            dir.ends_with("addons") && dir.is_dir(),
-            "source checkout should resolve bundled addons dir, got {}",
-            dir.display()
-        );
-    }
-
-    #[test]
     fn load_from_dir_finds_yaml_files() {
         let dir = tempfile::tempdir().unwrap();
         write_test_yaml(
@@ -708,6 +774,59 @@ runtime: |
     }
 
     #[test]
+    fn embedded_catalog_contains_release_addons() {
+        let addons = load_embedded_catalog().unwrap();
+        for name in [
+            "browser-testing",
+            "cloudflare",
+            "go-quality",
+            "release",
+            "supply-chain",
+        ] {
+            assert!(
+                addons.iter().any(|addon| addon.name == name),
+                "embedded catalog should contain {name}"
+            );
+        }
+    }
+
+    #[test]
+    fn incomplete_installed_catalog_overrides_without_hiding_embedded_addons() {
+        let dir = tempfile::tempdir().unwrap();
+        write_test_yaml(
+            dir.path(),
+            "tools",
+            "git-ui",
+            r#"
+name: git-ui
+version: "override"
+tools:
+  - name: gh
+    default_enabled: true
+runtime: |
+  RUN echo override
+"#,
+        );
+
+        let merged = merge_catalogs(
+            load_embedded_catalog().unwrap(),
+            load_from_dir(dir.path()).unwrap(),
+        );
+        assert_eq!(
+            merged
+                .iter()
+                .find(|addon| addon.name == "git-ui")
+                .unwrap()
+                .addon_version,
+            "override"
+        );
+        assert!(
+            merged.iter().any(|addon| addon.name == "supply-chain"),
+            "a stale installed catalog must not hide embedded canonical addons"
+        );
+    }
+
+    #[test]
     fn load_addon_with_requires() {
         let dir = tempfile::tempdir().unwrap();
         write_test_yaml(
@@ -734,6 +853,196 @@ runtime: |
     }
 
     #[test]
+    fn load_addon_with_language_groups() {
+        let addon = load_repo_addon("go");
+        assert_eq!(
+            addon.groups.get("quality").map(String::as_str),
+            Some("go-quality")
+        );
+        assert_eq!(
+            addon.groups.get("supply-chain").map(String::as_str),
+            Some("supply-chain")
+        );
+        assert_eq!(
+            addon.groups.get("release").map(String::as_str),
+            Some("go-release")
+        );
+    }
+
+    #[test]
+    fn browser_testing_addon_pins_stack_and_defaults_to_full_chromium() {
+        let addon = load_repo_addon("browser-testing");
+        assert_eq!(addon.requires, vec!["node"]);
+
+        let playwright = addon
+            .tools
+            .iter()
+            .find(|tool| tool.name == "playwright")
+            .expect("browser-testing should define the Playwright tool");
+        assert_eq!(playwright.default_version, "1.63.0");
+        assert_eq!(playwright.supported_versions, vec!["1.62.1", "1.63.0"]);
+
+        let axe = addon
+            .tools
+            .iter()
+            .find(|tool| tool.name == "axe-playwright")
+            .expect("browser-testing should define the axe adapter tool");
+        assert_eq!(axe.default_version, "4.13.0");
+        assert_eq!(axe.supported_versions, vec!["4.13.0"]);
+
+        let chromium = addon
+            .tools
+            .iter()
+            .find(|tool| tool.name == "chromium")
+            .expect("browser-testing should define Chromium");
+        assert!(chromium.default_enabled);
+        assert!(
+            !addon
+                .tools
+                .iter()
+                .find(|tool| tool.name == "firefox")
+                .unwrap()
+                .default_enabled
+        );
+        assert!(
+            !addon
+                .tools
+                .iter()
+                .find(|tool| tool.name == "webkit")
+                .unwrap()
+                .default_enabled
+        );
+
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+        assert!(rendered.contains("@playwright/test@1.63.0"));
+        assert!(rendered.contains("@axe-core/playwright@4.13.0"));
+        assert!(rendered.contains("axe-core@4.13.0"));
+        assert!(rendered.contains("--no-shell"));
+        assert!(
+            rendered.contains("PLAYWRIGHT_BROWSERS_PATH=/ms-playwright"),
+            "full Chromium must be installed in a shared browser path"
+        );
+        assert!(rendered.contains("chromium"));
+        assert!(rendered.contains("firefox"));
+        assert!(rendered.contains("webkit"));
+        assert!(!rendered.contains("chromium-headless-shell"));
+
+        let rendered_defaults = render_runtime(
+            &addon,
+            &addon
+                .tools
+                .iter()
+                .map(|tool| {
+                    (
+                        tool.name.clone(),
+                        ToolConfig {
+                            enabled: tool.default_enabled,
+                            version: tool.default_version.clone(),
+                        },
+                    )
+                })
+                .collect(),
+        )
+        .unwrap();
+        assert!(rendered_defaults.contains("chromium \\"));
+        assert!(!rendered_defaults.contains("      firefox \\"));
+        assert!(!rendered_defaults.contains("      webkit \\"));
+
+        let rendered_disabled = render_runtime(&addon, &all_disabled_tools(&addon)).unwrap();
+        assert!(rendered_disabled.contains("npm uninstall -g @playwright/test playwright"));
+        assert!(rendered_disabled.contains("npm uninstall -g @axe-core/playwright axe-core"));
+        assert!(!rendered_disabled.contains("playwright install --with-deps"));
+    }
+
+    #[test]
+    fn graphics_renderer_addons_pin_tools_dependencies_and_purge_paths() {
+        let diagramming = load_repo_addon("diagramming");
+        assert!(diagramming.requires.is_empty());
+        let d2 = diagramming
+            .tools
+            .iter()
+            .find(|tool| tool.name == "d2")
+            .expect("diagramming should define D2");
+        assert_eq!(d2.default_version, "0.9.0");
+        assert_eq!(d2.supported_versions, ["0.7.1", "0.9.0"]);
+        let rendered = render_runtime(&diagramming, &all_enabled_tools(&diagramming)).unwrap();
+        assert!(rendered.contains("D2_VERSION=\"v0.9.0\""));
+        assert!(rendered.contains("D2_ASSET=\"d2-${D2_VERSION}-linux-${D2_ARCH}.tar.gz\""));
+        assert!(
+            rendered.contains("5669ddc46b99e942cc96078f4a4e36d5e62103348f4c05179ede27802fdd87a9")
+        );
+        assert!(
+            rendered.contains("ac2c028697199479acb321db1e3d68caee9f2ba492ed73caa3cd13f3829bf913")
+        );
+        assert!(rendered.contains("apt-get install -y --no-install-recommends graphviz"));
+        let disabled = render_runtime(&diagramming, &all_disabled_tools(&diagramming)).unwrap();
+        assert!(disabled.contains("rm -f /usr/local/bin/d2"));
+        assert!(disabled.contains("apt-get purge -y --auto-remove graphviz"));
+
+        let visualization = load_repo_addon("data-visualization");
+        assert_eq!(visualization.requires, ["node"]);
+        let rendered = render_runtime(&visualization, &all_enabled_tools(&visualization)).unwrap();
+        assert!(rendered.contains("vega-cli@6.4.0"));
+        assert!(rendered.contains("vega-lite@6.4.3"));
+        let disabled = render_runtime(&visualization, &all_disabled_tools(&visualization)).unwrap();
+        assert!(disabled.contains("npm uninstall -g vega-cli"));
+        assert!(disabled.contains("npm uninstall -g vega-lite"));
+
+        let mermaid = load_repo_addon("mermaid");
+        assert_eq!(mermaid.requires, ["node"]);
+        let rendered = render_runtime(&mermaid, &all_enabled_tools(&mermaid)).unwrap();
+        assert!(rendered.contains("@mermaid-js/mermaid-cli@12.0.0"));
+        assert!(rendered.contains("puppeteer@25.12.0"));
+        assert!(
+            rendered.contains("puppeteer browsers install chrome-headless-shell --install-deps")
+        );
+        assert!(rendered.contains("PUPPETEER_CACHE_DIR=/ms-puppeteer"));
+        let disabled = render_runtime(&mermaid, &all_disabled_tools(&mermaid)).unwrap();
+        assert!(disabled.contains("npm uninstall -g @mermaid-js/mermaid-cli"));
+        assert!(disabled.contains("rm -rf /ms-puppeteer"));
+    }
+
+    #[test]
+    fn latex_addon_uses_reachable_immutable_texlive_archive() {
+        let addon = load_repo_addon("latex");
+        let rendered = render_builder(&addon, &all_enabled_tools(&addon))
+            .unwrap()
+            .expect("latex should define a builder stage");
+
+        assert!(rendered.contains(
+            "https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final"
+        ));
+        assert!(!rendered.contains("https://texlive.info/historic/"));
+        assert!(rendered.contains("--repository \"${CTAN_MIRROR}\""));
+    }
+
+    #[test]
+    fn every_language_exposes_consistent_shared_groups() {
+        for language in ["go", "rust", "python", "node", "typst", "latex"] {
+            let addon = load_repo_addon(language);
+            assert_eq!(
+                addon.groups.get("infrastructure").map(String::as_str),
+                Some("infrastructure"),
+                "{language} infrastructure group"
+            );
+            assert_eq!(
+                addon.groups.get("security").map(String::as_str),
+                Some("supply-chain"),
+                "{language} security group"
+            );
+            assert_eq!(
+                addon.groups.get("supply-chain").map(String::as_str),
+                Some("supply-chain"),
+                "{language} supply-chain group"
+            );
+            assert!(
+                addon.groups.contains_key("release"),
+                "{language} release group"
+            );
+        }
+    }
+
+    #[test]
     fn render_runtime_substitutes_versions() {
         let addon = LoadedAddon {
             name: "test".to_string(),
@@ -753,6 +1062,7 @@ runtime: |
                 default_version: "3.0".to_string(),
                 supported_versions: vec!["3.0".to_string()],
             }],
+            groups: HashMap::new(),
             builder_template: None,
             runtime_template: Some("RUN install mytool={{ tools.mytool.version }}".to_string()),
         };
@@ -799,6 +1109,7 @@ runtime: |
                     supported_versions: vec![],
                 },
             ],
+            groups: HashMap::new(),
             builder_template: None,
             runtime_template: Some(
                 "RUN install required\n\
@@ -836,6 +1147,7 @@ runtime: |
             builder_weight: Some("heavy".to_string()),
             tools: vec![],
             requires: vec![],
+            groups: HashMap::new(),
             builder_template: Some("FROM debian".to_string()),
             runtime_template: None,
         };
@@ -851,6 +1163,7 @@ runtime: |
             builder_weight: Some("medium".to_string()),
             tools: vec![],
             requires: vec![],
+            groups: HashMap::new(),
             builder_template: Some("FROM debian".to_string()),
             runtime_template: None,
         };
@@ -866,6 +1179,7 @@ runtime: |
             builder_weight: None,
             tools: vec![],
             requires: vec![],
+            groups: HashMap::new(),
             builder_template: None,
             runtime_template: None,
         };
@@ -906,6 +1220,7 @@ runtime: |
                 default_version: "1.0".to_string(),
                 supported_versions: vec![],
             }],
+            groups: HashMap::new(),
             builder_template: None,
             runtime_template: Some(
                 "{% if tools.mytool.version %}RUN install mytool={{ tools.mytool.version }}{% else %}RUN install mytool{% endif %}"
@@ -1015,6 +1330,7 @@ runtime: |
                 builder_weight: None,
                 tools: vec![],
                 requires: vec![],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1030,6 +1346,7 @@ runtime: |
                 builder_weight: None,
                 tools: vec![],
                 requires: vec![],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1067,6 +1384,7 @@ runtime: |
                 builder_weight: None,
                 tools: vec![],
                 requires: vec![],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1082,6 +1400,7 @@ runtime: |
                 builder_weight: None,
                 tools: vec![],
                 requires: vec![],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1123,6 +1442,7 @@ runtime: |
                     supported_versions: vec!["2.0".to_string()],
                 }],
                 requires: vec!["base".to_string()],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1138,6 +1458,7 @@ runtime: |
                 builder_weight: None,
                 tools: vec![],
                 requires: vec![],
+                groups: HashMap::new(),
                 builder_template: None,
                 runtime_template: None,
             },
@@ -1211,6 +1532,30 @@ runtime: |
             missing.is_empty(),
             "addon tools must describe their purpose for generated aibox.toml comments: {missing:?}"
         );
+    }
+
+    #[test]
+    fn production_tool_addons_render_enabled_and_disabled_paths() {
+        for name in ["go-quality", "supply-chain", "release", "go-release"] {
+            let addon = load_repo_addon(name);
+            let enabled = all_enabled_tools(&addon);
+            if addon.builder_template.is_some() {
+                let rendered = render_builder(&addon, &enabled).unwrap().unwrap();
+                assert!(!rendered.trim().is_empty(), "{name} builder must render");
+            }
+            let rendered = render_runtime(&addon, &enabled).unwrap();
+            assert!(!rendered.trim().is_empty(), "{name} runtime must render");
+
+            let disabled = render_runtime(&addon, &all_disabled_tools(&addon)).unwrap();
+            for tool in &addon.tools {
+                assert!(
+                    disabled.contains(&format!("rm -f /usr/local/bin/{}", tool.name))
+                        || disabled.contains(&format!("rm -f /usr/local/bin/{} ", tool.name)),
+                    "{name}.{} must purge its disabled binary: {disabled}",
+                    tool.name
+                );
+            }
+        }
     }
 
     fn all_disabled_tools(addon: &LoadedAddon) -> HashMap<String, ToolConfig> {
@@ -1343,21 +1688,72 @@ runtime: |
     }
 
     #[test]
-    fn infrastructure_runtime_installs_pip_before_ansible() {
+    fn infrastructure_runtime_installs_ansible_in_isolated_venv() {
         let addon = load_repo_addon("infrastructure");
         let tools = all_enabled_tools(&addon);
         let rendered = render_runtime(&addon, &tools).unwrap();
 
-        let pip_install = rendered
-            .find("python3-pip")
-            .expect("enabled Ansible must install python3-pip: {rendered}");
+        let venv_install = rendered
+            .find("python3-venv")
+            .expect("enabled Ansible must install python3-venv: {rendered}");
         let ansible_install = rendered
-            .find("pip3 install --no-cache-dir 'ansible==")
-            .expect("enabled Ansible must be installed with pip3: {rendered}");
+            .find("/opt/aibox/ansible/bin/pip install --no-cache-dir 'ansible==")
+            .expect("enabled Ansible must be installed in its virtual environment: {rendered}");
         assert!(
-            pip_install < ansible_install,
-            "python3-pip must be installed before pip3 installs Ansible: {rendered}"
+            venv_install < ansible_install,
+            "python3-venv must be installed before the Ansible virtual environment: {rendered}"
         );
+        assert!(
+            rendered.contains("ln -sf \"$bin\" \"/usr/local/bin/$(basename \"$bin\")\""),
+            "Ansible commands must be exposed on PATH: {rendered}"
+        );
+    }
+
+    #[test]
+    fn infrastructure_runtime_installs_rootless_podman_prerequisites() {
+        let addon = load_repo_addon("infrastructure");
+        let tools = all_enabled_tools(&addon);
+        let rendered = render_runtime(&addon, &tools).unwrap();
+
+        for expected in [
+            "podman-compose",
+            "fuse-overlayfs",
+            "slirp4netns",
+            "uidmap",
+            "aibox:100000:65536",
+            "/etc/containers/containers.conf",
+            "cgroup_manager = \"cgroupfs\"",
+        ] {
+            assert!(
+                rendered.contains(expected),
+                "Podman runtime must include {expected}: {rendered}"
+            );
+        }
+    }
+
+    #[test]
+    fn pip_packaged_runtime_tools_use_isolated_venvs() {
+        for (addon_name, venv, command) in [
+            ("cloud-azure", "azure-cli", "az"),
+            ("python", "poetry", "poetry"),
+            ("python", "pdm", "pdm"),
+        ] {
+            let addon = load_repo_addon(addon_name);
+            let tools = all_enabled_tools(&addon);
+            let rendered = render_runtime(&addon, &tools).unwrap();
+            let venv_path = format!("/opt/aibox/{venv}/bin/pip install");
+            let command_path = format!("/opt/aibox/{venv}/bin/{command}");
+            assert!(
+                rendered.contains("python3-venv")
+                    && rendered.contains(&venv_path)
+                    && rendered.contains(&command_path),
+                "{addon_name} must install {command} through the {venv} virtual environment: {rendered}"
+            );
+            assert!(
+                !rendered.contains("RUN pip3 install"),
+                "{addon_name} must not install Python packages into Debian's externally managed Python: {rendered}"
+            );
+        }
     }
 
     #[test]
@@ -1372,13 +1768,32 @@ runtime: |
     }
 
     #[test]
-    fn purge_cloud_azure_pip_uninstalls_when_disabled() {
+    fn cloud_aws_installer_vendors_and_verifies_documented_signing_key() {
+        let addon = load_repo_addon("cloud-aws");
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+
+        assert!(
+            rendered.contains("gpg gpg-agent")
+                && rendered.contains("AWS_CLI_PGP_KEY_BASE64=")
+                && rendered.contains("FB5DB77FD5C118B80511ADA8A6310ACC4672475C")
+                && rendered.contains("gpg --batch --import /tmp/aws-cli-public-key.asc"),
+            "AWS CLI verification must use the fingerprint-checked key from AWS's install guide: {rendered}"
+        );
+        assert!(rendered.contains("gpg --verify /tmp/awscli.sig /tmp/awscli.zip"));
+        assert!(
+            !rendered.contains("gpg --keyserver"),
+            "AWS CLI builds must not depend on external keyserver availability: {rendered}"
+        );
+    }
+
+    #[test]
+    fn purge_cloud_azure_removes_venv_when_disabled() {
         let addon = load_repo_addon("cloud-azure");
         let tools = all_disabled_tools(&addon);
         let rendered = render_runtime(&addon, &tools).unwrap();
         assert!(
-            rendered.contains("pip3 uninstall -y azure-cli"),
-            "disabled azure-cli must pip uninstall: {rendered}"
+            rendered.contains("rm -rf /opt/aibox/azure-cli"),
+            "disabled azure-cli must remove its virtual environment: {rendered}"
         );
     }
 
@@ -1400,7 +1815,9 @@ runtime: |
         let rendered = render_runtime(&addon, &tools).unwrap();
         assert!(rendered.contains("rm -f /usr/local/bin/tofu"));
         assert!(rendered.contains("rm -f /usr/local/bin/packer"));
-        assert!(rendered.contains("pip3 uninstall -y ansible"));
+        assert!(rendered.contains("apt-get purge -y podman podman-compose"));
+        assert!(rendered.contains("rm -rf /opt/aibox/ansible"));
+        assert!(rendered.contains("rm -f /usr/local/bin/ansible*"));
     }
 
     #[test]
@@ -1467,8 +1884,123 @@ runtime: |
                 .contains("HUGO_ASSET=\"hugo_extended_${HUGO_VERSION}_linux-${HUGO_ARCH}.tar.gz\"")
         );
         assert!(rendered.contains("hugo_${HUGO_VERSION}_checksums.txt"));
+        assert_eq!(
+            rendered
+                .matches(
+                    "curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30"
+                )
+                .count(),
+            2,
+            "both Hugo release downloads must retry transient GitHub connection failures: {rendered}"
+        );
         assert!(rendered.contains(
             "grep \" ${HUGO_ASSET}$\" /tmp/hugo_checksums.txt | sed 's#  .*#  /tmp/hugo.tar.gz#' | sha256sum -c"
         ));
+    }
+
+    #[test]
+    fn opencode_installer_retries_transient_release_download_failures() {
+        let addon = load_repo_addon("ai-opencode");
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+
+        assert_eq!(
+            rendered
+                .matches(
+                    "curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30"
+                )
+                .count(),
+            2,
+            "both pinned OpenCode release downloads must retry transient GitHub failures: {rendered}"
+        );
+        assert!(rendered.contains("/checksums.txt"));
+        assert!(rendered.contains("sha256sum -c"));
+    }
+
+    #[test]
+    fn node_installer_uses_verified_official_release_archive() {
+        let addon = load_repo_addon("node");
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+
+        assert!(rendered.contains("https://nodejs.org/dist/latest-v26.x"));
+        assert!(rendered.contains("SHASUMS256.txt"));
+        assert!(rendered.contains("sha256sum -c -"));
+        assert!(
+            rendered.contains("libatomic1"),
+            "official Node.js ARM64 archives require libatomic.so.1: {rendered}"
+        );
+        assert!(
+            !rendered.contains("deb.nodesource.com"),
+            "Node installation must not depend on the retired NodeSource key endpoint: {rendered}"
+        );
+    }
+
+    #[test]
+    fn go_installer_uses_published_archive_digests() {
+        let addon = load_repo_addon("go");
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+
+        assert!(rendered.contains(
+            r#"1.27.1:amd64) GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445""#
+        ));
+        assert!(rendered.contains(
+            r#"1.27.1:arm64) GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec""#
+        ));
+        assert!(rendered.contains(r#"echo "${GO_SHA256}  /tmp/go.tar.gz" | sha256sum -c -"#));
+        assert!(
+            !rendered.contains(".tar.gz.sha256"),
+            "go.dev does not publish per-archive checksum sidecars: {rendered}"
+        );
+        assert_eq!(
+            addon.tools[0].supported_versions,
+            [
+                "1.25.12", "1.26.3", "1.26.4", "1.26.5", "1.26.6", "1.27.0", "1.27.1"
+            ]
+        );
+    }
+
+    #[test]
+    fn typst_installer_uses_published_archive_digests() {
+        let addon = load_repo_addon("typst");
+        let rendered = render_runtime(&addon, &all_enabled_tools(&addon)).unwrap();
+
+        assert!(rendered.contains(
+            r#"0.15.1:aarch64) TYPST_SHA256="5aa8d74a3d906e60ea12a66ac2f37f8eef1b14cbad7182a745e393a10c23dcee""#
+        ));
+        assert!(rendered.contains(
+            r#"0.15.1:x86_64) TYPST_SHA256="a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c""#
+        ));
+        assert!(rendered.contains(r#"echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c -"#));
+        assert!(
+            !rendered.contains(".tar.xz.sha256"),
+            "Typst does not publish per-archive checksum sidecars: {rendered}"
+        );
+    }
+
+    #[test]
+    fn docs_mdbook_installer_uses_published_asset_digests() {
+        let addon = load_repo_addon("docs-mdbook");
+        let mut tools = all_disabled_tools(&addon);
+        tools.insert(
+            "mdbook".to_string(),
+            ToolConfig {
+                enabled: true,
+                version: String::new(),
+            },
+        );
+        let rendered = render_runtime(&addon, &tools).unwrap();
+
+        assert!(rendered.contains(
+            "aarch64) MDBOOK_SHA256=\"753e5c5c363ee8a56972344dcf91466f005a51db84a7aeffe427ae3ef83d6d44\""
+        ));
+        assert!(rendered.contains(
+            "x86_64) MDBOOK_SHA256=\"5222beabd3e37dc5be0d18ff99b79058469354db5c220153a1b92db5ba12be89\""
+        ));
+        assert!(
+            rendered.contains("echo \"${MDBOOK_SHA256}  /tmp/mdbook.tar.gz\" | sha256sum -c -")
+        );
+        assert!(
+            !rendered.contains(".tar.gz.sha256"),
+            "mdBook 0.5.4 does not publish separate checksum assets: {rendered}"
+        );
     }
 }

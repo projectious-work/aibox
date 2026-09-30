@@ -25,6 +25,7 @@
 //! | Cursor   | `.cursor/commands/<name>.md`               | md verbatim |
 //! | Gemini   | `.gemini/commands/<name>.toml`             | TOML (converted) |
 //! | OpenCode | `.opencode/commands/<name>.md`             | md verbatim |
+//! | Tau      | `.agents/skills/<name>/SKILL.md`           | Agent Skill |
 //!
 //! Codex Skills are the supported reusable-workflow surface and are invoked
 //! with `$<name>` or selected through `/skills`. Codex custom prompts provide
@@ -138,6 +139,15 @@ fn profile_for(harness: AiHarness, project_root: &Path) -> Option<HarnessCommand
             format: CommandFormat::CodexSkill,
             subdir_per_command: true,
         }),
+        AiHarness::Tau => Some(HarnessCommandProfile {
+            harness,
+            // Tau implements the Agent Skills specification and discovers
+            // project skills from .agents/skills.
+            target_dir: project_root.join(".agents").join("skills"),
+            file_extension: "md",
+            format: CommandFormat::CodexSkill,
+            subdir_per_command: true,
+        }),
         AiHarness::Cursor => Some(HarnessCommandProfile {
             harness,
             target_dir: project_root.join(".cursor").join("commands"),
@@ -197,6 +207,7 @@ const SCAFFOLDABLE_HARNESSES: &[AiHarness] = &[
     AiHarness::Cursor,
     AiHarness::Gemini,
     AiHarness::OpenCode,
+    AiHarness::Tau,
 ];
 
 /// Sync processkit command adapter files to every enabled harness target.
@@ -309,13 +320,18 @@ fn sync_one_profile(
             continue;
         }
         let remove_current_managed = universe.contains(&source_md_name);
+        // The pk-* command namespace is reserved for processkit. Remove an
+        // unwanted adapter even when its old source is no longer present in a
+        // retained template mirror; otherwise package changes can strand
+        // generated commands indefinitely in derived projects.
+        let remove_reserved_processkit = source_md_name.starts_with("pk-");
         let remove_historical_generated = deployed_matches_historical_source(
             profile,
             &source_md_name,
             &path,
             historical_sources,
         )?;
-        if remove_current_managed || remove_historical_generated {
+        if remove_current_managed || remove_reserved_processkit || remove_historical_generated {
             remove_deployed_command(profile, &path)?;
             removed += 1;
         }
@@ -1384,6 +1400,26 @@ mod tests {
     }
 
     #[test]
+    fn tau_profile_writes_agent_skill_without_codex_prompt_alias() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+        fixture_with_pk_resume(project);
+
+        let config = config_with("v0.20.0", vec![AiHarness::Tau]);
+        sync_harness_commands(project, &config).unwrap();
+
+        let skill = project.join(".agents/skills/pk-resume/SKILL.md");
+        assert!(skill.exists(), "Tau must receive an Agent Skills adapter");
+        let content = fs::read_to_string(skill).unwrap();
+        assert!(content.contains("\nname: pk-resume\n"));
+        assert!(content.contains("Do the thing."));
+        assert!(
+            !project.join(".aibox-home/.codex/prompts").exists(),
+            "Tau must not create Codex-only prompt aliases"
+        );
+    }
+
+    #[test]
     fn codex_skill_pulls_description_from_frontmatter_first() {
         let src = "---\ndescription: \"Frontmatter wins\"\nargument-hint: \"[x]\"\n---\n\n# Body header should not be used\n\nBody.\n";
         let out = render_codex_skill("pk-thing.md", src.as_bytes()).unwrap();
@@ -1794,6 +1830,40 @@ mod tests {
                 .join(".agents/skills/morning-briefing-generate/SKILL.md")
                 .exists()
         );
+        assert!(project.join(".agents/skills/pk-resume/SKILL.md").exists());
+        assert!(project.join(".agents/skills/user-skill/SKILL.md").exists());
+    }
+
+    #[test]
+    fn stale_reserved_codex_command_removed_without_historical_source() {
+        let tmp = tempfile::tempdir().unwrap();
+        let project = tmp.path();
+        let live = project.join("context/skills");
+        make_skill_commands(
+            &live,
+            "processkit",
+            "status-briefing",
+            &["pk-resume.md"],
+            "---\ndescription: Resume\n---\n\n# Resume\n",
+        );
+
+        fs::create_dir_all(project.join(".agents/skills/pk-release")).unwrap();
+        fs::write(
+            project.join(".agents/skills/pk-release/SKILL.md"),
+            "---\nname: pk-release\ndescription: stale generated command\n---\n",
+        )
+        .unwrap();
+        fs::create_dir_all(project.join(".agents/skills/user-skill")).unwrap();
+        fs::write(
+            project.join(".agents/skills/user-skill/SKILL.md"),
+            "---\nname: user-skill\ndescription: user\n---\n",
+        )
+        .unwrap();
+
+        let config = config_with("v0.20.0", vec![AiHarness::Codex]);
+        sync_harness_commands(project, &config).unwrap();
+
+        assert!(!project.join(".agents/skills/pk-release").exists());
         assert!(project.join(".agents/skills/pk-resume/SKILL.md").exists());
         assert!(project.join(".agents/skills/user-skill/SKILL.md").exists());
     }

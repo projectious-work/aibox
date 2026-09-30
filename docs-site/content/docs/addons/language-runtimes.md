@@ -12,9 +12,9 @@ Language runtimes install compilers, interpreters, and package managers into you
 ```toml
 [addons.python.tools]
 python = { version = "3.14" }   # 3.12, 3.13, 3.14
-uv = { version = "0.11.26" }    # 0.7, 0.11.10, 0.11.11, 0.11.15, 0.11.19, 0.11.26
-# poetry = { version = "2.4.1" } # Optional: 1.8, 2.0, 2.4.1
-# pdm = { version = "2.28.0" }   # Optional: 2.22, 2.26.9, 2.27.0, 2.28.0
+uv = { version = "0.12.20" }   # 0.7, 0.11.10, 0.11.11, 0.11.15, 0.11.19, 0.11.26, 0.12.0, 0.12.5, 0.12.20
+# poetry = { version = "2.5.1" } # Optional: 1.8, 2.0, 2.4.1, 2.5.1
+# pdm = { version = "2.29.2" }   # Optional: 2.22, 2.26.9, 2.27.0, 2.28.0, 2.28.1, 2.28.2, 2.29.2
 ```
 
 Installs Python, pip, venv, and [uv](https://github.com/astral-sh/uv) (fast package manager). The base image pins uv to the curated default instead of following a floating `latest` image tag. Poetry and PDM are available but not enabled by default.
@@ -23,7 +23,7 @@ Installs Python, pip, venv, and [uv](https://github.com/astral-sh/uv) (fast pack
 
 ```toml
 [addons.rust.tools]
-rustc = { version = "1.96.1" }  # 1.90, 1.91, 1.92, 1.93, 1.94, 1.94.1, 1.96.0, 1.96.1
+rustc = { version = "1.98.1" }  # 1.90, 1.91, 1.92, 1.93, 1.94, 1.94.1, 1.96.0, 1.96.1, 1.97.1, 1.98.0, 1.98.1
 clippy = {}                     # Linter (no version selection)
 rustfmt = {}                    # Formatter (no version selection)
 ```
@@ -35,21 +35,59 @@ Installs the Rust toolchain via rustup with clippy and rustfmt. Uses a multi-sta
 ```toml
 [addons.node.tools]
 node = { version = "26" }       # 20, 22, 24, 26
-pnpm = { version = "11.10.0" }  # 9, 10, 11.1.3, 11.5.2, 11.10.0
-# yarn = { version = "4.17.0" } # Optional: 4, 4.16.0, 4.17.0
-# bun = { version = "1.3.14" }  # Optional
+pnpm = { version = "12.8.1" }   # 9, 10, 11.1.3, 11.5.2, 11.10.0, 11.18.0, 11.20.0, 11.21.0, 11.22.0, 12.6.0, 12.8.1
+# yarn = { version = "4.18.1" } # Optional: 4, 4.16.0, 4.17.0, 4.18.1
+# bun = { version = "1.4.2" }   # Optional
 ```
 
-Installs Node.js via NodeSource, plus pnpm as default package manager. Yarn and Bun are available but not enabled by default.
+Installs Node.js from the official release archive, plus pnpm as default package manager. Yarn and Bun are available but not enabled by default.
 
 ## Go
 
 ```toml
 [addons.go.tools]
-go = { version = "1.26.4" }     # 1.25, 1.26, 1.26.3, 1.26.4
+go = { version = "1.27.1" }     # 1.25.12, 1.26.3, 1.26.4, 1.26.5, 1.26.6, 1.27.0, 1.27.1
 ```
 
 Installs Go and sets up GOPATH.
+
+### Production Go groups
+
+Go projects can compose production tooling without bloating the base runtime:
+
+```toml
+[addons.go]
+
+[addons.go.infrastructure]
+
+[addons.go.quality.tools]
+staticcheck = { enabled = false } # optional per-tool override
+
+[addons.go.supply-chain]
+
+[addons.go.release]
+
+# Optional nested container engine without the other infrastructure defaults:
+[addons.go.infrastructure.tools]
+opentofu = { enabled = false }
+ansible = { enabled = false }
+packer = { enabled = false }
+podman = {}
+```
+
+`quality` installs `goimports`, `staticcheck`, `golangci-lint`,
+`govulncheck`, and `gosec`, plus the Linux compiler and libc headers required
+by `go test -race ./...`. `supply-chain` adds `gitleaks`, `osv-scanner`,
+`syft`, `grype`, and `cosign`. `release` adds GoReleaser, ShellCheck, and
+Hadolint. The built-in `gofmt`, `go vet`, `go test`, fuzzing, and coverage
+commands remain part of the Go toolchain and need no extra binary.
+The optional `podman` selection installs a rootless container engine and its
+Compose provider. The explicit disables keep OpenTofu, Ansible, and Packer out
+when the project only needs nested container operations.
+
+The same `infrastructure`, `security`/`supply-chain`, and `release` group names
+are accepted below every language addon. Go additionally exposes `quality`
+and its `lint` alias.
 
 ## Typst
 

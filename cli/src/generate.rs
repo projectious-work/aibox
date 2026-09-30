@@ -181,10 +181,7 @@ pub fn generate_all(config: &AiboxConfig) -> Result<()> {
 }
 
 pub(crate) fn image_version_for_generation(published_latest: Version) -> String {
-    format!(
-        "{}.{}.{}",
-        published_latest.major, published_latest.minor, published_latest.patch
-    )
+    published_latest.to_string()
 }
 
 /// Generate the Dockerfile. Returns true if file was written.
@@ -822,6 +819,7 @@ mod tests {
                 name.to_string(),
                 AddonToolsSection {
                     tools: HashMap::new(),
+                    ..Default::default()
                 },
             );
         }
@@ -884,6 +882,16 @@ mod tests {
         assert_eq!(
             selected, "0.24.3",
             "image generation must not couple a newer CLI version to an unpublished base image tag"
+        );
+    }
+
+    #[test]
+    fn image_version_for_generation_preserves_prerelease_tag() {
+        let published = semver::Version::parse("1.0.0-alpha.1").unwrap();
+        let selected = image_version_for_generation(published);
+        assert_eq!(
+            selected, "1.0.0-alpha.1",
+            "image generation must preserve the exact published GHCR tag"
         );
     }
 
@@ -1343,7 +1351,7 @@ mod tests {
         config.security.acknowledge_seccomp_unconfined = true;
         fs::write(
             dir.path().join("docker-compose.override.yml"),
-            "services:\n  aibox-e2e-testrunner:\n    security_opt:\n      - seccomp=unconfined\n",
+            "services:\n  unrelated-sidecar:\n    security_opt:\n      - seccomp=unconfined\n",
         )
         .unwrap();
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
@@ -1869,6 +1877,24 @@ mod tests {
     }
 
     #[test]
+    fn dockerfile_installs_tau_in_shared_uv_tool_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut config = make_config(&[], false);
+        config.ai.harnesses = vec![crate::config::AiProvider::Tau];
+        config.resolve_ai_provider_addons();
+        generate_dockerfile(&config, dir.path(), &test_env()).unwrap();
+        let content = fs::read_to_string(dir.path().join("Dockerfile")).unwrap();
+        assert!(
+            content.contains("UV_TOOL_DIR=/opt/aibox/uv-tools uv tool install tau-ai==0.4.6"),
+            "Tau should be installed from its pinned PyPI package: {content}"
+        );
+        assert!(
+            content.contains("chmod -R a+rX /opt/aibox/uv-tools"),
+            "Tau tool environment must be traversable by the runtime user: {content}"
+        );
+    }
+
+    #[test]
     fn dockerfile_claude_installed_via_addon() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = make_config(&[], false);
@@ -1950,6 +1976,7 @@ mod tests {
     #[test]
     fn base_image_prepares_writable_cache_home_and_shell_env() {
         let content = include_str!("../../images/base-debian/Dockerfile");
+        let bashrc = include_str!("../../images/base-debian/config/bashrc");
         assert!(content.contains("SHELL=/bin/bash"));
         assert!(
             content.contains("ENV UV_CACHE_DIR=/tmp/aibox/uv-cache")
@@ -1961,6 +1988,11 @@ mod tests {
                 && content.contains("chown -R aibox:aibox /tmp/aibox"),
             "base image should create writable cache-home and uv cache paths before final ownership fix"
         );
+        assert!(
+            bashrc.contains("moved file blocking Starship cache")
+                && bashrc.contains("mkdir -p \"$HOME/.cache/starship\""),
+            "interactive Bash must repair a file collision at Starship's cache path before initializing the prompt"
+        );
     }
 
     #[test]
@@ -1970,15 +2002,6 @@ mod tests {
             content.contains("mkdir -p /tmp/aibox/uv-cache")
                 && content.contains("chown -R \"$TARGET_UID:$TARGET_GID\" /tmp/aibox"),
             "entrypoint must re-own /tmp/aibox after UID/GID remap so uv caches stay writable:\n{content}"
-        );
-    }
-
-    #[test]
-    fn e2e_companion_image_installs_yazi_companion_entrypoint() {
-        let content = include_str!("../../.devcontainer/Dockerfile.e2e");
-        assert!(
-            content.contains("ln -sf /usr/local/bin/yazi /usr/local/bin/ya"),
-            "E2E companion image should expose yazi's companion entrypoint"
         );
     }
 

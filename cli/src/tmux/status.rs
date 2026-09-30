@@ -64,7 +64,9 @@ bind-key -N "Split pane down" d split-window -v -c "#{pane_current_path}"
 bind-key -N "Kill pane" x kill-pane
 bind-key -N "Toggle pane zoom" f resize-pane -Z
 bind-key -N "Toggle pane zoom (alias)" z resize-pane -Z
-bind-key -N "Kill tmux session" q confirm-before -p "kill tmux session AIBOX_TMUX_SESSION? (y/n)" kill-session
+# Clear tmux's last OSC title before returning control to the host terminal.
+# An empty title lets the outer terminal resume its own default title policy.
+bind-key -N "Kill tmux session" q confirm-before -p "kill tmux session AIBOX_TMUX_SESSION? (y/n)" "run-shell 'client_tty=##{client_tty}; if [ -n \"\$client_tty\" ] && [ -w \"\$client_tty\" ]; then printf \"\\033]0;\\007\\033[23;0t\" >\"\$client_tty\"; fi' ; kill-session"
 bind-key -N "Reload tmux config" R source-file ~/.config/tmux/tmux.conf \; display-message "aibox tmux config reloaded"
 bind-key -N "Open log pane (lnav)" o display-popup -E -w 90% -h 80% "aibox-log-viewer"
 
@@ -85,17 +87,19 @@ AIBOX_TMUX_LAYOUT_SWITCH_BINDING
 AIBOX_TMUX_THEME_SWITCH_BINDING
 
 set -g status AIBOX_TMUX_STATUS
+AIBOX_TMUX_TITLE_BLOCK
 set -g status-style "bg=AIBOX_TMUX_BG,fg=AIBOX_TMUX_FG"
-set -g window-status-current-style "bg=AIBOX_TMUX_ACCENT,fg=AIBOX_TMUX_BG,bold"
+set -g window-status-current-style "bg=AIBOX_TMUX_ACCENT,fg=AIBOX_TMUX_BGAIBOX_TMUX_ACTIVE_ATTR"
 set -g window-status-format " #I:#W "
 set -g window-status-current-format " #I:#W "
-# Inactive panes are dimmed a touch (bg+fg both biased ~12% toward
-# muted) so the focused pane stands out without making non-focus
-# content hard to read. Tweak via `themes::dim_inactive_pane_colors`.
+# Inactive panes use the audited dim surface while the active border also gets
+# tmux's directional indicators. This remains visible around full-screen TUIs
+# such as Yazi where content otherwise obscures the focus change.
 set -g window-style "bg=AIBOX_TMUX_DIM_BG,fg=AIBOX_TMUX_DIM_FG"
 set -g window-active-style "bg=AIBOX_TMUX_BG,fg=AIBOX_TMUX_FG"
 set -g pane-border-style "fg=AIBOX_TMUX_MUTED,bg=AIBOX_TMUX_BG"
 set -g pane-active-border-style "fg=AIBOX_TMUX_ACCENT,bg=AIBOX_TMUX_BG"
+set -g pane-border-indicators both
 set -g message-style "bg=AIBOX_TMUX_ACCENT,fg=AIBOX_TMUX_BG"
 set -g message-command-style "bg=AIBOX_TMUX_ACCENT,fg=AIBOX_TMUX_BG"
 set -g mode-style "bg=AIBOX_TMUX_ACCENT,fg=AIBOX_TMUX_BG"
@@ -142,6 +146,7 @@ pub fn tmux_conf(config: &AiboxConfig) -> String {
         TmuxStatusMode::Plain | TmuxStatusMode::Disabled => "%H:%M",
     };
     let (powerkit_block, powerkit_plugin, powerkit_formats) = tmux_powerkit_settings(config);
+    let title_block = tmux_title_settings(config);
 
     let mut conf = DEFAULT_TMUX_CONF
         .replace("AIBOX_TMUX_PREFIX", &config.customization.tmux.prefix)
@@ -158,6 +163,7 @@ pub fn tmux_conf(config: &AiboxConfig) -> String {
                 .to_string(),
         )
         .replace("AIBOX_TMUX_STATUS", status)
+        .replace("AIBOX_TMUX_TITLE_BLOCK", &title_block)
         .replace("AIBOX_TMUX_POWERKIT_BLOCK", &powerkit_block)
         .replace("AIBOX_TMUX_POWERKIT_PLUGIN", &powerkit_plugin)
         .replace("AIBOX_TMUX_POWERKIT_FORMATS", &powerkit_formats)
@@ -171,6 +177,18 @@ pub fn tmux_conf(config: &AiboxConfig) -> String {
         )
         .replace("AIBOX_TMUX_DIM_BG", &dim_bg)
         .replace("AIBOX_TMUX_DIM_FG", &dim_fg)
+        .replace("AIBOX_TMUX_ACTIVE_ATTR", &{
+            let attr = crate::themes::tmux_role_attributes(
+                config.customization.emphasis,
+                "active_foreground",
+                Some(&config.customization.emphasis_overrides),
+            );
+            if attr.is_empty() {
+                attr
+            } else {
+                format!(",{attr}")
+            }
+        })
         .replace("AIBOX_TMUX_BG", bg)
         .replace("AIBOX_TMUX_FG", fg)
         .replace("AIBOX_TMUX_ACCENT", accent)
@@ -187,6 +205,154 @@ pub fn tmux_conf(config: &AiboxConfig) -> String {
         );
     }
     conf
+}
+
+/// Render the tmux-owned terminal title. Runtime helpers update the
+/// `@aibox_attention_*` user options; no task/message text is embedded here.
+/// `elapsed` is intentionally a transition snapshot supplied by the helper,
+/// rather than a continuously-updating shell command in tmux's title path.
+fn tmux_title_settings(config: &AiboxConfig) -> String {
+    let title = &config.customization.tmux.title;
+    let mut lines = vec![
+        format!(
+            "set -g set-titles {}",
+            if title.enabled { "on" } else { "off" }
+        ),
+        format!(
+            "set -g @aibox_title_project \"{}\"",
+            tmux_option_escape(&config.aibox.project_name)
+        ),
+        format!(
+            "set -g @aibox_title_message_max_length \"{}\"",
+            title.message_max_length
+        ),
+        format!(
+            "set -g @aibox_title_repository_style \"{}\"",
+            tmux_option_escape(&title.repository_style)
+        ),
+        format!(
+            "set -g @aibox_title_agent_style \"{}\"",
+            tmux_option_escape(&title.agent_style)
+        ),
+        format!(
+            "set -g @aibox_done_ttl_seconds \"{}\"",
+            title.done_ttl_seconds
+        ),
+        format!(
+            "set -g @aibox_notifications_enabled \"{}\"",
+            if config.customization.tmux.notifications.enabled {
+                1
+            } else {
+                0
+            }
+        ),
+        format!(
+            "set -g @aibox_notifications_protocol \"{}\"",
+            tmux_option_escape(&config.customization.tmux.notifications.protocol)
+        ),
+        format!(
+            "set -g @aibox_notifications_include_message \"{}\"",
+            if config.customization.tmux.notifications.include_message {
+                1
+            } else {
+                0
+            }
+        ),
+        format!(
+            "set -g @aibox_notification_states \"{}\"",
+            config.customization.tmux.notifications.states.join(",")
+        ),
+    ];
+    if title.enabled {
+        let mut rendered = String::new();
+        let mut rest = title.format.as_str();
+        while let Some(open) = rest.find('{') {
+            rendered.push_str(&tmux_title_literal_escape(&rest[..open]));
+            let after_open = &rest[open + 1..];
+            let Some(close) = after_open.find('}') else {
+                // Validation reports this to users; keep generation non-panicking
+                // for programmatically assembled configs.
+                rendered.push_str(&tmux_title_literal_escape(after_open));
+                break;
+            };
+            rendered.push_str(&title_placeholder_expression(
+                &after_open[..close],
+                &title.directory_style,
+            ));
+            rest = &after_open[close + 1..];
+        }
+        rendered.push_str(&tmux_title_literal_escape(rest));
+        let mut title_expression = format!("#{{={}:{}", title.max_length, rendered);
+        title_expression.push('}');
+        lines.insert(
+            1,
+            format!("set -g set-titles-string \"{title_expression}\""),
+        );
+    } else {
+        // tmux retains option values that are omitted by a later source-file.
+        // Clear the previous expression as well as disabling future updates so
+        // a project that turns titles off cannot keep displaying a stale agent
+        // title from the earlier enabled configuration.
+        lines.insert(1, "set -g set-titles-string \"\"".to_string());
+    }
+    if title.enabled || config.customization.tmux.notifications.enabled {
+        // Refresh aggregate attention state when a source pane exits. Append
+        // rather than replace so a user's existing hook remains authoritative.
+        lines.push(
+            "set-hook -g pane-died[90] 'run-shell -b \"aibox-agent-signal refresh --window \\\"#{window_id}\\\"\"'"
+                .to_string(),
+        );
+    }
+    for (state, symbol) in [
+        ("working", &title.states.working),
+        ("question", &title.states.question),
+        ("done", &title.states.done),
+        ("error", &title.states.error),
+        ("idle", &title.states.idle),
+    ] {
+        lines.push(format!(
+            "set -g @aibox_title_state_{state} \"{}\"",
+            tmux_option_escape(symbol)
+        ));
+    }
+    lines.join("\n")
+}
+
+fn tmux_title_literal_escape(value: &str) -> String {
+    // `#` starts a tmux format expansion. Doubling it makes user-authored
+    // punctuation literal while backslash/quote escaping protects the option.
+    tmux_option_escape(value).replace('#', "##")
+}
+
+fn title_placeholder_expression(placeholder: &str, directory_style: &str) -> String {
+    match placeholder {
+        "state_symbol" => "#{@aibox_attention_symbol}".to_string(),
+        "state" => "#{@aibox_attention_state}".to_string(),
+        // Project is an option rather than a raw config string so even a
+        // user-chosen project name cannot become tmux syntax.
+        "project" => "#{@aibox_title_project}".to_string(),
+        "session" => "#S".to_string(),
+        "window" => "#W".to_string(),
+        "window_index" => "#I".to_string(),
+        "pane" => "#P".to_string(),
+        "directory" => match directory_style {
+            "full" => "#{pane_current_path}".to_string(),
+            "abbreviated" => "#{s|^/home/[^/]*/|~/|:pane_current_path}".to_string(),
+            // tmux's basename modifier is stable across tmux 3.x versions.
+            _ => "#{b:pane_current_path}".to_string(),
+        },
+        "directory_path" => "#{pane_current_path}".to_string(),
+        "repository" => "#{@aibox_attention_repository}".to_string(),
+        "branch" => "#{@aibox_attention_branch}".to_string(),
+        "harness" => "#{@aibox_attention_harness}".to_string(),
+        "agent" => "#{@aibox_attention_agent}".to_string(),
+        "agent_suffix" => "#{?#{@aibox_attention_harness}, — #{?#{@aibox_attention_agent},#{@aibox_attention_agent}@,}#{@aibox_attention_harness},}".to_string(),
+        "task" => "#{@aibox_attention_task}".to_string(),
+        "message" => "#{@aibox_attention_message}".to_string(),
+        "elapsed" => "#{@aibox_attention_elapsed}".to_string(),
+        // Validation rejects this; generation remains safe if called directly.
+        _ => String::new(),
+    }
 }
 
 /// Slot order constants — intentionally fixed per DEC-20260508_2115-SilentFern.
@@ -260,6 +426,8 @@ pub(crate) struct ResolvedTmuxStatusLayout {
 
 struct TmuxSurfaceColors {
     bg: String,
+    fg: String,
+    dim_bg: String,
     active_title_fg: String,
     dim_fg: String,
     accent: String,
@@ -267,14 +435,18 @@ struct TmuxSurfaceColors {
 }
 
 fn tmux_surface_colors(theme: &crate::config::Theme) -> TmuxSurfaceColors {
-    let (bg, _fg, accent, muted, dim_fg, active_title_fg) =
+    let (bg, fg, _accent, _muted, _legacy_dim_fg, active_title_fg) =
         crate::themes::terminal_surface_colors(theme);
+    let (dim_bg, dim_fg) = crate::themes::dim_inactive_pane_colors(theme);
+    let (border_active, border_inactive) = crate::themes::terminal_border_colors(theme);
     TmuxSurfaceColors {
         bg: bg.to_string(),
+        fg: fg.to_string(),
+        dim_bg,
         active_title_fg,
         dim_fg,
-        accent: accent.to_string(),
-        muted: muted.to_string(),
+        accent: border_active.to_string(),
+        muted: border_inactive.to_string(),
     }
 }
 
@@ -516,6 +688,8 @@ set -g @powerkit_plugin_netspeed_speed_width "7"{}{}{}{}{}"##,
         &line2_left,
         &line2_right,
         &surface,
+        config.customization.emphasis,
+        &config.customization.emphasis_overrides,
     );
     (powerkit_block, powerkit_plugin, powerkit_formats)
 }
@@ -556,6 +730,8 @@ pub fn tmux_powerkit_overrides(config: &AiboxConfig) -> String {
         &resolved_layout.line2_left,
         &resolved_layout.line2_right,
         &surface,
+        config.customization.emphasis,
+        &config.customization.emphasis_overrides,
     )
 }
 
@@ -913,9 +1089,33 @@ fn tmux_powerkit_post_render_overrides(
     line2_left: &[String],
     line2_right: &[String],
     surface: &TmuxSurfaceColors,
+    emphasis: crate::config::ThemeEmphasis,
+    emphasis_overrides: &std::collections::BTreeMap<String, String>,
 ) -> String {
     let status_formats =
         tmux_powerkit_status_formats(line1_left, line1_right, line2_left, line2_right);
+    let active_attr = crate::themes::tmux_role_attributes(
+        emphasis,
+        "pane_active_foreground",
+        Some(emphasis_overrides),
+    );
+    let active_attr = if active_attr.is_empty() {
+        String::new()
+    } else {
+        format!("#[{active_attr}]")
+    };
+    let inactive_attr = crate::themes::tmux_role_attributes(
+        emphasis,
+        "pane_inactive_foreground",
+        Some(emphasis_overrides),
+    );
+    let inactive_attr = if inactive_attr.is_empty() {
+        String::new()
+    } else {
+        format!("#[{inactive_attr}]")
+    };
+    let active_style = format!("#[fg={}]{}", surface.active_title_fg, active_attr);
+    let inactive_style = format!("#[fg={}]{}", surface.dim_fg, inactive_attr);
     format!(
         r##"{}
 
@@ -923,18 +1123,25 @@ fn tmux_powerkit_post_render_overrides(
 # PowerKit's renderer owns status-format and pane styles when it loads. Keep
 # the aibox two-row status shape and pane surfaces authoritative after that
 # render pass.
+set -g window-style "bg={},fg={}"
+set -g window-active-style "bg={},fg={}"
 set -g pane-border-style "fg={},bg={}"
 set -g pane-active-border-style "fg={},bg={}"
-set -g pane-border-format "#[bg={}]#{{?pane_active,#[fg={}]#[bold],#[fg={}]}} #{{?client_prefix,PREFIX,NORMAL}} #{{pane_title}} #{{pane_current_command}} #[bg={},fg={}] "
+set -g pane-border-indicators both
+set -g pane-border-format "#[bg={}]#{{?pane_active,{},{} }} #{{?client_prefix,PREFIX,NORMAL}} #{{pane_title}} #{{pane_current_command}} #[bg={},fg={}] "
 "##,
         status_formats,
+        surface.dim_bg,
+        surface.dim_fg,
+        surface.bg,
+        surface.fg,
         surface.muted,
         surface.bg,
         surface.accent,
         surface.bg,
         surface.bg,
-        surface.active_title_fg,
-        surface.dim_fg,
+        active_style,
+        inactive_style,
         surface.bg,
         surface.bg,
     )
@@ -1231,8 +1438,8 @@ mod tests {
                 && conf.contains(r#"@powerkit_status_interval "15""#)
                 && conf.contains(r#"@powerkit_transparent "false""#)
                 && conf.contains(r#"@powerkit_pane_border_status "top""#)
-                && conf.contains(r##"@powerkit_active_pane_border_color "#D79921""##)
-                && conf.contains(r##"@powerkit_inactive_pane_border_color "#928374""##)
+                && conf.contains(r##"@powerkit_active_pane_border_color "#FABD2F""##)
+                && conf.contains(r##"@powerkit_inactive_pane_border_color "#A89984""##)
                 && conf.contains(r##"@powerkit_pane_border_status_bg "#282828""##)
                 && conf.contains(r##"@powerkit_pane_border_format "#{?client_prefix,PREFIX,NORMAL} #{pane_title} #{pane_current_command}""##)
                 && conf.contains(r#"@powerkit_line1_right "aibox_log,aibox_oom,aibox_proc,aibox_ai,aibox_mcp,aibox_mig,weather,uptime,datetime""#)
@@ -1438,10 +1645,10 @@ mod tests {
             "line 1 must keep the compact window list on the left and PowerKit metrics on the right:\n{line1_format}"
         );
         assert!(
-            conf.contains("set -g pane-border-style \"fg=#928374,bg=#282828\"")
-                && conf.contains("set -g popup-style \"bg=#282828,fg=#D5C4A1\"")
-                && conf.contains("#[fg=#D69F34]")
-                && conf.contains("#[fg=#B3A38A]"),
+            conf.contains("set -g pane-border-style \"fg=#A89984,bg=#282828\"")
+                && conf.contains("set -g popup-style \"bg=#282828,fg=#EBDBB2\"")
+                && conf.contains("#[fg=#FABD2F]")
+                && conf.contains("#[fg=#DACBA7]"),
             "tmux surface styles should be generated from the resolved theme:\n{conf}"
         );
 
@@ -1689,6 +1896,19 @@ mod tests {
         assert!(
             conf.contains(&format!("set -g window-active-style \"bg={bg},fg={fg}\"")),
             "active window-style must keep the original palette bg/fg:\n{conf}"
+        );
+        let post_render = conf
+            .split("# aibox post-PowerKit overrides.")
+            .nth(1)
+            .expect("PowerKit post-render override block");
+        assert!(
+            post_render.contains(&format!("set -g window-style \"bg={dim_bg},fg={dim_fg}\""))
+                && post_render.contains(&format!("set -g window-active-style \"bg={bg},fg={fg}\"")),
+            "PowerKit must not erase the active/inactive pane surface distinction:\n{post_render}"
+        );
+        assert!(
+            conf.contains("set -g pane-border-indicators both"),
+            "the active pane needs an explicit border indicator around full-screen TUIs:\n{conf}"
         );
     }
 
@@ -2048,5 +2268,42 @@ mod tests {
             conf.contains(r#"bind-key -N "Switch to shell window" s find-window -Z 'shell'"#),
             "leader s must jump to shell window:\n{conf}"
         );
+    }
+
+    #[test]
+    fn tmux_quit_clears_terminal_title_before_killing_session() {
+        let config = crate::config::test_config();
+        let conf = tmux_conf(&config);
+
+        assert!(conf.contains(r#"printf \"\\033]0;\\007\\033[23;0t\" >\"\$client_tty\""#));
+        assert!(conf.contains("client_tty=##{client_tty}"));
+        assert!(conf.contains(r#"; kill-session""#));
+    }
+
+    #[test]
+    fn tmux_conf_renders_configurable_attention_title_and_runtime_options() {
+        let mut config = crate::config::test_config();
+        config.customization.tmux.title.format =
+            "{state_symbol}{project}:{window} {directory_path} {message}{agent_suffix}".to_string();
+        config.customization.tmux.title.max_length = 80;
+        config.customization.tmux.notifications.enabled = true;
+        let conf = tmux_conf(&config);
+
+        assert!(conf.contains("set -g set-titles on"));
+        assert!(conf.contains("#{=80:#{@aibox_attention_symbol}#{@aibox_title_project}:#W #{pane_current_path} #{@aibox_attention_message}#{?#{@aibox_attention_harness}, — #{?#{@aibox_attention_agent},#{@aibox_attention_agent}@,}#{@aibox_attention_harness},}}"));
+        assert!(conf.contains("set -g @aibox_notifications_enabled \"1\""));
+        assert!(conf.contains("set -g @aibox_notifications_protocol \"osc-9\""));
+        assert!(conf.contains("set -g @aibox_title_state_question \"❓ \""));
+        assert!(conf.contains("set-hook -g pane-died[90]"));
+    }
+
+    #[test]
+    fn tmux_conf_disables_title_without_attention_hook() {
+        let mut config = crate::config::test_config();
+        config.customization.tmux.title.enabled = false;
+        let conf = tmux_conf(&config);
+        assert!(conf.contains("set -g set-titles off"));
+        assert!(conf.contains("set -g set-titles-string \"\""));
+        assert!(!conf.contains("pane-died[90]"));
     }
 }

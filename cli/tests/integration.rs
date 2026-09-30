@@ -139,6 +139,8 @@ fn release_scripts_publish_checksum_sidecars() {
         std::fs::read_to_string(repo_root.join("scripts/maintain.sh")).expect("read maintain.sh");
     let build_macos = std::fs::read_to_string(repo_root.join("scripts/build-macos.sh"))
         .expect("read build-macos.sh");
+    let host_publisher = std::fs::read_to_string(repo_root.join("scripts/release_host_publish.py"))
+        .expect("read release_host_publish.py");
     let install =
         std::fs::read_to_string(repo_root.join("scripts/install.sh")).expect("read install.sh");
 
@@ -147,14 +149,15 @@ fn release_scripts_publish_checksum_sidecars() {
             r#"sha256_file "${DIST_DIR}/${binary_name}.tar.gz" > "${DIST_DIR}/${binary_name}.tar.gz.sha256""#,
         )
             && maintain.contains(r#"built_archives+=("${archive}" "${checksum}")"#)
-            && maintain.contains(r#""${DIST_DIR}"/aibox-v${version}-*-apple-darwin.tar.gz.sha256"#),
+            && host_publisher.contains("manifest must list exactly two Darwin archives and two checksums")
+            && host_publisher.contains(r#"run(["gh", "release", "upload"#),
         "maintain.sh must generate and upload sha256 sidecars for Linux and macOS release assets"
     );
     assert!(
         maintain.contains("release_validate_license_guardrails")
             && maintain.contains(r#"-C "${PROJECT_ROOT}" LICENSE"#)
             && maintain.contains(r#""${PROJECT_ROOT}/LICENSE""#)
-            && maintain.contains("--clobber"),
+            && host_publisher.contains("--clobber"),
         "maintain.sh must enforce README license notice, include LICENSE in Linux tarballs, and upload LICENSE to GitHub releases"
     );
     assert!(
@@ -186,6 +189,41 @@ fn release_scripts_publish_checksum_sidecars() {
             && maintain.contains("require_docker_buildx_for_images")
             && maintain.contains("Docker Buildx is required"),
         "maintain.sh must support label-based image retagging and require Docker Buildx for BuildKit-only image builds"
+    );
+}
+
+#[test]
+fn release_state_reads_tool_pins_from_their_sources() {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let repo_root = std::path::Path::new(manifest_dir).parent().unwrap();
+    let state = std::fs::read_to_string(repo_root.join("scripts/release-check-state.sh"))
+        .expect("read release-check-state.sh");
+
+    assert!(
+        state.contains(
+            r#"uv_pin="$(container_image_tag "${BASE_DOCKERFILE}" "ghcr.io/astral-sh/uv" || true)""#
+        ),
+        "uv release-state inventory must derive the image tag from the Dockerfile"
+    );
+    assert!(
+        state.contains(
+            r#""$(quoted_assignment "${PROJECT_ROOT}/addons/docs/docs-hugo.yaml" HUGO_VERSION || true)""#
+        ) && state.contains(
+            r#""$(quoted_assignment "${PROJECT_ROOT}/addons/docs/docs-mdbook.yaml" MDBOOK_VERSION || true)""#
+        ) && state.contains(
+            r#""$(package_pin "${PROJECT_ROOT}/addons/docs/docs-mkdocs.yaml" mkdocs-material || true)""#
+        ),
+        "documentation tool inventory must derive pins from addon manifests"
+    );
+    assert!(
+        state.contains("https://static.rust-lang.org/dist/channel-rust-stable.toml")
+            && state.contains(r#"/^\[pkg\.rust\]$/"#),
+        "Rust latest lookup must read the stable toolchain manifest rather than rustup's own version"
+    );
+    assert!(
+        state.contains("Status: Cargo.lock is current for the active Rust toolchain.")
+            && state.contains("Locking 0 packages"),
+        "a current Cargo.lock must not produce an actionable update disposition"
     );
 }
 
@@ -252,6 +290,34 @@ fn install_script_lists_every_repo_addon_yaml() {
 }
 
 #[test]
+fn install_script_refreshes_addons_when_binary_version_is_unchanged() {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let script = std::fs::read_to_string(
+        std::path::Path::new(manifest_dir)
+            .parent()
+            .unwrap()
+            .join("scripts/install.sh"),
+    )
+    .expect("read scripts/install.sh");
+
+    let same_version_branch = script
+        .split_once(r#"if [[ "${current}" == "${version}" ]]; then"#)
+        .expect("install script should detect an unchanged version")
+        .1
+        .split_once("fi")
+        .expect("same-version branch should be closed")
+        .0;
+    assert!(
+        !same_version_branch.contains("exit 0"),
+        "same-version installs must continue to refresh addon definitions"
+    );
+    assert!(
+        same_version_branch.contains("refreshing binary and addon catalog"),
+        "same-version refresh behavior should be visible to users"
+    );
+}
+
+#[test]
 fn apply_with_installed_catalog_installs_gh_from_git_ui() {
     let dir = tempfile::tempdir().unwrap();
     let installed_addons = install_script_addons_dir();
@@ -301,6 +367,126 @@ lazygit = { enabled = false }
         !dockerfile.contains("unknown addon 'git-ui'"),
         "git-ui must be known in installed-catalog simulation:\n{dockerfile}"
     );
+}
+
+#[test]
+fn apply_with_stale_installed_catalog_uses_embedded_supply_chain_addon() {
+    let dir = tempfile::tempdir().unwrap();
+    let stale_catalog = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(stale_catalog.path().join("tools")).unwrap();
+    std::fs::write(
+        stale_catalog.path().join("tools/git-ui.yaml"),
+        std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../addons/tools/git-ui.yaml"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    std::fs::write(
+        dir.path().join("aibox.toml"),
+        r#"[aibox]
+version = "0.32.4"
+base = "debian"
+
+[container]
+name = "embedded-supply-chain"
+
+[processkit]
+version = "unset"
+
+[addons.supply-chain.tools]
+syft = { version = "1.50.0" }
+grype = { version = "0.116.1" }
+"#,
+    )
+    .unwrap();
+
+    let output = Command::new(aibox_bin())
+        .args(["apply", "--no-container"])
+        .current_dir(dir.path())
+        .env("AIBOX_ADDONS_DIR", stale_catalog.path())
+        .output()
+        .expect("failed to execute aibox apply");
+    assert!(
+        output.status.success(),
+        "embedded catalog apply should succeed\nstderr:\n{}\nstdout:\n{}",
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+
+    let dockerfile = std::fs::read_to_string(dir.path().join(".devcontainer/Dockerfile")).unwrap();
+    assert!(dockerfile.contains("Addon: supply-chain"));
+    assert!(!dockerfile.contains("unknown addon 'supply-chain'"));
+    assert!(dockerfile.contains("syft_1.50.0_linux_${ARCH}.tar.gz"));
+    assert!(dockerfile.contains("grype_0.116.1_linux_${ARCH}.tar.gz"));
+}
+
+#[test]
+fn nested_go_groups_expand_render_and_honor_tool_disablement() {
+    let dir = tempfile::tempdir().unwrap();
+    let installed_addons = install_script_addons_dir();
+    std::fs::write(
+        dir.path().join("aibox.toml"),
+        r#"[aibox]
+version = "0.29.0"
+base = "debian"
+
+[container]
+name = "nested-go-groups"
+
+[processkit]
+version = "unset"
+
+[addons.go]
+
+[addons.go.quality.tools]
+staticcheck = { enabled = false }
+
+[addons.go.supply-chain.tools]
+grype = { enabled = false }
+
+[addons.go.release]
+"#,
+    )
+    .unwrap();
+
+    let output = Command::new(aibox_bin())
+        .args(["apply", "--no-container"])
+        .current_dir(dir.path())
+        .env("AIBOX_ADDONS_DIR", installed_addons.path())
+        .output()
+        .expect("failed to execute aibox apply");
+    assert!(
+        output.status.success(),
+        "nested Go groups should apply successfully\nstderr:\n{}\nstdout:\n{}",
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+
+    let dockerfile = std::fs::read_to_string(dir.path().join(".devcontainer/Dockerfile")).unwrap();
+    for marker in [
+        "Addon: go (runtime)",
+        "Addon: go-quality (runtime)",
+        "Addon: supply-chain (runtime)",
+        "Addon: release (runtime)",
+        "Addon: go-release (runtime)",
+        "go test -race ./...",
+        "go install golang.org/x/tools/cmd/goimports@v0.50.0",
+        "goreleaser_Linux_",
+    ] {
+        assert!(
+            dockerfile.contains(marker),
+            "missing {marker}:\n{dockerfile}"
+        );
+    }
+    assert!(dockerfile.contains("rm -f /usr/local/bin/staticcheck"));
+    assert!(dockerfile.contains("rm -f /usr/local/bin/grype"));
+    assert!(!dockerfile.contains("go install honnef.co/go/tools/cmd/staticcheck"));
+    assert!(!dockerfile.contains("COPY --from=supply-chain-builder /build/bin/grype"));
+    let persisted = std::fs::read_to_string(dir.path().join("aibox.toml")).unwrap();
+    assert!(persisted.contains("[addons.go.quality.tools]"));
+    assert!(persisted.contains("[addons.go.supply-chain.tools]"));
+    assert!(persisted.contains("[addons.go.release]"));
 }
 
 #[test]
@@ -793,6 +979,14 @@ fn describe_addon_catalog_json_contract() {
             .iter()
             .any(|tool| tool["name"] == "python")
     );
+
+    let go = addons
+        .iter()
+        .find(|addon| addon["name"] == "go")
+        .expect("catalog should include go addon");
+    assert_eq!(go["groups"]["quality"], "go-quality");
+    assert_eq!(go["groups"]["supply-chain"], "supply-chain");
+    assert_eq!(go["groups"]["release"], "go-release");
 }
 
 #[test]
@@ -912,6 +1106,6 @@ fn describe_image_provenance_policy_json_contract() {
     );
     assert_eq!(
         json["release_phase"]["host_command_template"],
-        "./scripts/maintain.sh release-host {version}"
+        "./scripts/maintain.sh release-host {run_dir}"
     );
 }
