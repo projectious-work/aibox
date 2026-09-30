@@ -507,47 +507,18 @@ ADDON_GROUPS = {
     "addon-platforms": ["cloud-aws", "cloud-gcp", "cloudflare", "infrastructure", "kubernetes"],
     "addon-tools": ["ai-claude", "ai-opencode", "browser-testing", "preview-archive", "supply-chain"],
 }
-ADDON_GROUP_TRIGGERS = {
-    **ADDON_GROUPS,
-    # go-release consumes the shared release addon transitively.
-    "addon-languages": [*ADDON_GROUPS["addon-languages"], "release"],
-}
 ALL_IMPACT_CHECKS = {*ADDON_GROUPS, "latex-lifecycle", "rootless-podman"}
-BROAD_IMPACT_PREFIXES = (
-    "images/base-debian/", "cli/src/addon_loader.rs", "cli/src/addons.rs",
-    "cli/src/cli.rs", "cli/src/config.rs", "cli/src/container.rs", "cli/src/generate.rs",
-    "cli/src/runtime.rs", "cli/src/templates/", "scripts/release-host-",
-    "scripts/release_host_",
-)
 
 
 def select_impact_checks(changed_paths: list[str]) -> dict[str, str]:
-    """Select expensive host checks from an already verified release diff.
+    """Require every host check regardless of the preceding tag's diff.
 
-    The returned mapping is both the execution plan and human-readable audit
-    evidence: each key is a reviewed conditional check and each value explains
-    which path or fail-safe rule selected it. Broad runtime machinery selects
-    every conditional check. A missing comparison tag is represented by
-    ``["*"]`` and also selects everything rather than producing a passing skip.
+    A previous release tag does not prove that its host phase completed or
+    covered the changes it contained. Keep changed paths in the audit record,
+    but never use them to omit candidate verification. Explicit retry
+    checkpoints remain available for evidence from this same candidate.
     """
-    if changed_paths == ["*"]:
-        return {check: "no comparison tag; fail-safe full selection" for check in sorted(ALL_IMPACT_CHECKS)}
-    broad = next((path for path in changed_paths if path.startswith(BROAD_IMPACT_PREFIXES)), None)
-    if broad:
-        return {check: f"broad runtime impact: {broad}" for check in sorted(ALL_IMPACT_CHECKS)}
-
-    selected: dict[str, str] = {}
-    for group, addons in ADDON_GROUP_TRIGGERS.items():
-        for path in changed_paths:
-            if any(path.endswith(f"/{addon}.yaml") for addon in addons):
-                selected[group] = path
-                break
-    for path in changed_paths:
-        if path.endswith("/latex.yaml") or path.startswith("cli/src/latex.rs") or "aibox-latex-" in path:
-            selected["latex-lifecycle"] = path
-        if path.endswith("/infrastructure.yaml") or "podman" in path.lower():
-            selected["rootless-podman"] = path
-    return selected
+    return {check: "mandatory for every host release" for check in sorted(ALL_IMPACT_CHECKS)}
 
 
 def grype_policy_summary(report: Path) -> dict[str, object]:

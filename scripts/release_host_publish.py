@@ -43,6 +43,17 @@ def fail(message: str) -> "None":
     raise SystemExit(f"release-host publisher: {message}")
 
 
+def required_impact_evidence(selection: dict[str, object]) -> set[str]:
+    """Reject a host run unless every candidate check has evidence."""
+    if set(selection) != {"comparison_tag", "comparison_commit", "changed_paths", "selected", "skipped"}:
+        fail("impact-selection evidence has an unexpected schema")
+    if not isinstance(selection["selected"], dict) or not isinstance(selection["skipped"], dict):
+        fail("impact-selection evidence has invalid check mappings")
+    if selection["skipped"] or set(selection["selected"]) != set(IMPACT_EVIDENCE):
+        fail("impact-selection evidence must require every host check")
+    return set(IMPACT_EVIDENCE.values())
+
+
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -146,13 +157,7 @@ def main() -> None:
     if (run_dir / LOCAL_CANDIDATE_EVIDENCE).exists():
         required_evidence.add(LOCAL_CANDIDATE_EVIDENCE)
     selection = json.loads((evidence / "container-e2e/impact-selection.json").read_text(encoding="utf-8"))
-    if set(selection) != {"comparison_tag", "comparison_commit", "changed_paths", "selected", "skipped"}:
-        fail("impact-selection evidence has an unexpected schema")
-    selected = set(selection["selected"])
-    skipped = set(selection["skipped"])
-    if selected & skipped or selected | skipped != set(IMPACT_EVIDENCE):
-        fail("impact-selection evidence does not partition every reviewed conditional check")
-    required_evidence.update(IMPACT_EVIDENCE[check] for check in selected)
+    required_evidence.update(required_impact_evidence(selection))
     evidence_entries = {entry["path"]: entry["sha256"] for entry in manifest["evidence"]}
     if set(evidence_entries) != required_evidence:
         fail("manifest does not enumerate the complete required evidence set")
