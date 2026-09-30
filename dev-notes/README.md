@@ -11,9 +11,11 @@ narrating commits or replacing user documentation.
 |---|---|---|
 | V1-01 | [Implementation baseline](V1-01-implementation-baseline.md) | Merged baseline evidence; no v1 runtime claim |
 | V1-02 | [Shared documentation build](V1-02-shared-documentation-build.md) | Merged Hugo foundation; publication gates remain later |
-| V1-03 | [Go operation core](V1-03-go-operation-core.md) | Active internal implementation; no usable v1 CLI/MCP yet |
+| V1-03 | [Go operation core](V1-03-go-operation-core.md) | Implementation done with local CLI/MCP evidence; publication pending |
 
 Update a phase note after each meaningful implementation wave: record what
 changed, which contract was checked, validation, remaining gaps, and security
 or compatibility consequences. A merged PR alone does not make a phase
-shipped; release and conformance evidence are separate gates.
+shipped; release and published-artifact evidence are separate gates. The
+roadmap's `implementationStatus: done` records a verified local implementation
+without claiming a release.

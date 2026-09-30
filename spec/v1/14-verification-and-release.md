@@ -119,10 +119,13 @@ and re-run of failure-sensitive gates after changed candidate bits.
 ## Roadmap state and publication
 
 The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phases
-with dependency edges and spec references. `planned` identifies pending work;
-`in_progress` identifies active implementation; `shipped` requires a
-`devNote` path and release identifier validated by the roadmap schema, plus
-the evidence above. V1-02 is a foundation prerequisite for all implementation
+with dependency edges and spec references. Its standard `status` values remain
+`idea`, `planned`, `in_progress`, `shipped`, and `cancelled`. The project-specific
+`implementationStatus: done` marks completed, verified code and documentation
+with a source commit, development note, and local evidence. A phase can retain
+`status: in_progress` while publication remains pending. `shipped` additionally
+requires a named release and published-artifact evidence; merging code alone
+does not meet it. V1-02 is a foundation prerequisite for all implementation
 phases, so the shared Hugo build exists before features are delivered. Every
 phase has a distinct executable demo and documentation deliverable; V1-19
 hardens the later cross-line alpha/beta archive matrix, not the first

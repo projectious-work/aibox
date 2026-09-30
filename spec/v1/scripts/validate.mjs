@@ -144,12 +144,18 @@ for(const [id,demo] of Object.entries(roadmap.demos)){
 const position=new Map(phases.map((p,i)=>[p.id,i]));
 if(roadmap.currentFocus){
  assert(ids.has(roadmap.currentFocus),'Unknown current focus');
- assert(phases[position.get(roadmap.currentFocus)].status==='in_progress','Current focus must be in progress');
+ assert(phases[position.get(roadmap.currentFocus)].status==='in_progress' && phases[position.get(roadmap.currentFocus)].implementationStatus!=='done','Current focus must have active implementation');
 }
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
  assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
+ if(p.implementationStatus==='done'){
+  assert(['in_progress','shipped'].includes(p.status),`Completed implementation needs a delivery status ${p.id}`);
+  assert(/^[0-9a-f]{40}$/.test(p.implementationCommit??''),`Completed implementation needs its verified source commit ${p.id}`);
+  assert(p.devNote && p.evidence?.length>0,`Completed implementation needs a note and evidence ${p.id}`);
+ }
+ if(p.status==='shipped')assert(p.implementationStatus==='done',`Shipped phase needs completed implementation ${p.id}`);
  for(const dep of p.dependencies??[]){
   assert(ids.has(dep),`Unknown dependency ${dep}`);
   assert(position.get(dep)<position.get(p.id),`Dependency ${dep} must precede ${p.id}`);

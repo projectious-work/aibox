@@ -5,7 +5,8 @@ dependency graph and phase scope did not change; the IDs below let older PRs,
 reviews and issue references be read without ambiguity. The current IDs are
 retained as stable references. V1-01 and V1-02 have merged evidence but remain
 `in_progress` pending conformance and release acceptance; V1-03 (Go operation
-core) is the primary coding focus.
+core) has locally verified implementation marked `done`, with publication
+still pending. V1-04 is the next planned implementation phase.
 
 | Previous ID | Current ID | Phase |
 |---|---|---|
