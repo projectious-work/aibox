@@ -13,8 +13,8 @@ The CLI/MCP completion slice was merged through
 source is `05dd13b1556ff300cac77f08fbd628f966e807bc`; the
 [local evidence record](../spec/v1/evidence/V1-03-05dd13b1/evidence.json)
 and [MCP client transcript](../spec/v1/evidence/V1-03-05dd13b1/mcp-parity.txt)
-are preserved in this repository. The roadmap marks implementation `done` and
-keeps delivery `in_progress` until a named release has published-artifact evidence.
+are preserved in this repository. The roadmap records `status: done` (Done — awaiting release). It becomes
+`shipped` only when a named release has published-artifact evidence.
 
 ## Implemented and boundaries
 

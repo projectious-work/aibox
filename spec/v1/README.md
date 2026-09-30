@@ -38,7 +38,7 @@ content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. Display order follows the intended
 implementation sequence, with dependencies pointing only backward; IDs remain
 stable references. The roadmap tracks delivery separately from these target
-requirements. `implementationStatus: done` records locally verified completion;
+requirements. `status: done` records integrated, validated, documented completion;
 only release-backed work with published conformance evidence becomes `shipped`.
 From V1-03,
 the roadmap's `demos` map requires a feature-specific run of the Go executable
