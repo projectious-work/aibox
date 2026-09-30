@@ -13,12 +13,13 @@ The initial slice was merged through
 The initial Go slice adds a common result envelope and CLI exit classes,
 canonical project-file containment, and a no-shell child runner with an
 explicit environment and bounded, known-secret-redacted diagnostic tails.
-The module pins Go 1.27.0 and adds no third-party dependencies. The accepted
+The module pins Go 1.27.0 and the official MCP Go SDK. The accepted
 design uses one Go core and delegates container semantics to the upstream
 Dev Container CLI; this slice does not create a second container engine.
 
 There is now a source-built v1 CLI with version/help and read-only local
-inspection; there is no installable release, MCP server, or supported lifecycle operation.
+inspection through both CLI and a local stdio MCP server; there is no installable
+release or supported lifecycle operation.
 The result `data` remains opaque at the common-contract layer, so envelope
 validation alone does not prove operation-specific schema conformance. A
 follow-on slice added Linux/macOS process-group TERM/KILL cancellation and a
@@ -38,9 +39,9 @@ For an exact candidate checkpoint, run `./scripts/verify-v1-03.sh` from the
 repository root. It builds Linux and macOS arm64 Go binaries, executes the
 minimal customer demo, validates the actual JSON against the closed result
 schema, runs Go tests/race/vet and specification checks, builds the v1 Hugo
-site, and prints the source SHA, binary digests and preserved evidence path.
-This is a reproducible review gate, not a public prerelease or a claim that
-host mutations and MCP already work.
+site, tests a real stdio MCP client against the same inspection use case, and
+prints the source SHA, binary digests and preserved evidence path. This is a
+reproducible review gate, not a public prerelease or a claim that host mutations work.
 
 The initial candidate passed `go test ./...`, `go test -race ./internal/...`,
 `go vet ./...`, specification validation, and a local Hugo build. Tests cover
@@ -75,10 +76,28 @@ inspects `spec/v1/examples/minimal`; its successful result binds the native
 declaration digest and reports runtime state as unknown. No host authority or
 v1 runtime compatibility claim is exposed by this slice.
 
-## Open V1-03 work
+## Completion boundary and later phases
 
-V1-03 still owns policy loading and authorization, upstream-assisted complete input discovery,
-operation record recovery reads, runtime-specific effect inspection,
-operation-specific checks, fake Dev Container delegation, CLI/MCP equivalence,
-and offline contract fixtures. Later V1-08 lifecycle and V1-21 trust-boundary
-work depend on these foundations.
+V1-03's executable acceptance boundary is the source-built read-only Go CLI
+and stdio MCP tool: version/help, local inspection of the minimal native example,
+schema-valid equivalent results, invalid-input refusals with no host effect,
+offline black-box tests,
+the supporting safe operation primitives, and a successful build of the v1
+documentation. `./scripts/verify-v1-03.sh` records the exact source commit,
+binary digests, both observed journeys, specification and contract checks, and
+documentation build in its evidence directory. Publication remains a separate
+gate before the roadmap can call the phase `shipped`.
+
+The following work belongs to later capability phases under the canonical
+[verification plan](../spec/v1/14-verification-and-release.md):
+
+- V1-08 owns operator policy loading and authorization, runtime-specific effect
+  inspection, complete upstream-assisted input discovery, recovery reads for
+  mutating operation records, and verified Dev Container delegation. Its host
+  mutations stay unavailable until these checks are in place.
+- V1-09 expands the fixed SDK registry, operator capabilities, and complete
+  operation-specific conformance corpus. CLI/MCP equivalence starts at V1-03
+  and remains a gate for each executable roadmap phase.
+- V1-21 owns host trust-boundary qualification. The existing executable
+  resolver and input-manifest builder are foundations for that work, not
+  grants of host authority.

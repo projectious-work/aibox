@@ -137,6 +137,10 @@ for(const row of uniqueConfig){
 }
 workspaceSchema.properties.sidebar={type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'},width:{type:'integer',minimum:20},showUnknown:{type:'boolean'}}};
 workspaceSchema.properties.review={type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'},githubTui:{enum:['gh-dash','web']}}};
+// The inventory is pinned to the immutable v0 baseline. These v0 options
+// gained closed values after that baseline and must stay closed in v1.
+workspaceSchema.properties.tmux.properties.layout_switch.properties.style.enum=['menu','table'];
+workspaceSchema.properties.tmux.properties.notifications.properties.protocol.enum=['osc-9','bell'];
 const harnessSchema={type:'object',additionalProperties:false,properties:{
   order:{type:'array',uniqueItems:true,items:{type:'string'}},
   launch:{type:'object',additionalProperties:{type:'object',additionalProperties:false,properties:{enabled:{type:'boolean'}}}}

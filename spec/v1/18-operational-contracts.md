@@ -25,7 +25,7 @@ UUID when omitted. No semantics are attached to a UUID beyond correlation.
 | Read logs | Root, declared source, 1–1000 lines, optional RFC 3339 `since` | Bounded entries and explicit truncation; runtime source is operator-only |
 | Refresh workspace | Root, expected UX input digest, scope `all`, `theme` or `tmux` | Changed files, rebuild and session-restart flags; optional theme/mode/layout overrides are invocation-only |
 | Inspect operation | Root and operation ID | Durable state, original operation, last confirmed step, known/unknown effects and closed next action |
-| Migration preview/apply/rollback | CLI-only; preview source/destination roots; apply/rollback plan ID and digest | Plan/manifest reference, conflicts and whether activation occurred |
+| Migration preview/apply/rollback | CLI and MCP; preview source/destination roots; apply/rollback plan ID and digest under explicit operator authorization | Plan/manifest reference, conflicts and whether activation occurred |
 
 `data` is required for successful/no-change/rebuild-required results and has an
 operation-specific closed schema. Diagnostics belong in findings, not free-text
@@ -113,9 +113,10 @@ settings. Local calls never acquire an operator client or policy path.
 The fixed registry exposes the declared lifecycle tools and
 `inspect_operation`; local mode exposes `inspect_workspace`, `check_workspace`,
 `refresh_workspace`, `read_logs` for local sources, and `inspect_operation`
-for local operation records. Migration stays a human/operator CLI utility because it
-rewrites configuration/state; this documented exception is compatible with the
-no-generic-config-mutation MCP boundary. Names, descriptions, schemas and
+for local operation records. V1-20 adds named migration preview/apply/rollback
+tools with the same reviewable plan, digest and rollback semantics as the CLI;
+apply/rollback require operator grants and never expose generic config editing.
+Names, descriptions, schemas and
 capability membership are release assets checked for collisions at startup.
 Each MCP tool exposes its selected request-union branch as an object schema,
 not the whole operation union. Local `read_logs` additionally excludes runtime

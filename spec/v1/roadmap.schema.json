@@ -24,10 +24,16 @@
   "$defs": {
     "demo": {
       "type": "object", "additionalProperties": false,
-      "required": ["run", "expect"],
+      "required": ["run", "expect", "mcp"],
       "properties": {
         "run": {"type": "string", "minLength": 1},
-        "expect": {"type": "string", "minLength": 1}
+        "expect": {"type": "string", "minLength": 1},
+        "mcp": {"type": "object", "additionalProperties": false,
+          "required": ["tool", "expect"],
+          "properties": {
+            "tool": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+            "expect": {"type": "string", "minLength": 16}
+          }}
       }
     },
     "phase": {

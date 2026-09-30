@@ -1,5 +1,16 @@
 # Contributing to aibox
 
+## v1 Go line
+
+Build the v1 CLI with `go build ./cmd/aibox`. Before committing v1 changes,
+run `go test ./...`, `go test -race ./...`, `go vet ./...`, the affected
+`spec/v1` validators and the v1 Hugo build. V1-03 has a single exact-candidate
+gate: `./scripts/verify-v1-03.sh`. Each executable roadmap increment must
+demonstrate equivalent CLI and stdio MCP results and refusals. Rust/Cargo
+checks in the legacy instructions below apply to retained v0 work, not v1.
+
+## Retained v0 Rust line
+
 ## Prerequisites
 
 - Rust stable toolchain (`rustup`)
