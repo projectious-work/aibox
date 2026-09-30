@@ -147,6 +147,12 @@ procedures before acting. These take precedence over general knowledge or tool d
 
 ## Setup
 
+For the v1 Go line, use `go test ./...`, `go test -race ./...`, `go vet ./...`,
+`go build ./cmd/aibox`, the relevant `spec/v1` validators, and the v1 docs
+build. `./scripts/verify-v1-03.sh` runs the exact V1-03 candidate gate.
+The Rust and Cargo commands below describe retained v0 work only; they are
+not v1 acceptance, commit, or release requirements.
+
 ```sh
 # build the CLI binary
 cd cli && cargo build

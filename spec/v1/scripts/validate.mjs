@@ -133,10 +133,13 @@ assert(new Set(roadmap.groups.map(x=>x.id)).size===roadmap.groups.length,'Duplic
 assert(ids.size===phases.length,'Duplicate phase');
 const demoIds=new Set(Object.keys(roadmap.demos));
 const implementationIds=new Set(phases.filter(p=>!['V1-01','V1-02'].includes(p.id)).map(p=>p.id));
+const operationNames=new Set(json('operation-request.schema.json').oneOf.map(branch=>branch.properties.operation.const));
 assert(demoIds.size===implementationIds.size && [...implementationIds].every(id=>demoIds.has(id)),'Every V1-03+ phase needs exactly one demo contract');
 for(const [id,demo] of Object.entries(roadmap.demos)){
  assert(implementationIds.has(id),`Unknown or foundation demo ${id}`);
  assert(/\baibox\b/.test(demo.run) && demo.expect.length>=16,`Demo ${id} must exercise aibox and state an observable outcome`);
+ assert(demo.mcp?.tool && demo.mcp.expect.length>=16,`Demo ${id} must state an MCP tool and observable parity outcome`);
+ assert(operationNames.has(demo.mcp.tool),`Demo ${id} references an undeclared MCP operation`);
 }
 const position=new Map(phases.map((p,i)=>[p.id,i]));
 if(roadmap.currentFocus){

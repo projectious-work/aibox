@@ -1,19 +1,17 @@
-// Command aibox is the v1 Go CLI. V1-03 intentionally exposes only local,
-// read-only inspection; host lifecycle operations arrive in later phases.
+// Command aibox is the v1 Go CLI. V1-03 exposes local, read-only inspection
+// through the CLI and MCP; host lifecycle operations arrive in later phases.
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 
-	"github.com/projectious-work/aibox/internal/contract"
-	"github.com/projectious-work/aibox/internal/inspection"
+	"github.com/projectious-work/aibox/internal/mcpserver"
+	"github.com/projectious-work/aibox/internal/usecase"
 )
 
 // version may be set at build time; the default identifies a development CLI.
@@ -24,11 +22,25 @@ func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
 // run keeps command routing testable without granting an implicit host client.
 func run(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
-		fmt.Fprintln(stdout, "aibox v1 preview\nUsage: aibox inspect --context local --project PATH --format json\n       aibox version")
+		fmt.Fprintln(stdout, "aibox v1 preview\nUsage: aibox inspect --context local --project PATH --format json\n       aibox mcp serve --context local\n       aibox version")
 		return 0
 	}
 	if args[0] == "version" || args[0] == "--version" {
 		fmt.Fprintln(stdout, version)
+		return 0
+	}
+	if args[0] == "mcp" {
+		flags := flag.NewFlagSet("mcp serve", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		contextValue := flags.String("context", "local", "MCP context")
+		if len(args) < 2 || args[1] != "serve" || flags.Parse(args[2:]) != nil || flags.NArg() != 0 || *contextValue != "local" {
+			fmt.Fprintln(stderr, "aibox: only mcp serve --context local is available in this preview")
+			return 2
+		}
+		if err := mcpserver.Serve(context.Background(), version); err != nil {
+			fmt.Fprintf(stderr, "aibox: MCP server failed: %v\n", err)
+			return 5
+		}
 		return 0
 	}
 	if args[0] != "inspect" {
@@ -51,39 +63,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "aibox: operator inspection is not available in this preview")
 		return 2
 	}
-	requestBytes := make([]byte, 16)
-	if _, err := rand.Read(requestBytes); err != nil {
+	requestID, err := usecase.NewRequestID()
+	if err != nil {
 		fmt.Fprintln(stderr, "aibox: cannot create a request ID")
 		return 5
 	}
-	requestID := hex.EncodeToString(requestBytes)
-	result := contract.Result{
-		SchemaVersion:    contract.ResultSchemaVersion,
-		Operation:        contract.InspectWorkspace,
-		RequestID:        requestID,
-		Actors:           contract.Actors{Initiator: "cli", Executor: "aibox"},
-		ChangedResources: []string{}, Warnings: []string{}, Evidence: []string{},
-	}
-	absProject, err := filepath.Abs(*projectValue)
-	if err == nil {
-		var root, digest string
-		var data inspection.WorkspaceData
-		root, digest, data, err = inspection.Workspace(absProject)
-		if err == nil {
-			result.Target = &contract.Target{Scope: "local", WorkspaceRoot: root}
-			result.InputDigest = digest
-			result.Outcome = contract.Succeeded
-			result.Data = data
-		}
-	}
-	if err != nil {
-		result.Outcome = contract.Failed
-		result.Error = &contract.Error{
-			Code: "invalid_input", Category: "invalid_input",
-			Message:   "cannot inspect the native project declaration",
-			Retryable: false, NextAction: "edit_configuration",
-		}
-	}
+	result := usecase.InspectWorkspace(requestID, "cli", *projectValue, false)
 	if err := result.ValidateEnvelope(); err != nil {
 		fmt.Fprintf(stderr, "aibox: invalid operation result: %v\n", err)
 		return 5

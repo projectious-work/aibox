@@ -7,15 +7,18 @@ documentation build from the same commit. Unit-test success alone is insufficien
 
 ## Runnable increments and frequent preview checkpoints
 
-V1-03 delivers the first Go `aibox` executable: version/help plus a safe,
-read-only `inspect --context local` journey on the minimal native example. It
+V1-03 delivers the first Go `aibox` executable: version/help plus safe,
+read-only `inspect --context local` and `inspect_workspace` MCP journeys on the minimal native example. They
 must produce a schema-valid result without Docker, operator policy or host
 credentials. It does not expose unfinished lifecycle mutation or claim v0
-parity. V1-09 completes the guarded MCP and thin CLI surfaces; it is not the
-first executable milestone.
+parity. V1-09 expands the guarded MCP registry and thin CLI surfaces to the
+authorized operator use cases.
 
 For every phase from V1-03 onward, the [roadmap's phase demo](roadmap.yaml)
-names a product-binary command and an observable, feature-specific outcome.
+names a product-binary CLI command, an MCP tool, and observable, feature-specific
+outcomes. Each implementation phase proves equivalent CLI/MCP operation results
+and refusal behavior for its new shared use cases. The foundation phases V1-01
+and V1-02 have no executable surface to compare.
 The implementation change builds the Go executable, runs that phase's demo
 against a disposable fixture, keeps earlier supported demo journeys working,
 and builds the matching v1 Hugo documentation from the same commit. The
@@ -50,12 +53,17 @@ named release and conformance evidence support that status.
 |---|---|---|
 | Schema/static | Closed JSON schemas, valid/invalid native examples, import-boundary rules, source/ledger row counts | Reject incompatible config and duplicate engines early |
 | Unit/component | Fake child executables, policy and path checker, result serializer, guide index, local renderer | All error branches, stable codes, no side effects on denied/read-only requests |
-| Binary black box | Built Go CLI from V1-03 with read-only demo, invalid input and output separation; stdio MCP parity from V1-09 | Earlier executable journeys remain working; later adapters return equivalent results |
+| Binary black box | Built Go CLI and stdio MCP client from V1-03 with matching result data and errors, invalid input and output separation | Earlier CLI/MCP journeys remain working; every phase's adapters return equivalent results |
+
 | Settings/logging black box | Temporary system/user/project/env-file/env/flag layers; stderr/file/collector capture, disk-full and rotation fixtures | Provenance, source authority, redaction and evidence separation under real binary execution |
 | Disposable integration | Pinned Dev Container CLI, selected runtime, Features, Templates, image, local UX assets | Direct upstream and wrapped lifecycle, exact stop/remove, persisted home |
 | User journey | Chapter 20's human and agent stories: fresh minimal project, complex migrated v0 project, local agent customization, operator lifecycle and recovery, sidebar/review | Actual v0 parity and new feature usability |
 | Security/fault injection | Host hook denial, symlinks, token leaks, race/restart/partial failure | Boundary holds under hostile and interrupted inputs |
 | Published-artifact | Download exact candidate binary/image/Feature/Template, verify hashes/signatures/SBOM, run fresh journey | Source-tree success cannot substitute for release evidence |
+
+The v1 test gate uses Go tests, race detection, vet, contract/schema checks,
+CLI/MCP binary journeys and documentation builds. Rust `cargo test`, Clippy,
+and Cargo audit are not v1 gates; the retained v0 Rust line keeps its own gates.
 
 Each phase evidence record contains phase ID, source commit, candidate digests,
 target cell, dependency versions, command with bounded/sanitized arguments,

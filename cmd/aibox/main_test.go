@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/projectious-work/aibox/internal/contract"
 )
 
@@ -54,12 +55,114 @@ func TestPreviewBinaryInspection(t *testing.T) {
 	if result.Operation != contract.InspectWorkspace || result.Target.WorkspaceRoot != root || result.InputDigest == "" {
 		t.Fatalf("unexpected inspect result: %s", stdout.String())
 	}
-	for _, unavailable := range []string{"build", "up", "mcp"} {
+	for _, unavailable := range []string{"build", "up"} {
 		output, err := exec.Command(binary, unavailable).CombinedOutput()
 		if err == nil || !strings.Contains(string(output), "not available") {
 			t.Fatalf("%s unexpectedly available: %v %s", unavailable, err, output)
 		}
 	}
+}
+
+func callInspect(t *testing.T, session *mcp.ClientSession, root string) (contract.Result, bool) {
+	t.Helper()
+	response, err := session.CallTool(t.Context(), &mcp.CallToolParams{
+		Name: "inspect_workspace", Arguments: map[string]any{"requestId": "parity-1", "projectRoot": root},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(response.StructuredContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var result contract.Result
+	if err := json.Unmarshal(encoded, &result); err != nil {
+		t.Fatalf("decode structured MCP result: %v: %s", err, encoded)
+	}
+	if err := result.ValidateEnvelope(); err != nil {
+		t.Fatal(err)
+	}
+	return result, response.IsError
+}
+
+func TestPreviewBinaryMCPParity(t *testing.T) {
+	binary := buildPreview(t)
+	client := mcp.NewClient(&mcp.Implementation{Name: "aibox-test", Version: "1"}, nil)
+	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: exec.Command(binary, "mcp", "serve", "--context", "local")}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = session.Close() })
+	listed, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(listed.Tools) != 1 || listed.Tools[0].Name != "inspect_workspace" || listed.Tools[0].Annotations == nil || !listed.Tools[0].Annotations.ReadOnlyHint {
+		t.Fatalf("unexpected V1-03 MCP registry: %+v", listed.Tools)
+	}
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".devcontainer"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".devcontainer", "devcontainer.json"), []byte(`{"image":"example.invalid/base:one"}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	mcpResult, isError := callInspect(t, session, root)
+	if isError || mcpResult.Outcome != contract.Succeeded || mcpResult.Target.WorkspaceRoot != root {
+		t.Fatalf("MCP inspect: %+v error=%v", mcpResult, isError)
+	}
+	output, err := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cliResult contract.Result
+	if err := json.Unmarshal(output, &cliResult); err != nil {
+		t.Fatal(err)
+	}
+	if cliResult.Operation != mcpResult.Operation || cliResult.Outcome != mcpResult.Outcome || cliResult.InputDigest != mcpResult.InputDigest || *cliResult.Target != *mcpResult.Target {
+		t.Fatalf("CLI/MCP result mismatch: cli=%+v mcp=%+v", cliResult, mcpResult)
+	}
+	cliData, _ := json.Marshal(cliResult.Data)
+	mcpData, _ := json.Marshal(mcpResult.Data)
+	var cliFields, mcpFields map[string]any
+	if err := json.Unmarshal(cliData, &cliFields); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(mcpData, &mcpFields); err != nil {
+		t.Fatal(err)
+	}
+	delete(cliFields, "observedAt")
+	delete(mcpFields, "observedAt")
+	cliData, _ = json.Marshal(cliFields)
+	mcpData, _ = json.Marshal(mcpFields)
+	if !bytes.Equal(cliData, mcpData) {
+		t.Fatalf("CLI/MCP data mismatch: cli=%s mcp=%s", cliData, mcpData)
+	}
+	missing := filepath.Join(root, "missing")
+	mcpFailure, isError := callInspect(t, session, missing)
+	if !isError || mcpFailure.Outcome != contract.Failed || mcpFailure.Error.Code != "invalid_input" || mcpFailure.Target != nil {
+		t.Fatalf("MCP refusal: %+v error=%v", mcpFailure, isError)
+	}
+	command := exec.Command(binary, "inspect", "--context", "local", "--project", missing, "--format", "json")
+	output, err = command.Output()
+	if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 2 {
+		t.Fatalf("CLI refusal exit: %v", err)
+	}
+	if err := json.Unmarshal(output, &cliResult); err != nil {
+		t.Fatal(err)
+	}
+	if cliResult.Outcome != mcpFailure.Outcome || *cliResult.Error != *mcpFailure.Error {
+		t.Fatalf("CLI/MCP refusal mismatch: cli=%+v mcp=%+v", cliResult, mcpFailure)
+	}
+	symlink := filepath.Join(t.TempDir(), "linked")
+	if err := os.Symlink(root, symlink); err != nil {
+		t.Fatal(err)
+	}
+	symlinkFailure, isError := callInspect(t, session, symlink)
+	if !isError || symlinkFailure.Error == nil || symlinkFailure.Error.Code != "invalid_input" || symlinkFailure.Target != nil {
+		t.Fatalf("MCP symlink refusal: %+v error=%v", symlinkFailure, isError)
+	}
+	t.Logf("stdio MCP registry=%s success=%s refusal=%s parity=passed", listed.Tools[0].Name, mcpResult.Outcome, mcpFailure.Error.Code)
 }
 
 func TestPreviewBinaryMissingProject(t *testing.T) {

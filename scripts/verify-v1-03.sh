@@ -17,6 +17,8 @@ native_target="$(go env GOOS)/$(go env GOARCH)"
 go test ./...
 go test -race ./...
 go vet ./...
+go mod verify
+go test -run '^TestPreviewBinaryMCPParity$' -count=1 -v ./cmd/aibox > "$evidence_dir/mcp-parity.txt"
 go build -o "$evidence_dir/aibox" ./cmd/aibox
 GOOS=darwin GOARCH=arm64 go build -o "$evidence_dir/aibox-darwin-arm64" ./cmd/aibox
 
@@ -70,12 +72,15 @@ const evidence = {
   demo: {command: 'aibox inspect --context local --project spec/v1/examples/minimal --format json',
     operation: demo.operation, outcome: demo.outcome, state: demo.data.state,
     transcript: 'inspect.json', transcriptDigest: digest('inspect.json')},
+  mcp: {command: 'aibox mcp serve --context local', tool: 'inspect_workspace',
+    transcript: 'mcp-parity.txt', transcriptDigest: digest('mcp-parity.txt')},
   binaries: [
     {target: nativeTarget, path: 'aibox', digest: digest('aibox')},
     {target: 'darwin/arm64', path: 'aibox-darwin-arm64', digest: digest('aibox-darwin-arm64')},
   ],
   documentation: {source: 'docs-site/content/docs/core-status.md', build: 'hugo', output: 'hugo'},
-  checks: ['go test ./...', 'go test -race ./...', 'go vet ./...',
+  checks: ['go test ./...', 'go test -race ./...', 'go vet ./...', 'go mod verify',
+    'binary stdio MCP client parity and refusal',
     'binary success and invalid-input journeys', 'Draft 2020-12 result validation',
     'inventory', 'specification', 'contract fixtures', 'v1 Hugo build', 'git diff --check'],
   failed: [], skipped: [],

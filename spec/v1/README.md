@@ -1,6 +1,6 @@
 # aibox v1 — Software implementation specification
 
-Version: **0.6, 2026-09-29**. Development line: `v1.x-dev`.
+Version: **0.7, 2026-09-30**. Development line: `v1.x-dev`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
 an MCP-first interface and a thin human CLI. Configuration is edited in files;
@@ -43,7 +43,9 @@ requirements. Only release-backed work with conformance evidence becomes
 the roadmap's `demos` map requires a feature-specific run of the Go executable
 and an observable outcome for every phase. The executable and matching Hugo
 walkthrough remain demonstrable after each integrated increment; V1-03 must
-deliver the first safe read-only binary, while V1-09 completes MCP/CLI parity.
+deliver the first safe read-only binary and stdio MCP tool with equivalent
+inspection results. Every executable roadmap phase proves CLI/MCP parity for
+its operations; V1-09 expands the guarded registry and client coverage.
 Verified checkpoints may publish scoped alpha/beta releases before full v0
 parity. V1-19 hardens the cross-line archive/navigation matrix rather than
 postponing the first matching prerelease documentation.
