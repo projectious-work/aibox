@@ -114,7 +114,7 @@ there is no permissive opaque extension bag.
 | Setting class | Authoritative input | Interpreter | Durable user override |
 |---|---|---|---|
 | Workspace name, image/build, user, ports, mounts, lifecycle | Standard `devcontainer.json`, native Dockerfile/Compose | Dev Container CLI and native tools | Edited native file; operator policy may deny unsafe requests |
-| Install/disable/version of optional tool or harness | Feature presence and documented Feature options | Feature installer and upstream CLI | Project edit of Feature reference/options |
+| Install/disable/version of optional tool or harness | Native Feature/image/Dockerfile/package inputs | Native installer and upstream CLI | Project edit of native selection/build inputs |
 | Theme family/mode/variant, prompt/layout, tmux/status/title UX | Versioned distribution defaults and optional `customizations.aibox.workspace`; no duplicate Feature preference options | Bounded local UX renderer; native-only operation also supported | Tool-native user files in persistent home |
 | Native tool advanced settings | Native tmux, PowerKit, Yazi, Vim, Starship, LazyGit and harness files | Owning tool | User-owned native file; never copied back into namespace |
 | Optional audio client | Audio Feature and approved native env/mount declarations | Package manager, runtime and client tools | Host audio service remains operator-owned |
@@ -132,27 +132,33 @@ conversion is never silently reported as parity.
 
 ## Feature composition contract
 
-Use the Dev Container Feature mechanism for installable capabilities. A
-Feature is a packaged installer with declared options, dependencies and
-entry point; it is not an aibox package-manager API. Standard or
-maintainer-owned Features are preferred when they meet the complete tool
-contract. An aibox-owned Feature is permitted only for a proven gap or
-aibox-specific integration, and must reuse existing package managers/tool
-distribution rather than implement another resolver. A thin aibox Feature MAY
-compose several upstream Features when conditional v0 bundle behavior cannot
-be expressed otherwise; it must not hide an unbounded addon registry.
+Select qualified existing native Dev Container Features or native image,
+Dockerfile and package units for installable capabilities. A Feature is a
+packaged installer with declared options, dependencies and entry point; it is
+not an aibox package-manager API. `customizations.aibox` carries UX preferences
+only and must not install tools. A native unit may supply several catalog rows.
+
+Aibox-owned installer Features require individual justification and owner
+approval **after review of the complete gap list**, including existing native
+alternatives and removal/scope-reduction options. Missing upstream coverage
+alone does not authorize a fallback Feature. Follow
+DEC-20261001_1954-SmoothTrout and chapter 19; reuse existing package managers
+and official distributions for any approved owned installer.
 
 Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 
-1. Record one selected v1 install unit/reference and its publisher, immutable
-   digest, license, current maintenance evidence and security review.
+1. Record a selected qualified v1 native install unit/reference and its
+   publisher, immutable inputs, license, maintenance/security evidence, or an
+   explicit owner-approved removal/scope decision. Retain every census row.
 2. Map v0 absent/default-enabled/explicit-enabled/explicit-disabled/version
-   states to Feature presence/options; explicit disable MUST result in absence
-   of the tool where v0 promises it, including from the base image.
-3. Map v0 recipe `requires` into explicit Feature dependencies or a documented
+   states to native selection/options; explicit disable MUST result in absence
+   where v0 promises it, including from the base image. Record any reduced
+   support explicitly for owner decision.
+3. Map v0 recipe `requires` into native dependencies or a documented
    prerequisite; prove there is no hidden addon solver or unexpected extras.
-4. Test default and non-default supported versions on both container
-   architectures, including a failed download/checksum and wrong architecture.
+4. Test default/non-default supported versions and disable on both container
+   architectures. Test download/checksum and wrong-architecture failures where
+   those operations are performed by the selected installation mechanism.
 5. Prove that native project lockfiles remain authoritative for application
    dependencies; bundled convenience tools never rewrite them.
 
@@ -160,7 +166,9 @@ The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and
 `decision`. The current `ledger/addons.json` is only its input. Phase V1-05
-cannot be accepted without the filled table and actual Feature manifests.
+requires the complete table, owner dispositions for gaps/removals, actual
+native installation sources and qualification evidence. It does not require
+98 Feature manifests or aibox ownership of each installer.
 
 The base image must separately enumerate its packages and runtime glue from
 `ledger/base-build.json`; tools outside the addon catalog do not disappear.
