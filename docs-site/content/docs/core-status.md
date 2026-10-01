@@ -6,7 +6,8 @@ weight: 20
 
 # Go core implementation status
 
-V1-03 is in progress. A source-built Go CLI supports version, help and
+V1-03 implementation is complete with local evidence; publication is pending.
+A source-built Go CLI supports version, help and
 read-only local inspection through both CLI and stdio MCP. The first internal slice adds the operation result
 envelope and stable exit-code mapping, canonical project-file containment,
 plus a no-shell child-process runner and an exact-environment advisory lock.

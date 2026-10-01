@@ -1,12 +1,21 @@
 # V1-03 — Go operation core
 
-V1-03 is the current implementation focus. This note is for Go implementers,
+V1-03 implementation is done with local evidence; publication is pending.
+This note is for Go implementers,
 security reviewers, and independent conformance reviewers. The accepted
 [architecture](../spec/v1/07-architecture.md),
 [lifecycle](../spec/v1/09-lifecycle.md), and
 [operational contracts](../spec/v1/18-operational-contracts.md) are the baseline.
 The initial slice was merged through
 [PR #467](https://github.com/projectious-work/aibox/pull/467).
+The CLI/MCP completion slice was merged through
+[PR #490](https://github.com/projectious-work/aibox/pull/490). Its verified
+source is `05dd13b1556ff300cac77f08fbd628f966e807bc`; the
+[local evidence record](../spec/v1/evidence/V1-03-05dd13b1/evidence.json)
+and [MCP client transcript](../spec/v1/evidence/V1-03-05dd13b1/mcp-parity.txt)
+are preserved in this repository. The roadmap records `status: done`
+(Done — awaiting release). It becomes `shipped` only when a named release has
+published-artifact evidence.
 
 ## Implemented and boundaries
 

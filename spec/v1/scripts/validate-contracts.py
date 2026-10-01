@@ -99,6 +99,24 @@ check("roadmap.schema.json", missing_demo, False)
 invalid_demo = copy.deepcopy(roadmap)
 invalid_demo["demos"]["V1-03"]["run"] = ""
 check("roadmap.schema.json", invalid_demo, False)
+missing_completion_commit = copy.deepcopy(roadmap)
+missing_completion_commit["groups"][0]["phases"][2].pop("implementationCommit")
+check("roadmap.schema.json", missing_completion_commit, False)
+missing_completion_evidence = copy.deepcopy(roadmap)
+missing_completion_evidence["groups"][0]["phases"][2].pop("evidence")
+check("roadmap.schema.json", missing_completion_evidence, False)
+unreleased_shipped = copy.deepcopy(roadmap)
+unreleased_shipped["groups"][0]["phases"][2]["status"] = "shipped"
+check("roadmap.schema.json", unreleased_shipped, False)
+released_done = copy.deepcopy(unreleased_shipped)
+released_done["groups"][0]["phases"][2]["release"] = "v1.0.0-alpha.1"
+check("roadmap.schema.json", released_done)
+missing_completion_note = copy.deepcopy(roadmap)
+missing_completion_note["groups"][0]["phases"][2].pop("devNote")
+check("roadmap.schema.json", missing_completion_note, False)
+legacy_completion = copy.deepcopy(roadmap)
+legacy_completion["groups"][0]["phases"][2]["implementationStatus"] = "done"
+check("roadmap.schema.json", legacy_completion, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
 for example_name in ("minimal", "customized"):
     example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"

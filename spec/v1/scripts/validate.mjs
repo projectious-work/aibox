@@ -71,10 +71,18 @@ function schemaCheck(value,schema,at='$',rootSchema=schema){
  if(schema.items)for(let i=0;i<value.length;i++)schemaCheck(value[i],schema.items,`${at}[${i}]`,rootSchema);
  if(schema.allOf)for(const rule of schema.allOf){
   const [key,condition]=Object.entries(rule.if.properties)[0];
-  if(value[key]===condition.const)schemaCheck(value,rule.then,at,rootSchema);
+  if(condition.const!==undefined ? value[key]===condition.const : condition.enum?.includes(value[key]))
+   schemaCheck(value,rule.then,at,rootSchema);
  }
 }
 schemaCheck(roadmap,roadmapSchema);
+const incompleteDone=structuredClone(roadmap);
+const completedPhase=incompleteDone.groups.flatMap(group=>group.phases).find(phase=>phase.status==='done');
+assert(completedPhase,'Missing completed roadmap fixture');
+delete completedPhase.implementationCommit;
+let rejectedIncompleteDone=false;
+try{schemaCheck(incompleteDone,roadmapSchema);}catch{rejectedIncompleteDone=true;}
+assert(rejectedIncompleteDone,'Roadmap schema accepted done without its verified commit');
 const customizationSchema=json('customization.schema.json');
 execFileSync(process.execPath,[path.join(root,'scripts/render-devcontainer-examples.mjs'),'--check'],{stdio:'pipe'});
 const parseDocumentedExample=flavor=>JSON.parse(read(`examples/${flavor}/.devcontainer/devcontainer.json`)
@@ -144,12 +152,16 @@ for(const [id,demo] of Object.entries(roadmap.demos)){
 const position=new Map(phases.map((p,i)=>[p.id,i]));
 if(roadmap.currentFocus){
  assert(ids.has(roadmap.currentFocus),'Unknown current focus');
- assert(phases[position.get(roadmap.currentFocus)].status==='in_progress','Current focus must be in progress');
+ assert(phases[position.get(roadmap.currentFocus)].status==='in_progress','Current focus must have active implementation');
 }
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
- assert(['idea','planned','in_progress','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
+ assert(['idea','planned','in_progress','done','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
+ if(['done','shipped'].includes(p.status)){
+  assert(/^[0-9a-f]{40}$/.test(p.implementationCommit??''),`Completed implementation needs its verified source commit ${p.id}`);
+  assert(p.devNote && p.evidence?.length>0,`Completed implementation needs a note and evidence ${p.id}`);
+ }
  for(const dep of p.dependencies??[]){
   assert(ids.has(dep),`Unknown dependency ${dep}`);
   assert(position.get(dep)<position.get(p.id),`Dependency ${dep} must precede ${p.id}`);

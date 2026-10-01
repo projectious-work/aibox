@@ -1,6 +1,6 @@
 # aibox v1 — Software implementation specification
 
-Version: **0.7, 2026-09-30**. Development line: `v1.x-dev`.
+Version: **0.8, 2026-09-30**. Development line: `v1.x-dev`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
 an MCP-first interface and a thin human CLI. Configuration is edited in files;
@@ -38,8 +38,9 @@ content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation. Display order follows the intended
 implementation sequence, with dependencies pointing only backward; IDs remain
 stable references. The roadmap tracks delivery separately from these target
-requirements. Only release-backed work with conformance evidence becomes
-`shipped`. From V1-03,
+requirements. `status: done` records integrated, validated, documented completion;
+only release-backed work with published conformance evidence becomes `shipped`.
+From V1-03,
 the roadmap's `demos` map requires a feature-specific run of the Go executable
 and an observable outcome for every phase. The executable and matching Hugo
 walkthrough remain demonstrable after each integrated increment; V1-03 must
