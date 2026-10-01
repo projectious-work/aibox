@@ -15,7 +15,8 @@ translate native image, Dockerfile, Compose, mount, or lifecycle settings.
 > references yet. The source templates and rendered examples are for checkout
 > testing. `aibox` currently provides read-only `inspect` in its Go CLI and
 > local MCP server. It does not build, start, or exec into containers. Direct
-> Dev Container CLI build/up/exec qualification is still pending.
+> Dev Container CLI build/up/exec passed one macOS arm64 Docker host run; the
+> required repeat run and integration review are pending.
 
 ## Choose a starter
 
@@ -65,10 +66,10 @@ the local MCP server currently exposes the equivalent read-only
 `inspect_workspace` tool; see the [current preview limits](core-status.md).
 
 Direct upstream Dev Container CLI `build`, `up` and `exec` are the lifecycle
-path for these native definitions. They have not yet been qualified for this
-candidate, so runtime startup remains pending. On a host with the supported
-container runtime available, maintainers should run the V1-04 host gate from
-the repository root:
+path for these native definitions. One host run passed for this source
+candidate on macOS arm64 with Docker. Repeatability and other host/runtime
+targets remain unqualified. On a host with a container runtime available,
+maintainers can run the V1-04 host gate from the repository root:
 
 ```sh
 ./scripts/verify-v1-04-host.sh --output /path/to/evidence
@@ -79,11 +80,11 @@ The script needs Python 3, a working Docker or Podman CLI, and access to
 checksummed Dev Container CLI `0.89.0` archive; npm and an installed Node.js
 are not required. It renders both Template variants and records build/up/exec
 plus home-volume persistence evidence in the chosen
-output directory. It also checks the custom-user and bind-home examples when
-the host supports them. Keep the output directory, including `evidence.json`
-and step logs, and provide it with the implementation review. Do not claim
-lifecycle support until that evidence records passing results for the tested
-host and runtime. The aibox Go preview cannot perform those lifecycle actions.
+output directory. It also checks the custom-user and bind-home examples. Keep
+the output directory, including `evidence.json` and step logs, and provide it
+with the implementation review. The [first checked-in host manifest](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
+records one passing run of all four examples at source `85cc0c9a`. The aibox
+Go preview cannot perform lifecycle actions.
 
 ## Keep private workspace state persistent
 
@@ -130,5 +131,4 @@ idempotently.
 - The aibox Go preview and MCP interface currently inspect only. They do not
   apply configuration changes or perform host lifecycle operations.
 
-Until the host gate evidence is available, treat the examples as candidate
-native definitions, not as a release-qualified setup.
+These are source checkout examples, not a release-qualified setup.

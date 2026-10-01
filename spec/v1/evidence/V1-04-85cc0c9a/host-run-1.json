@@ -1,0 +1,771 @@
+{
+  "phase": "V1-04",
+  "verification": "host",
+  "sourceCommit": "85cc0c9af67e74175b0efc1499d48193bb73a629",
+  "startedAt": "2026-10-01T17:24:45Z",
+  "finishedAt": "2026-10-01T17:27:19Z",
+  "runId": "20261001t172445-35325",
+  "status": "passed",
+  "engine": "/usr/local/bin/docker",
+  "runtime": {
+    "nodeVersion": "v20.19.5",
+    "nodeArchive": "https://nodejs.org/dist/v20.19.5/node-v20.19.5-darwin-arm64.tar.gz",
+    "nodeArchiveSha256": "cfed7503d8d99fbcf2f52e408ec52f616058eb0867b34dbc3437259993ef5cba",
+    "cliVersion": "0.89.0",
+    "cliArchive": "tools/vendor/devcontainer-cli-0.89.0.tgz",
+    "cliArchiveSha256": "49c7d71d40058f89e1fd8b019a193ed4215b7fc773c0f6273f7032a46cd33f4b"
+  },
+  "steps": [
+    {
+      "name": "template-docs",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "templates",
+        "generate-docs",
+        "--project-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/template-docs/src"
+      ],
+      "log": "template-docs.log",
+      "exitCode": 0
+    },
+    {
+      "name": "engine-info",
+      "command": [
+        "/usr/local/bin/docker",
+        "info"
+      ],
+      "log": "engine-info.log",
+      "exitCode": 0
+    },
+    {
+      "name": "read-configuration-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "read-configuration",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--include-merged-configuration"
+      ],
+      "log": "read-configuration-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "build-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "build",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--image-name",
+        "aibox-v1-04-20261001t172445-35325-minimal",
+        "--label",
+        "aibox.v1-04.run=20261001t172445-35325"
+      ],
+      "log": "build-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "up-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-minimal",
+        "--include-configuration"
+      ],
+      "log": "up-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "exec-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-minimal",
+        "bash",
+        "-lc",
+        "set -e; test \"$(id -un)\" = aibox; test -w \"$HOME\"; tmux -V; yazi --version; codex --version"
+      ],
+      "log": "exec-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "write-home-marker-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-minimal",
+        "bash",
+        "-lc",
+        "printf \"v1-04-persisted\\n\" > \"$HOME/.aibox-v1-04-marker\""
+      ],
+      "log": "write-home-marker-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "remove-for-rebuild-minimal",
+      "command": [
+        "/usr/local/bin/docker",
+        "rm",
+        "-f",
+        "68a6010eaabf"
+      ],
+      "log": "remove-for-rebuild-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "rebuild-up-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-minimal",
+        "--include-configuration",
+        "--build-no-cache"
+      ],
+      "log": "rebuild-up-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "verify-home-marker-minimal",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/minimal",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-minimal",
+        "bash",
+        "-lc",
+        "test \"$(cat \"$HOME/.aibox-v1-04-marker\")\" = v1-04-persisted && test -w \"$HOME\""
+      ],
+      "log": "verify-home-marker-minimal.log",
+      "exitCode": 0
+    },
+    {
+      "name": "read-configuration-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "read-configuration",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--include-merged-configuration"
+      ],
+      "log": "read-configuration-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "build-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "build",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--image-name",
+        "aibox-v1-04-20261001t172445-35325-curated",
+        "--label",
+        "aibox.v1-04.run=20261001t172445-35325"
+      ],
+      "log": "build-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "up-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-curated",
+        "--include-configuration"
+      ],
+      "log": "up-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "exec-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-curated",
+        "bash",
+        "-lc",
+        "set -e; test \"$(id -un)\" = aibox; test -w \"$HOME\"; tmux -V; yazi --version; codex --version"
+      ],
+      "log": "exec-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "write-home-marker-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-curated",
+        "bash",
+        "-lc",
+        "printf \"v1-04-persisted\\n\" > \"$HOME/.aibox-v1-04-marker\""
+      ],
+      "log": "write-home-marker-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "remove-for-rebuild-curated",
+      "command": [
+        "/usr/local/bin/docker",
+        "rm",
+        "-f",
+        "882c00560c45"
+      ],
+      "log": "remove-for-rebuild-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "rebuild-up-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-curated",
+        "--include-configuration",
+        "--build-no-cache"
+      ],
+      "log": "rebuild-up-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "verify-home-marker-curated",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/curated",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-curated",
+        "bash",
+        "-lc",
+        "test \"$(cat \"$HOME/.aibox-v1-04-marker\")\" = v1-04-persisted && test -w \"$HOME\""
+      ],
+      "log": "verify-home-marker-curated.log",
+      "exitCode": 0
+    },
+    {
+      "name": "read-configuration-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "read-configuration",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--include-merged-configuration"
+      ],
+      "log": "read-configuration-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "build-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "build",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--image-name",
+        "aibox-v1-04-20261001t172445-35325-custom-user",
+        "--label",
+        "aibox.v1-04.run=20261001t172445-35325"
+      ],
+      "log": "build-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "up-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-custom-user",
+        "--include-configuration"
+      ],
+      "log": "up-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "exec-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-custom-user",
+        "bash",
+        "-lc",
+        "set -e; test \"$(id -un)\" = dev; test -w \"$HOME\"; tmux -V; yazi --version; codex --version"
+      ],
+      "log": "exec-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "write-home-marker-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-custom-user",
+        "bash",
+        "-lc",
+        "printf \"v1-04-persisted\\n\" > \"$HOME/.aibox-v1-04-marker\""
+      ],
+      "log": "write-home-marker-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "remove-for-rebuild-custom-user",
+      "command": [
+        "/usr/local/bin/docker",
+        "rm",
+        "-f",
+        "4d92596af2b0"
+      ],
+      "log": "remove-for-rebuild-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "rebuild-up-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-custom-user",
+        "--include-configuration"
+      ],
+      "log": "rebuild-up-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "verify-home-marker-custom-user",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/custom-user",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-custom-user",
+        "bash",
+        "-lc",
+        "test \"$(cat \"$HOME/.aibox-v1-04-marker\")\" = v1-04-persisted && test -w \"$HOME\""
+      ],
+      "log": "verify-home-marker-custom-user.log",
+      "exitCode": 0
+    },
+    {
+      "name": "read-configuration-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "read-configuration",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--include-merged-configuration"
+      ],
+      "log": "read-configuration-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "build-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "build",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--image-name",
+        "aibox-v1-04-20261001t172445-35325-bind-home",
+        "--label",
+        "aibox.v1-04.run=20261001t172445-35325"
+      ],
+      "log": "build-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "up-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-bind-home",
+        "--include-configuration"
+      ],
+      "log": "up-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "exec-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-bind-home",
+        "bash",
+        "-lc",
+        "set -e; test \"$(id -un)\" = aibox; test -w \"$HOME\"; tmux -V; yazi --version; codex --version"
+      ],
+      "log": "exec-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "write-home-marker-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-bind-home",
+        "bash",
+        "-lc",
+        "printf \"v1-04-persisted\\n\" > \"$HOME/.aibox-v1-04-marker\""
+      ],
+      "log": "write-home-marker-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "remove-for-rebuild-bind-home",
+      "command": [
+        "/usr/local/bin/docker",
+        "rm",
+        "-f",
+        "04227cbfa50f"
+      ],
+      "log": "remove-for-rebuild-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "rebuild-up-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "up",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-bind-home",
+        "--include-configuration"
+      ],
+      "log": "rebuild-up-bind-home.log",
+      "exitCode": 0
+    },
+    {
+      "name": "verify-home-marker-bind-home",
+      "command": [
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/node",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/cli/package/devcontainer.js",
+        "exec",
+        "--docker-path",
+        "/usr/local/bin/docker",
+        "--workspace-folder",
+        "/private/var/folders/7h/n7kg_mg563xdh_3c3_9sbl880000gn/T/aibox-v1-04-host-run-fw9zo888/bind-home",
+        "--id-label",
+        "aibox.v1-04.run=20261001t172445-35325-bind-home",
+        "bash",
+        "-lc",
+        "test \"$(cat \"$HOME/.aibox-v1-04-marker\")\" = v1-04-persisted && test -w \"$HOME\""
+      ],
+      "log": "verify-home-marker-bind-home.log",
+      "exitCode": 0
+    }
+  ],
+  "failures": [],
+  "cleanupFailures": [],
+  "cleanup": {
+    "runOwnedContainersOnly": true,
+    "inspectedHomeVolumesOnly": true,
+    "uniquelyTaggedBuildImagesOnly": true,
+    "retainedUnownedImageRefs": [
+      "vsc-bind-home-126b9f3ba1b44dfc10f542c0bcbfcb912a1b47ab8dc4e8a8a62c3f08df73423f",
+      "vsc-curated-4dd8ad65898823e679b5e02460edc1397e53536703ebe049a9e3d68d4fa4315d",
+      "vsc-custom-user-398068b0840a086521a58a840d9a1888faf187045bb6e5cf3f53b2fbbbbf4ad4",
+      "vsc-minimal-fb35214b182a5a34fa3aec334098d726810d6d68767c0be989392afe77836077"
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "build-bind-home.log",
+      "sha256": "sha256:59b5e6a64e0bc8e0675a1a940ff4ca0dc9fcd37232a2a65c600ea3ed4733ee83"
+    },
+    {
+      "path": "build-curated.log",
+      "sha256": "sha256:c2841dba39cf0e599739015f8276933ef905ec2efd326655f9507c950cb32403"
+    },
+    {
+      "path": "build-custom-user.log",
+      "sha256": "sha256:49bf59be2a18b49fe1fdc020f5f529585bfaafa69d507154a33b4589fd773aba"
+    },
+    {
+      "path": "build-minimal.log",
+      "sha256": "sha256:eb4de155401fd87944e6124a4dd78a9ffeef2028527a908b02676a45da73beae"
+    },
+    {
+      "path": "cli-runtime.json",
+      "sha256": "sha256:3708153f94f12e3ef4da2456f85deb9636b59e35f68530f8f6b33c9815ef4bd9"
+    },
+    {
+      "path": "engine-info.log",
+      "sha256": "sha256:57213658ed6d7cd80a6adf580846dd3546721a0d258d71f1852f13b1f28477eb"
+    },
+    {
+      "path": "exec-bind-home.log",
+      "sha256": "sha256:72b0d837555fa9e6e8e6a1ddccab00571fa82915b6cabde11f6b0eb5307da907"
+    },
+    {
+      "path": "exec-curated.log",
+      "sha256": "sha256:416679535c66c96c017ff0c6c2e12ab0b387bdd9c6c6d22298507a641ee81d92"
+    },
+    {
+      "path": "exec-custom-user.log",
+      "sha256": "sha256:3c6ea286ee1cdd4fd27e9502726733c6cb3a0cb9f976f8a3e6754d80be8b6e1b"
+    },
+    {
+      "path": "exec-minimal.log",
+      "sha256": "sha256:b73df101a1b84d74e0e7fec8dfa13474d033153463d5f958688eac059fbc0ff7"
+    },
+    {
+      "path": "home-mount-bind-home-first.json",
+      "sha256": "sha256:706bbdba118d18af9c488b595470167d9d9add7b8f77483fe0b76c4d78bf9e90"
+    },
+    {
+      "path": "home-mount-bind-home-rebuilt.json",
+      "sha256": "sha256:86e573e93defd50378a43797f4077080d6761f25190055655a27a8337887ae99"
+    },
+    {
+      "path": "home-mount-curated-first.json",
+      "sha256": "sha256:ce7dabb61a9e677dcd01d2149c99a88bc77ff592e3ccc5e51fad924663f4a29e"
+    },
+    {
+      "path": "home-mount-curated-rebuilt.json",
+      "sha256": "sha256:18ed01e9239448ef5163dcdb6a1f69ec49a18801e1e089f3a4272cac33da35e5"
+    },
+    {
+      "path": "home-mount-custom-user-first.json",
+      "sha256": "sha256:3b5f97bd11f33e0d33495a989fbbc626b4326d402e71770a65c5196d0556f16c"
+    },
+    {
+      "path": "home-mount-custom-user-rebuilt.json",
+      "sha256": "sha256:5b3f58980e823e1f90a1f5e37bbaaaa2f05f7fea28389e7ef5f24944334127bc"
+    },
+    {
+      "path": "home-mount-minimal-first.json",
+      "sha256": "sha256:077f69c8034a8c8b502e7fe08b0a475f17a54fe2f644e3d84e3fde4b008a4f0e"
+    },
+    {
+      "path": "home-mount-minimal-rebuilt.json",
+      "sha256": "sha256:3e69ad4af529862b1f51c725740bb7193b4a3385ba2822806d71af7969d446ce"
+    },
+    {
+      "path": "read-configuration-bind-home.log",
+      "sha256": "sha256:ffd069d2e099127ababea58e60ed319175afc619ffc56947ec8f55fd08a8c4ad"
+    },
+    {
+      "path": "read-configuration-curated.log",
+      "sha256": "sha256:bc1bb5a53137b6e71b4a168ecfe7439ec9ded34a5fb35cd2d1b920e77246d4d6"
+    },
+    {
+      "path": "read-configuration-custom-user.log",
+      "sha256": "sha256:5685594b3bb0cb1df14fb8695be448992eede992048f77b3f9ed5939de4ece8b"
+    },
+    {
+      "path": "read-configuration-minimal.log",
+      "sha256": "sha256:e8c27982e0498f9a0d733570e8c9a522486cfc14484a099695c31680b3129a99"
+    },
+    {
+      "path": "rebuild-up-bind-home.log",
+      "sha256": "sha256:33a6b7511cc49ac400d62952c10e5de305fc555e962f297ae875291a5adf5561"
+    },
+    {
+      "path": "rebuild-up-curated.log",
+      "sha256": "sha256:6058623668a1faa47b54eabdcdbb129990db1e2062c402ca89a7719f6286d304"
+    },
+    {
+      "path": "rebuild-up-custom-user.log",
+      "sha256": "sha256:5b724f4e23d4e53582692e0598d299b5252f22d3998e2fc1b3d23edeb62d9ad4"
+    },
+    {
+      "path": "rebuild-up-minimal.log",
+      "sha256": "sha256:a4e6e307bbc9733d28c6c67fffc5bf10f7919b03e4533a4fc72b23d818cd2510"
+    },
+    {
+      "path": "remove-for-rebuild-bind-home.log",
+      "sha256": "sha256:0885159f8ee2f5faa34889dfa011163120807a374944cd345aab800c040664dd"
+    },
+    {
+      "path": "remove-for-rebuild-curated.log",
+      "sha256": "sha256:0415a424f78e3ca594260a480d419ecd0cb14363c86e5070a60dbe39264343e7"
+    },
+    {
+      "path": "remove-for-rebuild-custom-user.log",
+      "sha256": "sha256:9559c93ff72f61778b59be9bfe62c5b30ec14ee415aa483df6eed925e587b858"
+    },
+    {
+      "path": "remove-for-rebuild-minimal.log",
+      "sha256": "sha256:a59b026dddd894dd5a477fb409d458d1776de4d3aeb622bf113ae796cfbc5e40"
+    },
+    {
+      "path": "template-docs.log",
+      "sha256": "sha256:1b6b1a23d8336493a238012e20a8257e6bacfa83ec6af7d0c0eef651b77ea0d4"
+    },
+    {
+      "path": "up-bind-home.log",
+      "sha256": "sha256:1d5576e721355799d6d1a0efb7d055fd2e186581aaad2ab32c4dabff2c982b95"
+    },
+    {
+      "path": "up-curated.log",
+      "sha256": "sha256:ae5ba696e27e9986bef98b64726fffadaca71212276b4bc49052501877bc0056"
+    },
+    {
+      "path": "up-custom-user.log",
+      "sha256": "sha256:bfef5f6b9686c555d925a475b0079aa53d9f27db4336e348235bb6d002a1ec42"
+    },
+    {
+      "path": "up-minimal.log",
+      "sha256": "sha256:ad572d0d80037ccd7cc8740785a3d157f3411c76bad74a82b10b9be9c452e711"
+    },
+    {
+      "path": "verify-home-marker-bind-home.log",
+      "sha256": "sha256:c7c7da47dbdfd9b3b401755c84c2b717648c8977e8a5ddbf31c6de49fd1bda57"
+    },
+    {
+      "path": "verify-home-marker-curated.log",
+      "sha256": "sha256:be407b4bfe5cb778f28d3acc43ec10ffc5519f9ef8b9cd117fe0e35deac2bf42"
+    },
+    {
+      "path": "verify-home-marker-custom-user.log",
+      "sha256": "sha256:3a7dff25e2a64498dc4034507f882bfa44f037a6695918a42ca839aa0c4a46e1"
+    },
+    {
+      "path": "verify-home-marker-minimal.log",
+      "sha256": "sha256:110e27746e66299b1e449592af3398b618d1eda3135a3d0b4841533ec493d967"
+    },
+    {
+      "path": "write-home-marker-bind-home.log",
+      "sha256": "sha256:b077f108ba7d4759700c5d8e512b7ab4843c7607f94e1efa6ced4251ca5fb380"
+    },
+    {
+      "path": "write-home-marker-curated.log",
+      "sha256": "sha256:918ac2effba59da463a9f2c2c6ae90c49528bfa86078fa5520f25b69ed3d05b4"
+    },
+    {
+      "path": "write-home-marker-custom-user.log",
+      "sha256": "sha256:7b31f9152f3d88e9be4ba3bc13bf0f18981299a424e0444d7f4e1c21e7f8f9a4"
+    },
+    {
+      "path": "write-home-marker-minimal.log",
+      "sha256": "sha256:da7fa68731c47c81efe53e91f9104a41578c6b1e1a72931931f560a7aead9dba"
+    }
+  ]
+}
