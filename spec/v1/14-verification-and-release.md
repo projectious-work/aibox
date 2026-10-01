@@ -1,9 +1,10 @@
 # 14. Verification, target qualification and release
 
 This chapter implements R-TARGETS and R-DEPENDENCIES and gives the roadmap
-evidence-based definitions of `done` and `shipped`. Each phase includes implementation,
-AC/ledger trace, tests, its roadmap `docs` deliverable and a passing local
-documentation build from the same commit. Unit-test success alone is insufficient.
+evidence-based definitions of `done` and `shipped`. Each phase includes
+implementation, AC/ledger trace, tests, its roadmap `docs` deliverable, and a
+passing local documentation build from the same commit. Unit-test success alone
+is insufficient.
 
 ## Runnable increments and frequent preview checkpoints
 
@@ -131,8 +132,10 @@ Implementation dependencies may be satisfied by `done` or `shipped`; a dependenc
 on released availability explicitly requires `shipped` in its acceptance criteria.
 Several phases may be `done` before a shared release gate. Public roadmap text
 labels them **Done — awaiting release**; an explicitly internal foundation may
-remain **Done — internal foundation** without a separate release claim. V1-02 is a foundation prerequisite for all implementation
-phases, so the shared Hugo build exists before features are delivered. Every
+remain **Done — internal foundation** without a separate release claim.
+
+V1-02 is a foundation prerequisite for all implementation phases, so the shared
+Hugo build exists before features are delivered. Every
 phase has a distinct executable demo and documentation deliverable; V1-19
 hardens the later cross-line alpha/beta archive matrix, not the first
 opportunity to publish a scoped, verified preview. Keep
