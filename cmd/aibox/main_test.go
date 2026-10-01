@@ -165,6 +165,62 @@ func TestPreviewBinaryMCPParity(t *testing.T) {
 	t.Logf("stdio MCP registry=%s success=%s refusal=%s parity=passed", listed.Tools[0].Name, mcpResult.Outcome, mcpFailure.Error.Code)
 }
 
+func TestV104StarterCLIMCPParity(t *testing.T) {
+	binary := buildPreview(t)
+	client := mcp.NewClient(&mcp.Implementation{Name: "aibox-v1-04-test", Version: "1"}, nil)
+	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: exec.Command(binary, "mcp", "serve", "--context", "local")}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = session.Close() })
+	listed, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(listed.Tools) != 1 || listed.Tools[0].Name != "inspect_workspace" {
+		t.Fatalf("unexpected V1-04 MCP registry: %+v", listed.Tools)
+	}
+	working, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	repoRoot := filepath.Clean(filepath.Join(working, "..", ".."))
+	for _, name := range []string{"minimal", "customized", "custom-user", "bind-home"} {
+		root := filepath.Join(repoRoot, "spec", "v1", "examples", name)
+		cliOutput, err := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
+		if err != nil {
+			t.Fatalf("%s CLI inspection: %v", name, err)
+		}
+		var cliResult contract.Result
+		if err := json.Unmarshal(cliOutput, &cliResult); err != nil {
+			t.Fatalf("%s CLI result: %v", name, err)
+		}
+		mcpResult, isError := callInspect(t, session, root)
+		if isError || cliResult.Outcome != contract.Succeeded || mcpResult.Outcome != cliResult.Outcome ||
+			mcpResult.Operation != cliResult.Operation || mcpResult.InputDigest != cliResult.InputDigest ||
+			mcpResult.Target == nil || cliResult.Target == nil || *mcpResult.Target != *cliResult.Target {
+			t.Fatalf("%s CLI/MCP envelope mismatch: cli=%+v mcp=%+v error=%v", name, cliResult, mcpResult, isError)
+		}
+		cliData, _ := json.Marshal(cliResult.Data)
+		mcpData, _ := json.Marshal(mcpResult.Data)
+		var cliFields, mcpFields map[string]any
+		if err := json.Unmarshal(cliData, &cliFields); err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(mcpData, &mcpFields); err != nil {
+			t.Fatal(err)
+		}
+		delete(cliFields, "observedAt")
+		delete(mcpFields, "observedAt")
+		cliData, _ = json.Marshal(cliFields)
+		mcpData, _ = json.Marshal(mcpFields)
+		if !bytes.Equal(cliData, mcpData) {
+			t.Fatalf("%s CLI/MCP data mismatch: cli=%s mcp=%s", name, cliData, mcpData)
+		}
+		t.Logf("starter=%s operation=%s outcome=%s digest=%s cli-mcp-parity=passed", name, cliResult.Operation, cliResult.Outcome, cliResult.InputDigest)
+	}
+}
+
 func TestPreviewBinaryMissingProject(t *testing.T) {
 	binary := buildPreview(t)
 	command := exec.Command(binary, "inspect", "--project", filepath.Join(t.TempDir(), "missing"), "--format", "json")

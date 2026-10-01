@@ -1,0 +1,18 @@
+// Project-owned native configuration. Requires no aibox host binary.
+// Optional aibox UX preferences are absent; standard tools retain their own configuration.
+// Optional Feature choices are documented in templates/README.md; no unpublished Feature is required.
+{
+  "name": "aibox curated",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "HARNESS": "${templateOption:harness}"
+    }
+  },
+  "containerUser": "aibox",
+  "remoteUser": "aibox",
+  "mounts": [
+    "source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"
+  ]
+}

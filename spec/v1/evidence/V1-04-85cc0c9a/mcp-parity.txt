@@ -1,0 +1,8 @@
+=== RUN   TestV104StarterCLIMCPParity
+    main_test.go:220: starter=minimal operation=inspect_workspace outcome=succeeded digest=sha256:c4e6563778e15c0fb4b633278cdb02835ba7d98035d1d089c212804c7841dfd0 cli-mcp-parity=passed
+    main_test.go:220: starter=customized operation=inspect_workspace outcome=succeeded digest=sha256:d80725b4d9b64923e72cb25b78abe89d3f3dc15c900d9c128fffd9cb6fc3d9fb cli-mcp-parity=passed
+    main_test.go:220: starter=custom-user operation=inspect_workspace outcome=succeeded digest=sha256:d0a0affaef91f92c3ab926edbb001d75c22efb0e9eb9a6739f6f3329752efc84 cli-mcp-parity=passed
+    main_test.go:220: starter=bind-home operation=inspect_workspace outcome=succeeded digest=sha256:858ed70223c98f3fe8dfb6618b804c70f81eb2f2e081dd104ac274c2a7f1aa04 cli-mcp-parity=passed
+--- PASS: TestV104StarterCLIMCPParity (0.57s)
+PASS
+ok  	github.com/projectious-work/aibox/cmd/aibox	0.570s

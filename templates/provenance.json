@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1",
+  "templateVersion": "1.0.0",
+  "updateOwner": "projectious-work/aibox maintainers",
+  "verifiedAt": "2026-10-01",
+  "base": {
+    "reference": "debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a",
+    "registry": "https://registry-1.docker.io/v2/library/debian/manifests/trixie-slim",
+    "platformManifests": [
+      {
+        "digest": "sha256:7792b1f7702a86946cd518db72b6a407302c3e9bc1635634368b878189e8221c",
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      },
+      {
+        "digest": "sha256:da496358bd6934d2bd6a563a33176a2e50eff5490c54b4ac6fb051b69fef4071",
+        "platform": {
+          "architecture": "arm64",
+          "os": "linux",
+          "variant": "v8"
+        }
+      }
+    ]
+  },
+  "debian": {
+    "snapshot": "https://snapshot.debian.org/archive/debian/20260930T000000Z/",
+    "verification": "APT archive signatures and fixed snapshot; explicit top-level package versions",
+    "packages": {
+      "amd64": {
+        "bash": {
+          "version": "5.2.37-2+b10",
+          "sha256": "2fd7b04f1b7caa29c4e683f5216e6af354a41e3cdcf6e75394d7cda680f9ab82",
+          "filename": "pool/main/b/bash/bash_5.2.37-2+b10_amd64.deb"
+        },
+        "ca-certificates": {
+          "version": "20250419",
+          "sha256": "ef590f89563aa4b46c8260d49d1cea0fc1b181d19e8df3782694706adf05c184",
+          "filename": "pool/main/c/ca-certificates/ca-certificates_20250419_all.deb"
+        },
+        "curl": {
+          "version": "8.14.1-2+deb13u5",
+          "sha256": "ebb7e0cbe30ad23bce0d28a848ccfeb9b73b82817eb4fe12fa20d2845f62dc73",
+          "filename": "pool/main/c/curl/curl_8.14.1-2+deb13u5_amd64.deb"
+        },
+        "git": {
+          "version": "1:2.47.3-0+deb13u1",
+          "sha256": "3e35662fd5c46add561703e54031a1d8ad9df45811927689f0a51122b13be722",
+          "filename": "pool/main/g/git/git_2.47.3-0+deb13u1_amd64.deb"
+        },
+        "procps": {
+          "version": "2:4.0.4-9",
+          "sha256": "4db90bb6776772fc52585d6b1fbfc52ec2a85480e1b4363b743fbb2ffa2a5375",
+          "filename": "pool/main/p/procps/procps_4.0.4-9_amd64.deb"
+        },
+        "tmux": {
+          "version": "3.5a-3",
+          "sha256": "e6b6aa51780044e2c4a0e618c33f832b70ec80caa30303e6c254a0c851b5af78",
+          "filename": "pool/main/t/tmux/tmux_3.5a-3_amd64.deb"
+        },
+        "unzip": {
+          "version": "6.0-29+deb13u1",
+          "sha256": "fc11f8736bdec6fc46a6864f75bce0c8206a790df37dbcab5ddb25b1bf0f58f0",
+          "filename": "pool/main/u/unzip/unzip_6.0-29+deb13u1_amd64.deb"
+        }
+      },
+      "arm64": {
+        "bash": {
+          "version": "5.2.37-2+b10",
+          "sha256": "9e2d2b3646b250f53be79b6128d9cff5e99cc5ff4a8c84e58efab59ad9bb0ddc",
+          "filename": "pool/main/b/bash/bash_5.2.37-2+b10_arm64.deb"
+        },
+        "ca-certificates": {
+          "version": "20250419",
+          "sha256": "ef590f89563aa4b46c8260d49d1cea0fc1b181d19e8df3782694706adf05c184",
+          "filename": "pool/main/c/ca-certificates/ca-certificates_20250419_all.deb"
+        },
+        "curl": {
+          "version": "8.14.1-2+deb13u5",
+          "sha256": "3ea9ea868ffaddb2aba840b52dcd1e59b74dbe625f0c4c4e2458c9d01bc03e6f",
+          "filename": "pool/main/c/curl/curl_8.14.1-2+deb13u5_arm64.deb"
+        },
+        "git": {
+          "version": "1:2.47.3-0+deb13u1",
+          "sha256": "8c6b1e96b226211260d7814472215a8a1ed38ee37400c421d454391c1807cb5a",
+          "filename": "pool/main/g/git/git_2.47.3-0+deb13u1_arm64.deb"
+        },
+        "procps": {
+          "version": "2:4.0.4-9",
+          "sha256": "9afd4ad2e8da92322715114fb9555c63ce92f6c72bf72867e76ab2d6a7a3b541",
+          "filename": "pool/main/p/procps/procps_4.0.4-9_arm64.deb"
+        },
+        "tmux": {
+          "version": "3.5a-3",
+          "sha256": "835d23b320f5d0457f7a695d90d1c5cca5c2b4a6481fa28b06ad14b18dcabff2",
+          "filename": "pool/main/t/tmux/tmux_3.5a-3_arm64.deb"
+        },
+        "unzip": {
+          "version": "6.0-29+deb13u1",
+          "sha256": "b455bc70ff59f790c619802f921fc5bd22ab25acb6394fd7505f34b93c5b2cdb",
+          "filename": "pool/main/u/unzip/unzip_6.0-29+deb13u1_arm64.deb"
+        }
+      }
+    }
+  },
+  "tools": [
+    {
+      "tool": "yazi",
+      "version": "v26.5.6",
+      "platform": "linux/arm64",
+      "url": "https://github.com/sxyazi/yazi/releases/download/v26.5.6/yazi-aarch64-unknown-linux-musl.zip",
+      "digest": "sha256:dff4a6774069bdde616c3cd145275b462a5887229cd9bf6341e78063da37e84f",
+      "license": "MIT",
+      "source": "https://github.com/sxyazi/yazi/releases/tag/v26.5.6",
+      "verification": "Published GitHub asset digest; installer verifies SHA256 before extraction"
+    },
+    {
+      "tool": "yazi",
+      "version": "v26.5.6",
+      "platform": "linux/amd64",
+      "url": "https://github.com/sxyazi/yazi/releases/download/v26.5.6/yazi-x86_64-unknown-linux-musl.zip",
+      "digest": "sha256:1031a02560d053301537195a6661d227c15cb4ce5c30481050b31e2b88681bff",
+      "license": "MIT",
+      "source": "https://github.com/sxyazi/yazi/releases/tag/v26.5.6",
+      "verification": "Published GitHub asset digest; installer verifies SHA256 before extraction"
+    },
+    {
+      "tool": "codex",
+      "version": "rust-v0.107.0",
+      "platform": "linux/arm64",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.107.0/codex-aarch64-unknown-linux-musl.tar.gz",
+      "digest": "sha256:b994c71d1c48aa4e340aa3aa295631ba54b6b94f0e2d5ece3ca744e86fe52d9d",
+      "license": "Apache-2.0",
+      "source": "https://github.com/openai/codex/releases/tag/rust-v0.107.0",
+      "verification": "Published GitHub asset digest; installer verifies SHA256 before extraction"
+    },
+    {
+      "tool": "codex",
+      "version": "rust-v0.107.0",
+      "platform": "linux/amd64",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.107.0/codex-x86_64-unknown-linux-musl.tar.gz",
+      "digest": "sha256:9c1a16086e971578f0c16d58d07fe8295791c0a597eeb7fd6388f8a3f1579cee",
+      "license": "Apache-2.0",
+      "source": "https://github.com/openai/codex/releases/tag/rust-v0.107.0",
+      "verification": "Published GitHub asset digest; installer verifies SHA256 before extraction"
+    }
+  ],
+  "optionalFeatures": [
+    {
+      "reference": "ghcr.io/devcontainers/features/node@sha256:8c0de46939b61958041700ee89e3493f3b2e4131a06dc46b4d9423427d06e5f6",
+      "version": "1.7.1",
+      "source": "https://github.com/devcontainers/features/tree/main/src/node",
+      "license": "MIT",
+      "qualification": "Published manifest and option declarations inspected; optional runtime composition remains V1-05 work"
+    }
+  ]
+}
