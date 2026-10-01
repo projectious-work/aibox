@@ -47,6 +47,7 @@ function checkSchema(value, schema, at = '$', rootSchema = schema) {
 }
 
 const customizationSchema = readJSON('customization.schema.json');
+const nativeFeatures = readJSON('fixtures/v1-05-native-features.json');
 const exampleNames = ['minimal', 'customized', 'custom-user', 'bind-home'];
 const examples = new Map();
 for (const name of exampleNames) {
@@ -84,10 +85,15 @@ for (const name of exampleNames) {
   }
   assert(!Object.hasOwn(example, 'aibox'), `${name}: aibox data belongs under customizations.aibox`);
   const extension = example.customizations?.aibox;
-  if (name === 'minimal') assert(extension === undefined, 'minimal: aibox UX configuration must be optional');
+  if (name === 'minimal') {
+    assert(extension === undefined, 'minimal: aibox UX configuration must be optional');
+    assert(!Object.hasOwn(example, 'features'), 'minimal: optional tools must remain absent');
+  }
   if (name === 'customized') {
     assert(extension !== undefined, 'customized: expected optional customizations.aibox example');
     checkSchema(extension, customizationSchema, '$.customizations.aibox');
+    assert(JSON.stringify(example.features) === JSON.stringify(nativeFeatures.selected),
+      'customized: native Feature selection must match the reviewed fixture');
   }
 }
 

@@ -6,6 +6,7 @@ import path from 'node:path';
 
 const specRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const schema = JSON.parse(readFileSync(path.join(specRoot, 'customization.schema.json'), 'utf8'));
+const nativeFeatureFixture = JSON.parse(readFileSync(path.join(specRoot, 'fixtures/v1-05-native-features.json'), 'utf8'));
 const check = process.argv.includes('--check');
 
 const native = [
@@ -264,13 +265,14 @@ function render(flavor) {
     'devcontainer.mounts': bindHome
       ? [{source: '${localWorkspaceFolder}/.aibox-home', target: '/home/aibox', type: 'bind'}]
       : [`source=aibox-home-\${devcontainerId},target=/home/${username},type=volume`],
+    'devcontainer.features': nativeFeatureFixture.selected,
     'aibox.schemaVersion': '1',
     'aibox.workspace.theme': 'gruvbox',
     'aibox.workspace.mode': 'dark',
     'aibox.workspace.layout': 'dev',
   };
   const selected = new Set(['devcontainer.name', 'devcontainer.build', 'devcontainer.build.dockerfile', 'devcontainer.build.context', 'devcontainer.containerUser', 'devcontainer.remoteUser', 'devcontainer.mounts']);
-  if (customized) for (const pointer of ['devcontainer.customizations', 'devcontainer.customizations.aibox',
+  if (customized) for (const pointer of ['devcontainer.features', 'devcontainer.customizations', 'devcontainer.customizations.aibox',
     'aibox.schemaVersion', 'aibox.workspace', 'aibox.workspace.theme', 'aibox.workspace.mode', 'aibox.workspace.layout'])
     selected.add(pointer);
   const lines = [
