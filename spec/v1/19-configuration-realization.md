@@ -19,7 +19,8 @@ verified destination blocks that **conversion**, not basic native v1 use.
    it entirely and edit each tool's configuration directly.
 3. Do not also define theme/status/layout/prompt fields as Feature options.
    The workspace-runtime Feature installs the renderer/assets, not a competing
-   UX preference store. Tool install/version options belong to Features.
+   UX preference store. Tool install/version choices belong to native Feature,
+   image, Dockerfile or package inputs; `customizations.aibox` never installs tools.
 4. A Feature installation cannot read an arbitrary workspace template. After
    workspace mount, a local lifecycle command invokes the renderer against the
    selected definition's validated namespace. Managed starters pass the
@@ -70,7 +71,7 @@ dynamic maps are expanded into individual entries in the conversion report.
 | `container.resource_thresholds.*` | `customizations.aibox.diagnostics.<leaf>`, preserving units and null/absent semantics. |
 | `customization.*` | `customizations.aibox.workspace.<same suffix>`; canonicalize aliases before emitting the closed schema. |
 | `ai.harness_order` / enabled harness list | `customizations.aibox.harnesses.order` and `launch.<id>.enabled`; installation is independent. |
-| `ai.harness.<id>.install/version`, `addons.*.tools.*` | Explicit Feature selection/options, using the per-tool rule below. Host-only tools stay host-only and produce installation guidance, never fictitious in-container support. |
+| `ai.harness.<id>.install/version`, `addons.*.tools.*` | Explicit native Feature/image/Dockerfile/package selection, using the per-tool rule below. Host-only tools stay host-only and produce installation guidance, never fictitious in-container support. |
 | `ai.execution.*`, harness execution overrides | Per-harness native approval/filesystem/network settings. Use adapter translations in chapter 11; no generic boolean approximation or claimed grant. A harness with no equivalent rejects that conversion with a manual disposition. |
 | `ai.mcp.servers[]` | Each selected harness's native MCP config entries, by exact server name. Preserve argv/env references, disable collisions rather than replacing personal entries. Secrets are references under chapter 17. |
 | `ai.mcp.permissions.*` | Native per-harness allow/ask/deny policy where expressible; explicit unsupported outcome otherwise. Deny wins; project values never authorize host operations. |
@@ -93,32 +94,42 @@ receive their actual v0 effective values, not the current upstream defaults.
 
 ## Tool installation realization
 
-The unit of acceptance is each of the 98 `ADDON:<recipe>/<tool>` entries,
-not “one Feature per language”. Adopt a qualified upstream Feature when it
-preserves that tool's install/version/disable behavior and license/provenance.
-For a tool without such an identified Feature, the concrete fallback design
-is an aibox-owned **thin installer Feature**, using the existing v0 recipe's
-native package manager or official release artifact. This is not permission
-to create an addon resolver or preserve insecure download behavior.
+Account for each of the 98 `ADDON:<recipe>/<tool>` entries in the v0 census.
+An installation unit may cover several tools; neither a Feature per tool nor
+a Feature per language is required. Prefer an existing qualified native Dev
+Container Feature when it preserves the relevant install/version/disable
+behavior and license/provenance. Native image, Dockerfile and package units
+are also valid, using existing package managers or official release artifacts.
+Do not introduce an addon resolver or an installer in `customizations.aibox`.
 
-Source layout: `features/src/<recipe>-<tool>/devcontainer-feature.json` and
-`install.sh`. IDs use lower-case ledger names; collisions fail validation.
-Each single-tool Feature has string `version` (explicit migrated version,
-otherwise the ledger default); its presence means enabled, omission means
-disabled. No redundant `enabled` flag. The template expands default-enabled
-tools explicitly. Package-manager tools with no selectable version expose no
-invented version promise: image/package lock records the installed version.
-Hard prerequisites use declared `dependsOn` only when unconditional; optional
-tools are separately selected. Disabled tools cannot be baked into the base.
-Local source references are used for implementation tests; published registry
-references and immutable digests are release outputs, not invented spec inputs.
+Before implementing any aibox-owned installer Feature, present the **complete
+gap list** to the owner. For each gap include researched existing native
+options, the behavior they cannot preserve, maintenance/security cost, and
+removal or scope-reduction options. The owner must decide the disposition;
+a missing qualified Feature is not automatic permission to write one.
+An owned installer requires individual justification and owner approval after
+that full review (DEC-20261001_1954-SmoothTrout). It must reuse existing native
+installation mechanisms rather than implement another package resolver.
 
-The V1-05 installation manifest enumerates the selected upstream reference
-or concrete source unit for **every** ledger entry, including options,
-dependencies and license. Unqualified upstream replacements cannot silently change
-the fallback contract. Binary checksums/signatures, architecture selection,
-failed download behavior, default/non-default versions and explicit disable
-are required tests for each selected installer.
+The V1-05 installation manifest accounts for **every** ledger entry with a
+selected qualified native reference/source unit or an explicit owner-approved
+removal/scope decision. Preserve the original census row for removed tools so
+parity accounting remains auditable. Unresolved gaps block catalog acceptance.
+Record options, defaults, dependencies, license/provenance, immutable build
+inputs, supported architectures and evidence per selected unit. Multiple rows
+may point to the same unit; a row must not invent independent version or
+disable support that the unit does not provide.
+
+Native selection explicitly expands migrated default-enabled tools. Explicit
+disable must produce absence where v0 promises it, including from the base
+image. Package tools without selectable versions expose no invented promise:
+the native image/package lock records installed versions. Hard prerequisites
+use native dependencies or documented prerequisites; optional selections do
+not acquire unexpected extras. Local source references may be used for tests;
+published references and immutable digests require actual publication evidence.
+Default/non-default supported versions, explicit disable and both container
+architectures require tests. Download/checksum and wrong-architecture failures
+are tested where the selected installation mechanism performs those operations.
 
 ## Local file ownership and recovery
 
