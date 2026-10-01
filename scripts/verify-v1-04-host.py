@@ -171,7 +171,7 @@ class Gate:
         self.steps: list[dict[str, object]] = []
         self.failures: list[str] = []
         self.cleanup_failures: list[str] = []
-        self.run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + f"-{os.getpid()}"
+        self.run_id = datetime.now(timezone.utc).strftime("%Y%m%dt%H%M%S") + f"-{os.getpid()}"
         self.engine: str | None = None
         self.node: Path | None = None
         self.cli: Path | None = None
