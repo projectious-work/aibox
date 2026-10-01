@@ -71,10 +71,18 @@ function schemaCheck(value,schema,at='$',rootSchema=schema){
  if(schema.items)for(let i=0;i<value.length;i++)schemaCheck(value[i],schema.items,`${at}[${i}]`,rootSchema);
  if(schema.allOf)for(const rule of schema.allOf){
   const [key,condition]=Object.entries(rule.if.properties)[0];
-  if(value[key]===condition.const)schemaCheck(value,rule.then,at,rootSchema);
+  if(condition.const!==undefined ? value[key]===condition.const : condition.enum?.includes(value[key]))
+   schemaCheck(value,rule.then,at,rootSchema);
  }
 }
 schemaCheck(roadmap,roadmapSchema);
+const incompleteDone=structuredClone(roadmap);
+const completedPhase=incompleteDone.groups.flatMap(group=>group.phases).find(phase=>phase.status==='done');
+assert(completedPhase,'Missing completed roadmap fixture');
+delete completedPhase.implementationCommit;
+let rejectedIncompleteDone=false;
+try{schemaCheck(incompleteDone,roadmapSchema);}catch{rejectedIncompleteDone=true;}
+assert(rejectedIncompleteDone,'Roadmap schema accepted done without its verified commit');
 const customizationSchema=json('customization.schema.json');
 execFileSync(process.execPath,[path.join(root,'scripts/render-devcontainer-examples.mjs'),'--check'],{stdio:'pipe'});
 const parseDocumentedExample=flavor=>JSON.parse(read(`examples/${flavor}/.devcontainer/devcontainer.json`)
