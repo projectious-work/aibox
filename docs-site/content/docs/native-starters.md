@@ -15,8 +15,8 @@ translate native image, Dockerfile, Compose, mount, or lifecycle settings.
 > references yet. The source templates and rendered examples are for checkout
 > testing. `aibox` currently provides read-only `inspect` in its Go CLI and
 > local MCP server. It does not build, start, or exec into containers. Direct
-> Dev Container CLI build/up/exec passed one macOS arm64 Docker host run; the
-> required repeat run and integration review are pending.
+> Dev Container CLI build/up/exec passed two macOS arm64 Docker host runs.
+> Other host/runtime targets remain unqualified.
 
 ## Choose a starter
 
@@ -66,9 +66,9 @@ the local MCP server currently exposes the equivalent read-only
 `inspect_workspace` tool; see the [current preview limits](core-status.md).
 
 Direct upstream Dev Container CLI `build`, `up` and `exec` are the lifecycle
-path for these native definitions. One host run passed for this source
-candidate on macOS arm64 with Docker. Repeatability and other host/runtime
-targets remain unqualified. On a host with a container runtime available,
+path for these native definitions. Two host runs passed for this source
+candidate on macOS arm64 with Docker. Other host/runtime targets remain
+unqualified. On a host with a container runtime available,
 maintainers can run the V1-04 host gate from the repository root:
 
 ```sh
@@ -82,9 +82,10 @@ are not required. It renders both Template variants and records build/up/exec
 plus home-volume persistence evidence in the chosen
 output directory. It also checks the custom-user and bind-home examples. Keep
 the output directory, including `evidence.json` and step logs, and provide it
-with the implementation review. The [first checked-in host manifest](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
-records one passing run of all four examples at source `85cc0c9a`. The aibox
-Go preview cannot perform lifecycle actions.
+with the implementation review. The [first](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
+and [repeat](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-2.json)
+checked-in host manifests record both passing runs of all four examples. The
+aibox Go preview cannot perform lifecycle actions.
 
 ## Keep private workspace state persistent
 
