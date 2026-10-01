@@ -145,4 +145,66 @@ event = dict(schemaVersion="aibox.log-event/v1", timestamp=t, severity="info", e
 check("log-event.schema.json", event)
 check("log-event.schema.json", dict(event, secret="unexpected"), False)
 check("log-event.schema.json", dict(event, sequence=-1), False)
+
+# V1-04 Template metadata and rendered native configuration contracts.
+repo_root = root.parent.parent
+template_root = repo_root / "templates" / "src"
+template_checks = 0
+def active_jsonc(path):
+    return json.loads("\n".join(line for line in path.read_text().splitlines()
+                                  if not line.lstrip().startswith("//")))
+
+for name in ("minimal", "curated"):
+    source = template_root / name
+    metadata = json.loads((source / "devcontainer-template.json").read_text())
+    assert metadata["id"] == name and metadata["version"] == "1.0.0"
+    assert metadata["publisher"] == "projectious-work" and "Any" in metadata["platforms"]
+    assert all(metadata[key].strip() for key in ("name", "description", "documentationURL", "licenseURL"))
+    option = metadata["options"]["harness"]
+    assert option["type"] == "string" and option["enum"] == ["codex", "none"] and option["default"] == "codex"
+    config = active_jsonc(source / ".devcontainer" / "devcontainer.json")
+    assert config["build"]["args"]["HARNESS"] == "${templateOption:harness}"
+    assert config["containerUser"] == config["remoteUser"] == "aibox"
+    assert config["mounts"] == ["source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"]
+    for filename in ("Dockerfile", "install-tools.sh"):
+        assert (source / ".devcontainer" / filename).is_file()
+    ignored = (source / ".devcontainer" / ".gitignore").read_text().splitlines()
+    assert "*.env" in ignored and "compose.local.yaml" in ignored
+    dockerfile = (source / ".devcontainer" / "Dockerfile").read_text()
+    assert "ARG USERNAME=aibox" in dockerfile and "USER ${USERNAME}" in dockerfile
+    assert "@sha256:" in dockerfile and "snapshot.debian.org" in dockerfile
+    if name == "curated":
+        assert (source / ".devcontainer" / "tmux.conf").is_file()
+    invalid = copy.deepcopy(metadata)
+    invalid["options"]["harness"]["default"] = "shell"
+    assert invalid["options"]["harness"]["default"] not in invalid["options"]["harness"]["enum"]
+    template_checks += 1
+
+for name in ("minimal", "customized", "custom-user", "bind-home"):
+    example_dir = root / "examples" / name
+    config = active_jsonc(example_dir / ".devcontainer" / "devcontainer.json")
+    assert config["build"] == {"dockerfile": "Dockerfile", "context": "."} and "image" not in config
+    assert config["containerUser"] == config["remoteUser"]
+    assert (example_dir / ".devcontainer" / "Dockerfile").is_file()
+    assert (example_dir / ".devcontainer" / "install-tools.sh").is_file()
+    ignored = (example_dir / ".devcontainer" / ".gitignore").read_text().splitlines()
+    assert "*.env" in ignored and "compose.local.yaml" in ignored
+    if name == "bind-home":
+        assert config["mounts"] == [{"source": "${localWorkspaceFolder}/.aibox-home",
+                                      "target": "/home/aibox", "type": "bind"}]
+        ignored = (example_dir / ".gitignore").read_text().splitlines()
+        assert ".aibox-home/" in ignored and ".env" in ignored
+    else:
+        user = "dev" if name == "custom-user" else "aibox"
+        assert config["remoteUser"] == user
+        assert config["mounts"] == [f"source=aibox-home-${{devcontainerId}},target=/home/{user},type=volume"]
+    if name == "minimal":
+        assert "customizations" not in config
+    elif name == "customized":
+        check("customization.schema.json", config["customizations"]["aibox"])
+    if name == "custom-user":
+        dockerfile = (example_dir / ".devcontainer" / "Dockerfile").read_text()
+        assert "ARG USERNAME=dev" in dockerfile and "useradd --create-home" in dockerfile
+    template_checks += 1
 print(f"Draft 2020-12 validation passed: {len(schemas)} schemas, {count} contract fixtures.")
+print(f"Native starter contracts passed: {template_checks} Template metadata and rendered example fixtures.")

@@ -1,6 +1,6 @@
 // Render the example JSONC option catalog from the closed aibox schema.
 // This is documentation generation, not a Dev Container configuration parser.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -252,17 +252,24 @@ function emitFields(lines, fields, parent, indent, selected, activeValues) {
 
 function render(flavor) {
   const customized = flavor === 'customized';
+  const customUser = flavor === 'custom-user';
+  const bindHome = flavor === 'bind-home';
+  const username = customUser ? 'dev' : 'aibox';
   const activeValues = {
     'devcontainer.name': customized ? 'Native Dev Container with Optional aibox Preferences' : 'Native Dev Container',
-    'devcontainer.image': 'mcr.microsoft.com/devcontainers/base:debian',
-    'devcontainer.remoteUser': 'vscode',
-    'devcontainer.mounts': ['source=native-devcontainer-home-${devcontainerId},target=/home/vscode,type=volume'],
+    'devcontainer.build.dockerfile': 'Dockerfile',
+    'devcontainer.build.context': '.',
+    'devcontainer.containerUser': username,
+    'devcontainer.remoteUser': username,
+    'devcontainer.mounts': bindHome
+      ? [{source: '${localWorkspaceFolder}/.aibox-home', target: '/home/aibox', type: 'bind'}]
+      : [`source=aibox-home-\${devcontainerId},target=/home/${username},type=volume`],
     'aibox.schemaVersion': '1',
     'aibox.workspace.theme': 'gruvbox',
     'aibox.workspace.mode': 'dark',
     'aibox.workspace.layout': 'dev',
   };
-  const selected = new Set(['devcontainer.name', 'devcontainer.image', 'devcontainer.remoteUser', 'devcontainer.mounts']);
+  const selected = new Set(['devcontainer.name', 'devcontainer.build', 'devcontainer.build.dockerfile', 'devcontainer.build.context', 'devcontainer.containerUser', 'devcontainer.remoteUser', 'devcontainer.mounts']);
   if (customized) for (const pointer of ['devcontainer.customizations', 'devcontainer.customizations.aibox',
     'aibox.schemaVersion', 'aibox.workspace', 'aibox.workspace.theme', 'aibox.workspace.mode', 'aibox.workspace.layout'])
     selected.add(pointer);
@@ -303,7 +310,7 @@ function render(flavor) {
   return lines.join('\n');
 }
 
-for (const flavor of ['minimal', 'customized']) {
+for (const flavor of ['minimal', 'customized', 'custom-user', 'bind-home']) {
   const file = path.join(specRoot, 'examples', flavor, '.devcontainer', 'devcontainer.json');
   const expected = render(flavor);
   // Every emitted example is also strict JSON once its documentation comments
@@ -316,6 +323,22 @@ for (const flavor of ['minimal', 'customized']) {
     throw Error('The customized example must select the current aibox schema');
   if (check) {
     if (readFileSync(file, 'utf8') !== expected) throw Error(`Example option catalog drift: ${file}`);
-  } else writeFileSync(file, expected);
+  } else { mkdirSync(path.dirname(file), {recursive: true}); writeFileSync(file, expected); }
+  const template = flavor === 'customized' ? 'curated' : 'minimal';
+  const sourceRoot = path.resolve(specRoot, '../../templates/src', template, '.devcontainer');
+  for (const name of ['Dockerfile', 'install-tools.sh', '.gitignore', ...(template === 'curated' ? ['tmux.conf'] : [])]) {
+    let content = readFileSync(path.join(sourceRoot, name), 'utf8');
+    if (flavor === 'custom-user' && name === 'Dockerfile') content = content.replace('ARG USERNAME=aibox', 'ARG USERNAME=dev');
+    const destination = path.join(path.dirname(file), name);
+    if (check) {
+      if (readFileSync(destination, 'utf8') !== content) throw Error(`Example native file drift: ${destination}`);
+    } else writeFileSync(destination, content);
+  }
+  if (flavor === 'bind-home') {
+    const ignore = path.join(specRoot, 'examples', flavor, '.gitignore');
+    const contents = '.aibox-home/\n.env\n.devcontainer/compose.local.yaml\n';
+    if (check) { if (readFileSync(ignore, 'utf8') !== contents) throw Error(`Example private-path ignore drift: ${ignore}`); }
+    else writeFileSync(ignore, contents);
+  }
 }
 console.log('Dev Container example option catalogs checked.');

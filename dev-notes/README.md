@@ -12,6 +12,7 @@ narrating commits or replacing user documentation.
 | V1-01 | [Implementation baseline](V1-01-implementation-baseline.md) | Merged baseline evidence; no v1 runtime claim |
 | V1-02 | [Shared documentation build](V1-02-shared-documentation-build.md) | Merged Hugo foundation; publication gates remain later |
 | V1-03 | [Go operation core](V1-03-go-operation-core.md) | Implementation done with local CLI/MCP evidence; publication pending |
+| V1-04 | [Native workspace starters](V1-04-native-workspace-starters.md) | Candidate Templates and user guide; upstream lifecycle qualification remains pending |
 
 Update a phase note after each meaningful implementation wave: record what
 changed, which contract was checked, validation, remaining gaps, and security

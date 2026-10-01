@@ -37,7 +37,7 @@
   // Override the project mount; coordinate with workspaceFolder. Valid: JSON string; use a value supported by the owning runtime.
   // "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/project,type=bind",
   // Persist the aibox user home with a named volume, or use a reviewed native bind. Valid: array of native mount strings or mount objects.
-  "mounts": ["source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"]
+  "mounts": [{"source":"${localWorkspaceFolder}/.aibox-home","target":"/home/aibox","type":"bind"}]
 
   // --- Tools, environment and connectivity ---
   // Install selected, pinned Features; their own manifests define valid option keys. Valid: map of selected Feature IDs to their declared option objects.
