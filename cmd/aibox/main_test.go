@@ -217,6 +217,12 @@ func TestV104StarterCLIMCPParity(t *testing.T) {
 		if !bytes.Equal(cliData, mcpData) {
 			t.Fatalf("%s CLI/MCP data mismatch: cli=%s mcp=%s", name, cliData, mcpData)
 		}
+		if name == "customized" {
+			configuration := cliFields["configuration"].([]any)
+			if len(configuration) != 2 || configuration[1].(map[string]any)["key"] != "devcontainer.features" {
+				t.Fatalf("customized selection is not visible through CLI/MCP inspection: %s", cliData)
+			}
+		}
 		t.Logf("starter=%s operation=%s outcome=%s digest=%s cli-mcp-parity=passed", name, cliResult.Operation, cliResult.Outcome, cliResult.InputDigest)
 	}
 }

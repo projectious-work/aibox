@@ -123,7 +123,9 @@ idempotently.
 - `devcontainer.json`, Dockerfile, Compose, mounts, ports and lifecycle hooks
   remain native project inputs interpreted by the upstream Dev Container CLI.
 - Feature presence and each Feature's declared options select installable
-  tools. Omit a Feature to leave that optional tool out.
+  tools. Omit a Feature to leave that optional tool out. The
+  [V1-05 native tool preview](../tool-catalog/) records the currently reviewed
+  upstream options and unresolved catalog decisions.
 - `customizations.aibox` is optional UX metadata. The minimal starter does not
   enable it; settings there have no effect without an aibox runtime Feature.
 - Native tool configuration belongs to the corresponding tool and remains
