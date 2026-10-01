@@ -182,15 +182,22 @@ class Gate:
 
     def step(self, name: str, argv: list[str], *, cwd: Path | None = None) -> str:
         log = self.output / f"{name}.log"
+        print(f"V1-04 host gate: {name} started; log: {log}", flush=True)
         with log.open("w") as target:
             target.write("$ " + " ".join(argv) + "\n")
             target.flush()
-            completed = subprocess.run(argv, cwd=cwd, text=True, stdout=target,
-                                       stderr=subprocess.STDOUT, check=False)
+            try:
+                completed = subprocess.run(argv, cwd=cwd, text=True, stdout=target,
+                                           stderr=subprocess.STDOUT, check=False)
+            except KeyboardInterrupt as exc:
+                self.steps.append({"name": name, "command": argv, "log": log.name,
+                                   "exitCode": 130})
+                raise RuntimeError(f"{name} interrupted; see {log}") from exc
         self.steps.append({"name": name, "command": argv, "log": log.name,
                            "exitCode": completed.returncode})
         if completed.returncode:
             raise RuntimeError(f"{name} failed ({completed.returncode}); see {log}")
+        print(f"V1-04 host gate: {name} passed", flush=True)
         return log.read_text()
 
     def cli_step(self, name: str, args: list[str]) -> str:
@@ -385,8 +392,9 @@ def main() -> int:
     try:
         gate.run()
     except BaseException as exc:
-        gate.failures.append(str(exc))
-        print(f"V1-04 host gate failed: {exc}", file=sys.stderr)
+        detail = str(exc) or type(exc).__name__
+        gate.failures.append(detail)
+        print(f"V1-04 host gate failed: {detail}", file=sys.stderr)
     try:
         gate.cleanup()
     except BaseException as exc:
