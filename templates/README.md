@@ -47,8 +47,10 @@ devcontainer exec --workspace-folder /absolute/path/to/project bash -lc 'id; tmu
 
 Use `tmux -V; yazi --version` when the harness is `none`. See the V1-04 host
 verification script for direct build/up/exec, named-volume identity and rebuild
-persistence evidence. Source/metadata checks do not establish live runtime
-qualification.
+persistence evidence. Its Python bootstrap uses a checked-in upstream CLI
+archive and a checksummed temporary Node runtime; it needs no npm installation
+or npm registry access on the host. Source/metadata checks do not establish
+live runtime qualification.
 
 ## Optional native Features
 

@@ -74,8 +74,11 @@ the repository root:
 ./scripts/verify-v1-04-host.sh --output /path/to/evidence
 ```
 
-The script pins Dev Container CLI `0.89.0`, renders both Template variants,
-and records build/up/exec plus home-volume persistence evidence in the chosen
+The script needs Python 3, a working Docker or Podman CLI, and access to
+`nodejs.org` for a checksummed temporary Node runtime. It uses the checked-in,
+checksummed Dev Container CLI `0.89.0` archive; npm and an installed Node.js
+are not required. It renders both Template variants and records build/up/exec
+plus home-volume persistence evidence in the chosen
 output directory. It also checks the custom-user and bind-home examples when
 the host supports them. Keep the output directory, including `evidence.json`
 and step logs, and provide it with the implementation review. Do not claim

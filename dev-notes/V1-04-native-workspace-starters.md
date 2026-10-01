@@ -29,7 +29,7 @@ container lifecycle operations to aibox.
 | Template rendering and overwrite refusal | The implementation agent reports the source/helper checks passed. Attach candidate-specific offline verification output after the final revision is fixed. |
 | Rendered example/schema checks | Pending final candidate verification. |
 | Pinned Dev Container CLI configuration parsing | Pending final candidate verification. |
-| Direct upstream `build`, `up` and `exec` | **Pending host check.** Run `./scripts/verify-v1-04-host.sh --output /path/to/evidence`; it pins Dev Container CLI `0.89.0` and records lifecycle and home-volume persistence results. |
+| Direct upstream `build`, `up` and `exec` | **Pending host check.** Run `./scripts/verify-v1-04-host.sh --output /path/to/evidence`; Python verifies a checked-in Dev Container CLI `0.89.0` archive and downloads a checksummed temporary Node runtime. No npm command or npm registry access is needed on the host. The script records lifecycle and home-volume persistence results. |
 | Go CLI/MCP parity | The maintained V1-03 `inspect_workspace` operation remains read-only; V1-04 adds no new operation. Capture parity against the rendered starter in the phase evidence. |
 | Hugo documentation build | Passed locally with Hugo Extended v0.167.0: 35 pages and 142 static files. |
 

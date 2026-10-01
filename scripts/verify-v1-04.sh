@@ -13,7 +13,6 @@ fi
 evidence_dir="$(mktemp -d /tmp/aibox-v1-04-offline.XXXXXX)"
 candidate_sha="$(git rev-parse HEAD)"
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-cli_version='0.89.0'
 
 go test ./...
 go test -race ./...
@@ -33,20 +32,11 @@ node spec/v1/scripts/validate-examples.mjs
 uv run --script spec/v1/scripts/validate-contracts.py
 node spec/v1/scripts/render-devcontainer-examples.mjs --check
 
-# Run upstream's own Template metadata documentation generator at an exact
-# npm package version. Its configuration reader requires the host engine and
-# therefore belongs to the separate host verification step.
-npx --yes --package "@devcontainers/cli@$cli_version" devcontainer --version > "$evidence_dir/devcontainer-cli-version.txt"
-[[ "$(tr -d '\r\n' < "$evidence_dir/devcontainer-cli-version.txt")" == "$cli_version" ]] || {
-  printf 'Expected Dev Container CLI %s.\n' "$cli_version" >&2
-  exit 1
-}
-template_stage="$evidence_dir/template-stage"
-mkdir -p "$template_stage/src"
-cp -a templates/src/minimal templates/src/curated "$template_stage/src/"
-npx --yes --package "@devcontainers/cli@$cli_version" devcontainer templates generate-docs --project-folder "$template_stage/src" > "$evidence_dir/template-docs.txt" 2>&1
+# Python bootstraps pinned upstream CLI and Node archives without npm, then
+# runs upstream Template metadata generation. Configuration reading requires a
+# container engine and remains in the separate host gate.
+python3 scripts/verify-v1-04-host.py --preflight --output "$evidence_dir/upstream-preflight"
 for template in minimal curated; do
-  test -s "$template_stage/src/$template/README.md"
   for harness in codex none; do
     project="$evidence_dir/rendered-$template-$harness"
     mkdir -p "$project"
@@ -64,11 +54,11 @@ done
 git diff --check
 
 finished_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-node - "$evidence_dir" "$candidate_sha" "$started_at" "$finished_at" "$cli_version" <<'NODE'
+node - "$evidence_dir" "$candidate_sha" "$started_at" "$finished_at" <<'NODE'
 const {createHash} = require('node:crypto');
 const {readFileSync, readdirSync, writeFileSync} = require('node:fs');
 const {join} = require('node:path');
-const [directory, sourceCommit, startedAt, finishedAt, cliVersion] = process.argv.slice(2);
+const [directory, sourceCommit, startedAt, finishedAt] = process.argv.slice(2);
 const digest = name => 'sha256:' + createHash('sha256').update(readFileSync(join(directory, name))).digest('hex');
 const examples = ['minimal', 'customized', 'custom-user', 'bind-home'];
 const evidence = {
@@ -77,12 +67,13 @@ const evidence = {
   go: {nativeTarget: `${process.platform}/${process.arch}`, binary: 'aibox', binaryDigest: digest('aibox'),
     darwinArm64Binary: 'aibox-darwin-arm64', darwinArm64Digest: digest('aibox-darwin-arm64')},
   mcpParity: {test: 'TestV104StarterCLIMCPParity', transcript: 'mcp-parity.txt', transcriptDigest: digest('mcp-parity.txt')},
-  upstreamDevcontainerCli: {package: `@devcontainers/cli@${cliVersion}`, versionTranscript: 'devcontainer-cli-version.txt',
-    templateMetadataCheck: 'templates/src/{minimal,curated}/README.md generated in isolated staging copy'},
+  upstreamDevcontainerCli: {version: '0.89.0', vendoredArchive: 'tools/vendor/devcontainer-cli-0.89.0.tgz',
+    preflightEvidence: 'upstream-preflight/evidence.json',
+    templateMetadataCheck: 'upstream CLI generated both Template README files in isolated staging'},
   checks: ['go test ./...', 'go test -race ./...', 'go vet ./...', 'go mod verify',
     'CLI/MCP parity on all four native starter examples', 'Linux native and macOS arm64 cross build',
     'inventory', 'specification', 'Template metadata/content contract', 'Draft 2020-12 fixtures',
-    'upstream Dev Container CLI Template docs generation', 'Template render option fixtures for codex and none',
+    'verified no-npm upstream CLI bootstrap and Template docs generation', 'Template render option fixtures for codex and none',
     'generated example freshness', 'v1 Hugo build', 'git diff --check'],
   lifecycle: {status: 'not_run', reason: 'The pinned CLI read-configuration and lifecycle commands require the host container engine; verify-v1-04-host.sh runs them.'},
   artifacts: readdirSync(directory).filter(name => name !== 'evidence.json'),
