@@ -10,6 +10,7 @@ below shows the minimum compatible processkit version for each aibox release.
 
 | aibox version | Min. processkit | Notes |
 |--------------|-----------------|-------|
+| 0.35.4 | v0.28.8 | updates Claude Code on `aibox apply` when tracking `latest`, recreates the container when local environment changes, refreshes curated tool pins, and patches Rust TLS dependencies |
 | 0.35.3 | v0.28.8 | restores exact v0 development-to-main release promotion and retains required host checks |
 | 0.35.2 | v0.28.8 | fixes the macOS release-host Yazi smoke probe to check startup in a tmux PTY |
 | 0.35.1 | v0.28.8 | restores Rich Markdown preview in Yazi and refreshes v0 base-image and addon tool versions |
