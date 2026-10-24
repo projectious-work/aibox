@@ -342,11 +342,8 @@ fn generate_docker_compose(
 
     // Write .aibox-local.env even when empty so docker-compose env_file
     // references are stable while secrets remain outside committed files.
-    let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
-    let env_content: String = local_env_sorted
-        .iter()
-        .map(|(k, v)| format!("{}={}\n", k, v))
-        .collect();
+    let env_content = local_env_content(config);
+    let local_env_hash = local_env_hash(config);
     let local_env_path = project_path(&config.container.paths.local_env);
     if let Some(parent) = local_env_path.parent()
         && !parent.as_os_str().is_empty()
@@ -449,6 +446,7 @@ fn generate_docker_compose(
                 relative_path(compose_dir, &dockerfile_path)
             },
             local_env_file => local_env_file,
+            local_env_hash => local_env_hash,
             runtime_home_mounts => runtime_home_mounts,
             codex_sandbox_seccomp => codex_sandbox_seccomp,
             env_keys => env_keys,
@@ -462,6 +460,31 @@ fn generate_docker_compose(
         .context("Failed to render docker-compose template")?;
 
     write_if_changed(&compose_path, &content)
+}
+
+/// Container label recording which `.aibox-local.env` a container was created
+/// with. Compose applies `env_file` only at container creation, so `aibox up`
+/// compares this label to detect credentials that changed after creation.
+pub const LOCAL_ENV_HASH_LABEL: &str = "aibox.local-env-hash";
+
+/// Render the `.aibox-local.env` content for the local overlay variables.
+fn local_env_content(config: &AiboxConfig) -> String {
+    let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
+    local_env_sorted
+        .iter()
+        .map(|(k, v)| format!("{}={}\n", k, v))
+        .collect()
+}
+
+/// Short SHA-256 fingerprint of the generated `.aibox-local.env` content.
+/// Only the digest is written to the compose file, never the values.
+pub fn local_env_hash(config: &AiboxConfig) -> String {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(local_env_content(config).as_bytes())
+        .iter()
+        .take(8)
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 /// Generate devcontainer.json. Returns true if file was written.
@@ -1458,6 +1481,33 @@ mod tests {
     }
 
     #[test]
+    fn compose_labels_container_with_local_env_hash_without_values() {
+        in_temp_dir(|| {
+            let devcontainer = std::path::Path::new(".devcontainer");
+            fs::create_dir_all(devcontainer).unwrap();
+            let mut config = make_config(&[], false);
+            let empty_hash = local_env_hash(&config);
+            config
+                .local_env
+                .insert("GH_TOKEN".to_string(), "secret-old".to_string());
+            let old_hash = local_env_hash(&config);
+            config
+                .local_env
+                .insert("GH_TOKEN".to_string(), "secret-new".to_string());
+            let new_hash = local_env_hash(&config);
+
+            generate_docker_compose(&config, devcontainer, &test_env()).unwrap();
+
+            let content = fs::read_to_string(devcontainer.join("docker-compose.yml")).unwrap();
+            assert!(content.contains(&format!("aibox.local-env-hash: \"{new_hash}\"")));
+            assert!(!content.contains("secret-new"));
+            assert_ne!(empty_hash, old_hash);
+            assert_ne!(old_hash, new_hash);
+            assert_eq!(new_hash.len(), 16);
+        });
+    }
+
+    #[test]
     fn compose_includes_audio_when_enabled() {
         let dir = tempfile::tempdir().unwrap();
         let config = make_config(&[], true);
@@ -1885,7 +1935,7 @@ mod tests {
         generate_dockerfile(&config, dir.path(), &test_env()).unwrap();
         let content = fs::read_to_string(dir.path().join("Dockerfile")).unwrap();
         assert!(
-            content.contains("UV_TOOL_DIR=/opt/aibox/uv-tools uv tool install tau-ai==0.4.6"),
+            content.contains("UV_TOOL_DIR=/opt/aibox/uv-tools uv tool install tau-ai==0.4.8"),
             "Tau should be installed from its pinned PyPI package: {content}"
         );
         assert!(
