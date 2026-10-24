@@ -905,8 +905,19 @@ pub fn cmd_start(
         }
     }
 
+    let local_env_changed =
+        state != ContainerState::Missing && local_env_changed_since_create(&runtime, &config);
+    if local_env_changed {
+        output::warn(
+            "Environment from .aibox-local.toml changed since the container was created; \
+             recreating the container to apply it. Processes and tmux sessions inside the \
+             container restart; files under /workspace are kept.",
+        );
+    }
+
     let session_name = config.tmux_session_name();
-    let should_recreate_tmux_session = forget_tmux_state || state != ContainerState::Running;
+    let should_recreate_tmux_session =
+        forget_tmux_state || local_env_changed || state != ContainerState::Running;
     let refreshed_runtime_files = crate::seed::sync_theme_files(&config)?;
     if !refreshed_runtime_files.is_empty() {
         output::ok(&format!(
@@ -934,6 +945,12 @@ pub fn cmd_start(
     }
 
     match state {
+        ContainerState::Running if local_env_changed => {
+            output::info("Recreating container...");
+            runtime.compose_up(crate::config::COMPOSE_FILE, name)?;
+            runtime.wait_for_running(name, 7500)?;
+            output::ok("Container recreated");
+        }
         ContainerState::Running => {
             output::info("Container already running");
         }
@@ -4301,6 +4318,15 @@ fn perform_container_build(no_cache: bool, config: &AiboxConfig) -> Result<()> {
             )?;
             output::ok("Sync complete — image built");
             warn_if_container_lags_image(&runtime, config);
+            if runtime.container_status(&config.container.name).ok()
+                == Some(ContainerState::Running)
+                && local_env_changed_since_create(&runtime, config)
+            {
+                output::info(
+                    "Environment from .aibox-local.toml changed; the next `aibox up` recreates \
+                     the container to apply it.",
+                );
+            }
         }
         Err(_) => {
             output::warn("No container runtime found — skipping image build");
@@ -4308,6 +4334,21 @@ fn perform_container_build(no_cache: bool, config: &AiboxConfig) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// True when an existing container was created with a different
+/// `.aibox-local.env` than the one just generated. Containers created before
+/// the label existed count as changed only when local variables are set.
+fn local_env_changed_since_create(runtime: &Runtime, config: &AiboxConfig) -> bool {
+    let expected = crate::generate::local_env_hash(config);
+    match runtime.get_container_label(
+        &config.container.name,
+        crate::generate::LOCAL_ENV_HASH_LABEL,
+    ) {
+        Ok(Some(actual)) => actual != expected,
+        Ok(None) => !config.local_env.is_empty(),
+        Err(_) => false,
+    }
 }
 
 /// Warn the user if a container exists for this project AND its image

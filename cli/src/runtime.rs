@@ -104,6 +104,27 @@ impl Runtime {
         }
     }
 
+    /// Read a single label from a container. Returns `None` when the
+    /// container does not exist or the label is absent.
+    pub fn get_container_label(&self, container_name: &str, label: &str) -> Result<Option<String>> {
+        let format = format!("{{{{index .Config.Labels \"{label}\"}}}}");
+        let output = Command::new(&self.runtime_bin)
+            .args(["inspect", "--format", &format, container_name])
+            .output()
+            .context("Failed to inspect container labels")?;
+
+        if !output.status.success() {
+            return Ok(None);
+        }
+
+        let value = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if value.is_empty() || value == "<no value>" {
+            Ok(None)
+        } else {
+            Ok(Some(value))
+        }
+    }
+
     /// Read the runtime mount table for a container.
     ///
     /// Docker and Podman both expose `.Mounts` through `inspect`; the `RW`

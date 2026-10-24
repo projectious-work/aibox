@@ -793,6 +793,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.28.8",
         note: "Patch release: restores the v0 development-to-main release promotion chain and retains the host-gate checks.",
     },
+    CompatEntry {
+        aibox_version: "0.35.4",
+        processkit_version: "v0.28.8",
+        note: "Patch release: resolves Claude Code `latest` to a concrete apt version so `aibox apply` rebuilds with the newest CLI, recreates the container on `aibox up` when `.aibox-local.toml` environment changed, refreshes curated tool pins, and updates Rust dependencies for RustSec advisories.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.

@@ -14,18 +14,18 @@ tools:
   - name: opentofu
     description: "Open-source Terraform-compatible infrastructure as code CLI"
     default_enabled: true
-    default_version: "1.12.6"
-    supported_versions: ["1.9.0", "1.12.0", "1.12.1", "1.12.3", "1.12.5", "1.12.6"]
+    default_version: "1.13.2"
+    supported_versions: ["1.9.0", "1.12.0", "1.12.1", "1.12.3", "1.12.5", "1.12.6", "1.13.2"]
   - name: ansible
     description: "Configuration management and automation engine"
     default_enabled: true
-    default_version: "14.4.0"
-    supported_versions: ["13.7.0", "14.0.0", "14.1.0", "14.2.0", "14.3.1", "14.4.0"]
+    default_version: "14.5.0"
+    supported_versions: ["13.7.0", "14.0.0", "14.1.0", "14.2.0", "14.3.1", "14.4.0", "14.5.0"]
   - name: packer
     description: "Machine image build automation tool"
     default_enabled: true
-    default_version: "1.16.1"
-    supported_versions: ["1.11.2", "1.15.3", "1.15.4", "1.16.0", "1.16.1"]
+    default_version: "1.16.2"
+    supported_versions: ["1.11.2", "1.15.3", "1.15.4", "1.16.0", "1.16.1", "1.16.2"]
   - name: podman
     description: "Rootless container engine with Compose support"
     default_enabled: false

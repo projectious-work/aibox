@@ -20,13 +20,13 @@ tools:
   - name: helm
     description: "Kubernetes package manager for charts"
     default_enabled: true
-    default_version: "4.3.0"
-    supported_versions: ["3.17.2", "4.2.0", "4.2.2", "4.2.3", "4.2.4", "4.3.0"]
+    default_version: "4.3.1"
+    supported_versions: ["3.17.2", "4.2.0", "4.2.2", "4.2.3", "4.2.4", "4.3.0", "4.3.1"]
   - name: kustomize
     description: "Kubernetes manifest overlay and patching tool"
     default_enabled: true
-    default_version: "5.8.1"
-    supported_versions: ["5.6.0", "5.8.1"]
+    default_version: "5.8.3"
+    supported_versions: ["5.6.0", "5.8.1", "5.8.3"]
   - name: k9s
     description: "Interactive terminal UI for Kubernetes clusters"
     default_enabled: false

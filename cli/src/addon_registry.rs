@@ -190,8 +190,8 @@ mod tests {
         assert!(py.supported_versions.contains(&"3.14"));
         assert_eq!(py.default_version, "3.14");
         let uv = addon.tools.iter().find(|t| t.name == "uv").unwrap();
-        assert!(uv.supported_versions.contains(&"0.12.20"));
-        assert_eq!(uv.default_version, "0.12.20");
+        assert!(uv.supported_versions.contains(&"0.13.5"));
+        assert_eq!(uv.default_version, "0.13.5");
     }
 
     #[test]
@@ -199,21 +199,21 @@ mod tests {
         ensure_loaded();
         let addon = get_addon("rust").unwrap();
         let rustc = addon.tools.iter().find(|t| t.name == "rustc").unwrap();
-        assert!(rustc.supported_versions.contains(&"1.98.1"));
-        assert_eq!(rustc.default_version, "1.98.1");
+        assert!(rustc.supported_versions.contains(&"1.99.1"));
+        assert_eq!(rustc.default_version, "1.99.1");
     }
 
     #[test]
     fn deferred_v0_dependency_defaults_are_consolidated() {
         ensure_loaded();
         for (addon_name, tool_name, expected) in [
-            ("docs-zensical", "zensical", "0.0.66"),
-            ("go", "go", "1.27.1"),
-            ("node", "bun", "1.4.2"),
-            ("python", "pdm", "2.29.2"),
-            ("infrastructure", "opentofu", "1.12.6"),
+            ("docs-zensical", "zensical", "0.0.72"),
+            ("go", "go", "1.27.3"),
+            ("node", "bun", "1.4.4"),
+            ("python", "pdm", "2.29.3"),
+            ("infrastructure", "opentofu", "1.13.2"),
             ("kubernetes", "kubectl", "1.37.1"),
-            ("ai-tau", "tau", "0.4.6"),
+            ("ai-tau", "tau", "0.4.8"),
         ] {
             let addon = get_addon(addon_name).unwrap();
             let tool = addon
