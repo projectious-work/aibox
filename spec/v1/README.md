@@ -36,7 +36,9 @@ maps the v0 CLI to v1 operations and delegated workflows.
 
 The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
-chapters governing its implementation. Display order follows the intended
+chapters governing its implementation;
+[chapter 21](21-engineering-practice.md) applies to every phase from V1-05
+without being listed. Display order follows the intended
 implementation sequence, with dependencies pointing only backward; IDs remain
 stable references. The roadmap tracks delivery separately from these target
 requirements. `status: done` records integrated, validated, documented completion;
