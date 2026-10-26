@@ -28,7 +28,7 @@
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-05, V1-22, V1-23 |
 | R-DOCS | Phase-scoped AC-DOCS in every phase; each phase's `docs` deliverable and local build evidence, plus candidate-matched previews at verified checkpoints and the full both-line deploy matrix | V1-01–V1-23 (V1-02 enables; V1-19 qualifies the full archive matrix; V1-23 promotes stable docs) |
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-06, V1-09 |
-| R-CYCLE | Phase baseline, trace, plan-review and verification records in the development logbook | V1-05–V1-23 |
+| R-CYCLE | Development logbook: baseline, test-ready review and contract commit, trace, plan review, separate tests-only and implementation branches, classified integration-loop failures, verification | V1-05–V1-23 |
 | R-REVIEW | Designated reviewer, any authorized change, and round decisions recorded per review gate | V1-05–V1-23 |
 | R-CODE | Phase verification script: `gofmt -l` empty, `go vet ./...` clean; package-import test (chapter 7); no unfinished operation exposed; arc42/C4 pages under `docs-site/content/docs/architecture/` updated; architecture review | V1-05–V1-23 |
 | R-TESTSTYLE | Test review: fakes only at ports, regression test per confirmed defect, no unexplained skips | V1-05–V1-23 |

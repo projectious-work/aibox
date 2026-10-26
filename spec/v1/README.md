@@ -1,6 +1,6 @@
 # aibox v1 — Software implementation specification
 
-Version: **0.9, 2026-10-26**. Development line: `v1.x-dev`.
+Version: **0.10, 2026-10-26**. Development line: `v1.x-dev`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
 an MCP-first interface and a thin human CLI. Configuration is edited in files;

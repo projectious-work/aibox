@@ -27,32 +27,89 @@ cycle:
 1. **Baseline.** Record the specification commit, phase ID, applicable
    chapters, `R-*` requirements, acceptance groups, schemas, fixtures, and
    governing decisions. Essential ambiguity stops the phase.
-2. **Inventory and trace.** Map every applicable normative requirement to
+2. **Phase contract.** Turn the roadmap item into a test-ready contract (see
+   below). Owner decisions the contract depends on are made here, not during
+   implementation.
+3. **Inventory and trace.** Map every applicable normative requirement to
    planned work, expected evidence, and verification method (black-box
    journey, unit or component test, or visual check).
-3. **Plan.** Task graph, file ownership, frozen shared interfaces, and the
+4. **Plan.** Task graph, file ownership, frozen shared interfaces, and the
    requirement IDs each task addresses.
-4. **Independent plan review** (R-REVIEW). Each requirement is `covered`,
-   `not applicable` with rationale, `blocked`, `requires a specification
-   change`, or `deferred` with explicit authority.
-5. **Implement in waves** in dependency order; resolve interface drift before
-   dependent work continues.
-6. **Discoveries.** A specification defect stops affected work and becomes an
-   explicit, reviewed specification change. Implementation never silently
-   redefines the contract.
-7. **Independent verification** (R-REVIEW) of source, tests, schemas,
+5. **Independent plan review** (R-REVIEW) of the contract and the plan. The
+   reviewer confirms that the contract is test-ready. Each requirement is
+   `covered`, `not applicable` with rationale, `blocked`, `requires a
+   specification change`, or `deferred` with explicit authority.
+6. **Freeze.** The owner approves the reviewed contract, and its commit is
+   recorded in the development logbook as the contract commit.
+7. **Parallel tracks.** The acceptance-test track and the implementation track
+   run in parallel from the contract commit, and the integration loop runs
+   until all acceptance tests pass (see below). The implementation track works
+   in waves in dependency order and resolves interface drift before dependent
+   work continues.
+8. **Discoveries.** A specification defect stops affected work and becomes an
+   explicit, reviewed specification change and a new contract commit.
+   Implementation never silently redefines the contract.
+9. **Independent verification** (R-REVIEW) of source, tests, schemas,
    fixtures, documentation, and the development logbook. Each requirement is
    `satisfied`, `partially satisfied`, `not satisfied`, `not applicable`,
    `unverifiable`, or `specification inconsistency`; failure paths included.
-8. **Close gaps**, then mark the roadmap item `done` per the roadmap's status
-   semantics.
+10. **Close gaps**, then mark the roadmap item `done` per the roadmap's status
+    semantics.
 
-For user-facing behavior, acceptance tests are derived from the baseline by an
-author who does not read the implementation, and the implementer does not see
-those tests until integration. When a test contradicts the baseline, the
-baseline wins and the test is corrected with recorded rationale. This
-separation applies only to these black-box acceptance tests; implementers
-still write their own unit and component tests test-first (R-TESTSTYLE).
+### Phase contract
+
+A roadmap item names a phase's outcome; it is not a contract. The phase
+contract is the frozen set of specification changes, schemas, fixtures,
+examples, and an interface catalog for everything the phase makes observable:
+operations, native artifacts, Feature references and options, result fields,
+error codes, supported targets, and the observable check for each effect,
+including absence when something is disabled. Where the catalog is data, it is
+machine-readable and validated by the specification checks.
+
+The contract is test-ready when an author who reads only the contract commit
+can derive every acceptance test for the phase without reading code and
+without inventing an identifier, option, default, result field, error code, or
+supported target. A contract that is not test-ready blocks the freeze.
+
+### Acceptance-test and implementation tracks
+
+For user-facing behavior, acceptance tests and implementation are separated by
+an information barrier. The primary session is the integration owner: it
+starts both tracks and is the only participant that sees both.
+
+- **Acceptance-test track.** A fresh agent session, with no conversation
+  history, works in its own worktree created from the contract commit and
+  commits to a tests-only branch. Its input is the contract commit, the
+  applicable acceptance groups, and the test harness at that commit. It does
+  not read implementation branches and receives no implementation reasoning.
+  Its tests exercise only public interfaces (CLI, MCP, and native artifacts)
+  and name the requirement or acceptance ID each test verifies.
+- **Implementation track.** Works from the contract commit and the codebase on
+  its own branch, writes its unit and component tests test-first
+  (R-TESTSTYLE), and does not read the tests-only branch.
+
+The integration owner then runs the integration loop:
+
+1. Merge both branches onto the phase integration branch and run the
+   acceptance tests.
+2. Classify every failure and record the classification in the development
+   logbook:
+   - **implementation defect:** returned to the implementation track as
+     expected versus observed behavior in contract terms, never as test source;
+   - **test defect:** the test contradicts the contract; returned to the
+     acceptance-test track with the test ID, the contract reference, and the
+     rationale, never with implementation details;
+   - **contract defect:** the contract is ambiguous or wrong; affected work
+     stops and step 8 applies;
+   - **infrastructure failure:** handled under the agent rerun rules in
+     `AGENTS.md`.
+3. Repeat until every acceptance test passes without skips. A test is changed
+   only through the test-defect route, never weakened to make it pass.
+
+A track that disputes a classification gets at most 2 rounds (R-REVIEW); then
+the integration owner decides against the contract and records the decision.
+This separation applies only to black-box acceptance tests; the tests and the
+implementation merge into `v1.x-dev` together (R-INTEGRATION).
 
 A direct, narrowly scoped change request from the owner skips the planning
 round: implement it, update the baseline and affected tests in the same change
