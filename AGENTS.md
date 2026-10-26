@@ -238,6 +238,15 @@ typecheck: ""
   `cli/src/processkit_vocab.rs` instead.
 - **No trailing summaries** in agent responses — the user can read the diff.
 
+### v1 engineering practice
+
+v1 work on `v1.x-dev` follows
+[`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md):
+development cycle and independent review per phase, at most 3 concurrent
+sub-agents, *Hexagonal Architecture* with a *Clean Architecture* core,
+*TDD, Chicago School* tests, refactoring by named smells, Conventional
+Commits, and a green `v1.x-dev` after every merge.
+
 ### Pull requests
 
 - **Version-line integration** — long-lived branches (`main`, `v0.x-dev`,

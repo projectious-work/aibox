@@ -28,6 +28,14 @@
 | R-DEPENDENCIES | AC-TOOLS, AC-RELEASE artifact manifests | V1-05, V1-22, V1-23 |
 | R-DOCS | Phase-scoped AC-DOCS in every phase; each phase's `docs` deliverable and local build evidence, plus candidate-matched previews at verified checkpoints and the full both-line deploy matrix | V1-01–V1-23 (V1-02 enables; V1-19 qualifies the full archive matrix; V1-23 promotes stable docs) |
 | R-CONFIG-SOURCES | AC-CONFIG-SOURCES; precedence, source denial and effective-config fixtures | V1-06, V1-09 |
+| R-CYCLE | Phase baseline, trace, plan-review and verification records in the development logbook | V1-01–V1-23 |
+| R-REVIEW | Reviewer identity and round decisions recorded per review gate | V1-01–V1-23 |
+| R-AGENTS | Sub-agent, rerun and push limits observed in phase records | V1-01–V1-23 |
+| R-CODE | `gofmt`, `go vet` and linter clean; package-import test (chapter 7); architecture review | V1-03–V1-23 |
+| R-TESTSTYLE | Test review: fakes only at ports, regression test per confirmed defect, no unexplained skips | V1-03–V1-23 |
+| R-REFACTOR | `refactor:` commits leave golden fixtures, schemas and result envelopes unchanged | V1-03–V1-23 |
+| R-INTEGRATION | Conventional Commit titles; green `v1.x-dev` after each merge | V1-01–V1-23 |
+| R-WRITING | Documentation review per phase `docs` deliverable | V1-01–V1-23 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-06, V1-21 |
 | R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-07, V1-21, V1-22 |
 | R-LIMITS | AC-CONTRACTS; measured resource, latency, cancellation and output bounds | V1-03, V1-09, V1-21, V1-22 |

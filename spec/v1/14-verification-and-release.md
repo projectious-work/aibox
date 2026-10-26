@@ -4,7 +4,8 @@ This chapter implements R-TARGETS and R-DEPENDENCIES and gives the roadmap
 evidence-based definitions of `done` and `shipped`. Each phase includes
 implementation, AC/ledger trace, tests, its roadmap `docs` deliverable, and a
 passing local documentation build from the same commit. Unit-test success alone
-is insufficient.
+is insufficient. The development cycle, review gates and test style are defined
+in [chapter 21](21-engineering-practice.md) (R-CYCLE, R-REVIEW, R-TESTSTYLE).
 
 ## Runnable increments and frequent preview checkpoints
 
