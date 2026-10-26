@@ -4,6 +4,8 @@ This chapter defines R-CORE, R-BOUNDARY, R-REUSE, R-RESULT and R-EXECUTION.
 Package responsibilities and dependency boundaries apply independently of
 package names. The Go binary is an optional convenience
 and agent interface around a workspace that remains valid without it.
+Code design, test style and refactoring rules are in
+[chapter 21](21-engineering-practice.md) (R-CODE, R-TESTSTYLE, R-REFACTOR).
 
 ## Applications and processes
 

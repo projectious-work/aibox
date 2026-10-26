@@ -238,6 +238,28 @@ typecheck: ""
   `cli/src/processkit_vocab.rs` instead.
 - **No trailing summaries** in agent responses — the user can read the diff.
 
+### v1 engineering practice
+
+v1 work on `v1.x-dev` follows
+[`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md)
+from V1-05: development cycle and independent review per phase,
+*Hexagonal Architecture* with a *Clean Architecture* core, *TDD, Chicago
+School* tests, refactoring by named smells, Conventional Commits, and a green
+`v1.x-dev` after every merge.
+
+AI agents implementing v1 also follow these execution and communication
+rules (not part of the product specification):
+
+- Run at most 3 sub-agents at once and work in waves beyond that. The primary
+  agent keeps concept, core implementation, integration, and review of
+  delegated results.
+- Give a red check at most 1 rerun. Report an infrastructure-only failure once
+  with evidence. Push fixes in batches. Do not spend turns polling; wait for
+  completion notifications.
+- Reply answer-first: result or next action first, numbered steps, one
+  closing next action, no preamble or recap. Personal output styles are opt-in
+  through the person's user-level agent instructions.
+
 ### Pull requests
 
 - **Version-line integration** — long-lived branches (`main`, `v0.x-dev`,

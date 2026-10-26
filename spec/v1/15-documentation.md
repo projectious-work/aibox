@@ -5,7 +5,8 @@ line, built with the same Hugo build pipeline and the same
 `github.com/projectious-work/brand-theme-hugo-vanilla` theme module used by
 v0.x. Both lines use one Hugo build and brand shell, not two site frameworks.
 The theme version is pinned and coordinated across both lines; floating module
-heads are forbidden.
+heads are forbidden. Writing style and content types follow
+[chapter 21](21-engineering-practice.md) (R-WRITING).
 The v1 content is independently maintained and describes the Dev Container
 CLI-based product, not a copied v0 `aibox.toml` manual.
 
