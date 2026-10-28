@@ -242,7 +242,9 @@ typecheck: ""
 
 v1 work on `v1.x-dev` follows
 [`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md)
-from V1-05: development cycle and independent review per phase,
+from V1-05: development cycle and independent review per phase, a frozen
+test-ready phase contract with separate acceptance-test and implementation
+tracks,
 *Hexagonal Architecture* with a *Clean Architecture* core, *TDD, Chicago
 School* tests, refactoring by named smells, Conventional Commits, and a green
 `v1.x-dev` after every merge.
