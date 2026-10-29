@@ -11,7 +11,7 @@ license/supply-chain clearance.
 | Dev Container interpretation, build/up/exec, Features/Templates | [Dev Container CLI](https://github.com/devcontainers/cli) | Public-command delegation; AC-BUILD/AC-LIFE; no internal API import or compiler. |
 | Stop/remove and Compose services | Runtime CLI / native Compose | Verify exact identity and differences between stop/remove; no daemon API recreation. |
 | MCP protocol | [Official Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Typed bounded tools/resources and stdio; AC-CLI/AC-GUIDE. No custom protocol engine. |
-| Basic language/tool installs | [Maintainer Features](https://github.com/devcontainers/features), native package managers | Evaluate exact options/platform fit; fill proven gaps with small Features. |
+| Basic language/tool installs | [Maintainer Features](https://github.com/devcontainers/features), producer-documented installers and native package managers | Package coupled groups as one aibox Feature and semantic groups as selectable tool Features with an `all` bundle; preserve exact options/platform behavior. |
 | Workspace terminal | tmux, PowerKit, Yazi, Vim, Starship, lnav, native plugins | Retain assets/hooks/palettes; AC-UX/AC-PREVIEW. |
 | Source diff | Git, delta, LazyGit | Curated configuration and convenient launch; AC-REVIEW. |
 | PR workflow | Optional [gh-dash](https://github.com/dlvhdr/gh-dash) plus gh | GitHub-specific review integration; native forge web fallback; not a new forge abstraction. |

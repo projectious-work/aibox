@@ -1,0 +1,3369 @@
+{
+  "schemaVersion": "aibox.v1-05-tool-selection/v1",
+  "baselineRevision": "9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6",
+  "sourceAudit": "../evidence/V1-05/source-audit.json",
+  "rows": [
+    {
+      "id": "ADDON:ai-aider/aider",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-aider.yaml",
+      "v0-source-sha256": "fd2091328e8087024343f37b45f8868476d78de12d49ee54682ab8c56a336001",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install aider-chat using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "aider-chat"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:ai-claude/claude",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-claude.yaml",
+      "v0-source-sha256": "21030059a4653ccbbe5c5cadad402c470b06be93a7080f5e04275058811c46a7",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Official signed Claude Code apt repository; preserve stable/latest/exact version channels and disabled absence."
+      },
+      "community-candidates": [
+        {
+          "publisher": "Stuart Bell",
+          "ref": "ghcr.io/stu-bell/devcontainer-features/claude-code:0",
+          "source": "https://github.com/stu-bell/devcontainer-features/tree/main/src/claude-code"
+        },
+        {
+          "publisher": "Joshua Ji",
+          "ref": "ghcr.io/joshuanianji/devcontainer-features/claude-code-persistence:1",
+          "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/claude-code-persistence"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/claude-code:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/claude-code"
+        },
+        {
+          "publisher": "siri404",
+          "ref": "ghcr.io/siri404/devcontainer-ai-features/claude-code:1",
+          "source": "https://github.com/siri404/devcontainer-ai-features"
+        },
+        {
+          "publisher": "baxyz",
+          "ref": "ghcr.io/helpers4/devcontainer/claude-dev:1",
+          "source": "https://github.com/helpers4/devcontainer/tree/main/src/claude-dev"
+        },
+        {
+          "publisher": "esimkowitz",
+          "ref": "ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1",
+          "source": "https://github.com/esimkowitz/devcontainer-features"
+        },
+        {
+          "publisher": "sliekens",
+          "ref": "ghcr.io/sliekens/devcontainer-features/claude:1",
+          "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/claude/README.md"
+        },
+        {
+          "publisher": "PostFinance AG",
+          "ref": "ghcr.io/postfinance/devcontainer-features/claude-code:1",
+          "source": "https://github.com/postfinance/devcontainer-features"
+        },
+        {
+          "publisher": "cjcrobin",
+          "ref": "ghcr.io/cjcrobin/devcontainer-features/claudecode:1",
+          "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/claudecode"
+        },
+        {
+          "publisher": "Stephen Mott",
+          "ref": "ghcr.io/srzstephen/devcontainer-features/claude-code:1",
+          "source": "https://github.com/SrzStephen/devcontainer-features/blob/main/src/claude-code/README.md"
+        },
+        {
+          "publisher": "NolanJX",
+          "ref": "ghcr.io/nolanjx/devcontainer-features/claude-code:1",
+          "source": "https://github.com/NolanJX/devcontainer-features"
+        },
+        {
+          "publisher": "Andrii Pravorskyi",
+          "ref": "registry.gitlab.com/pravorskyi/devcontainer-features/claude-code:1",
+          "source": "https://gitlab.com/pravorskyi/devcontainer-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:ai-codex/codex",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-codex.yaml",
+      "v0-source-sha256": "dfcf5f472631b3217506c167cfe1c02c6848851564188a0349848938c6efdd54",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @openai/codex from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@openai/codex"
+      },
+      "community-candidates": [
+        {
+          "publisher": "jsburckhardt",
+          "ref": "ghcr.io/jsburckhardt/devcontainer-features/codex:1",
+          "source": "https://github.com/jsburckhardt/devcontainer-features"
+        },
+        {
+          "publisher": "sliekens",
+          "ref": "ghcr.io/sliekens/devcontainer-features/codex:1",
+          "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/codex/README.md"
+        },
+        {
+          "publisher": "cjcrobin",
+          "ref": "ghcr.io/cjcrobin/devcontainer-features/codexcli:1",
+          "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/codexcli"
+        },
+        {
+          "publisher": "NolanJX",
+          "ref": "ghcr.io/nolanjx/devcontainer-features/codex:1",
+          "source": "https://github.com/NolanJX/devcontainer-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:ai-continue/cn",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-continue.yaml",
+      "v0-source-sha256": "f42704ddc0853dab8f59bdf026fe9fec962f872914f34832d95df0cb8277bab5",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @continuedev/cli from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@continuedev/cli"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:ai-copilot/copilot",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-copilot.yaml",
+      "v0-source-sha256": "ff7513907a73700d5ccbcbd13b571e98daea4de91efd94f741075bfa57670174",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "The official Copilot CLI Feature creates an auto-update flag for version=latest and adds a postStartCommand that runs copilot update. This changes the installed tool after container start, unlike a fixed native build input; select an exact version to suppress auto-update or use a checked native Dockerfile install.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Install an exact Copilot CLI release from verified architecture-specific assets in a native Dockerfile, or choose an exact official Feature version after owner review; do not enable the Feature latest auto-update path.",
+        "owner_option": "Approve exact-version upstream Feature selection once a concrete tool version and both architecture checks are recorded."
+      },
+      "community-candidates": [
+        {
+          "publisher": "Dev Container Spec Maintainers",
+          "ref": "ghcr.io/devcontainers/features/copilot-cli:1.1.3",
+          "source": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/copilot-cli"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:ai-gemini/gemini",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-gemini.yaml",
+      "v0-source-sha256": "94d958ae9bb0d7b6bd43cf760180c487445a1bc56cc93095283c32433c2cac92",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @google/gemini-cli from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@google/gemini-cli"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Stuart Bell",
+          "ref": "ghcr.io/stu-bell/devcontainer-features/gemini-cli:0",
+          "source": "https://github.com/stu-bell/devcontainer-features/tree/main/src/gemini-cli"
+        },
+        {
+          "publisher": "siri404",
+          "ref": "ghcr.io/siri404/devcontainer-ai-features/gemini-cli:1",
+          "source": "https://github.com/siri404/devcontainer-ai-features"
+        },
+        {
+          "publisher": "marblejenka",
+          "ref": "ghcr.io/marblejenka/devcontainer-feature/gemini-cli:0",
+          "source": "https://github.com/marblejenka/devcontainer-feature/tree/main/src/gemini-cli"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:ai-hermes/hermes",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-hermes.yaml",
+      "v0-source-sha256": "2fdbbab3fd2442a040029f29d8b5285808b7ac06a8db0c22d07649d70183edc1",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.19.0",
+        "effectiveVersion": "0.19.0"
+      },
+      "v0-versions": [
+        "0.16.0",
+        "0.18.0",
+        "0.19.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install hermes-agent==0.19.0 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "hermes-agent"
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainer.community",
+          "ref": "ghcr.io/devcontainer-community/devcontainer-features/hermes-agent.nousresearch.com:1",
+          "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/hermes-agent.nousresearch.com"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:ai-mistral/mistral",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-mistral.yaml",
+      "v0-source-sha256": "1919f096b3a1294555174b8394df4576cebd10907cced4681a0f28f3b6f3e689",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install mistralai using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "mistralai",
+        "alternative_owner_decision": {
+          "kind": "removal_candidate",
+          "proposal": "Owner may remove the programmatic SDK from the global CLI tooling catalog and keep it in project dependencies."
+        }
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:ai-opencode/opencode",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-opencode.yaml",
+      "v0-source-sha256": "cab13c3ae08d71ada3e18530786dd4cd5fc68db7eeb3d8c1f579d062ac568aee",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.0.55",
+        "effectiveVersion": "0.0.55"
+      },
+      "v0-versions": [
+        "0.0.55"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from opencode-ai/opencode at 0.0.55 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "opencode-ai/opencode"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:ai-tau/tau",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-tau.yaml",
+      "v0-source-sha256": "e5624ac2adc076dcf13bd6158d8ac81198c6ac5b08f0c8b975cef64fb4039f8e",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.3.13",
+        "effectiveVersion": "0.3.13"
+      },
+      "v0-versions": [
+        "0.3.5",
+        "0.3.7",
+        "0.3.10",
+        "0.3.11",
+        "0.3.13"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install tau-ai==0.3.13 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "tau-ai"
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/webtau-sdkman:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/webtau-sdkman"
+        },
+        {
+          "publisher": "Olivier Lemasle",
+          "ref": "ghcr.io/olivierlemasle/devcontainers-features/tauri:1",
+          "source": "http://github.com/olivierlemasle/devcontainers-features/tree/main/src/tauri"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:docs-docusaurus/docusaurus",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-docusaurus.yaml",
+      "v0-source-sha256": "9af0383d3efe52301b80fe847e39b924d314775e9a20d8ca2539e3eb16000d73",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "3.10.1",
+        "effectiveVersion": "3.10.1"
+      },
+      "v0-versions": [
+        "3.7.0",
+        "3.8",
+        "3.9.2",
+        "3.10.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @docusaurus/core@3.10.1 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@docusaurus/core"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:docs-hugo/hugo",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-hugo.yaml",
+      "v0-source-sha256": "669811cf5b949cab942be7b7ea4a3640efdbeae62df6b4328dd6167210bcfab0",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "0.165.0"
+      },
+      "v0-versions": [],
+      "v1-ref": "ghcr.io/devcontainers/features/hugo@sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509",
+      "v1-option": {
+        "version": "0.165.0",
+        "extended": true
+      },
+      "install-owner": "Dev Container Spec Maintainers",
+      "dependency": [],
+      "license": "MIT",
+      "digest": "sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "test-id": null,
+      "decision": "source-reviewed; runtime-pending",
+      "classification": "qualified_upstream",
+      "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains. Blank v0 declaration hides actual hardcoded 0.165.0 extended binary; preserve this pin. v0 explicitly removed preinstalled Hugo on disable.",
+      "proposed-route": null,
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:docs-mdbook/mdbook",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mdbook.yaml",
+      "v0-source-sha256": "6eeb22b438c10f9fa6907a30206b4ef0b1ff18a3a6592eca58faa945488a266c",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "0.5.4"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from rust-lang/mdBook at 0.5.4 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "rust-lang/mdBook"
+      },
+      "community-candidates": [
+        {
+          "publisher": "eitsupi",
+          "ref": "ghcr.io/eitsupi/devcontainer-features/mdbook:1",
+          "source": "https://github.com/eitsupi/devcontainer-features/tree/main/src/mdbook"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:docs-mkdocs/mkdocs",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mkdocs.yaml",
+      "v0-source-sha256": "44be9cf2585d5980ba18ce0d60585226c8b7d00fd017e2938b27129902803369",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.6.1",
+        "effectiveVersion": "1.6.1"
+      },
+      "v0-versions": [
+        "1.6.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "python"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install mkdocs==1.6.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation. Preserve mkdocs-material==9.7.7 as bundled companion dependency.",
+        "package": "mkdocs"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:docs-starlight/starlight",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-starlight.yaml",
+      "v0-source-sha256": "2bc1b2d3be7f8fe6d8a78b899bd08b2c05039813bb01268467d1f379a32a69a1",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install create-starlight from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "create-starlight",
+        "alternative_owner_decision": {
+          "kind": "removal_candidate",
+          "proposal": "Owner may remove the global project scaffolder and use project-local create-starlight bootstrap instead. No removal is authorized."
+        }
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:docs-zensical/zensical",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-zensical.yaml",
+      "v0-source-sha256": "87dc18c6ec4d6c410f56b1cd3b1752ec1a1de5711cc75185e686060dcec4b333",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.0.57",
+        "effectiveVersion": "0.0.57"
+      },
+      "v0-versions": [
+        "0.0.43",
+        "0.0.44",
+        "0.0.47",
+        "0.0.51",
+        "0.0.52",
+        "0.0.53",
+        "0.0.55",
+        "0.0.56",
+        "0.0.57"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "python"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install zensical==0.0.57 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "zensical"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go-quality/goimports",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+      "v0-source-sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "v0.48.0",
+        "effectiveVersion": "v0.48.0"
+      },
+      "v0-versions": [
+        "v0.48.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Run GOBIN=/usr/local/bin go install golang.org/x/tools/cmd/goimports@v0.48.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
+        "package": "golang.org/x/tools/cmd/goimports"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go-quality/staticcheck",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+      "v0-source-sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "v0.7.0",
+        "effectiveVersion": "v0.7.0"
+      },
+      "v0-versions": [
+        "v0.7.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Run GOBIN=/usr/local/bin go install honnef.co/go/tools/cmd/staticcheck@v0.7.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
+        "package": "honnef.co/go/tools/cmd/staticcheck"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go-quality/golangci-lint",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+      "v0-source-sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "v2.12.2",
+        "effectiveVersion": "v2.12.2"
+      },
+      "v0-versions": [
+        "v2.12.2"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Run GOBIN=/usr/local/bin go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
+        "package": "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go-quality/govulncheck",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+      "v0-source-sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "v1.6.0",
+        "effectiveVersion": "v1.6.0"
+      },
+      "v0-versions": [
+        "v1.6.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Run GOBIN=/usr/local/bin go install golang.org/x/vuln/cmd/govulncheck@v1.6.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
+        "package": "golang.org/x/vuln/cmd/govulncheck"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go-quality/gosec",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+      "v0-source-sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "v2.28.0",
+        "effectiveVersion": "v2.28.0"
+      },
+      "v0-versions": [
+        "v2.28.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Run GOBIN=/usr/local/bin go install github.com/securego/gosec/v2/cmd/gosec@v2.28.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
+        "package": "github.com/securego/gosec/v2/cmd/gosec"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:go/go",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go.yaml",
+      "v0-source-sha256": "09ff56046c57f89b85a3ebb79e2533bf20d1eeead7b1541f5356f7a71cb56a63",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.27.0",
+        "effectiveVersion": "1.27.0"
+      },
+      "v0-versions": [
+        "1.25.12",
+        "1.26.3",
+        "1.26.4",
+        "1.26.5",
+        "1.26.6",
+        "1.27.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Install official Go 1.27.0 archive with verified digest, only when enabled; preserve native config without additional container permissions.",
+        "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-core",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-recommended",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-fonts",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-biber",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-code",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-diagrams",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-math",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-music",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-chemistry",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/texlive-linguistics",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:latex/svg-inkscape",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+      "v0-source-sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install inkscape from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "inkscape"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:node/node",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+      "v0-source-sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "26",
+        "effectiveVersion": "26"
+      },
+      "v0-versions": [
+        "20",
+        "22",
+        "24",
+        "26"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
+      "proposed-route": {
+        "kind": "native_image_or_dockerfile",
+        "proposal": "Official Node image or verified Node tarball; independent pnpm/yarn/bun selection. Official Node Feature always installs Yarn and cannot preserve yarn=false."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:node/pnpm",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+      "v0-source-sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "11.22.0",
+        "effectiveVersion": "11.22.0"
+      },
+      "v0-versions": [
+        "9",
+        "10",
+        "11.1.3",
+        "11.5.2",
+        "11.10.0",
+        "11.18.0",
+        "11.20.0",
+        "11.21.0",
+        "11.22.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install pnpm@11.22.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "pnpm"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:node/yarn",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+      "v0-source-sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "4.17.0",
+        "effectiveVersion": "4.17.0"
+      },
+      "v0-versions": [
+        "4",
+        "4.16.0",
+        "4.17.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Use Corepack exact Yarn activation only when enabled. Official Node Feature has no yarn version or disable option."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:node/bun",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+      "v0-source-sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "1.4.0",
+        "effectiveVersion": "1.4.0"
+      },
+      "v0-versions": [
+        "1.2",
+        "1.3.14",
+        "1.4.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from oven-sh/bun at 1.4.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "oven-sh/bun"
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/bun-package:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/bun-package"
+        },
+        {
+          "publisher": "Markus Zhang",
+          "ref": "ghcr.io/roul/devcontainer-features/mise-bun:1",
+          "source": "https://github.com/RouL/devcontainer-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:python/python",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+      "v0-source-sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "3.14",
+        "effectiveVersion": "3.14"
+      },
+      "v0-versions": [
+        "3.12",
+        "3.13",
+        "3.14"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Python Feature installs matching runtime version but unconditionally bootstraps/provides pip. v0 declares pip=false and provides no clear guarantee that a bundled pip is authorized. Exact independent disable behavior requires owner decision; installation method also changes uv-managed runtime to source-installed Python.",
+      "proposed-route": {
+        "kind": "native_image_or_dockerfile",
+        "proposal": "Keep uv-managed Python 3.14 from official uv image/binary and explicit pip selection in native Dockerfile; verify false means either no pip CLI or owner-approved bundled runtime pip.",
+        "alternative_owner_decision": "Owner may approve bundled pip and official Python Feature runtime installation."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:python/uv",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+      "v0-source-sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.12.5",
+        "effectiveVersion": "0.12.5"
+      },
+      "v0-versions": [
+        "0.7",
+        "0.11.10",
+        "0.11.11",
+        "0.11.15",
+        "0.11.19",
+        "0.11.26",
+        "0.12.0",
+        "0.12.5"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_image_or_dockerfile",
+        "proposal": "Copy /uv and /uvx from digest-pinned ghcr.io/astral-sh/uv at 0.12.5, only where enabled policy allows; upstream documents this path."
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/uv:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/uv"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/uv-tool:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/uv-tool"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:python/pip",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+      "v0-source-sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Python Feature always installs/provides pip (ensurepip, pip packages or upgrade), without a separate pip enable/disable option.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Use distro python3-pip/python3-venv only when enabled; decide whether pip supplied by the Python runtime is acceptable when false. Official Python Feature cannot omit bundled pip."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:python/poetry",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+      "v0-source-sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "2.4.1",
+        "effectiveVersion": "2.4.1"
+      },
+      "v0-versions": [
+        "1.8",
+        "2.0",
+        "2.4.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install poetry==2.4.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "poetry"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Niko Böckerman",
+          "ref": "ghcr.io/nikobockerman/devcontainer-features/poetry-persistent-cache:1",
+          "source": "https://github.com/nikobockerman/devcontainer-features"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/poetry:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/poetry"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:python/pdm",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+      "v0-source-sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "2.28.2",
+        "effectiveVersion": "2.28.2"
+      },
+      "v0-versions": [
+        "2.22",
+        "2.26.9",
+        "2.27.0",
+        "2.28.0",
+        "2.28.1",
+        "2.28.2"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install pdm==2.28.2 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "pdm"
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/pdm:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/pdm"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:rust/rustc",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+      "v0-source-sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.98.0",
+        "effectiveVersion": "1.98.0"
+      },
+      "v0-versions": [
+        "1.90",
+        "1.91",
+        "1.92",
+        "1.93",
+        "1.94",
+        "1.94.1",
+        "1.96.0",
+        "1.96.1",
+        "1.97.1",
+        "1.98.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
+        "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:rust/clippy",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+      "v0-source-sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
+        "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:rust/rustfmt",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+      "v0-source-sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
+        "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:rust/cargo-audit",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+      "v0-source-sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "cargo install cargo-audit --locked in a native Rust build stage only when enabled; resolve and lock a version for reproducibility."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:rust/x86_64-cross",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+      "v0-source-sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Rust Feature can add the rustup target but does not supply the matching cross compiler/sysroot or aibox Cargo linker configuration.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Rust Feature targets option alone is insufficient: install gcc-x86-64-linux-gnu/libc6-dev-amd64-cross and preserve Cargo linker config; condition all three on enable."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:typst/typst",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/typst.yaml",
+      "v0-source-sha256": "3002f096636fae12385780af07ef6f2f10afd7463b806194e2427ddf1a84e579",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.15.0",
+        "effectiveVersion": "0.15.0"
+      },
+      "v0-versions": [
+        "0.13.1",
+        "0.14.2",
+        "0.15.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from typst/typst at 0.15.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "typst/typst"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Michael Lohr",
+          "ref": "ghcr.io/michidk/devcontainers-features/typst:1",
+          "source": "https://github.com/michidk/devcontainers-features/tree/main/src/typst"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/typst:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/typst"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:audio-voice/sox",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+      "v0-source-sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install sox from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "sox"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:audio-voice/sox-pulse",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+      "v0-source-sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install libsox-fmt-pulse from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "libsox-fmt-pulse"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:audio-voice/pulseaudio-utils",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+      "v0-source-sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install pulseaudio-utils from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "pulseaudio-utils"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:audio-voice/alsa-pulse",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+      "v0-source-sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install libasound2-plugins from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "libasound2-plugins"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:browser-testing/playwright",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+      "v0-source-sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.62.1",
+        "effectiveVersion": "1.62.1"
+      },
+      "v0-versions": [
+        "1.62.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @playwright/test@1.62.1 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@playwright/test"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Ty Schlichenmeyer",
+          "ref": "ghcr.io/schlich/devcontainer-features/playwright:0",
+          "source": "https://github.com/schlich/devcontainer-features"
+        },
+        {
+          "publisher": "baxyz",
+          "ref": "ghcr.io/helpers4/devcontainer/playwright-dev:1",
+          "source": "https://github.com/helpers4/devcontainer/tree/main/src/playwright-dev"
+        },
+        {
+          "publisher": "PostFinance AG",
+          "ref": "ghcr.io/postfinance/devcontainer-features/playwright-deps:2",
+          "source": "https://github.com/postfinance/devcontainer-features"
+        },
+        {
+          "publisher": "cjcrobin",
+          "ref": "ghcr.io/cjcrobin/devcontainer-features/playwright-cli:1",
+          "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/playwright-cli"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:browser-testing/axe-playwright",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+      "v0-source-sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "4.13.0",
+        "effectiveVersion": "4.13.0"
+      },
+      "v0-versions": [
+        "4.13.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @axe-core/playwright@4.13.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable. Also install axe-core@4.13.0 as in v0; catalog name refers to @axe-core/playwright, not the separate axe-playwright package.",
+        "package": "@axe-core/playwright"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:browser-testing/chromium",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+      "v0-source-sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use exact Playwright package plus playwright install --with-deps --no-shell chromium, only when enabled; browser revision follows 1.62.1. Official Playwright image brings browsers that violate individual toggles."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:browser-testing/firefox",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+      "v0-source-sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use Playwright install firefox only when enabled, locked to Playwright 1.62.1 browser revision."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:browser-testing/webkit",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+      "v0-source-sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [
+        "node"
+      ],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Use Playwright install webkit only when enabled, locked to Playwright 1.62.1 browser revision."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:cloud-aws/aws-cli",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-aws.yaml",
+      "v0-source-sha256": "7e45e4a5796235c24ce26956edf84cd0fa0ad8fd7106a4893c1758ea9b89e2d3",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": "ghcr.io/devcontainers/features/aws-cli@sha256:1f93c8315b7a6d76982ebb2269f8b0d50413fc0f965c032edf4aee0caceb73ef",
+      "v1-option": {
+        "version": "latest"
+      },
+      "install-owner": "Dev Container Spec Maintainers",
+      "dependency": [],
+      "license": "MIT",
+      "digest": "sha256:1f93c8315b7a6d76982ebb2269f8b0d50413fc0f965c032edf4aee0caceb73ef",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "test-id": null,
+      "decision": "source-reviewed; runtime-pending",
+      "classification": "qualified_upstream",
+      "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
+      "proposed-route": null,
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:cloud-azure/azure-cli",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-azure.yaml",
+      "v0-source-sha256": "ac025ae5b7b22e26d6394be0459f558ab356606d8ae752691aed98c2212255ff",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": "ghcr.io/devcontainers/features/azure-cli@sha256:d98f1066c077be0fa9d115b718f458bd803e415181b4a96f82a6f5d9f77241ac",
+      "v1-option": {
+        "version": "latest",
+        "installBicep": false
+      },
+      "install-owner": "Dev Container Spec Maintainers",
+      "dependency": [],
+      "license": "MIT",
+      "digest": "sha256:d98f1066c077be0fa9d115b718f458bd803e415181b4a96f82a6f5d9f77241ac",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "test-id": null,
+      "decision": "source-reviewed; runtime-pending",
+      "classification": "qualified_upstream",
+      "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
+      "proposed-route": null,
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:cloud-gcp/gcloud-cli",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-gcp.yaml",
+      "v0-source-sha256": "5b43e10b06ad8f829a30e61d790ae7412324ebc29f9f907791fca59386a8deb1",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install from official signed Google Cloud apt repository in a native Dockerfile, conditional on enable; lock version/snapshot."
+      },
+      "community-candidates": [
+        {
+          "publisher": "Eric Ho",
+          "ref": "ghcr.io/dhoeric/features/google-cloud-cli:1",
+          "source": "https://github.com/dhoeric/features/tree/main/src/google-cloud-cli"
+        },
+        {
+          "publisher": "Joshua Ji",
+          "ref": "ghcr.io/joshuanianji/devcontainer-features/gcloud-cli-persistence:1",
+          "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/gcloud-cli-persistence"
+        },
+        {
+          "publisher": "Joshua Ji",
+          "ref": "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1",
+          "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/google-cloud-cli"
+        },
+        {
+          "publisher": "Bart Venter",
+          "ref": "ghcr.io/bartventer/arch-devcontainer-features/gcloud-cli:1",
+          "source": "https://github.com/bartventer/arch-devcontainer-features/tree/main/src/gcloud-cli"
+        },
+        {
+          "publisher": "John Ajera",
+          "ref": "ghcr.io/jajera/features/gcloud-cli:1",
+          "source": "https://cloud.google.com/sdk/docs/install"
+        },
+        {
+          "publisher": "siri404",
+          "ref": "ghcr.io/siri404/devcontainer-ai-features/gcloud:1",
+          "source": "https://github.com/siri404/devcontainer-ai-features"
+        },
+        {
+          "publisher": "aqua",
+          "ref": "ghcr.io/aqua/devcontainer-gcloud/gcloud:1",
+          "source": "https://github.com/aqua/devcontainer-gcloud"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:cloudflare/cloudflared",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloudflare.yaml",
+      "v0-source-sha256": "eebfab7cab1dca19b18f5fb68016b432c3113f9379879efe57383e68376a5845",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install from official signed Cloudflare apt repository conditional on enable; lock version/snapshot."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:data-preview/sqlite3",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-preview.yaml",
+      "v0-source-sha256": "aee18fc3d26b615bbe4e427b9ebdc498b6f63c73bb7cbf8cd812a0d8a9e933e8",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install sqlite3 from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "sqlite3"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:data-preview/csvkit",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-preview.yaml",
+      "v0-source-sha256": "aee18fc3d26b615bbe4e427b9ebdc498b6f63c73bb7cbf8cd812a0d8a9e933e8",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install csvkit from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "csvkit"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:data-visualization/vega-cli",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-visualization.yaml",
+      "v0-source-sha256": "d9e6a6bbbebac2b162ff23fb86befc54526991f32adc70df6c0beae502b633d4",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "6.4.0",
+        "effectiveVersion": "6.4.0"
+      },
+      "v0-versions": [
+        "6.4.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install vega-cli@6.4.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "vega-cli"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:data-visualization/vega-lite",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-visualization.yaml",
+      "v0-source-sha256": "d9e6a6bbbebac2b162ff23fb86befc54526991f32adc70df6c0beae502b633d4",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "6.4.3",
+        "effectiveVersion": "6.4.3"
+      },
+      "v0-versions": [
+        "6.4.3"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install vega-lite@6.4.3 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "vega-lite"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:diagramming/d2",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/diagramming.yaml",
+      "v0-source-sha256": "bb93c024cf58df5b832ae89eb248572fd8764e3fc9cd1fa947d0ffeda9b0d536",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.7.1",
+        "effectiveVersion": "0.7.1"
+      },
+      "v0-versions": [
+        "0.7.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from d2lang/d2 at 0.7.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "d2lang/d2"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:diagramming/graphviz",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/diagramming.yaml",
+      "v0-source-sha256": "bb93c024cf58df5b832ae89eb248572fd8764e3fc9cd1fa947d0ffeda9b0d536",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install graphviz from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "graphviz"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:git-ui/gh",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/git-ui.yaml",
+      "v0-source-sha256": "7aab7e1585e5144e4c065d0256c9e323f3bf8e8cb13acc08ec6e7fd9af4eca5c",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": "ghcr.io/devcontainers/features/github-cli@sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2",
+      "v1-option": {
+        "version": "latest"
+      },
+      "install-owner": "Dev Container Spec Maintainers",
+      "dependency": [],
+      "license": "MIT",
+      "digest": "sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "test-id": null,
+      "decision": "source-reviewed; runtime-pending",
+      "classification": "qualified_upstream",
+      "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
+      "proposed-route": null,
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:git-ui/lazygit",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/git-ui.yaml",
+      "v0-source-sha256": "7aab7e1585e5144e4c065d0256c9e323f3bf8e8cb13acc08ec6e7fd9af4eca5c",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install lazygit from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "lazygit"
+      },
+      "community-candidates": [
+        {
+          "publisher": "jsburckhardt",
+          "ref": "ghcr.io/jsburckhardt/devcontainer-features/lazygit:1",
+          "source": "https://github.com/jsburckhardt/devcontainer-features"
+        },
+        {
+          "publisher": "cirolosapio",
+          "ref": "ghcr.io/cirolosapio/devcontainers-features/alpine-lazygit:0",
+          "source": "https://github.com/cirolosapio/devcontainers-features/tree/main/src/alpine-lazygit"
+        },
+        {
+          "publisher": "Georg Ofenbeck",
+          "ref": "ghcr.io/georgofenbeck/features/lazygit-homebrew:1",
+          "source": "https://github.com/GeorgOfenbeck/features/tree/main/src/lazygit-homebrew"
+        },
+        {
+          "publisher": "Georg Ofenbeck",
+          "ref": "ghcr.io/georgofenbeck/features/lazygit-linuxbinary:1",
+          "source": "https://github.com/GeorgOfenbeck/features/tree/main/src/lazygit-linuxbinary"
+        },
+        {
+          "publisher": "devcontainer.community",
+          "ref": "ghcr.io/devcontainer-community/devcontainer-features/lazygit:1",
+          "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/lazygit"
+        },
+        {
+          "publisher": "TheDiveO",
+          "ref": "ghcr.io/thediveo/devcontainer-features/lazygit:0",
+          "source": "https://github.com/thediveo/devcontainer-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:go-release/goreleaser",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/go-release.yaml",
+      "v0-source-sha256": "9466c02ffd9248f10c83dad5a86381838d63b1a9bc456b91e3feaafa01a7d62b",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "2.17.1",
+        "effectiveVersion": "2.17.1"
+      },
+      "v0-versions": [
+        "2.17.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from goreleaser/goreleaser at 2.17.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "goreleaser/goreleaser"
+      },
+      "community-candidates": [
+        {
+          "publisher": "guiyomh",
+          "ref": "ghcr.io/guiyomh/features/goreleaser:0",
+          "source": "https://github.com/guiyomh/features"
+        },
+        {
+          "publisher": "Marco Zaccaro",
+          "ref": "ghcr.io/marcozac/devcontainer-features/goreleaser:1",
+          "source": "https:/github.com/marcozac/devcontainer-features/tree/main/src/goreleaser"
+        },
+        {
+          "publisher": "PostFinance AG",
+          "ref": "ghcr.io/postfinance/devcontainer-features/goreleaser:1",
+          "source": "https://github.com/postfinance/devcontainer-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:infrastructure/opentofu",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+      "v0-source-sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.12.6",
+        "effectiveVersion": "1.12.6"
+      },
+      "v0-versions": [
+        "1.9.0",
+        "1.12.0",
+        "1.12.1",
+        "1.12.3",
+        "1.12.5",
+        "1.12.6"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from opentofu/opentofu at 1.12.6 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "opentofu/opentofu"
+      },
+      "community-candidates": [
+        {
+          "publisher": "John Rowley",
+          "ref": "ghcr.io/robbert229/devcontainer-features/opentofu:1",
+          "source": "https://github.com/robbert229/devcontainer-features"
+        },
+        {
+          "publisher": "cirolosapio",
+          "ref": "ghcr.io/cirolosapio/devcontainers-features/alpine-opentofu:0",
+          "source": "https://github.com/cirolosapio/devcontainers-features/tree/main/src/alpine-opentofu"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/opentofu:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/opentofu"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:infrastructure/ansible",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+      "v0-source-sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "14.3.1",
+        "effectiveVersion": "14.3.1"
+      },
+      "v0-versions": [
+        "13.7.0",
+        "14.0.0",
+        "14.1.0",
+        "14.2.0",
+        "14.3.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install ansible==14.3.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
+        "package": "ansible"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Hans Spaans",
+          "ref": "ghcr.io/hspaans/devcontainer-features/ansible-lint:2",
+          "source": "http://github.com/hspaans/devcontainer-features/tree/master/src/ansible-lint"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/ansible:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/ansible"
+        },
+        {
+          "publisher": "sliekens",
+          "ref": "ghcr.io/sliekens/devcontainer-features/ansible-core:1",
+          "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/ansible-core/README.md"
+        },
+        {
+          "publisher": "sliekens",
+          "ref": "ghcr.io/sliekens/devcontainer-features/ansible-lint:1",
+          "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/ansible-lint/README.md"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:infrastructure/packer",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+      "v0-source-sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.16.0",
+        "effectiveVersion": "1.16.0"
+      },
+      "v0-versions": [
+        "1.11.2",
+        "1.15.3",
+        "1.15.4",
+        "1.16.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from hashicorp/packer at 1.16.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "hashicorp/packer"
+      },
+      "community-candidates": [
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/packer-asdf:2",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/packer-asdf"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:infrastructure/podman",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+      "v0-source-sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install podman/buildah/skopeo/slirp4netns/fuse-overlayfs from selected distro only when enabled; separately decide required user namespaces/cgroups rather than substituting Docker Feature."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:kubernetes/kubectl",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+      "v0-source-sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.36.4",
+        "effectiveVersion": "1.36.4"
+      },
+      "v0-versions": [
+        "1.36.1",
+        "1.36.2",
+        "1.36.3",
+        "1.36.4"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature matches exact version/independent tool enable options, but OCI metadata unconditionally creates minikube-config volume mounted at /home/vscode/.minikube even when minikube=none. This adds persistent provider-named runtime configuration absent from v0 addon and cannot be disabled by a Feature option. Owner decision required.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Install kubectl 1.36.4 from verified official release assets only when enabled, using a native Dockerfile and preserving current mounts.",
+        "alternative_owner_decision": "Owner may approve the upstream Feature unconditional named Minikube volume; existing feature_options then apply."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:kubernetes/helm",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+      "v0-source-sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "4.2.4",
+        "effectiveVersion": "4.2.4"
+      },
+      "v0-versions": [
+        "3.17.2",
+        "4.2.0",
+        "4.2.2",
+        "4.2.3",
+        "4.2.4"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "Official Feature matches exact version/independent tool enable options, but OCI metadata unconditionally creates minikube-config volume mounted at /home/vscode/.minikube even when minikube=none. This adds persistent provider-named runtime configuration absent from v0 addon and cannot be disabled by a Feature option. Owner decision required.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Install helm 4.2.4 from verified official release assets only when enabled, using a native Dockerfile and preserving current mounts.",
+        "alternative_owner_decision": "Owner may approve the upstream Feature unconditional named Minikube volume; existing feature_options then apply."
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:kubernetes/kustomize",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+      "v0-source-sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "5.8.1",
+        "effectiveVersion": "5.8.1"
+      },
+      "v0-versions": [
+        "5.6.0",
+        "5.8.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from kubernetes-sigs/kustomize at 5.8.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "kubernetes-sigs/kustomize"
+      },
+      "community-candidates": [
+        {
+          "publisher": "rio",
+          "ref": "ghcr.io/rio/features/kustomize:1",
+          "source": "https://github.com/rio/features"
+        },
+        {
+          "publisher": "audacioustux",
+          "ref": "ghcr.io/audacioustux/devcontainers/kustomize:1",
+          "source": "https://github.com/audacioustux/devcontainers"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:kubernetes/k9s",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+      "v0-source-sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+      "v0-default": {
+        "enabled": false,
+        "declaredVersion": "0.51.0",
+        "effectiveVersion": "0.51.0"
+      },
+      "v0-versions": [
+        "0.50.18",
+        "0.51.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from derailed/k9s at 0.51.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "derailed/k9s"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Eric Ho",
+          "ref": "ghcr.io/dhoeric/features/k9s:1",
+          "source": "https://github.com/dhoeric/features/tree/main/src/k9s"
+        },
+        {
+          "publisher": "Nate Scherer",
+          "ref": "ghcr.io/natescherer/devcontainers-custom-features/k9s:1",
+          "source": "https://github.com/natescherer/devcontainers-custom-features"
+        },
+        {
+          "publisher": "rio",
+          "ref": "ghcr.io/rio/features/k9s:1",
+          "source": "https://github.com/rio/features"
+        },
+        {
+          "publisher": "audacioustux",
+          "ref": "ghcr.io/audacioustux/devcontainers/k9s:1",
+          "source": "https://github.com/audacioustux/devcontainers"
+        },
+        {
+          "publisher": "devcontainer.community",
+          "ref": "ghcr.io/devcontainer-community/devcontainer-features/k9scli.io:1",
+          "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/k9scli.io"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:mermaid/mermaid-cli",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/mermaid.yaml",
+      "v0-source-sha256": "6649f18cfccc577eb10eba2233e93fd606a2809bd41e847a43fb68b75c0c0d4e",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "11.16.0",
+        "effectiveVersion": "11.16.0"
+      },
+      "v0-versions": [
+        "11.16.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install @mermaid-js/mermaid-cli@11.16.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
+        "package": "@mermaid-js/mermaid-cli"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:mermaid/puppeteer",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/mermaid.yaml",
+      "v0-source-sha256": "6649f18cfccc577eb10eba2233e93fd606a2809bd41e847a43fb68b75c0c0d4e",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "25.9.0",
+        "effectiveVersion": "25.9.0"
+      },
+      "v0-versions": [
+        "25.9.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install puppeteer@25.9.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable. Preserve puppeteer@25.9.0 plus its compatible Chrome headless shell and runtime libraries; package alone is insufficient.",
+        "package": "puppeteer"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/chafa",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install chafa from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "chafa"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/librsvg",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install librsvg2-bin from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "librsvg2-bin"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/poppler",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install poppler-utils from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "poppler-utils"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/timg",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install timg from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "timg"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/mupdf",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install mupdf-tools from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "mupdf-tools"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/entr",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install entr from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "entr"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/p7zip",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install p7zip-full from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "p7zip-full"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-archive/resvg",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+      "v0-source-sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.47.0",
+        "effectiveVersion": "0.47.0"
+      },
+      "v0-versions": [
+        "0.47.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists. Frozen v0 source has real x86_64 asset but an error-returning placeholder on other architectures; do not claim ARM64 functional parity.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from linebender/resvg at 0.47.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "linebender/resvg"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-enhanced/ffmpeg",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-enhanced.yaml",
+      "v0-source-sha256": "8e0aa8a30571f3f54d07104180bf515cc084620fb5781454b7ca34404d5f848a",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install ffmpeg from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "ffmpeg"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-enhanced/ghostscript",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-enhanced.yaml",
+      "v0-source-sha256": "8e0aa8a30571f3f54d07104180bf515cc084620fb5781454b7ca34404d5f848a",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install ghostscript from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "ghostscript"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:preview-enhanced/rich",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-enhanced.yaml",
+      "v0-source-sha256": "8e0aa8a30571f3f54d07104180bf515cc084620fb5781454b7ca34404d5f848a",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "",
+        "effectiveVersion": "unversioned/distro-or-latest"
+      },
+      "v0-versions": [],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_package",
+        "proposal": "Install python3-rich from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
+        "package": "python3-rich"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:release/shellcheck",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/release.yaml",
+      "v0-source-sha256": "f66f5a3e2e9f3d3cb38139a3c49ec77ba9da6c94385691ab361a429ef01614c5",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.11.0",
+        "effectiveVersion": "0.11.0"
+      },
+      "v0-versions": [
+        "0.11.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from koalaman/shellcheck at 0.11.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "koalaman/shellcheck"
+      },
+      "community-candidates": [
+        {
+          "publisher": "lukewiwa",
+          "ref": "ghcr.io/lukewiwa/features/shellcheck:0",
+          "source": "https://github.com/lukewiwa/features"
+        },
+        {
+          "publisher": "Marco Zaccaro",
+          "ref": "ghcr.io/marcozac/devcontainer-features/shellcheck:1",
+          "source": "https://github.com/marcozac/devcontainer-features/tree/main/src/shellcheck"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/shellcheck:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/shellcheck"
+        },
+        {
+          "publisher": "Stephen Mott",
+          "ref": "ghcr.io/srzstephen/devcontainer-features/bash-language-server:1",
+          "source": "https://github.com/SrzStephen/devcontainer-features/blob/main/src/bash-language-server/README.md"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:release/hadolint",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/release.yaml",
+      "v0-source-sha256": "f66f5a3e2e9f3d3cb38139a3c49ec77ba9da6c94385691ab361a429ef01614c5",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "2.15.1",
+        "effectiveVersion": "2.15.1"
+      },
+      "v0-versions": [
+        "2.15.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from hadolint/hadolint at 2.15.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "hadolint/hadolint"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Eric Ho",
+          "ref": "ghcr.io/dhoeric/features/hadolint:1",
+          "source": "https://github.com/dhoeric/features/tree/main/src/hadolint"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:supply-chain/gitleaks",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+      "v0-source-sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "8.30.1",
+        "effectiveVersion": "8.30.1"
+      },
+      "v0-versions": [
+        "8.30.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from gitleaks/gitleaks at 8.30.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "gitleaks/gitleaks"
+      },
+      "community-candidates": [
+        {
+          "publisher": "jsburckhardt",
+          "ref": "ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1",
+          "source": "https://github.com/jsburckhardt/devcontainer-features"
+        },
+        {
+          "publisher": "Matthieu Fronton",
+          "ref": "ghcr.io/frntn/devcontainers-features/gitleaks:1",
+          "source": "https://github.com/frntn/devcontainers-features"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:supply-chain/osv-scanner",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+      "v0-source-sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "2.4.0",
+        "effectiveVersion": "2.4.0"
+      },
+      "v0-versions": [
+        "2.4.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "gap",
+      "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from google/osv-scanner at 2.4.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "google/osv-scanner"
+      },
+      "community-candidates": []
+    },
+    {
+      "id": "ADDON:supply-chain/syft",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+      "v0-source-sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "1.50.0",
+        "effectiveVersion": "1.50.0"
+      },
+      "v0-versions": [
+        "1.50.0"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from anchore/syft at 1.50.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "anchore/syft"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Dasith Wijes",
+          "ref": "ghcr.io/dasiths/devcontainer-features/syft:1",
+          "source": "https://github.com/dasiths/devcontainer-features"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/syft:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/syft"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:supply-chain/grype",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+      "v0-source-sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "0.116.1",
+        "effectiveVersion": "0.116.1"
+      },
+      "v0-versions": [
+        "0.116.1"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from anchore/grype at 0.116.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "anchore/grype"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Dasith Wijes",
+          "ref": "ghcr.io/dasiths/devcontainer-features/grype:1",
+          "source": "https://github.com/dasiths/devcontainer-features"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/grype:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/grype"
+        }
+      ]
+    },
+    {
+      "id": "ADDON:supply-chain/cosign",
+      "v0-source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+      "v0-source-sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+      "v0-default": {
+        "enabled": true,
+        "declaredVersion": "3.1.2",
+        "effectiveVersion": "3.1.2"
+      },
+      "v0-versions": [
+        "3.1.2"
+      ],
+      "v1-ref": null,
+      "v1-option": null,
+      "install-owner": null,
+      "dependency": [],
+      "license": null,
+      "digest": null,
+      "platforms": [],
+      "test-id": null,
+      "decision": "owner-review-pending",
+      "classification": "uncertain",
+      "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
+      "proposed-route": {
+        "kind": "native_dockerfile",
+        "proposal": "Download verified architecture-specific assets from sigstore/cosign at 3.1.2 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
+        "upstream": "sigstore/cosign"
+      },
+      "community-candidates": [
+        {
+          "publisher": "Ravikanth Chaganti",
+          "ref": "ghcr.io/rchaganti/vsc-devcontainer-features/cosign:1",
+          "source": "https://github.com/rchaganti/vsc-devcontainer-features"
+        },
+        {
+          "publisher": "devcontainers-extra",
+          "ref": "ghcr.io/devcontainers-extra/features/cosign:1",
+          "source": "http://github.com/devcontainers-extra/features/tree/main/src/cosign"
+        }
+      ]
+    }
+  ]
+}

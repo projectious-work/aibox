@@ -132,18 +132,52 @@ conversion is never silently reported as parity.
 
 ## Feature composition contract
 
-Select qualified existing native Dev Container Features or native image,
-Dockerfile and package units for installable capabilities. A Feature is a
-packaged installer with declared options, dependencies and entry point; it is
-not an aibox package-manager API. `customizations.aibox` carries UX preferences
-only and must not install tools. A native unit may supply several catalog rows.
+Classify each retained v0 addon group by the usefulness of selecting its
+members separately. A tightly coupled group is one aibox-owned Feature with
+no subtool Feature routes or `all` bundle: `audio-voice` is the example, under
+`ghcr.io/projectious-work/aibox-features/audio/voice`. A semantic collection
+of independently useful tools has one Feature per selectable tool and a
+versioned `all` bundle using standard `dependsOn`: `data-preview` is the
+example, under `.../data/preview/<tool>` and `.../data/preview/all`.
+Only publish an `all` bundle where its members also have individual routes;
+avoid using a collection's metadata artifact as a Feature. Document each
+group's classification and the member-to-Feature mapping in the selection
+table. The 98 v0 rows remain individually traceable even when one Feature
+installs several coupled components. Do not submit these collections to the
+public Feature index yet. Record exact release references only after artifacts
+exist. If a v0 project used per-tool switches within a now-atomic group, the
+converter must report those states as an explicit compatibility decision;
+it must not silently claim that the single Feature preserves them.
 
-Aibox-owned installer Features require individual justification and owner
-approval **after review of the complete gap list**, including existing native
-alternatives and removal/scope-reduction options. Missing upstream coverage
-alone does not authorize a fallback Feature. Follow
-DEC-20261001_1954-SmoothTrout and chapter 19; reuse existing package managers
-and official distributions for any approved owned installer.
+Each Feature owns a support matrix by selected tool version, container distro
+and release, and architecture. Its `install.sh` selects an applicable canonical
+method from the tool producer's installation documentation for that matrix
+cell; different tool versions may need different methods. If the producer has
+no applicable method, an official distro package is an allowed fallback only
+after checking that the exact requested tool version is available from the
+selected base's configured repository on that architecture, that its provenance
+and dependencies are acceptable, and that installation and runtime tests pass.
+An APT index entry for one release or architecture does not qualify all
+Debian-based images. Pin and verify consumed release or package inputs; the
+Feature's own version does not pin the installed tool version. Reuse a
+qualified upstream Feature, native package manager or official distribution
+*inside* an aibox Feature where it meets that contract. A Feature is a packaged
+installer with declared options, dependencies and entry point; it is not an
+aibox package-manager API. `customizations.aibox` carries UX preferences only
+and must not install tools. An unsupported version/base/architecture combination
+fails clearly at build time before installation; Arch and Nix are not inferred
+as supported from a generic Linux claim. Follow
+DEC-20261002_0054-AmberCompass-qualify-feature-compatibility-per-tool-version.
+Feature compatibility is distinct from any client editor's own container
+requirements; a passing Feature build does not establish VS Code Server or
+extension compatibility on that base.
+
+The owner still decides which v0 rows to retain or remove. The grouped Feature
+direction supersedes DEC-20261001_1954-SmoothTrout's restriction on routine
+aibox-owned installer Features; the group boundary is fixed by
+DEC-20261002_0046-SmoothLotus-package-coupled-addon-groups-atomically-and. Native
+image/Dockerfile/package units are implementation inputs for those Features,
+not a parallel project-facing addon resolver.
 
 Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 
@@ -157,8 +191,9 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 3. Map v0 recipe `requires` into native dependencies or a documented
    prerequisite; prove there is no hidden addon solver or unexpected extras.
 4. Test default/non-default supported versions and disable on both container
-   architectures. Test download/checksum and wrong-architecture failures where
-   those operations are performed by the selected installation mechanism.
+   architectures, for every declared distro/release cell. Test download/checksum,
+   missing exact package version and wrong-architecture failures where those
+   operations are performed by the selected installation mechanism.
 5. Prove that native project lockfiles remain authoritative for application
    dependencies; bundled convenience tools never rewrite them.
 
@@ -166,9 +201,11 @@ The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and
 `decision`. The current `ledger/addons.json` is only its input. Phase V1-05
-requires the complete table, owner dispositions for gaps/removals, actual
-native installation sources and qualification evidence. It does not require
-98 Feature manifests or aibox ownership of each installer.
+requires the complete table, owner dispositions for removals, group cohesion
+classification, grouped Feature sources and references for retained tools,
+producer installation provenance, and qualification evidence. The 98 census
+rows remain individually traceable; semantic bundles are additional convenience
+selections.
 
 The base image must separately enumerate its packages and runtime glue from
 `ledger/base-build.json`; tools outside the addon catalog do not disappear.
