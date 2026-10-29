@@ -1,0 +1,12 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "typescript bundle",
+  "description": "Installs every typescript member Feature through dependsOn (aibox catalog ID typescript/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/typescript/biome:1": {},
+    "ghcr.io/projectious-work/aibox-features/typescript/oxlint:1": {},
+    "ghcr.io/projectious-work/aibox-features/typescript/tsc:1": {}
+  }
+}

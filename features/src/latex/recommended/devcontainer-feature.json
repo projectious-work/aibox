@@ -1,0 +1,11 @@
+{
+  "id": "recommended",
+  "version": "1.0.0",
+  "name": "texlive-recommended",
+  "description": "Installs texlive-recommended (aibox catalog ID latex/recommended).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

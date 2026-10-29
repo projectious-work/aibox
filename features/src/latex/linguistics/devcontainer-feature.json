@@ -1,0 +1,11 @@
+{
+  "id": "linguistics",
+  "version": "1.0.0",
+  "name": "texlive-linguistics",
+  "description": "Installs texlive-linguistics (aibox catalog ID latex/linguistics).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "chromium",
+  "version": "1.0.0",
+  "name": "chromium",
+  "description": "Installs chromium (aibox catalog ID browser-testing/chromium).",
+  "documentationURL": "https://playwright.dev/docs/browsers#install-browsers",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/browser-testing/playwright:1": {}
+  }
+}

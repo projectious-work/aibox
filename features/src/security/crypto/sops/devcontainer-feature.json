@@ -1,0 +1,17 @@
+{
+  "id": "sops",
+  "version": "1.0.0",
+  "name": "sops",
+  "description": "Installs sops (aibox catalog ID security/crypto/sops).",
+  "documentationURL": "https://github.com/getsops/sops#download",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "3.13.3"
+      ],
+      "default": "3.13.3",
+      "description": "Version of sops to install."
+    }
+  }
+}

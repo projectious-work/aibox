@@ -1,0 +1,8 @@
+{
+  "id": "voice",
+  "version": "1.0.0",
+  "name": "sox, sox-pulse, pulseaudio-utils, alsa-pulse",
+  "description": "Installs sox, sox-pulse, pulseaudio-utils, alsa-pulse (aibox catalog ID audio/voice).",
+  "documentationURL": "https://packages.debian.org/trixie/sox",
+  "options": {}
+}

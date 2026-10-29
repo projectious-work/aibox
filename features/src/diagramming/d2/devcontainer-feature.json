@@ -1,0 +1,17 @@
+{
+  "id": "d2",
+  "version": "1.0.0",
+  "name": "d2",
+  "description": "Installs d2 (aibox catalog ID diagramming/d2).",
+  "documentationURL": "https://d2lang.com/tour/install/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.7.1"
+      ],
+      "default": "0.7.1",
+      "description": "Version of d2 to install."
+    }
+  }
+}

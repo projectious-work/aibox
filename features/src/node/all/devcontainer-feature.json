@@ -1,0 +1,13 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "node bundle",
+  "description": "Installs every node member Feature through dependsOn (aibox catalog ID node/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/node/bun:1": {},
+    "ghcr.io/projectious-work/aibox-features/node/node:1": {},
+    "ghcr.io/projectious-work/aibox-features/node/pnpm:1": {},
+    "ghcr.io/projectious-work/aibox-features/node/yarn:1": {}
+  }
+}

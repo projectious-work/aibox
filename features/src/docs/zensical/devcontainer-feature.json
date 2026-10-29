@@ -1,0 +1,20 @@
+{
+  "id": "zensical",
+  "version": "1.0.0",
+  "name": "zensical",
+  "description": "Installs zensical (aibox catalog ID docs/zensical).",
+  "documentationURL": "https://zensical.org/docs/get-started/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.0.57"
+      ],
+      "default": "0.0.57",
+      "description": "Version of zensical to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

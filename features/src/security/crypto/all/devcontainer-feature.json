@@ -1,0 +1,15 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "security-crypto bundle",
+  "description": "Installs every security-crypto member Feature through dependsOn (aibox catalog ID security/crypto/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/security/crypto/age:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/crypto/gnupg:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/crypto/minisign:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/crypto/openssh-client:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/crypto/openssl:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/crypto/sops:1": {}
+  }
+}

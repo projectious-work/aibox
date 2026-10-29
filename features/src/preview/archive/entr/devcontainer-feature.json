@@ -1,0 +1,8 @@
+{
+  "id": "entr",
+  "version": "1.0.0",
+  "name": "entr",
+  "description": "Installs entr (aibox catalog ID preview/archive/entr).",
+  "documentationURL": "https://packages.debian.org/trixie/entr",
+  "options": {}
+}

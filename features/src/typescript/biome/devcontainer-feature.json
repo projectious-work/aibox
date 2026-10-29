@@ -1,0 +1,17 @@
+{
+  "id": "biome",
+  "version": "1.0.0",
+  "name": "biome",
+  "description": "Installs biome (aibox catalog ID typescript/biome).",
+  "documentationURL": "https://biomejs.dev/guides/manual-installation/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.6.4"
+      ],
+      "default": "2.6.4",
+      "description": "Version of biome to install."
+    }
+  }
+}

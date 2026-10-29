@@ -1,0 +1,20 @@
+{
+  "id": "vibe",
+  "version": "1.0.0",
+  "name": "vibe",
+  "description": "Installs vibe (aibox catalog ID ai/vibe).",
+  "documentationURL": "https://github.com/mistralai/mistral-vibe#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "3.0.3"
+      ],
+      "default": "3.0.3",
+      "description": "Version of vibe to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

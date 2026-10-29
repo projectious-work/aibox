@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -216,6 +217,31 @@ func TestV104StarterCLIMCPParity(t *testing.T) {
 		mcpData, _ = json.Marshal(mcpFields)
 		if !bytes.Equal(cliData, mcpData) {
 			t.Fatalf("%s CLI/MCP data mismatch: cli=%s mcp=%s", name, cliData, mcpData)
+		}
+		// AC-TOOLS/inspect: the selection is reported identically and without options.
+		var features []any
+		for _, entry := range cliFields["configuration"].([]any) {
+			if fields := entry.(map[string]any); fields["key"] == "devcontainer.features" {
+				features = append(features, fields)
+			}
+		}
+		switch name {
+		case "customized":
+			want := map[string]any{
+				"key": "devcontainer.features", "redacted": false, "layer": "project",
+				"source": ".devcontainer/devcontainer.json", "domain": "native", "invocationOnly": false,
+				"value": []any{"ghcr.io/devcontainers/features/hugo@sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509"},
+			}
+			if len(features) != 1 || !reflect.DeepEqual(features[0], want) {
+				t.Fatalf("customized Feature selection is not reported as specified: %s", cliData)
+			}
+			if bytes.Contains(cliData, []byte("0.165.0")) {
+				t.Fatalf("customized inspection echoed a Feature option: %s", cliData)
+			}
+		case "minimal":
+			if len(features) != 0 {
+				t.Fatalf("minimal inspection reports a Feature selection: %s", cliData)
+			}
 		}
 		t.Logf("starter=%s operation=%s outcome=%s digest=%s cli-mcp-parity=passed", name, cliResult.Operation, cliResult.Outcome, cliResult.InputDigest)
 	}

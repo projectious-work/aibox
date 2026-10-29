@@ -1,0 +1,8 @@
+{
+  "id": "poppler",
+  "version": "1.0.0",
+  "name": "poppler",
+  "description": "Installs poppler (aibox catalog ID preview/archive/poppler).",
+  "documentationURL": "https://packages.debian.org/trixie/poppler-utils",
+  "options": {}
+}

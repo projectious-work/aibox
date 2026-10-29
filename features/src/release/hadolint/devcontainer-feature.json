@@ -1,0 +1,17 @@
+{
+  "id": "hadolint",
+  "version": "1.0.0",
+  "name": "hadolint",
+  "description": "Installs hadolint (aibox catalog ID release/hadolint).",
+  "documentationURL": "https://github.com/hadolint/hadolint#install",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.15.1"
+      ],
+      "default": "2.15.1",
+      "description": "Version of hadolint to install."
+    }
+  }
+}

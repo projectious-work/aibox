@@ -1,0 +1,14 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "browser-testing bundle",
+  "description": "Installs every browser-testing member Feature through dependsOn (aibox catalog ID browser-testing/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/browser-testing/axe-playwright:1": {},
+    "ghcr.io/projectious-work/aibox-features/browser-testing/chromium:1": {},
+    "ghcr.io/projectious-work/aibox-features/browser-testing/firefox:1": {},
+    "ghcr.io/projectious-work/aibox-features/browser-testing/playwright:1": {},
+    "ghcr.io/projectious-work/aibox-features/browser-testing/webkit:1": {}
+  }
+}

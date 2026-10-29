@@ -1,0 +1,20 @@
+{
+  "id": "semgrep",
+  "version": "1.0.0",
+  "name": "semgrep",
+  "description": "Installs semgrep (aibox catalog ID security/scan/semgrep).",
+  "documentationURL": "https://semgrep.dev/docs/getting-started/cli",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.182.1"
+      ],
+      "default": "1.182.1",
+      "description": "Version of semgrep to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

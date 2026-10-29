@@ -1,0 +1,17 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "preview-archive bundle",
+  "description": "Installs every preview-archive member Feature through dependsOn (aibox catalog ID preview/archive/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/preview/archive/chafa:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/entr:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/librsvg:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/mupdf:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/p7zip:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/poppler:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/resvg:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/archive/timg:1": {}
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "gnupg",
+  "version": "1.0.0",
+  "name": "gnupg",
+  "description": "Installs gnupg (aibox catalog ID security/crypto/gnupg).",
+  "documentationURL": "https://packages.debian.org/trixie/gnupg",
+  "options": {}
+}

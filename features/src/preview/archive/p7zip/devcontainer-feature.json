@@ -1,0 +1,8 @@
+{
+  "id": "p7zip",
+  "version": "1.0.0",
+  "name": "p7zip",
+  "description": "Installs p7zip (aibox catalog ID preview/archive/p7zip).",
+  "documentationURL": "https://packages.debian.org/trixie/7zip",
+  "options": {}
+}
