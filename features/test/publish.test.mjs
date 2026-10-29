@@ -3,8 +3,8 @@
 // a Fake that records what it was asked to publish.
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {cpSync, existsSync, mkdirSync, readFileSync, readdirSync} from 'node:fs';
-import {join} from 'node:path';
+import {cpSync, existsSync, mkdirSync, readFileSync, readdirSync, symlinkSync} from 'node:fs';
+import {dirname, join} from 'node:path';
 import {describe, it} from 'node:test';
 
 import {loadCatalog, rewriteMetadata} from '../../scripts/v1-05-features.mjs';
@@ -37,9 +37,11 @@ cp -R "$target"/. "${state}/published/$registry/$namespace/"
   return {cli, state};
 }
 
-function publish(args, {cli, features} = {}) {
+// The script takes devcontainer and node from PATH (chapter 8, Publishing).
+function publish(args, {cli, features, path} = {}) {
   const env = {...process.env};
-  if (cli) env.DEVCONTAINER_CLI = cli;
+  if (cli) env.PATH = `${dirname(cli)}:${process.env.PATH}`;
+  if (path !== undefined) env.PATH = path;
   const extra = features ? ['--features-dir', features] : [];
   const result = spawnSync(script, ['publish', ...args, ...extra], {encoding: 'utf8', env});
   return {...result, output: result.stdout + result.stderr};
@@ -124,6 +126,18 @@ describe('publish', () => {
     const result = publish(['--registry', 'localhost:5000/aibox-features', '--feature', 'go/go'], {cli});
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /Dev Container CLI 0\.89\.0 is required/);
+  });
+
+  it('fails with a message when devcontainer is not on PATH', () => {
+    const bin = tempDir('bin');
+    symlinkSync(process.execPath, join(bin, 'node'));
+    for (const tool of ['bash', 'env', 'sed', 'mktemp', 'rm', 'ls', 'tr', 'cat', 'dirname']) {
+      const target = ['/usr/bin', '/bin'].map((d) => join(d, tool)).find((p) => existsSync(p));
+      if (target) symlinkSync(target, join(bin, tool));
+    }
+    const result = publish(['--registry', 'localhost:5000/aibox-features', '--feature', 'go/go'], {path: bin});
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /devcontainer/);
   });
 
   it('publishes under a multi-segment prefix', () => {

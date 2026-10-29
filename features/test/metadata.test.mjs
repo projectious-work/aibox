@@ -7,7 +7,7 @@ import {cpSync, mkdirSync, readFileSync, statSync, writeFileSync} from 'node:fs'
 import {join} from 'node:path';
 import {describe, it} from 'node:test';
 
-import {featureDirectories, loadCatalog} from '../../scripts/v1-05-features.mjs';
+import {featureDirectories, loadCatalog, renderMetadata} from '../../scripts/v1-05-features.mjs';
 import {featuresSrc, repoRoot, tempDir} from './harness.mjs';
 
 const catalog = loadCatalog();
@@ -145,5 +145,22 @@ describe('drift check', () => {
     const missing = catalog.features.filter((f) => f.owner === 'aibox' && !present.has(f.id));
     assert.equal(result.status === 0, missing.length === 0);
     for (const f of missing) assert.match(result.stderr, new RegExp(`Feature ${f.id} has no sources`));
+  });
+});
+
+describe('dependsOn rendering', () => {
+  it('uses upstream.ref and upstream.options for an upstream Feature and <registry>/<id>:<major> otherwise', () => {
+    const bundle = catalog.features.find((f) => f.dependsOn.some((d) => byId.get(d).owner === 'upstream'));
+    assert.ok(bundle, 'the catalog has a Feature that depends on an upstream Feature');
+    const metadata = JSON.parse(renderMetadata(bundle, catalog));
+    for (const dep of bundle.dependsOn) {
+      const target = byId.get(dep);
+      if (target.owner === 'upstream') {
+        assert.deepEqual(metadata.dependsOn[target.upstream.ref], target.upstream.options ?? {});
+      } else {
+        assert.deepEqual(metadata.dependsOn[`${catalog.registry}/${dep}:${target.featureVersion.split('.')[0]}`], {});
+      }
+    }
+    assert.equal(Object.keys(metadata.dependsOn).length, bundle.dependsOn.length);
   });
 });

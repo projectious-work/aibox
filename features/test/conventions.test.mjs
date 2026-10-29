@@ -248,6 +248,14 @@ describe('version coupling', () => {
     }
   });
 
+  it('fails with COUPLING_MISMATCH when the table rule finds no coupled Feature', () => {
+    const container = makeContainer();
+    const before = snapshot(container);
+    const result = runFeature(table(), container, {options: {version: '2.0.0'}});
+    assertError(result, 'AIBOX_FEATURE_COUPLING_MISMATCH', 'sample/tool', /installed=none/);
+    assertUnchanged(container, before);
+  });
+
   it('fails with COUPLING_MISMATCH for a version the table does not list', () => {
     const container = makeContainer();
     markInstalled(container, 'sample/base', '1.0.0');

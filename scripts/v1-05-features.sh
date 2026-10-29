@@ -7,8 +7,8 @@
 #       <host>/<prefix>/<catalog-id> with the tags <featureVersion>, <major>
 #       and <major>.<minor>, rewriting aibox dependsOn and installsAfter
 #       references to <host>/<prefix>. Upstream references are unchanged.
-#       Prerequisites: Node.js and the pinned Dev Container CLI 0.89.0, taken
-#       from tools/vendor unless DEVCONTAINER_CLI names a CLI executable.
+#       Runs from the repository root and uses the node and devcontainer
+#       (pinned Dev Container CLI 0.89.0) executables found on PATH.
 #   scripts/v1-05-features.sh generate
 #       Regenerates devcontainer-feature.json, lib/aibox-feature.sh and
 #       lib/catalog.sh for every Feature directory with an install.sh.
@@ -20,8 +20,6 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cli_version=0.89.0
-cli_archive="$repo_root/tools/vendor/devcontainer-cli-$cli_version.tgz"
-cli_sha256=49c7d71d40058f89e1fd8b019a193ed4215b7fc773c0f6273f7032a46cd33f4b
 
 fail() {
   printf 'v1-05-features: %s\n' "$*" >&2
@@ -51,18 +49,9 @@ publish() {
   work="$(mktemp -d "${TMPDIR:-/tmp}/aibox-v1-05-publish.XXXXXX")"
   trap 'rm -rf "${work:-}"' EXIT
 
-  local cli=()
-  if [[ -n "${DEVCONTAINER_CLI:-}" ]]; then
-    cli=("$DEVCONTAINER_CLI")
-  else
-    [[ -f "$cli_archive" ]] || fail "pinned Dev Container CLI archive is missing: $cli_archive"
-    local digest
-    digest="$(sha256sum "$cli_archive" 2>/dev/null || shasum -a 256 "$cli_archive")"
-    [[ "${digest%% *}" == "$cli_sha256" ]] || fail "pinned Dev Container CLI archive digest mismatch: $cli_archive"
-    mkdir -p "$work/cli"
-    tar -xzf "$cli_archive" -C "$work/cli" package
-    cli=(node "$work/cli/package/devcontainer.js")
-  fi
+  command -v devcontainer >/dev/null 2>&1 \
+    || fail "the Dev Container CLI $cli_version is required (devcontainer not found on PATH)"
+  local cli=(devcontainer)
   local version
   version="$("${cli[@]}" --version 2>/dev/null)" || fail 'the Dev Container CLI does not run'
   [[ "$version" == "$cli_version" ]] || fail "Dev Container CLI $cli_version is required, found ${version:-nothing}"
