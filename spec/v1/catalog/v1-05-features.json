@@ -2645,8 +2645,8 @@
      ],
      "alsoProvides": [
       {
-       "kind": "command",
-       "name": "x86_64-linux-gnu-gcc",
+       "kind": "feature",
+       "name": "rust/x86-64-cross",
        "targets": [
         "debian-13-amd64"
        ]

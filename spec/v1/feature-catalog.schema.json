@@ -511,7 +511,8 @@
               "kind": {
                 "enum": [
                   "command",
-                  "package"
+                  "package",
+                  "feature"
                 ]
               },
               "name": {

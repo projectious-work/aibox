@@ -119,6 +119,27 @@ findings against the baseline:
   without enforcing it. If integration shows otherwise, the failure is a
   contract defect under R-CYCLE step 8.
 
+## Contract amendment 1
+
+Both tracks reported contract questions after the freeze. Classified as
+contract defects under R-CYCLE step 8 and fixed in amendment 1:
+
+| Source | Defect | Change |
+|---|---|---|
+| Tests Q1 | Runtimes required by automatically installed Features were not selected | Selections add `requires` of the whole `dependsOn` closure |
+| Tests Q3, implementation 1 | Absence could not observe Rust components; `texlive` absence would conflict with the TeX Live scheme | `command` checks are absence observables; `version` and `texlive` checks are not |
+| Tests Q4, Q5 | Dependency closure and `alsoProvides` scope were unclear | Transitive closure; exemptions cover only what they name; new `feature` kind exempts `rust/x86-64-cross` on amd64 |
+| Tests Q11, Q12 | Git status needs a repository the base fixture lacks; metadata keys were open | Workspace folder unchanged; exact metadata key list |
+| Tests Q6, Q15 | Publish prerequisites and registry image unstated | `devcontainer` and `node` from `PATH`; registry chosen by tests and recorded |
+| Tests Q2, Q7, Q8, Q9, Q13 | Test naming, bundle presence, conflict value, installed package | ID form, stack IDs, bundles excluded from `present`, first non-default value, `dpkg` status rule |
+| Implementation 2 | The pinned CLI also publishes `latest` | Tags are a minimum; extra tags are never selected |
+| Implementation 3 | `versionCoupling` table direction | Key is this Feature's version; missing coupled Feature fails |
+| Implementation 4 | Upstream Features in `dependsOn` | Use `upstream.ref` and `upstream.options` |
+
+Tests Q10 (MCP inspection), Q14 (requires target) and the implementation's
+error-code mapping for apt update and tool-internal downloads follow the
+existing contract and need no change.
+
 ## Logbook
 
 | Date | Entry |
@@ -127,3 +148,4 @@ findings against the baseline:
 | 2026-10-29 | Review round 1 findings resolved (`25c5a472`). |
 | 2026-10-29 | Review round 2 findings closed by the integration owner (`34d06da0`). |
 | 2026-10-29 | Owner froze the contract at `34d06da0` (DEC-20261029_1515-ShinySpire). |
+| 2026-10-29 | Tracks started: tests `799d234b`..`b646e40a`, implementation waves 1–2 `2cfa66e5`..`977a7eed`. Amendment 1 drafted from their contract questions; review pending. |

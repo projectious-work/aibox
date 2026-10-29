@@ -243,16 +243,19 @@ sources. The `version` of a
 the minimal and curated starters to configure `trixie`, `trixie-updates` and
 `trixie-security` from one snapshot.
 
-**Dependencies.** Each `dependsOn` entry becomes a standard `dependsOn`
-reference to `<registry>/<id>:<major>` with an empty option object; the Dev
-Container CLI installs it automatically. Each `requires` entry, used only for
+**Dependencies.** Each `dependsOn` entry naming an aibox-owned Feature becomes
+a standard `dependsOn` reference to `<registry>/<id>:<major>` with an empty
+option object; an entry naming an upstream Feature becomes its `upstream.ref`
+with its `upstream.options`. The Dev Container CLI installs it automatically. Each `requires` entry, used only for
 multi-version runtimes, becomes an `installsAfter` reference to
 `<registry>/<id>`; the Feature checks before installation that the runtime is
 installed and otherwise fails with `AIBOX_FEATURE_DEPENDENCY_MISSING`, naming
 the missing Feature ID in the detail. It uses whichever enum version of the
 runtime is installed. A `versionCoupling` of rule `equal` requires the coupled
-Feature's installed version to equal this Feature's `version`; `table` uses
-the listed mapping; a violation fails with `AIBOX_FEATURE_COUPLING_MISMATCH`.
+Feature's installed version to equal this Feature's `version`; `table` maps
+this Feature's `version` to the coupled Feature's allowed version. A coupled
+Feature that is not installed, or installed at another version, fails with
+`AIBOX_FEATURE_COUPLING_MISMATCH`.
 When a tool is installed twice with different versions, for example through a
 bundle and an explicit member selection with another version, the second
 installation fails with `AIBOX_FEATURE_VERSION_CONFLICT`; an identical repeat
@@ -281,11 +284,18 @@ component tests because black-box tests cannot inject the fault.
 fixture and add Features to its `features` object. A command or package in
 `baseline.provides` exists in the base and is excluded from absence checks.
 With no Feature selected, no other catalog `commands` entry resolves through
-`command -v`, no other `package` check is installed and no `path` check
-exists. For a semantic member selected alone, together with the Features it
-`requires`, the commands, packages and paths of every sibling that is neither
-a `dependsOn` or `requires` dependency nor listed in an installed tool's
-`alsoProvides` for that target are absent. Disabling a tool means omitting its Feature.
+`command -v`, no other `package` check is installed, no `path` check exists and
+no `command` check passes. A package is installed only when
+`dpkg-query -W -f '${db:Status-Status}' <package>` prints `installed`. For a
+semantic member selected alone, together with the Features its `dependsOn`
+closure `requires`, the same observables of every sibling are absent unless
+the sibling is in that member's transitive `dependsOn` or `requires` closure.
+An installed tool's `alsoProvides` entry for the target exempts only what it
+names: a `command` or `package` exempts that command or package, and a
+`feature` exempts every observable of that Feature. `version` and `texlive`
+checks are not absence observables. A tool whose observables are all exempt or
+in `baseline.provides` has no absence test. Disabling a tool means omitting its
+Feature.
 
 **Checks.** Every check is evaluated in the running container, as the
 fixture's `remoteUser` through `devcontainer exec`, and again as `root`
@@ -308,12 +318,14 @@ version the tool follows and does not change how its checks run. A tool's
 `packages` lists what it installs and is informative; absence is judged only
 through checks and commands.
 
-**Side effects.** Owned Features declare no lifecycle commands, no mounts, no
-`privileged` mode, capabilities or devices; `privileges` is explanatory text
-only. Their `containerEnv` is exactly the catalog's `containerEnv`. They
-write nothing under the workspace folder, so the workspace Git status is
-unchanged by a build. A tool that would update itself is configured not to.
-Tools never replace project lockfiles.
+**Side effects.** The published `devcontainer-feature.json` of an owned
+Feature has none of `onCreateCommand`, `updateContentCommand`,
+`postCreateCommand`, `postStartCommand`, `postAttachCommand`, `mounts`,
+`privileged`, `capAdd`, `securityOpt`, `init` and `entrypoint`; `privileges`
+is explanatory text only. Its `containerEnv` is exactly the catalog's
+`containerEnv`, or absent when the catalog has none. A build creates, changes
+or removes no file under the workspace folder. A tool that would update itself
+is configured not to. Tools never replace project lockfiles.
 
 **Smoke tests.** For each `smoke` entry, the fixture file or directory is
 copied under its base name into the root of the workspace folder, `argv` runs
@@ -323,12 +335,14 @@ equal those hexadecimal bytes.
 
 **Publishing and running tests.** `scripts/v1-05-features.sh publish
 --registry <host>/<prefix>` publishes every aibox-owned Feature to
-`<host>/<prefix>/<catalog-id>` with tags `<featureVersion>`, `<major>` and
-`<major>.<minor>`, rewrites aibox `dependsOn` and `installsAfter` references
+`<host>/<prefix>/<catalog-id>` with at least the tags `<featureVersion>`,
+`<major>` and `<major>.<minor>`; tags the pinned CLI adds, such as `latest`,
+are allowed but never selected by tests, rewrites aibox `dependsOn` and `installsAfter` references
 to that prefix, leaves upstream references unchanged, exits 0 on success and
-non-zero with a message on failure. Its prerequisites are the pinned Dev
-Container CLI and Docker. Acceptance tests run an OCI Distribution registry on
-`localhost:5000`, which the pinned CLI contacts over plain HTTP, publish to
+non-zero with a message on failure. It runs from the repository root and uses
+Docker and the `devcontainer` and `node` executables found on `PATH`.
+Acceptance tests run an OCI Distribution registry of
+their choice, recorded in the evidence, on `localhost:5000`, which the pinned CLI contacts over plain HTTP, publish to
 `localhost:5000/aibox-features`, and select aibox Features by their `<major>`
 tag so automatic dependencies resolve to the same instance. Upstream Features
 are selected by digest. A test run covers the host's native architecture;

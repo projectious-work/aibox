@@ -119,6 +119,8 @@ for fid, feature in features.items():
         require(tool.get("versionFrom", fid) in features, f"{fid}/{tool['name']}: unknown versionFrom")
         for extra in tool.get("alsoProvides", []):
             require(set(extra["targets"]) <= set(feature["targets"]), f"{fid}/{tool['name']}: alsoProvides target")
+            if extra["kind"] == "feature":
+                require(extra["name"] in features, f"{fid}/{tool['name']}: alsoProvides Feature")
         for command in tool.get("commands", []):
             commands[command] += 1
         for check in tool["checks"]:
