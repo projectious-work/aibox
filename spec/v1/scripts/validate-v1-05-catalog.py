@@ -51,9 +51,16 @@ require({(t["architecture"], t["unameMachine"]) for t in targets.values()} == {(
         "targets must be exactly trixie amd64 and arm64")
 error_codes = {error["code"] for error in catalog["errors"]}
 for code in ("AIBOX_FEATURE_UNSUPPORTED_TARGET", "AIBOX_FEATURE_UNSUPPORTED_VERSION", "AIBOX_FEATURE_VERSION_CONFLICT",
-             "AIBOX_FEATURE_DOWNLOAD_FAILED", "AIBOX_FEATURE_VERIFICATION_FAILED", "AIBOX_FEATURE_PACKAGE_UNAVAILABLE"):
+             "AIBOX_FEATURE_DOWNLOAD_FAILED", "AIBOX_FEATURE_VERIFICATION_FAILED", "AIBOX_FEATURE_PACKAGE_UNAVAILABLE",
+             "AIBOX_FEATURE_COUPLING_MISMATCH", "AIBOX_FEATURE_DEPENDENCY_MISSING"):
     require(code in error_codes, f"missing error code {code}")
 
+require((root / catalog["baseline"]["fixture"] / ".devcontainer/Dockerfile").exists(), "baseline fixture")
+require(catalog["baseline"]["snapshot"] in (root / catalog["baseline"]["fixture"] / ".devcontainer/Dockerfile").read_text(),
+        "baseline snapshot must match the fixture")
+for target in catalog["unsupportedTargets"]:
+    dockerfile = (root / target["fixture"] / ".devcontainer/Dockerfile")
+    require(dockerfile.exists() and target["image"] in dockerfile.read_text(), f"{target['id']}: fixture image")
 features = {feature["id"]: feature for feature in catalog["features"]}
 require(len(features) == len(catalog["features"]), "duplicate Feature ID")
 groups = {group["id"]: group for group in catalog["groups"]}
@@ -85,8 +92,12 @@ require(set(grouped) == set(features) and set(grouped.values()) == {1}, "each Fe
 commands = Counter()
 for fid, feature in features.items():
     require(set(feature["targets"]) <= set(targets), f"{fid}: unknown target")
-    for dependency in feature["dependsOn"]:
+    for dependency in feature["dependsOn"] + feature["requires"]:
         require(dependency in features and dependency != fid, f"{fid}: unknown dependency {dependency}")
+    require(not set(feature["dependsOn"]) & set(feature["requires"]), f"{fid}: dependency listed twice")
+    for dependency in feature["requires"]:
+        require("version" in features[dependency]["options"] and len(features[dependency]["options"]["version"]["enum"]) > 1,
+                f"{fid}: requires is for multi-version runtimes")
     version = feature["options"].get("version")
     if version:
         require(version["default"] in version["enum"], f"{fid}: default outside enum")
@@ -106,7 +117,8 @@ for fid, feature in features.items():
             require(set(coupling.get("table", {})) == set(version["enum"]), f"{fid}: coupling table keys")
     for tool in feature["tools"]:
         require(tool.get("versionFrom", fid) in features, f"{fid}/{tool['name']}: unknown versionFrom")
-        require(set(tool.get("absenceTargets", [])) <= set(feature["targets"]), f"{fid}/{tool['name']}: absence target")
+        for extra in tool.get("alsoProvides", []):
+            require(set(extra["targets"]) <= set(feature["targets"]), f"{fid}/{tool['name']}: alsoProvides target")
         for command in tool.get("commands", []):
             commands[command] += 1
         for check in tool["checks"]:
@@ -124,7 +136,7 @@ require(not [c for c, n in commands.items() if n > 1], f"command owned twice: {[
 # Dependency cycles.
 def visit(fid, path):
     require(fid not in path, f"dependency cycle through {fid}")
-    for dependency in features[fid]["dependsOn"]:
+    for dependency in features[fid]["dependsOn"] + features[fid]["requires"]:
         visit(dependency, path | {fid})
 for fid in features:
     visit(fid, frozenset())
@@ -136,6 +148,12 @@ for fid, feature in features.items():
         for row in tool["rows"]:
             mapped[row] += 1
             require(rows[row]["v1-ref"] == fid and rows[row]["decision"] == "retained", f"{row}: selection table must point to {fid}")
+            option = feature["upstream"]["options"] if feature["owner"] == "upstream" else (
+                {"version": feature["options"]["version"]["default"]} if "version" in feature["options"] else {})
+            require(rows[row]["v1-option"] == option, f"{row}: selection table option")
+            require(rows[row]["install-owner"] == feature["owner"], f"{row}: selection table owner")
+            require(rows[row]["license"] == tool["license"], f"{row}: selection table license")
+            require(rows[row]["dependency"] == sorted(set(feature["dependsOn"]) | set(feature["requires"])), f"{row}: selection table dependency")
 removed = {entry["row"]: entry for entry in catalog["removed"]}
 for row, entry in removed.items():
     mapped[row] += 1
@@ -153,6 +171,8 @@ for note in catalog["compatibilityNotes"]:
 for smoke in catalog.get("smoke", []):
     require((root / smoke["fixture"]).exists(), f"{smoke['id']}: missing fixture")
     require(set(smoke["features"]) <= set(features), f"{smoke['id']}: unknown Feature")
+    required = {dep for fid in smoke["features"] for dep in features[fid]["requires"]}
+    require(required <= set(smoke["features"]), f"{smoke['id']}: missing required runtime")
 
 # The maintained example selects only reviewed upstream references with catalog options.
 upstream_refs = {f["upstream"]["ref"]: f["upstream"]["options"] for f in features.values() if f["owner"] == "upstream"}

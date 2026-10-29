@@ -201,12 +201,14 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 
 [`catalog/v1-05-features.json`](catalog/v1-05-features.json), validated by
 [`feature-catalog.schema.json`](feature-catalog.schema.json), is the frozen
-interface catalog for retained and added tools. It lists every group with its
-shape, every Feature with its ID, owner, options, dependencies, tools,
-installation provenance and observable checks, every removed census row, every
-compatibility note, the supported targets and the error codes. Prose in this
-section defines how those fields are realized; where prose and catalog differ,
-the catalog wins and the difference is a contract defect.
+interface catalog for retained and added tools. It lists the reference base,
+supported and unsupported targets, error codes, every group with its shape,
+every Feature with its ID, owner, options, dependencies, environment, tools,
+installation provenance and observable checks, every removed census row,
+every compatibility note and the smoke tests. Prose in this section defines
+how those fields are realized; where prose and catalog differ, the catalog
+wins and the difference is a contract defect. `notes` fields are informative
+research records, not requirements.
 
 **Identity.** An aibox-owned Feature with catalog ID `<parent>/<name>` is
 published as `<registry>/<parent>/<name>:<featureVersion>` with the moving
@@ -225,64 +227,111 @@ options; the bundle installs nothing itself and has no options.
 
 **Options.** A Feature whose catalog entry has `options.version` declares a
 string `version` option with exactly that `enum` and `default`. Any other value
-fails with `AIBOX_FEATURE_UNSUPPORTED_VERSION` before installation. A Feature
-without `options.version` installs exactly the versions in its checks. No
-option accepts `latest`, a range or a URL. The specification checks reject an
-example that sets an option key its Feature does not declare.
+fails with `AIBOX_FEATURE_UNSUPPORTED_VERSION` before installation. The option
+is the tool's own version; a package revision such as an APT `-0` suffix is an
+installation detail. A Feature without `options.version` has no `version`
+option. No option accepts `latest`, a range or a URL, and no Feature has an
+`enabled` option. The specification checks reject an example that sets an
+option key its Feature does not declare.
+
+**Debian packages.** A tool with method `debian-package` installs the
+candidate version of each named package from the base's configured
+repositories; the base's snapshot pin, not the Feature, fixes that version.
+Such a Feature does not add or change APT sources. The `version` of a
+`package` check is the version expected on the reference base. The minimal
+and curated starters configure `trixie`, `trixie-updates` and
+`trixie-security` from one snapshot.
 
 **Dependencies.** Each `dependsOn` entry becomes a standard `dependsOn`
-reference to `<registry>/<id>:<major>` with an empty option object. A
-`versionCoupling` of rule `equal` requires the coupled Feature's installed
-version to equal this Feature's `version`; `table` uses the listed mapping.
-A violation fails with `AIBOX_FEATURE_VERSION_CONFLICT`. When the same tool is
-requested twice with different versions, for example through a bundle and an
-explicit member selection, the second installation fails with
-`AIBOX_FEATURE_VERSION_CONFLICT`; an identical repeat succeeds without change.
+reference to `<registry>/<id>:<major>` with an empty option object; the Dev
+Container CLI installs it automatically. Each `requires` entry, used only for
+multi-version runtimes, becomes an `installsAfter` reference to
+`<registry>/<id>`; the Feature checks before installation that the runtime is
+installed and otherwise fails with `AIBOX_FEATURE_DEPENDENCY_MISSING`, naming
+the missing Feature ID in the detail. It uses whichever enum version of the
+runtime is installed. A `versionCoupling` of rule `equal` requires the coupled
+Feature's installed version to equal this Feature's `version`; `table` uses
+the listed mapping; a violation fails with `AIBOX_FEATURE_COUPLING_MISMATCH`.
+When a tool is installed twice with different versions, for example through a
+bundle and an explicit member selection with another version, the second
+installation fails with `AIBOX_FEATURE_VERSION_CONFLICT`; an identical repeat
+succeeds without change.
 
 **Targets.** Before any change to the image, `install.sh` reads
 `/etc/os-release` and `dpkg --print-architecture`. A combination not listed in
-the Feature's `targets` fails with `AIBOX_FEATURE_UNSUPPORTED_TARGET`; this
-includes other Debian releases, Ubuntu, non-Debian distributions and other
-architectures.
+the Feature's `targets` fails with `AIBOX_FEATURE_UNSUPPORTED_TARGET`; the
+catalog's `unsupportedTargets` are the fixtures for this behavior. Upstream
+Features have no aibox error contract; for them, V1-05 verifies only presence,
+absence, isolation, bundles and smoke tests on the supported targets.
 
-**Errors.** Every failure listed in the catalog's `errors` writes exactly one
-line `aibox-feature error <CODE> feature=<catalog-id> <detail>` to standard
-error and exits non-zero, so the Dev Container build fails. `beforeInstall`
-errors leave no package, file or user change behind in the failed layer's
-inputs. Errors marked `component` are verified by implementation-track
+**Errors.** Every failure listed in the catalog's `errors` writes one line
+`aibox-feature error <CODE> feature=<catalog-id> <detail>` to standard error
+and exits non-zero, so the Dev Container build fails. A test passes when the
+build fails and some line of its combined output contains
+`aibox-feature error <CODE> feature=<catalog-id>`, regardless of any prefix the
+build adds. `beforeInstall` errors leave no package, file or user change
+behind. Errors marked `component` are verified by implementation-track
 component tests because black-box tests cannot inject the fault.
 
-**Presence.** For each selected Feature, every `version` check runs as the
-example's `remoteUser` through `devcontainer exec`, exits 0, and its combined
-output matches `regex` after `{version}` is replaced by the regular-expression
-escaped selected version. A tool with `versionFrom` uses the named option or
-Feature version instead of its own. Every `package` check finds the package
-installed by `dpkg-query` at exactly `version`.
+**Reference base and absence.** Acceptance tests build the catalog `baseline`
+fixture and add Features to its `features` object. A command or package in
+`baseline.provides` exists in the base and is excluded from absence checks.
+With no Feature selected, no other catalog `commands` entry resolves through
+`command -v`, no other `package` check is installed and no `path` check
+exists. For a semantic member selected alone, together with the Features it
+`requires`, the commands, packages and paths of every sibling that is neither
+a dependency nor listed in an installed tool's `alsoProvides` for that
+target are absent. Disabling a tool means omitting its Feature.
 
-**Absence.** In a workspace built from the minimal example with no Feature
-selected, no catalog `commands` entry resolves through `command -v` for the
-remote user or root and no `package` check is installed. For each semantic
-member selected alone, the commands and packages of its siblings, other than
-its declared dependencies, are absent. Disabling a tool means omitting its
-Feature; no Feature accepts an `enabled` option.
+**Checks.** Every check is evaluated in the running container, as the
+fixture's `remoteUser` through `devcontainer exec`, and again as `root`
+through `docker exec --user root <containerId>`. Every entry in `commands`
+resolves through `command -v`. Regular expressions are ECMAScript, searched
+anywhere in the combined standard output and error, with `^` and `$`
+matching at line boundaries.
 
-**Side effects.** Owned Features declare no lifecycle commands, no
-`postCreateCommand`/`postStartCommand`, no auto-update configuration, no
-mounts, no `privileged` or capability changes unless the catalog `privileges`
-field says so, and write nothing under the workspace folder. Tools never
-replace project lockfiles; the workspace Git status is unchanged by a build.
+| Kind | Passes when |
+|---|---|
+| `version` | `argv` exits 0 and output matches `regex` after `{version}` is replaced by the regular-expression escaped selected version |
+| `command` | `argv` exits 0 and output matches `regex`, which has no placeholder |
+| `package` | `dpkg-query -W -f '${Version}' <package>` exits 0 and prints exactly `version` |
+| `texlive` | `tlmgr info --only-installed --data name <package>` prints `package` |
+| `path` | `test -d <path>` succeeds |
 
-**Smoke tests.** Each `smoke` entry runs `argv` in a workspace with the listed
-Features selected and the fixture copied into the workspace folder, exits 0,
-and produces the named file, which starts with `producesMagic` when given.
+The selected version of a `version` check is the Feature's `version` option
+value, otherwise the tool's `version`. `versionFrom` names the Feature whose
+version the tool follows and does not change how its checks run. A tool's
+`packages` lists what it installs and is informative; absence is judged only
+through checks and commands.
 
-**Publishing for tests.** `scripts/v1-05-features.sh publish --registry
-<host>/<prefix>` publishes every aibox-owned Feature to
-`<host>/<prefix>/<catalog-id>:<featureVersion>` plus moving tags and rewrites
-aibox `dependsOn` references to that prefix; upstream references are
-unchanged. Acceptance tests use only this command, a registry they start, the
-pinned Dev Container CLI and the examples. Production publication to the
-registry and the public Feature index are out of V1-05 scope.
+**Side effects.** Owned Features declare no lifecycle commands, no mounts, no
+`privileged` mode, capabilities or devices; `privileges` is explanatory text
+only. Their `containerEnv` is exactly the catalog's `containerEnv`. They
+write nothing under the workspace folder, so the workspace Git status is
+unchanged by a build. A tool that would update itself is configured not to.
+Tools never replace project lockfiles.
+
+**Smoke tests.** For each `smoke` entry, the fixture file or directory is
+copied under its base name into the root of the workspace folder, `argv` runs
+there as the remote user, exits 0 and creates `produces` relative to the
+workspace folder. When `producesMagicHex` is given, the file's first bytes
+equal those hexadecimal bytes.
+
+**Publishing and running tests.** `scripts/v1-05-features.sh publish
+--registry <host>/<prefix>` publishes every aibox-owned Feature to
+`<host>/<prefix>/<catalog-id>` with tags `<featureVersion>`, `<major>` and
+`<major>.<minor>`, rewrites aibox `dependsOn` and `installsAfter` references
+to that prefix, leaves upstream references unchanged, exits 0 on success and
+non-zero with a message on failure. Its prerequisites are the pinned Dev
+Container CLI and Docker. Acceptance tests run an OCI Distribution registry on
+`localhost:5000`, which the pinned CLI contacts over plain HTTP, publish to
+`localhost:5000/aibox-features`, and select aibox Features by their `<major>`
+tag so automatic dependencies resolve to the same instance. Upstream Features
+are selected by digest. A test run covers the host's native architecture;
+acceptance requires one run on each supported target. Presence checks may
+share one build across Features that do not conflict; absence, isolation,
+bundle and error checks use exactly the selection their item defines.
+Production publication and the public Feature index are out of V1-05 scope.
 
 **Inspection.** `aibox inspect` and the MCP `inspect_workspace` tool report a
 configuration entry with key `devcontainer.features`, value the sorted list of

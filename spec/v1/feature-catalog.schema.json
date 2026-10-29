@@ -9,6 +9,8 @@
     "baselineRevision",
     "registry",
     "targets",
+    "baseline",
+    "unsupportedTargets",
     "errors",
     "groups",
     "features",
@@ -77,6 +79,17 @@
       "uniqueItems": true,
       "items": {
         "$ref": "#/$defs/smoke"
+      }
+    },
+    "baseline": {
+      "$ref": "#/$defs/baseline"
+    },
+    "unsupportedTargets": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/unsupportedTarget"
       }
     }
   },
@@ -475,19 +488,45 @@
         "version": {
           "$ref": "#/$defs/exactVersion"
         },
-        "absenceTargets": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
-        },
         "packages": {
           "type": "array",
           "uniqueItems": true,
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "alsoProvides": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "name",
+              "targets"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "command",
+                  "package"
+                ]
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "targets": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -534,6 +573,7 @@
         "owner",
         "targets",
         "options",
+        "requires",
         "dependsOn",
         "tools"
       ],
@@ -627,6 +667,13 @@
           "type": "object",
           "additionalProperties": {
             "type": "string"
+          }
+        },
+        "requires": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/featureId"
           }
         }
       },
@@ -757,8 +804,77 @@
           "type": "string",
           "minLength": 1
         },
-        "producesMagic": {
-          "type": "string"
+        "producesMagicHex": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{2})+$"
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture",
+        "snapshot",
+        "provides"
+      ],
+      "properties": {
+        "fixture": {
+          "type": "string",
+          "pattern": "^fixtures/v1-05-base$"
+        },
+        "snapshot": {
+          "type": "string",
+          "pattern": "^[0-9]{8}T[0-9]{6}Z$"
+        },
+        "provides": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "commands",
+            "packages"
+          ],
+          "properties": {
+            "commands": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "packages": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "unsupportedTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "fixture",
+        "image"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9.-]+$"
+        },
+        "fixture": {
+          "type": "string",
+          "pattern": "^fixtures/v1-05-targets/"
+        },
+        "image": {
+          "type": "string",
+          "pattern": "@sha256:[0-9a-f]{64}$"
         }
       }
     }

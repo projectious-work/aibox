@@ -95,21 +95,19 @@ receive their actual v0 effective values, not the current upstream defaults.
 ## Tool installation realization
 
 Account for each of the 98 `ADDON:<recipe>/<tool>` entries in the v0 census.
-An installation unit may cover several tools; neither a Feature per tool nor
-a Feature per language is required. Prefer an existing qualified native Dev
-Container Feature when it preserves the relevant install/version/disable
-behavior and license/provenance. Native image, Dockerfile and package units
-are also valid, using existing package managers or official release artifacts.
-Do not introduce an addon resolver or an installer in `customizations.aibox`.
+Retained tools are installed by Features grouped as chapter 8 defines:
+atomic groups are one Feature, semantic groups have one Feature per tool and
+an `all` bundle. Qualified upstream Features are referenced directly where
+they meet the same contract. Features reuse producer installers, package
+managers and official release artifacts rather than implement a package
+resolver. Do not introduce an addon resolver or an installer in
+`customizations.aibox`.
 
-Before implementing any aibox-owned installer Feature, present the **complete
-gap list** to the owner. For each gap include researched existing native
-options, the behavior they cannot preserve, maintenance/security cost, and
-removal or scope-reduction options. The owner must decide the disposition;
-a missing qualified Feature is not automatic permission to write one.
-An owned installer requires individual justification and owner approval after
-that full review (DEC-20261001_1954-SmoothTrout). It must reuse existing native
-installation mechanisms rather than implement another package resolver.
+The owner reviewed the complete gap list and decided every row's disposition
+(DEC-20261029_0835-HumbleBridge, DEC-20261029_1034-ActiveJay,
+DEC-20261029_1409-DaringTrail). A new owned Feature outside
+[`catalog/v1-05-features.json`](catalog/v1-05-features.json) still requires an
+owner decision; a missing upstream Feature alone is not permission to add one.
 
 The V1-05 installation manifest accounts for **every** ledger entry with a
 selected qualified native reference/source unit or an explicit owner-approved

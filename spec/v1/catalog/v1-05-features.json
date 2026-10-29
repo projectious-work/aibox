@@ -35,7 +35,19 @@
   },
   {
    "code": "AIBOX_FEATURE_VERSION_CONFLICT",
-   "when": "A coupled Feature is installed at a different version, or the same tool is already installed at a different version.",
+   "when": "The same tool is already installed at a different version, for example by a bundle and an explicit member selection.",
+   "beforeInstall": true,
+   "verification": "acceptance"
+  },
+  {
+   "code": "AIBOX_FEATURE_COUPLING_MISMATCH",
+   "when": "A Feature with versionCoupling finds its coupled Feature installed at a version the coupling rule does not allow.",
+   "beforeInstall": true,
+   "verification": "component"
+  },
+  {
+   "code": "AIBOX_FEATURE_DEPENDENCY_MISSING",
+   "when": "A Feature listed in requires is not installed; the detail names the missing Feature ID.",
    "beforeInstall": true,
    "verification": "acceptance"
   },
@@ -56,6 +68,30 @@
    "when": "The exact Debian package version is not available from the configured repositories.",
    "beforeInstall": true,
    "verification": "component"
+  }
+ ],
+ "baseline": {
+  "fixture": "fixtures/v1-05-base",
+  "snapshot": "20261028T000000Z",
+  "provides": {
+   "commands": [
+    "openssl"
+   ],
+   "packages": [
+    "openssl"
+   ]
+  }
+ },
+ "unsupportedTargets": [
+  {
+   "id": "debian-12",
+   "fixture": "fixtures/v1-05-targets/bookworm",
+   "image": "debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3"
+  },
+  {
+   "id": "ubuntu-24.04",
+   "fixture": "fixtures/v1-05-targets/ubuntu-24.04",
+   "image": "ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852"
   }
  ],
  "groups": [
@@ -591,7 +627,8 @@
      ],
      "notes": "v0 unversioned -> newest PyPI release 0.86.2 (2026-02-12; project cadence slowed). aider-chat requires Python <3.13,>=3.10, so install must force a uv-managed 3.12 (--python 3.12), not uv's default 3.14. Producer docs recommend 'uv tool install --force --python python3.12 --with pip aider-chat@latest' (or aider-install); pin version instead of @latest. Needs network for uv to fetch CPython 3.12 unless already present."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "ai/claude",
@@ -639,7 +676,11 @@
      ],
      "notes": "Default = current 'stable' channel (pointer https://downloads.claude.ai/claude-code-releases/stable = 2.1.308; 'latest' pointer = 2.1.312). Alternatives all documented by producer: (a) signed apt repo: 'deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main' (same key; exact pin 'apt-get install claude-code=2.1.308-1' verified present for amd64+arm64 in Packages index); (b) npm -g @anthropic-ai/claude-code@2.1.308 (needs node>=22). Release-binary route chosen because manifest has per-platform sha256 + GPG-signed manifest (signatures exist from 2.1.89 on) and no node/apt-repo dependency. Linux binaries are glibc (linux-x64/linux-arm64; musl variants separate). Set DISABLE_UPDATES=1 (documented) to block all self-update paths; DISABLE_AUTOUPDATER alone is not enough. Both arches built. manifest sha256 for 2.1.308: linux-x64 356733f185fa988e6bf3aa9a555269fdd167982a2e2a80d3c8a78037bb92ad58, linux-arm64 fdd22e6cbb734d580f5664c48df4294eeec850218ff07f186f9af30426396ee1 (fetched; signature not verified by me, gpg not exercised)."
     }
-   ]
+   ],
+   "requires": [],
+   "containerEnv": {
+    "DISABLE_AUTOUPDATER": "1"
+   }
   },
   {
    "id": "ai/codex",
@@ -660,9 +701,7 @@
      "default": "0.165.0"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "codex",
@@ -689,6 +728,9 @@
      ],
      "notes": "npm 'latest' = 0.165.0 (published 2026-10-27), matches GitHub release rust-v0.165.0. README documents: install.sh (chatgpt.com/codex/install.sh), npm, brew, or GitHub release binaries. Alternative no-node route: https://github.com/openai/codex/releases/download/rust-v{version}/codex-{triple}.tar.gz with triple x86_64-unknown-linux-musl / aarch64-unknown-linux-musl (GitHub asset digests: amd64 sha256:be635d3486a5bd060d0fff582ae6d30160280c31344dd85719707fa920e187f0, arm64 sha256:6522e056d0be7f531da915c9a81ae05bc70811b782542499cc0a9776d3abf5d3; .sigstore files + codex-package_SHA256SUMS also published; release also has many -bazel / -package / app-server variants, layout in flux). npm chosen as the simple documented exact-pin route (platform binary arrives via optional deps - install must not use --omit=optional). Linux sandbox may want bubblewrap (inferred)."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -710,9 +752,7 @@
      "default": "1.5.47"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "cn",
@@ -739,6 +779,9 @@
      ],
      "notes": "npm latest = 1.5.47 (published 2026-06-18; beta tag 1.5.43-beta). Bin name 'cn'. No engines field declared; docs say Node 20+ (inferred). Version-output format not confirmed (inferred). Docs URL not fetched; package page https://www.npmjs.com/package/@continuedev/cli is the verified source."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -787,7 +830,8 @@
      ],
      "notes": "Newest stable v1.0.105 (2026-10-28; v1.0.105-0/-1 are prereleases, npm 'prerelease' tag 1.0.105-1). SHA256SUMS.txt entries: copilot-linux-x64.tar.gz aba1f06f27bc0447656647f76e0a4cf58b4b2a341c75ff04a750982b6aeb6bd2; copilot-linux-arm64.tar.gz e7b488cc04ac3e2ed800e1bf0aace33ada42dcf167529b3d2f48a61e1535a847. Tarball contains single file 'copilot'. Documented alternatives: install script 'curl -fsSL https://gh.io/copilot-install | VERSION=v1.0.105 bash', npm -g @github/copilot (needs node). Auto-update: CLI self-updates by default; changelog documents a '--no-auto-update' flag (runs bundled version) - contract must wrap/alias or set the config; exact config key name not confirmed (inferred). Proprietary license (GitHub Copilot CLI license terms; npm says 'SEE LICENSE IN LICENSE.md'). Version output text is from memory (inferred)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "ai/gemini",
@@ -808,9 +852,7 @@
      "default": "0.66.0"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "gemini",
@@ -837,6 +879,9 @@
      ],
      "notes": "npm 'latest' = 0.66.0 (2026-10-27); preview 0.67.0-preview.0, nightly tags exist (do not use). engines node>=20. ARM64 GAP: 0.66.0 optionalDependencies list @lydell/node-pty-{linux-x64,darwin-*,win32-*} but NO linux-arm64 prebuilt (plus node-pty, @github/keytar); on linux/arm64 the PTY module likely falls back to source build (needs build-essential, python3/make) or is skipped (optional) - must be tested on arm64; the CLI is a bundled bundle/gemini.js so it may still run without PTY. Inferred, not run."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -887,7 +932,8 @@
      ],
      "notes": "v0 default 0.19.0 is still PyPI latest (2026-07-20). v0 offered 0.16.0/0.18.0 dropped by policy (default only). Requires Python >=3.11,<3.14: do NOT let uv pick 3.14 - force --python 3.13 (or 3.12). Console scripts: hermes, hermes-acp, hermes-agent. Version output format not confirmed (inferred)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "ai/opencode",
@@ -935,7 +981,8 @@
      ],
      "notes": "REPLACES v0 0.0.55 of archived opencode-ai/opencode (owner decision). Newest stable anomalyco/opencode v1.19.5 (2026-10-28). Asset sha256 (GitHub digest; no checksum file in release): opencode-linux-x64.tar.gz 588310a336fa3b9df36b3f0225b26f679d453efaad0cf3d66c3651ef3ec1647a; opencode-linux-arm64.tar.gz fae5be262d693b7c5e562856cc473e59e741772936db0c0600ac0d5ed5bd088b; baseline x64 17c200fd4b2289954cc01552559f9b6d03ec157b2ddfb5eb54144f491656333d. Tarball holds one file 'opencode'. Docs also list npm (opencode-ai) and install script, not verified. Config/CLI incompatible with 0.0.55 (different project lineage)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "ai/tau",
@@ -985,7 +1032,8 @@
      ],
      "notes": "v0 0.3.13 still on PyPI, not yanked, but PyPI latest is 0.4.8 (2026-10-14; fast-moving, 0.3.x -> 0.4.x). Policy keeps v0 pin 0.3.13. Requires Python >=3.12 (uv default 3.14 OK). Console script 'tau'. Version output format and docs URL not confirmed (homepage twotimespi.dev from package metadata) - inferred."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "ai/vibe",
@@ -1033,7 +1081,8 @@
      ],
      "notes": "NEW. PyPI mistral-vibe 3.0.3 (2026-10-26; 3.0.0 only 2026-10-19 - young major). README documents 'uv tool install mistral-vibe' (also install.sh and pip). Requires Python >=3.12. Exact pin (==) also suppresses Vibe's own update prompt (documented). Console scripts: vibe, vibe-acp, vibe-app-server. Version string from README phrase 'vibe --version', exact text inferred."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "docs/hugo",
@@ -1064,7 +1113,7 @@
      ],
      "method": "upstream-feature",
      "docsUrl": "https://github.com/devcontainers/features/tree/main/src/hugo",
-     "source": "ghcr.io/devcontainers/features/hugo (options: version=\"0.165.0\", extended=true)",
+     "source": "ghcr.io/devcontainers/features/hugo@sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509 with options {\"extended\": true, \"version\": \"0.165.0\"}",
      "verification": "none",
      "license": "Apache-2.0",
      "checks": [
@@ -1080,10 +1129,10 @@
      "commands": [
       "hugo"
      ],
-     "notes": "Confirmed: gohugoio/hugo v0.165.0 (latest is v0.169.0) has extended assets for both arches: hugo_extended_0.165.0_linux-amd64.tar.gz (sha256 f43494894cdf4a8630a201d5c828051c77f523cc66bb3938b30806835470ac20, identical to legacy Linux-64bit.tar.gz) and hugo_extended_0.165.0_linux-arm64.tar.gz (f40ebc44dfda3896cecd3ae7ed44f5c44c4b4a30a2b7d976ece6da62da699a58); checksums file hugo_0.165.0_checksums.txt. Feature v1.1.3 options: version (string, default 'latest', pass 0.165.0 without 'v') and extended (boolean, default false - must set true). RISK: Feature install.sh on aarch64 requests 'hugo_extended_0.165.0_Linux-ARM64.tar.gz'; that name is NOT in the 0.165.0 asset list, but github.com/.../download/v0.165.0/hugo_extended_0.165.0_Linux-ARM64.tar.gz currently redirects (HTTP 302->200) to the linux-arm64 file, so it works today via an undocumented alias - verify in a real arm64 build. Feature does no checksum verification and installs to /usr/local/hugo/bin. Ext. Hugo needs libstdc++ (present in trixie base).",
      "version": "0.165.0"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "docs/mdbook",
@@ -1131,7 +1180,8 @@
      ],
      "notes": "v0 0.5.4 (2026-07-06) still downloadable. Release has NO aarch64 gnu build: arm64 only aarch64-unknown-linux-musl (static, fine on trixie); use musl for both arches for symmetry. sha256 (GitHub digests; no checksum file): x86_64-musl 5222beabd3e37dc5be0d18ff99b79058469354db5c220153a1b92db5ba12be89; aarch64-musl 753e5c5c363ee8a56972344dcf91466f005a51db84a7aeffe427ae3ef83d6d44 (x86_64-gnu 3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7). Tarball holds file 'mdbook'. Did not check whether a newer 0.5.x exists."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "docs/zensical",
@@ -1181,7 +1231,8 @@
      ],
      "notes": "v0 0.0.57 still on PyPI (not yanked); PyPI latest 0.0.73 (2026-10-26, ~weekly releases). Wheels exist for manylinux x86_64 and aarch64 (abi3, py>=3.10). Producer docs show pip venv / 'uv add --dev' and mention running as a uv tool; they warn against uv symlink link-mode (do not set UV_LINK_MODE=symlink). Version output format not confirmed (inferred)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "typst",
@@ -1229,7 +1280,8 @@
      ],
      "notes": "v0 0.15.0 (2026-06-15) still downloadable; v0 other versions 0.13.1/0.14.2 dropped; upstream latest 0.15.1. sha256 (GitHub digests; no checksum file): x86_64-musl 59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea; aarch64-musl cdf50ffc7b8ba759ed02200632eda3d78eb8b99aacb6611f4f75684990647620. Tarball: typst-{arch}-unknown-linux-musl/typst. Only musl builds on Linux (static) - fine on trixie. Needs xz-utils."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "cloud/aws",
@@ -1259,7 +1311,7 @@
      ],
      "method": "upstream-feature",
      "docsUrl": "https://github.com/devcontainers/features/tree/main/src/aws-cli",
-     "source": "ghcr.io/devcontainers/features/aws-cli:1.2.0 option version=\"2.39.1\" (Feature downloads https://awscli.amazonaws.com/awscli-exe-linux-{arch}-{version}.zip + .sig)",
+     "source": "ghcr.io/devcontainers/features/aws-cli@sha256:1f93c8315b7a6d76982ebb2269f8b0d50413fc0f965c032edf4aee0caceb73ef with options {\"version\": \"2.39.1\"}",
      "verification": "gpg https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html (fingerprint FB5DB77FD5C118B80511ADA8A6310ACC4672475C; Feature vendors the key)",
      "license": "Apache-2.0",
      "checks": [
@@ -1275,10 +1327,10 @@
      "commands": [
       "aws"
      ],
-     "notes": "Newest AWS CLI v2 = 2.39.1 (aws/aws-cli tags; v0 was unversioned). Feature install.sh (repo main, devcontainer-feature.json version 1.2.0) builds awscli-exe-linux-<x86_64|aarch64>-<VERSION>.zip when VERSION!=latest; I confirmed HTTP 200 for both arch zips and their .sig for 2.39.1, so the version option accepts it. Feature GPG-verifies the zip. Option installSessionManagerPlugin defaults false. Feature tag 1.2.0 taken from repo source, OCI tag not independently pulled.",
      "version": "2.39.1"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "cloud/azure",
@@ -1328,7 +1380,8 @@
      ],
      "notes": "Newest azure-cli 2.91.0 (PyPI latest, GH tag azure-cli-2.91.0 2026-10-05; v0 unversioned and v0 installed unpinned pip azure-cli in a python3 venv). IMPORTANT: Microsoft apt repo https://packages.microsoft.com/repos/azure-cli/dists/trixie/ returns 404 for amd64 and arm64, so on trixie the Feature's apt path fails and it falls back to pipx/pip; it will apt-install python3-minimal python3-pip libffi-dev python3-venv (and pipx) from Debian. That conflicts with owner rule 'no Debian python3' - alternative is a native `uv tool install azure-cli==2.91.0` (azure-cli requires Python >=3.10; not verified to work with uv). With a pinned version the Feature uses `pipx install azure-cli==2.91.0`. Feature options installBicep default false (explicitly false), installUsingPython default false. Feature OCI tag 1.3.0 from repo source."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "cloud/gcp",
@@ -1344,9 +1397,9 @@
     "version": {
      "type": "string",
      "enum": [
-      "591.0.0-0"
+      "591.0.0"
      ],
-     "default": "591.0.0-0"
+     "default": "591.0.0"
     }
    },
    "dependsOn": [],
@@ -1358,7 +1411,7 @@
      ],
      "method": "producer-apt-repo",
      "docsUrl": "https://docs.cloud.google.com/sdk/docs/install-sdk#deb",
-     "source": "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main ; key https://packages.cloud.google.com/apt/doc/apt-key.gpg ; apt-get install google-cloud-cli={version}",
+     "source": "apt package google-cloud-cli={version}-0 from https://packages.cloud.google.com/apt cloud-sdk main",
      "verification": "apt-signed",
      "license": "Apache-2.0",
      "checks": [
@@ -1376,7 +1429,8 @@
      ],
      "notes": "Newest google-cloud-cli in cloud-sdk repo is 591.0.0-0 on BOTH amd64 and arm64 (repo keeps ~1400 versions, exact pin via google-cloud-cli=591.0.0-0 is supported and documented). Package-version suffix -0; gcloud --version prints 591.0.0 (so regex must use the upstream part 591.0.0). Repo suite is the single 'cloud-sdk main' (no per-codename dist, works on trixie). Use CLOUDSDK_SKIP_PY_COMPILATION=1 optionally. License: SDK source Apache-2.0 but use is subject to Google Cloud SDK terms (non-SPDX bits possible). Package is large and brings its own bundled Python."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "cloud/cloudflared",
@@ -1424,7 +1478,8 @@
      ],
      "notes": "Newest = 2026.10.5 (2026-10-27). Not in Debian. v0 used the signed apt repo (https://pkg.cloudflare.com/cloudflared any main, key https://pkg.cloudflare.com/cloudflare-main.gpg; arm64+amd64 present) BUT that repo only carries the single latest version (Packages lists 1 version), so exact pinning via apt is impossible/unstable; hence release-binary route chosen for exact reproducibility. Release publishes no checksum file; sha256 are listed in the release body and GitHub asset digests (both confirmed identical for linux-amd64/arm64). Cloudflare also rolled its package signing key on 2025-10-30 (new cloudflare-main.gpg) if the apt route is preferred. Alternative: apt route with `apt-get install cloudflared` unpinned (violates exact-version policy)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "audio/voice",
@@ -1527,7 +1582,8 @@
      "commands": [],
      "notes": "Library-only ALSA plugins (provides ALSA 'pulse' PCM). Verify by dpkg-query. Pulls ffmpeg libs (libavcodec61 etc.) and jack libs as Depends - sizeable. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "data/visualization",
@@ -1540,9 +1596,7 @@
     "debian-13-arm64"
    ],
    "options": {},
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "vega-cli",
@@ -1607,6 +1661,9 @@
      ],
      "notes": "Atomic Feature with vega-cli + vega-lite; both npm global. Bins: vl2vg vl2svg vl2png vl2pdf. peerDependency vega ^6.0.0 (satisfied by vega-cli 6.4.0 / npm 7+ auto-installs peer; vl2svg/vl2png require resolvable `vega`, and vl2png needs `canvas` via vega-cli so install both in one npm command as v0 did). node >=20. integrity sha512-d/7hPjfz560UERaQuTmGgIVfXAe3g2hJWeC+igDeaGohUdEoNrHLXgR/yTOBT8vV/lIuuKnw+0/xWWblkDwkMQ==."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -1620,9 +1677,7 @@
     "debian-13-arm64"
    ],
    "options": {},
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "mermaid-cli",
@@ -1677,7 +1732,13 @@
      "commands": [],
      "notes": "ARM64 PROBLEM WITH V0 PIN: puppeteer 25.9.0 pins Chrome/chrome-headless-shell 152.0.7977.54, whose Chrome-for-Testing downloads exist only for linux64, mac-arm64, mac-x64, win32, win64 - NO linux-arm64 (storage.googleapis.com/.../152.0.7977.54/linux-arm64/... = 404; same for 25.10.0 -> 152.0.7977.75). Chrome for Testing gained linux-arm64 for chrome-headless-shell starting with 153.0.8001.0; puppeteer 25.11.0 is the first puppeteer pinning an arm64-capable build (153.0.8010.36, linux-arm64 zip HTTP 200). PROPOSED REPLACEMENT: puppeteer 25.11.0 (satisfies mermaid-cli peer ^25; node >=22.12.0; integrity sha512-n+psxZFH/qlJ3gwTZMxTLUZoE98FAOEjT/BSxHXvPmNCGAfN/kq0UnIZ8m9RB4rAVvJr7zRHUnKKg98GLMUyyQ==). Keeping v0 25.9.0 would work on amd64 only (on arm64 users historically used Debian chromium + PUPPETEER_EXECUTABLE_PATH). Chrome binaries have no published checksum (TLS only). The browser version is coupled to the puppeteer version (see puppeteer-core lib/puppeteer/revisions.js). `puppeteer` bin only has browser-management subcommands (`puppeteer browsers ...`), so there is no meaningful --version; verify with `puppeteer browsers list` or npm ls -g. Offered list contains only the proposed default."
     }
-   ]
+   ],
+   "requires": [
+    "node/node"
+   ],
+   "containerEnv": {
+    "PUPPETEER_CACHE_DIR": "/opt/aibox/puppeteer"
+   }
   },
   {
    "id": "go/go",
@@ -1694,9 +1755,6 @@
      "type": "string",
      "enum": [
       "1.25.12",
-      "1.26.3",
-      "1.26.4",
-      "1.26.5",
       "1.26.6",
       "1.27.0"
      ],
@@ -1731,7 +1789,8 @@
      ],
      "notes": "All six v0 versions still listed on go.dev; but newer patch releases exist (1.27.3, 1.26.10, 1.25.14 latest in their lines) so older ones lack security fixes. sha256 (amd64 / arm64): 1.27.0 675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685 / 51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda; 1.26.6 708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89 / d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e; 1.26.5 5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053 / fe4789e92b1f33358680864bbe8704289e7bb5fc207d80623c308935bd696d49; 1.26.4 1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f / ef758ae7c6cf9267c9c0ef080b8965f453d89ab2d25d9eb22de4405925238768; 1.26.3 2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556 / 9d89a3ea57d141c2b22d70083f2c8459ba3890f2d9e818e7e933b75614936565; 1.25.12 234828b7a89e0e303d2556310ee549fbcf253d28de937bac3da13d6294262ac1 / 8b5884aef89600aef5b0b051fb971f11f49bb996521e911f30f02a66884f7bd2. Extract to /usr/local/go (docs: rm -rf first). A contract author should regenerate hashes at build time check against go.dev JSON."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "go/goimports",
@@ -1752,9 +1811,7 @@
      "default": "0.48.0"
     }
    },
-   "dependsOn": [
-    "go/go"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "goimports",
@@ -1782,6 +1839,9 @@
      ],
      "notes": "v0 pin v0.48.0 (2026-07-09) resolves on proxy.golang.org (module go 1.25.0; latest is v0.52.0). goimports has no --version flag; use 'go version -m <binary>' (needs go on PATH at verify time) - inferred. Integrity = Go checksum DB (sum.golang.org) via go install; no separate hash. Source build, so arch-independent; takes Go toolchain >=1.25."
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -1803,9 +1863,7 @@
      "default": "0.7.0"
     }
    },
-   "dependsOn": [
-    "go/go"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "staticcheck",
@@ -1832,6 +1890,9 @@
      ],
      "notes": "Module tag v0.7.0 == release 2026.1 (2026-02-13); latest module v0.8.2. Output format from memory (inferred). Source build."
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -1880,6 +1941,9 @@
      ],
      "notes": "v0 pinned via 'go install' but producer explicitly recommends binary install over go install (go install unsupported), so route changed to release binary: v2.12.2 (2026-05-06) both arches. sha256: linux-amd64 8df580d2670fed8fa984aac0507099af8df275e665215f5c7a2ae3943893a553; linux-arm64 44cd40a8c76c86755375adfeea52cfd3533cb43d7bd647771e0ae065e166df3a. Latest upstream is v2.15.0. Tarball has top-level dir golangci-lint-{version}-linux-{arch}/golangci-lint. Does not itself need Go installed to run, but analysis needs go toolchain at lint time. License GPL-3.0 (GitHub). Output format from memory (inferred)."
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -1901,9 +1965,7 @@
      "default": "1.6.0"
     }
    },
-   "dependsOn": [
-    "go/go"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "govulncheck",
@@ -1930,6 +1992,9 @@
      ],
      "notes": "v0 pin v1.6.0 (2026-07-09) resolves; latest is v1.9.0. Output from memory (inferred)."
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -1951,19 +2016,17 @@
      "default": "2.28.0"
     }
    },
-   "dependsOn": [
-    "go/go"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "gosec",
      "rows": [
       "ADDON:go-quality/gosec"
      ],
-     "method": "go-install",
-     "docsUrl": "https://pkg.go.dev/github.com/securego/gosec/v2/cmd/gosec",
-     "source": "GOBIN=/usr/local/bin go install github.com/securego/gosec/v2/cmd/gosec@v2.28.0",
-     "verification": "none",
+     "method": "producer-release",
+     "docsUrl": "https://github.com/securego/gosec#install",
+     "source": "https://github.com/securego/gosec/releases/download/v{version}/gosec_{version}_linux_{arch}.tar.gz",
+     "verification": "sha256-file https://github.com/securego/gosec/releases/download/v{version}/gosec_{version}_checksums.txt",
      "license": "Apache-2.0",
      "checks": [
       {
@@ -1977,9 +2040,11 @@
      ],
      "commands": [
       "gosec"
-     ],
-     "notes": "v0 pin v2.28.0 (2026-07-13) resolves; latest v2.30.0. Release binaries also exist but go install kept per v0/Go-producer route. Output from memory (inferred)."
+     ]
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -2028,6 +2093,9 @@
      ],
      "notes": "v0 2.17.1 (2026-07-26) still downloadable; latest upstream 2.19.0. sha256: Linux_x86_64 a99bbc7ae0d8d897b07c4c497a9b62f222558804715ef219d1af05a7e417bc80; Linux_arm64 702f03769ac8bcb0e47839c82243cc614ae995633599a98c63062e13ea85f829 (also in checksums.txt). Needs go and git at use-time for builds. Output format from memory (inferred)."
     }
+   ],
+   "requires": [
+    "go/go"
    ]
   },
   {
@@ -2050,7 +2118,8 @@
     "go/govulncheck",
     "go/staticcheck"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "node/node",
@@ -2066,7 +2135,6 @@
     "version": {
      "type": "string",
      "enum": [
-      "20.20.2",
       "22.23.4",
       "24.22.2",
       "26.13.0"
@@ -2103,7 +2171,8 @@
      ],
      "notes": "v0 listed MAJORS only (20,22,24,26; default 26) -> resolved to newest patch per line as of today: 20.20.2 (Iron, last 20.x, 2026-03-24, EOL), 22.23.4 (Jod LTS), 24.22.2 (Krypton LTS), 26.13.0 (Lithium LTS, 2026-10-28). Default 26.13.0. sha256 tar.xz: 26.13.0 arm64 406fe3fbde1c054adff8b297c16fdb5af6659db327c1ac8acd46b56ef1af9a92 / x64 d28a96af6c38596f6d9d97c0ee531c13d238d757742387d1928de822d959e997; 24.22.2 arm64 eb187837a2230d4047161ac0be008584e16b46f726e9c9490ee35dc6b17d9ba8 / x64 48cc0e21e048790e54c0cf5749c2725005313d652651c40b7a21feb9697aaf75; 22.23.4 arm64 6287aa46b6c375d816e63ae66d024fbbfd70404825aabdfdf898a970871d2f4b / x64 1805bcd35e6815559bd2eb97db438d3fdb0eb3a5e6a977b7c1badca76337e9ce; 20.20.2 arm64 73093db209e4e9e09dd7d15a47aeaab1b74833830df03efa5f942a1122c5fa71 / x64 df770b2a6f130ed8627c9782c988fda9669fa23898329a61a871e32f965e007d. Bundles npm (26.13.0 npm 11.20.0; 24 npm 11.19.1; 22 npm 10.9.9; 20 npm 10.8.2). Node 25+ no longer ships corepack (see yarn). Needs xz-utils to unpack. Node 20 is EOL - consider dropping."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "node/pnpm",
@@ -2124,9 +2193,7 @@
      "default": "11.22.0"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "pnpm",
@@ -2153,6 +2220,9 @@
      ],
      "notes": "v0 11.22.0 still on npm (integrity sha512-H/hwxMYTPf2I+yr8Rt0T1H8JyXlLQ4xv20fKmMrzvBY4HuC+k6CRuOOCTPAfiJ9G19niCRD7C+GrD7W6qA3WIQ==). npm latest tag is 12.16.1, so v0 default is two majors behind latest-11 (11.28.9). engines node>=22.13 - not installable on Node 20. pnpm also self-manages versions (packageManager field / manage-package-manager-versions) - set to avoid self-switching."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -2174,9 +2244,7 @@
      "default": "4.17.0"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "yarn",
@@ -2203,6 +2271,9 @@
      ],
      "notes": "v0 listed '4','4.16.0','4.17.0'; default 4.17.0 (npm @yarnpkg/cli-dist 4.17.0 integrity sha512-quDpJzauzaCeutv4S7MObzjKcExJU0iKPzwl2LN66AP2MSVC/yTDuwnTyR3NwaA6euvSMBhk8MzX2GBDvVXxsA==; Yarn latest is 4.18.1). DEVIATION: producer-DOCUMENTED route is Corepack ('npm install -g corepack' then 'corepack enable' / 'corepack prepare yarn@4.17.0 --activate'; Node 25+/26 no longer bundles corepack, latest corepack 0.36.0) which needs runtime network and is per-project. @yarnpkg/cli-dist is the official npm-published dist of the same binary giving a deterministic global 'yarn' with integrity check; I judged it more suitable for a pinned Feature but it is not what the docs page tells users - owner/contract author may prefer corepack. Bin is bin/yarn.js (yarn, yarnpkg)."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -2251,7 +2322,8 @@
      ],
      "notes": "v0 1.4.0 (2026-08-20) still downloadable; latest upstream 1.4.4. Asset sha256 (GitHub digests): bun-linux-x64.zip 2d03fb5fb83ac8b567aca0a281b2ce1a1a19d488f56c2968d88c3f25e92fe452; bun-linux-aarch64.zip 4b1a332ee861983eb93bcfe6f770fff94e3e31b2c388bdaea3c8ed35e58eed0e. Zip contains bun-linux-{arch}/bun; needs unzip. Producer script alternative: curl bun.sh/install | bash -s bun-v1.4.0. Not dependent on node. License is MIT (bundles LGPL JavaScriptCore) - GitHub reports NOASSERTION."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "node/all",
@@ -2270,7 +2342,8 @@
     "node/pnpm",
     "node/yarn"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "python/uv",
@@ -2319,7 +2392,8 @@
      ],
      "notes": "v0 default 0.12.5 (2026-08-14) still downloadable; upstream latest 0.13.6. sha256 tar.gz: x86_64-gnu 68a509da24b06b4223a1c0175fb5eb5bc79342b76cbeff0cfe51ac3f5b17b6b2; aarch64-gnu 9bf43b4d1a07665bf64d4c4e710930b382321a785e0eb10aac07f46471f86a31 (musl variants a4742988...bfcdb / 8767a0e7...dbc5). Tarball contains uv-{arch}-unknown-linux-gnu/{uv,uvx}. Docs also document the image ghcr.io/astral-sh/uv:0.12.5 (COPY /uv /uvx) and PyPI. Set UV_PYTHON_PREFERENCE=only-managed if Debian python3 must be ignored."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "python/python",
@@ -2391,7 +2465,8 @@
      ],
      "notes": "v0 listed minors 3.12/3.13/3.14 (default 3.14). uv 0.12.5 embedded metadata (crates/uv-python/download-metadata.json @0.12.5) can install, both gnu arches: 3.14.7 (default), 3.13.15, 3.12.14 (also 3.11.16, 3.10.21; 3.15.0rc1 prerelease). Builds fetched from github.com/astral-sh/python-build-standalone release 20260814; uv verifies sha256 from its embedded metadata (no separate verification step needed). 'python' is not put on PATH by plain 'uv python install' unless --default / UV_PYTHON_INSTALL_BIN; Needs `uv python install --default` (preview) or symlink - inferred. ADDON:python/pip maps here: pip is bundled in PBS CPython (3.14.7 ships pip); no Debian python3-pip."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "python/poetry",
@@ -2441,7 +2516,8 @@
      ],
      "notes": "v0 2.4.1 still on PyPI; latest 2.5.1 (2026-09-20). Requires Python >=3.10,<4. Poetry docs officially recommend pipx / official installer; 'uv tool install' is the pipx-equivalent route (uv is the shared foundation) - not literally in poetry docs."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "python/pdm",
@@ -2491,7 +2567,8 @@
      ],
      "notes": "v0 2.28.2 still on PyPI; latest 2.29.4 (2026-10-27). Requires Python >=3.10. PDM docs recommend pipx/install script; uv tool is the equivalent isolated route. Output format from memory (inferred)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "python/all",
@@ -2510,7 +2587,8 @@
     "python/python",
     "python/uv"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "rust/rustc",
@@ -2526,13 +2604,6 @@
     "version": {
      "type": "string",
      "enum": [
-      "1.90.0",
-      "1.91.0",
-      "1.92.0",
-      "1.93.0",
-      "1.94.0",
-      "1.94.1",
-      "1.96.0",
       "1.96.1",
       "1.97.1",
       "1.98.0"
@@ -2567,9 +2638,28 @@
       "cargo",
       "rustup"
      ],
-     "notes": "All v0 versions verified installable (channel manifests exist for both arches): v0 '1.90'..'1.94' are minors -> .0 here (1.90.0 ... 1.94.0, 1.94.1, 1.96.0, 1.96.1, 1.97.1, 1.98.0; 1.95.x absent from v0). Current stable is 1.99.1 (2026-10-13). rustup route (producer: https://rust-lang.github.io/rustup/installation/other.html): download https://static.rust-lang.org/rustup/archive/1.29.2/{triple}/rustup-init (+ .sha256: x86_64-unknown-linux-gnu 5be191e8c70a5007074254cb74d78dbfdd25cd5a61c27de7b8e5410122ec24f4; aarch64-unknown-linux-gnu a9c168dbea81a84671c6b7a5c1795cb0eb699020110d107ddfca427bd797e697), run 'rustup-init -y --profile minimal --default-toolchain 1.98.0 --no-modify-path'. rustup stable = 1.29.2. Needs a C linker (gcc/cc) in image."
+     "notes": "All v0 versions verified installable (channel manifests exist for both arches): v0 '1.90'..'1.94' are minors -> .0 here (1.90.0 ... 1.94.0, 1.94.1, 1.96.0, 1.96.1, 1.97.1, 1.98.0; 1.95.x absent from v0). Current stable is 1.99.1 (2026-10-13). rustup route (producer: https://rust-lang.github.io/rustup/installation/other.html): download https://static.rust-lang.org/rustup/archive/1.29.2/{triple}/rustup-init (+ .sha256: x86_64-unknown-linux-gnu 5be191e8c70a5007074254cb74d78dbfdd25cd5a61c27de7b8e5410122ec24f4; aarch64-unknown-linux-gnu a9c168dbea81a84671c6b7a5c1795cb0eb699020110d107ddfca427bd797e697), run 'rustup-init -y --profile minimal --default-toolchain 1.98.0 --no-modify-path'. rustup stable = 1.29.2. Needs a C linker (gcc/cc) in image.",
+     "packages": [
+      "gcc",
+      "libc6-dev"
+     ],
+     "alsoProvides": [
+      {
+       "kind": "command",
+       "name": "x86_64-linux-gnu-gcc",
+       "targets": [
+        "debian-13-amd64"
+       ]
+      }
+     ]
     }
-   ]
+   ],
+   "requires": [],
+   "containerEnv": {
+    "RUSTUP_HOME": "/usr/local/rustup",
+    "CARGO_HOME": "/usr/local/cargo",
+    "PATH": "/usr/local/cargo/bin:${containerEnv:PATH}"
+   }
   },
   {
    "id": "rust/clippy",
@@ -2582,9 +2672,7 @@
     "debian-13-arm64"
    ],
    "options": {},
-   "dependsOn": [
-    "rust/rustc"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "clippy",
@@ -2614,6 +2702,9 @@
      "notes": "Component version is coupled to the toolchain: clippy-preview 0.1.98 for rustc 1.98.0 (0.1.N tracks rustc 1.N; use a regex on 0.1.<minor> not the full {version}). v0 unversioned -> exact = toolchain version 1.98.0. Install in the same 'rustup toolchain install' via --component clippy.",
      "versionFrom": "rust/rustc"
     }
+   ],
+   "requires": [
+    "rust/rustc"
    ]
   },
   {
@@ -2627,9 +2718,7 @@
     "debian-13-arm64"
    ],
    "options": {},
-   "dependsOn": [
-    "rust/rustc"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "rustfmt",
@@ -2658,6 +2747,9 @@
      "notes": "rustfmt-preview component version for toolchain 1.98.0 is 1.9.0 (1.8.0 for 1.90-1.94, 1.9.0 for 1.96-1.98). Versions are toolchain-coupled; exact = toolchain 1.98.0. Output text from memory (inferred).",
      "versionFrom": "rust/rustc"
     }
+   ],
+   "requires": [
+    "rust/rustc"
    ]
   },
   {
@@ -2679,9 +2771,7 @@
      "default": "0.22.2"
     }
    },
-   "dependsOn": [
-    "rust/rustc"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "cargo-audit",
@@ -2707,8 +2797,11 @@
      "commands": [
       "cargo-audit"
      ],
-     "notes": "NEW pin: crates.io cargo-audit 0.22.2 (max stable, updated 2026-06-05, rust-version 1.88 <= 1.98 OK). Producer docs: 'cargo install cargo-audit --locked'. Method label 'rustup' is used for cargo-installed crate (no enum value for cargo-install). RustSec releases publish no prebuilt Linux binaries (only library crates tagged), so source build is the route; compile needs build-essential, and on arm64 builds natively (slow, minutes). Crates.io verifies checksum via index (Cargo.lock/--locked). 'cargo audit --version' output reportedly prints 'cargo-audit-audit X' (known quirk, inferred)."
+     "notes": "No prebuilt binaries; built with cargo install --locked cargo-audit@{version} into /usr/local/cargo/bin."
     }
+   ],
+   "requires": [
+    "rust/rustc"
    ]
   },
   {
@@ -2722,9 +2815,7 @@
     "debian-13-arm64"
    ],
    "options": {},
-   "dependsOn": [
-    "rust/rustc"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "x86-64-cross",
@@ -2760,14 +2851,14 @@
       "x86_64-linux-gnu-gcc"
      ],
      "notes": "On debian-13-amd64 the target is the host triple and rust/rustc already provides the linker; the Feature succeeds without further change. On debian-13-arm64 it installs the Debian cross toolchain packages and the rustup target.",
-     "absenceTargets": [
-      "debian-13-arm64"
-     ],
      "packages": [
       "gcc-x86-64-linux-gnu",
       "libc6-dev-amd64-cross"
      ]
     }
+   ],
+   "requires": [
+    "rust/rustc"
    ]
   },
   {
@@ -2788,7 +2879,8 @@
     "rust/rustfmt",
     "rust/x86-64-cross"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "typescript/tsc",
@@ -2809,9 +2901,7 @@
      "default": "7.0.2"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "tsc",
@@ -2836,6 +2926,9 @@
      ],
      "notes": "NEW. npm 'latest' = 7.0.2 (2026-07-08); 7.x is the native (Go) port with per-platform optional deps (linux-x64, linux-arm64 present) - installs must not omit optional deps. tags: rc 7.0.1-rc, beta 7.1.0-beta, next 7.1.0-dev. Many projects still pin 5.x/6.x; owner may want 5.x offered (not required by policy)."
     }
+   ],
+   "requires": [
+    "node/node"
    ]
   },
   {
@@ -2882,7 +2975,8 @@
      ],
      "notes": "NEW. Newest stable @biomejs/biome@2.6.4 published 2026-10-28 (1 day old). Tag is '@biomejs/biome@2.6.4' (URL-encode). Assets are bare binaries named biome-linux-x64 / biome-linux-arm64 (+ -musl variants); sha256 (GitHub digests; no checksums file): x64 eb9afd5af3c04bd242be6db39fb812a025b42469af8c6a621535036dbd9b0c63; arm64 11a2e6770b3d7c8ce8cbec4652a516584b179dc30febecce0ca852d87074bee8. chmod +x and install as 'biome'. npm alternative @biomejs/biome (needs node). GitHub license shows Apache-2.0, npm says MIT OR Apache-2.0."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "typescript/oxlint",
@@ -2928,7 +3022,8 @@
      ],
      "notes": "NEW. oxlint 1.90.0 (npm latest and GitHub release oxlint_v1.90.0, 2026-10-27). sha256 (GitHub digests): x86_64-gnu dd5b0c99ca7917fd6d3caabae260acc5bf7d65ae094541971862602fe288dca4; aarch64-gnu dda6ccf8e94d4cddb82672c9d230ab04cc52e13a31075e88e53bb97b31311468. Tarball contains one file named oxlint-{arch}-unknown-linux-gnu (rename to oxlint). npm alternative 'npm i -g oxlint@1.90.0' (needs node>=20.19). Docs page not fetched (inferred as the producer docs location). Note: the oxc repo's 'latest' release pointer is not oxlint - use tag oxlint_v*."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "typescript/all",
@@ -2946,7 +3041,8 @@
     "typescript/oxlint",
     "typescript/tsc"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "zig/zig",
@@ -2992,7 +3088,8 @@
      ],
      "notes": "NEW; v0 had no zig row (no offered list beyond default). 0.17.0 (2026-10-01) is newest tagged release (index.json also has 'master' dev 2026-10-27). sha256 / size: x86_64 1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026 (57332648); aarch64 9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8 (52877280). Minisign pubkey is the one published on https://ziglang.org/download/ (confirmed by fetching page; .minisig exists). Previous releases still available if wanted: 0.16.0, 0.15.2. Zig tarball is self-contained dir zig-{arch}-linux-{version}/ (zig + lib/). Needs xz-utils and minisign (Debian package minisign)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "zig/zls",
@@ -3044,7 +3141,8 @@
    "versionCoupling": {
     "feature": "zig/zig",
     "rule": "equal"
-   }
+   },
+   "requires": []
   },
   {
    "id": "zig/all",
@@ -3061,7 +3159,8 @@
     "zig/zig",
     "zig/zls"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "latex/core",
@@ -3111,7 +3210,8 @@
      ],
      "notes": "tlmgr packages (exact, from v0 recipe): geometry fancyhdr lastpage multirow adjustbox microtype parskip setspace titlesec tabularray booktabs tabu colortbl xcolor graphics epstopdf svg hyperref bookmark cleveref url algorithms algorithmicx algorithm2e caption enumitem wrapfig footmisc appendix pdfpages pdflscape xkeyval iftex babel babel-english tools oberdiek symbol zapfding kvoptions kvsetkeys kvdefinekeys ltxcmds infwarerr epstopdf-pkg grfext pdftexcmds auxhook intcalc letltxmacro bitset bigintcalc atbegshi atveryend rerunfilecheck uniquecounter refcount gettitlestring hycolor stringenc pdfescape hobsub bytefield siunitx markdown soul ulem todonotes changes datetime2 tracklang was emoji ninecolors transparent spath3 nicematrix lipsum. TeX Live 2025 frozen mirror (v0 CTAN_MIRROR) https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final ; installer https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final/install-tl-unx.tar.gz sha256 311df9f1477fd90c520159d1feddc2d6270f010d8349d1f6bdb9461a93b48a5c (sha512 a307d7d11bcbd1f054ad0b0d476f7f12bc1a40d07445020edef8713b44453831d18a2f1722c3d2b0ea2e4fe6c06183a79d1c4049495113f412a9f5a570a8614d == published .sha512 on mirror; .sha512.asc also published; installer dir install-tl-20260301 reports 'TeX Live version 2025', ReleaseYear 2025; tlpdb 00texlive.config depend release/2025). v0 recipe: debian:trixie-slim builder, selected_scheme scheme-basic, TEXDIR /usr/local/texlive, option_doc 0, option_src 0, then 'tlmgr install --no-execute-actions <packages>' + mktexlsr, updmap-sys, fmtutil-sys --all; runtime image copies /usr/local/texlive and symlinks /usr/local/texlive/bin/*/* into /usr/local/bin. Mirror is HTTPS+TLS and installer verifies signed TLPDB (gpg needed for full verification; TeX Live key https://tug.org/texlive/files/texlive.asc, URL responds 200). Both aarch64-linux and x86_64-linux binary packages exist in the 2025 tlpdb (e.g. biber.aarch64-linux r75744, biber.x86_64-linux r75738) -> binary arch token is aarch64-linux / x86_64-linux. Per-package versions are tlpdb revisions, not semver, so exact version = TeX Live release '2025'. TeX Live current release is 2026; this mirror is the immutable 2025 final snapshot (Last-Modified 2026-03-01). Runtime apt deps from v0: perl fontconfig fonts-noto-color-emoji poppler-utils libfile-homedir-perl libyaml-tiny-perl liblog-log4perl-perl libunicode-linebreak-perl (fonts-noto-color-emoji 2.051-0+deb13u1, poppler-utils 25.03.0-5+deb13u4 [trixie; security has deb13u3], both arches). All 78 core package names verified present in 2025 tlpdb. Command check: tlmgr/pdflatex exist after install; version output reports 'TeX Live 2025'."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/recommended",
@@ -3168,7 +3268,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/fonts",
@@ -3290,7 +3391,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/biber",
@@ -3342,7 +3444,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/code",
@@ -3427,7 +3530,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/diagrams",
@@ -3507,7 +3611,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/math",
@@ -3562,7 +3667,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/music",
@@ -3609,7 +3715,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/chemistry",
@@ -3654,7 +3761,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/linguistics",
@@ -3714,7 +3822,8 @@
      ],
      "versionFrom": "latex/core"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/inkscape",
@@ -3751,7 +3860,8 @@
      ],
      "notes": "Debian package as in v0 (inkscape 1.4-6 in trixie main for both arches; not in trixie-updates/security). Producer (inkscape.org) distributes AppImage/Flatpak/Snap for Linux, none suitable for a headless container (no deb/apt repo) -> Debian package is the fallback. Heavy dependency tree (python3, GTK, etc. pulled by apt - note brief says no Debian python3 as foundation; inkscape pulls python3 as a dependency, unavoidable). Used by LaTeX 'svg' package; version output format approximate (inferred). Debian revision '-6' is part of exact version."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "latex/all",
@@ -3777,7 +3887,8 @@
     "latex/music",
     "latex/recommended"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "browser-testing/playwright",
@@ -3798,9 +3909,7 @@
      "default": "1.62.1"
     }
    },
-   "dependsOn": [
-    "node/node"
-   ],
+   "dependsOn": [],
    "tools": [
     {
      "name": "playwright",
@@ -3830,7 +3939,10 @@
    ],
    "containerEnv": {
     "PLAYWRIGHT_BROWSERS_PATH": "/opt/aibox/ms-playwright"
-   }
+   },
+   "requires": [
+    "node/node"
+   ]
   },
   {
    "id": "browser-testing/axe-playwright",
@@ -3881,7 +3993,8 @@
      "commands": [],
      "notes": "Library-only (no bin). Both @axe-core/playwright@4.13.0 and axe-core@4.13.0 exist; @axe-core/playwright depends on axe-core ~4.13.0 and has peerDependency playwright-core >=1.0.0 (satisfied by playwright). Verify with `npm ls -g --depth=0` / `node -p \"require('@axe-core/playwright/package.json').version\"` with NODE_PATH set. integrity @axe-core/playwright sha512-6YLx+kxXu5GJceG4ozFg+33a2EMTdjYwWGloJ3sb9Kta5pp+ZNS53uxGVog5JetIY8s++P5UrtX+cri+u0VAVg==; axe-core sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "browser-testing/chromium",
@@ -3918,7 +4031,8 @@
      "notes": "Installed by `playwright install --with-deps --no-shell <browser>` (v0 used this; --with-deps runs apt-get as root and supports debian13-x64 and debian13-arm64 per playwright-core 1.62.1 registry). Downloads come from cdn.playwright.dev (TLS only; no published checksums). Playwright 1.62.1 -> Chromium 151.0.7922.34, revision 1234 (browsers.json). amd64 uses Chrome for Testing linux64; arm64 uses Playwright-built chromium-linux-arm64.zip (HTTP 200 on CDN, revision 1234; debian13-arm64 key present). Version coupled to playwright 1.62.1; there is no independent version. Executable lives under $PLAYWRIGHT_BROWSERS_PATH/chromium-1234 (not on PATH). Headless-shell (chromium-headless-shell rev 1234) also exists for arm64 but --no-shell skips it. Verify with `playwright --version` plus presence of chromium-1234 dir.",
      "versionFrom": "browser-testing/playwright"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "browser-testing/firefox",
@@ -3955,7 +4069,8 @@
      "notes": "Installed by `playwright install --with-deps --no-shell <browser>` (v0 used this; --with-deps runs apt-get as root and supports debian13-x64 and debian13-arm64 per playwright-core 1.62.1 registry). Downloads come from cdn.playwright.dev (TLS only; no published checksums). Playwright 1.62.1 -> Firefox 153.0 (Playwright patched build), revision 1538. Debian 13 arm64 asset firefox-debian-13-arm64.zip exists (HTTP 200). Optional (v0 default_enabled false). Verify dir firefox-1538.",
      "versionFrom": "browser-testing/playwright"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "browser-testing/webkit",
@@ -3992,7 +4107,8 @@
      "notes": "Installed by `playwright install --with-deps --no-shell <browser>` (v0 used this; --with-deps runs apt-get as root and supports debian13-x64 and debian13-arm64 per playwright-core 1.62.1 registry). Downloads come from cdn.playwright.dev (TLS only; no published checksums). Playwright 1.62.1 -> WebKit 26.5, revision 2336. Debian 13 arm64 asset webkit-debian-13-arm64.zip exists (HTTP 200). Optional (v0 default_enabled false); --with-deps pulls many GStreamer/GTK libs (large). Verify dir webkit-2336.",
      "versionFrom": "browser-testing/playwright"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "browser-testing/all",
@@ -4012,7 +4128,8 @@
     "browser-testing/playwright",
     "browser-testing/webkit"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "data/preview/sqlite3",
@@ -4049,7 +4166,8 @@
      ],
      "notes": "SQLite upstream publishes source/precompiled sqlite-tools zips only for x86 Linux (no arm64 CLI), so distro package is the practical route. Debian version string 3.46.1-7+deb13u2; --version prints upstream 3.46.1 so regex must use upstream part. trixie only (no -security/-updates copy)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "data/preview/csvkit",
@@ -4102,7 +4220,8 @@
      ],
      "notes": "PyPI csvkit latest 2.2.0 (pure python wheel csvkit-2.2.0-py3-none-any.whl; both arches). v0 used Debian csvkit 2.0.1-3 (still in trixie, python3-csvkit too) but owner wants uv tools. Exposes csvclean csvcut csvformat csvgrep csvjoin csvjson csvlook csvpy csvsort csvsql csvstat csvstack in2csv sql2csv. v0 comment: Yazi uses csvlook and in2csv. Excel (xls/xlsx) support is built in via xlrd/openpyxl deps. Debian fallback: package csvkit 2.0.1-3 (trixie, both arches)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "data/preview/all",
@@ -4119,7 +4238,8 @@
     "data/preview/csvkit",
     "data/preview/sqlite3"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "diagramming/d2",
@@ -4167,7 +4287,8 @@
      ],
      "notes": "v0 0.7.1 still downloadable on both arches; newest is 0.9.0 (2026-09-07) but policy keeps v0. Release has NO checksum/signature file, only GitHub digests, so inline sha256 per arch. Repo moved terrastruct/d2 -> d2lang/d2 (GitHub redirects). Producer's documented install is `curl -fsSL https://d2lang.com/install.sh | sh` (producer-script) - a fixed-release tarball is safer."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "diagramming/graphviz",
@@ -4204,7 +4325,8 @@
      ],
      "notes": "Graphviz upstream ships Linux packages only via distros (gitlab.com/graphviz); --version output (stderr!) gives 2.42.4 so regex uses upstream part. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "diagramming/all",
@@ -4221,7 +4343,8 @@
     "diagramming/d2",
     "diagramming/graphviz"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "git-ui/gh",
@@ -4251,7 +4374,7 @@
      ],
      "method": "upstream-feature",
      "docsUrl": "https://github.com/devcontainers/features/tree/main/src/github-cli",
-     "source": "ghcr.io/devcontainers/features/github-cli:1.1.3 option version=\"2.103.3\"",
+     "source": "ghcr.io/devcontainers/features/github-cli@sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2 with options {\"version\": \"2.103.3\"}",
      "verification": "none",
      "license": "MIT",
      "checks": [
@@ -4267,10 +4390,10 @@
      "commands": [
       "gh"
      ],
-     "notes": "Newest gh = v2.103.3 (2026-10-26; v0 used Debian gh 2.46.0 unpinned). Feature (devcontainer-feature.json 1.1.3) with installDirectlyFromGitHubRelease=true (default) downloads gh_<ver>_linux_<dpkg arch>.deb from github.com/cli/cli/releases and `dpkg -i`; it does NOT verify against gh_2.103.3_checksums.txt (it exists on the release). Release assets confirmed for linux_amd64 and linux_arm64 tarballs/debs. If installDirectlyFromGitHubRelease=false it uses cli.github.com apt repo (signed, key via keyserver) with version=ver suffix. Feature falls back to previous version if download fails (silent downgrade risk - worth a post-install version assertion). Debian trixie gh is 2.46.0-3 (old).",
      "version": "2.103.3"
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "git-ui/lazygit",
@@ -4318,7 +4441,8 @@
      ],
      "notes": "Newest 0.66.2 (2026-10-16). Debian trixie has lazygit 0.50.0+ds1-1+b2 (v0 used it). Release has x86_64 and arm64 tarballs (also armv6, 32-bit). Tarball contains `lazygit` binary. Producer docs list Debian/Ubuntu users to use release binaries (no apt)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "git-ui/all",
@@ -4335,7 +4459,8 @@
     "git-ui/gh",
     "git-ui/lazygit"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "infrastructure/opentofu",
@@ -4383,7 +4508,8 @@
      ],
      "notes": "v0 1.12.6 still on release page, amd64+arm64 tarballs confirmed. Newest is 1.13.2 (2026-10-21). Other v0-offered versions not offered (not a runtime)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "infrastructure/ansible",
@@ -4436,7 +4562,8 @@
      ],
      "notes": "v0 installed PyPI package `ansible` (community distribution, NOT ansible-core) 14.3.1 into a venv and symlinked every bin ansible*. 14.3.1 is still on PyPI (newest 14.5.0); depends ansible-core~=2.21.3. The `ansible` wheel's only console script is ansible-community; ansible, ansible-playbook, ansible-galaxy, ansible-vault, ansible-doc, ansible-config, ansible-console, ansible-inventory, ansible-pull (and ansible-test) come from ansible-core, so `uv tool install` needs `--with-executables-from ansible-core` to expose them (inferred from uv docs, not run). Requires Python >=3.12: uv can download a managed CPython (no Debian python3 needed). Pure-python wheels, both arches. Offered versions: only 14.3.1 (v0 list 13.7.0..14.2.0 also still on PyPI but not offered per policy)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "infrastructure/packer",
@@ -4484,7 +4611,8 @@
      ],
      "notes": "v0 1.16.0 present (200) for linux amd64+arm64 zips (386/arm/ppc64le also). Newest GH release v1.16.2 (2026-10-22). LICENSE NOTE: Packer is BUSL-1.1 (not OSI open source) since 1.10 - license field is a flag for the owner. HashiCorp also has apt repo apt.releases.hashicorp.com (not used: pinning by version possible but release zip+SHA256SUMS preferred). `packer --version` also works."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "infrastructure/podman",
@@ -4530,7 +4658,8 @@
      ]
     }
    ],
-   "privileges": "Running containers inside the workspace needs the host to permit nested user namespaces; the Feature does not add privileged mode, capabilities or devices. Without that permission podman is installed but cannot start containers."
+   "privileges": "Running containers inside the workspace needs the host to permit nested user namespaces; the Feature does not add privileged mode, capabilities or devices. Without that permission podman is installed but cannot start containers.",
+   "requires": []
   },
   {
    "id": "infrastructure/all",
@@ -4549,7 +4678,8 @@
     "infrastructure/packer",
     "infrastructure/podman"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "kubernetes/kubectl",
@@ -4598,7 +4728,8 @@
      ],
      "notes": "v0 1.36.4 still served by dl.k8s.io for amd64+arm64 (binary and .sha256 HTTP 200). Current stable.txt is v1.37.2. Note .sha256 file contains the hash only (no filename) - use echo \"<hash>  kubectl\" | sha256sum -c. Docs also offer pkgs.k8s.io apt repo (per-minor repos, signed) - release binary chosen for exact patch pin."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "kubernetes/helm",
@@ -4647,7 +4778,8 @@
      ],
      "notes": "v0 4.2.4 present, linux-amd64/arm64 tarballs and sha256sum (200). Newest GH release v4.3.1. Tarball contains linux-{arch}/helm. Helm 4 (not 3.x) so plugins/flags differ from v3 (v0 also offered 3.17.2, not offered here)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "kubernetes/kustomize",
@@ -4695,7 +4827,8 @@
      ],
      "notes": "v0 5.8.1 present with linux amd64+arm64 (also ppc64le, s390x). Newest tag kustomize/v5.8.3. Tag has a slash, URL-encode as kustomize%2Fv5.8.1. Release also lists other-component tags, so never use releases/latest."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "kubernetes/k9s",
@@ -4744,7 +4877,8 @@
      ],
      "notes": "v0 0.51.0 is also the newest (2026-06-06). Capitalised asset names Linux_amd64/Linux_arm64 (arm64 sha256 3ee05c82e5f9198928a4e86133608ba6a2c10a2244d6a7789e820f78319d640c, amd64 c3752ad51a5a4015a113819c4eeb6e55a4d0e4b8e652494797532f6fc8161dd7). SBOMs also attached."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "kubernetes/all",
@@ -4763,7 +4897,8 @@
     "kubernetes/kubectl",
     "kubernetes/kustomize"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "preview/archive/chafa",
@@ -4800,7 +4935,8 @@
      ],
      "notes": "Upstream releases are source tarballs only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/librsvg",
@@ -4837,7 +4973,8 @@
      ],
      "notes": "trixie has 2.60.0+dfsg-1; security update +deb13u1 is higher (appears only in trixie-security). Upstream librsvg ships source tarballs only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/poppler",
@@ -4874,7 +5011,8 @@
      ],
      "notes": "trixie has +deb13u4; trixie-security carries older +deb13u3 (u4 supersedes). -v prints to stderr. Upstream ships source only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/timg",
@@ -4911,7 +5049,8 @@
      ],
      "notes": "Upstream releases source tarballs only. Pulls ffmpeg/graphicsmagick/poppler libs as Depends (large). No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/mupdf",
@@ -4948,7 +5087,8 @@
      ],
      "notes": "Same version in trixie and trixie-security. AGPL licensed. Upstream ships source only for Linux. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/entr",
@@ -4985,7 +5125,8 @@
      ],
      "notes": "`entr` with no args prints usage incl. 'release: 5.7' (exit non-zero) - output text unconfirmed. Upstream ships source tarball only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/p7zip",
@@ -5024,7 +5165,8 @@
      ],
      "notes": "trixie has NO real p7zip: p7zip and p7zip-full are transitional packages (16.02+transitional.1, arch all) that depend on 7zip (>= 23.01+dfsg-4~); 7zip 25.01+dfsg-1~deb13u2 Provides p7zip/p7zip-full and installs /usr/bin/7z, 7za, 7zr (7zz is in 7zip-standalone). So v0's `apt install p7zip-full` still works and yields 7zip 25.01. Recommend installing `7zip` directly; Debian's build excludes unrar code (LGPL only). Running `7z` with no args prints banner. Upstream (7-zip.org) static linux-x64/arm64 tarballs exist (not checked here, no signature). No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/resvg",
@@ -5072,7 +5214,8 @@
      ],
      "notes": "ARM64 PROBLEM WITH V0 PIN: v0 0.47.0 (also 0.48.0, 0.48.1) has ONLY resvg-linux-x86_64.tar.gz - no linux aarch64 asset; v0 faked arm64 with a stub script that exits 1 (svg.yazi falls back to chafa). First release with resvg-linux-aarch64.tar.gz is v0.49.0 (2026-10-24, also newest). PROPOSED REPLACEMENT: 0.49.0 (archive name token: x86_64 / aarch64; tarball contains `resvg` binary at root, v0 extracted with tar -xz resvg). Alternative keeping 0.47.0 on amd64 only: cargo install resvg --version 0.47.0 on arm64 (slow compile)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/archive/all",
@@ -5095,7 +5238,8 @@
     "preview/archive/resvg",
     "preview/archive/timg"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "preview/enhanced/ffmpeg",
@@ -5132,7 +5276,8 @@
      ],
      "notes": "Same version in trixie and trixie-security. FFmpeg upstream ships source only (static builds are third-party). Debian version has epoch '7:' (not shown in -version output; regex uses 7.1.5-0+deb13u1 - brittle, consider matching 7\\.1\\.5). No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/enhanced/ghostscript",
@@ -5169,7 +5314,8 @@
      ],
      "notes": "trixie has +deb13u1; trixie-security +deb13u3 is higher (security-only). Upstream ships source only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/enhanced/rich",
@@ -5219,7 +5365,8 @@
      ],
      "notes": "v0 installed Debian python3-rich 13.9.4-1 (a LIBRARY; no `rich` command - Yazi's rich preview used `python3 -m rich.markdown`-style module calls via system python). PyPI `rich-cli` 1.8.1 (latest, uploaded 2025-07-04, py3-none-any wheel, MIT) is the Textualize CLI whose console script is `rich` (entry rich=rich_cli.__main__:run) - it renders Markdown/JSON/RST/CSV/notebooks and is the command the rich-preview.yazi plugin expects, so it is the right uv-tool equivalent of the *capability* but NOT a drop-in for the library. Caveats: rich-cli pins rich>=12.4,<13 (so isolated venv gets rich 12.x, not 13.9.4), textual<0.2, click 8, requests; project looks stale (no release for >1 year). `rich --version` output not confirmed (rich-cli uses click --version; likely prints '1.8.1' or 'rich-cli 1.8.1'; contract author should test). If the plugin needs the library instead, use `uv tool install --with rich` is not meaningful; alternative: `uv tool install rich-cli==1.8.1` only. Needs uv-managed Python >=3.9."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "preview/enhanced/all",
@@ -5237,7 +5384,8 @@
     "preview/enhanced/ghostscript",
     "preview/enhanced/rich"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "release/shellcheck",
@@ -5285,7 +5433,8 @@
      ],
      "notes": "v0 0.11.0 is also newest (2025-08-04). Trixie ships older 0.10.0-1 so release binary needed. Asset tokens x86_64 / aarch64 (tar.xz also available; .tar.gz chosen to avoid xz-utils)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "release/hadolint",
@@ -5333,7 +5482,8 @@
      ],
      "notes": "v0 2.15.1 is newest (2026-07-31). Not in Debian. Assets hadolint-linux-x86_64 and hadolint-linux-arm64 (static). checksums file lines use '*name' binary-mode format; sha256sum -c handles it."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "release/all",
@@ -5350,7 +5500,8 @@
     "release/hadolint",
     "release/shellcheck"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "security/crypto/age",
@@ -5396,7 +5547,8 @@
      ],
      "notes": "NEW. Newest v1.3.2 (2026-08-29). Also installs age-keygen (and age-inspect in some versions). No checksum file; each tarball has a sigsum .proof file (verification needs sigsum tooling, not used)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/sops",
@@ -5443,7 +5595,8 @@
      ],
      "notes": "NEW. Newest v3.13.3 (2026-07-23). Assets sops-v3.13.3.linux.amd64 / .arm64 (dot-separated naming). Plain `sops --version` also does a network check for a newer release ('(latest)' suffix / warning) - use --disable-version-check. Digests: amd64 e5bec3346a873ae91d871550f3e698c1aad962aff462a080e40f25fde17fef6b, arm64 53b0abacd38ef1b12a66d6c100956691b9cefce018d91f81e73ddf7438b94d77."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/gnupg",
@@ -5478,7 +5631,8 @@
      ],
      "notes": "NEW. gnupg is a meta-package depending on gpg, gpg-agent, dirmngr etc. Upstream ships source only. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/openssh-client",
@@ -5513,7 +5667,8 @@
      ],
      "notes": "NEW. trixie has +deb13u4; trixie-security carries older +deb13u2 (superseded). ssh -V prints to stderr. Upstream OpenSSH (portable) ships source only. Provides ssh-keygen. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/minisign",
@@ -5559,7 +5714,8 @@
      ],
      "notes": "NEW. Newest 0.12 (2025-01-15; unusual tag without 'v'). One universal tarball with static x86_64 and aarch64 builds (verified by listing). No checksum file and no GitHub digest for this asset (digest null); pin a sha256 computed from the tarball. The Debian package does not exist in trixie (not found)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/openssl",
@@ -5594,7 +5750,8 @@
      ],
      "notes": "NEW. trixie has 3.5.7-1~deb13u2, trixie-security 3.5.7-1~deb13u3 is higher. Upstream source only; Debian is the sensible route. No producer apt repo or release artifacts applicable for Debian; distro package is the producer-documented route."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/crypto/all",
@@ -5615,7 +5772,8 @@
     "security/crypto/openssl",
     "security/crypto/sops"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   },
   {
    "id": "security/scan/gitleaks",
@@ -5663,7 +5821,8 @@
      ],
      "notes": "v0 8.30.1 is also newest (2026-03-21). Arch tokens x64 / arm64 (note: x64 not amd64)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/osv-scanner",
@@ -5711,7 +5870,8 @@
      ],
      "notes": "v0 2.4.0 still on release page (newest v2.7.0). Bare binaries osv-scanner_linux_amd64/arm64 + osv-scanner_SHA256SUMS. Output text format inferred."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/syft",
@@ -5759,7 +5919,8 @@
      ],
      "notes": "v0 1.50.0 present (newest v1.55.0). Producer install.sh script exists but release tarball preferred."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/grype",
@@ -5807,7 +5968,8 @@
      ],
      "notes": "v0 0.116.1 present (newest v0.121.0). Vulnerability DB is downloaded at first run (network; not part of install)."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/cosign",
@@ -5855,7 +6017,8 @@
      ],
      "notes": "v0 3.1.2 present (newest v3.1.4, 2026-10-20). Bare binaries cosign-linux-amd64/arm64 (+ .sigstore.json bundles, SBOMs). Do not use cosign-linux-pivkey-pkcs11key-* variant."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/semgrep",
@@ -5903,7 +6066,8 @@
      ],
      "notes": "NEW. Newest 1.182.1 (2026-10-22). PyPI has manylinux_2_34_aarch64 and manylinux_2_34_x86_64 wheels (cp310-cp314, glibc 2.34 <= trixie 2.41) plus musllinux; no source build needed. requires Python >=3.10 via uv-managed Python. Sends metrics by default (set --metrics off / SEMGREP_SEND_METRICS=off). Rules need network or local rule files."
     }
-   ]
+   ],
+   "requires": []
   },
   {
    "id": "security/scan/all",
@@ -5924,7 +6088,8 @@
     "security/scan/semgrep",
     "security/scan/syft"
    ],
-   "tools": []
+   "tools": [],
+   "requires": []
   }
  ],
  "removed": [
@@ -6032,17 +6197,274 @@
     "ADDON:preview-archive/resvg",
     "ADDON:mermaid/puppeteer"
    ],
-   "decision": "DEC-20261029_0802-DeepOtter",
+   "decision": "DEC-20261029_1409-DaringTrail",
    "note": "v0 pins resvg 0.47.0 and puppeteer 25.9.0 have no arm64 builds; v1 defaults are resvg 0.49.0 and puppeteer 25.11.0."
   },
   {
    "id": "COMPAT-LANG-PATCH",
    "rows": [
+    "ADDON:go/go",
     "ADDON:node/node",
+    "ADDON:rust/rustc",
+    "ADDON:python/python"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "Runtimes offer the newest patch of their three newest v0 lines; a v0 minor or major selection maps to that line's patch version, and older lines are not offered."
+  },
+  {
+   "id": "COMPAT-VERSIONS-AI-HERMES-HERMES",
+   "rows": [
+    "ADDON:ai-hermes/hermes"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.16.0, 0.18.0; v1 offers only 0.19.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-AI-OPENCODE-OPENCODE",
+   "rows": [
+    "ADDON:ai-opencode/opencode"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.0.55; v1 offers only 1.19.5."
+  },
+  {
+   "id": "COMPAT-VERSIONS-AI-TAU-TAU",
+   "rows": [
+    "ADDON:ai-tau/tau"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.3.5, 0.3.7, 0.3.10, 0.3.11; v1 offers only 0.3.13."
+  },
+  {
+   "id": "COMPAT-VERSIONS-DOCS-ZENSICAL-ZENSICAL",
+   "rows": [
+    "ADDON:docs-zensical/zensical"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.0.43, 0.0.44, 0.0.47, 0.0.51, 0.0.52, 0.0.53, 0.0.55, 0.0.56; v1 offers only 0.0.57."
+  },
+  {
+   "id": "COMPAT-VERSIONS-TYPST-TYPST",
+   "rows": [
+    "ADDON:typst/typst"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.13.1, 0.14.2; v1 offers only 0.15.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-GO-GO",
+   "rows": [
+    "ADDON:go/go"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.26.3, 1.26.4, 1.26.5; v1 offers only 1.25.12, 1.26.6, 1.27.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-NODE-NODE",
+   "rows": [
+    "ADDON:node/node"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 20; v1 offers only 22.23.4, 24.22.2, 26.13.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-NODE-PNPM",
+   "rows": [
+    "ADDON:node/pnpm"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 9, 10, 11.1.3, 11.5.2, 11.10.0, 11.18.0, 11.20.0, 11.21.0; v1 offers only 11.22.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-NODE-YARN",
+   "rows": [
+    "ADDON:node/yarn"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 4.16.0; v1 offers only 4.17.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-NODE-BUN",
+   "rows": [
+    "ADDON:node/bun"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.2, 1.3.14; v1 offers only 1.4.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-PYTHON-UV",
+   "rows": [
+    "ADDON:python/uv"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.7, 0.11.10, 0.11.11, 0.11.15, 0.11.19, 0.11.26, 0.12.0; v1 offers only 0.12.5."
+  },
+  {
+   "id": "COMPAT-VERSIONS-PYTHON-POETRY",
+   "rows": [
+    "ADDON:python/poetry"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.8, 2.0; v1 offers only 2.4.1."
+  },
+  {
+   "id": "COMPAT-VERSIONS-PYTHON-PDM",
+   "rows": [
+    "ADDON:python/pdm"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 2.22, 2.26.9, 2.27.0, 2.28.0, 2.28.1; v1 offers only 2.28.2."
+  },
+  {
+   "id": "COMPAT-VERSIONS-RUST-RUSTC",
+   "rows": [
     "ADDON:rust/rustc"
    ],
-   "decision": "DEC-20261029_0802-DeepOtter",
-   "note": "v0 minor or major version selections map to the exact patch versions in the Feature enum."
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.90, 1.91, 1.92, 1.93, 1.94, 1.94.1, 1.96.0; v1 offers only 1.96.1, 1.97.1, 1.98.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-INFRASTRUCTURE-OPENTOFU",
+   "rows": [
+    "ADDON:infrastructure/opentofu"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.9.0, 1.12.0, 1.12.1, 1.12.3, 1.12.5; v1 offers only 1.12.6."
+  },
+  {
+   "id": "COMPAT-VERSIONS-INFRASTRUCTURE-ANSIBLE",
+   "rows": [
+    "ADDON:infrastructure/ansible"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 13.7.0, 14.0.0, 14.1.0, 14.2.0; v1 offers only 14.3.1."
+  },
+  {
+   "id": "COMPAT-VERSIONS-INFRASTRUCTURE-PACKER",
+   "rows": [
+    "ADDON:infrastructure/packer"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.11.2, 1.15.3, 1.15.4; v1 offers only 1.16.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-KUBERNETES-KUBECTL",
+   "rows": [
+    "ADDON:kubernetes/kubectl"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 1.36.1, 1.36.2, 1.36.3; v1 offers only 1.36.4."
+  },
+  {
+   "id": "COMPAT-VERSIONS-KUBERNETES-HELM",
+   "rows": [
+    "ADDON:kubernetes/helm"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 3.17.2, 4.2.0, 4.2.2, 4.2.3; v1 offers only 4.2.4."
+  },
+  {
+   "id": "COMPAT-VERSIONS-KUBERNETES-KUSTOMIZE",
+   "rows": [
+    "ADDON:kubernetes/kustomize"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 5.6.0; v1 offers only 5.8.1."
+  },
+  {
+   "id": "COMPAT-VERSIONS-KUBERNETES-K9S",
+   "rows": [
+    "ADDON:kubernetes/k9s"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.50.18; v1 offers only 0.51.0."
+  },
+  {
+   "id": "COMPAT-VERSIONS-PREVIEW-ARCHIVE-RESVG",
+   "rows": [
+    "ADDON:preview-archive/resvg"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 also offered 0.47.0; v1 offers only 0.49.0."
+  },
+  {
+   "id": "COMPAT-RUNTIME-REQUIRES",
+   "rows": [
+    "ADDON:ai-codex/codex",
+    "ADDON:ai-continue/cn",
+    "ADDON:ai-gemini/gemini",
+    "ADDON:browser-testing/playwright",
+    "ADDON:data-visualization/vega-cli",
+    "ADDON:data-visualization/vega-lite",
+    "ADDON:go-quality/goimports",
+    "ADDON:go-quality/golangci-lint",
+    "ADDON:go-quality/gosec",
+    "ADDON:go-quality/govulncheck",
+    "ADDON:go-quality/staticcheck",
+    "ADDON:go-release/goreleaser",
+    "ADDON:mermaid/mermaid-cli",
+    "ADDON:mermaid/puppeteer",
+    "ADDON:node/pnpm",
+    "ADDON:node/yarn",
+    "ADDON:rust/cargo-audit",
+    "ADDON:rust/clippy",
+    "ADDON:rust/rustfmt",
+    "ADDON:rust/x86_64-cross"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "Features that need node, go or rust no longer pull the runtime in; select the runtime Feature too, otherwise the build fails with AIBOX_FEATURE_DEPENDENCY_MISSING."
+  },
+  {
+   "id": "COMPAT-V0-REQUIRES",
+   "rows": [
+    "ADDON:preview-enhanced/ffmpeg",
+    "ADDON:preview-enhanced/ghostscript",
+    "ADDON:preview-enhanced/rich",
+    "ADDON:go-release/goreleaser"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 recipe requires preview-enhanced -> preview-archive and go-release -> release have no functional dependency and are not mapped; go-release -> go maps to requires go/go."
+  },
+  {
+   "id": "COMPAT-DEBIAN-VERSION",
+   "rows": [
+    "ADDON:audio-voice/alsa-pulse",
+    "ADDON:audio-voice/pulseaudio-utils",
+    "ADDON:audio-voice/sox",
+    "ADDON:audio-voice/sox-pulse",
+    "ADDON:data-preview/sqlite3",
+    "ADDON:diagramming/graphviz",
+    "ADDON:infrastructure/podman",
+    "ADDON:latex/svg-inkscape",
+    "ADDON:preview-archive/chafa",
+    "ADDON:preview-archive/entr",
+    "ADDON:preview-archive/librsvg",
+    "ADDON:preview-archive/mupdf",
+    "ADDON:preview-archive/p7zip",
+    "ADDON:preview-archive/poppler",
+    "ADDON:preview-archive/timg",
+    "ADDON:preview-enhanced/ffmpeg",
+    "ADDON:preview-enhanced/ghostscript",
+    "ADDON:rust/x86_64-cross"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "Debian-route tools install the version the base's configured repositories provide; the base's snapshot pin, not the Feature, fixes their version."
+  },
+  {
+   "id": "COMPAT-AZURE",
+   "rows": [
+    "ADDON:cloud-azure/azure-cli"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "azure-cli is installed with uv from PyPI because Microsoft's apt repository has no trixie distribution."
+  },
+  {
+   "id": "COMPAT-RICH",
+   "rows": [
+    "ADDON:preview-enhanced/rich"
+   ],
+   "decision": "DEC-20261029_1409-DaringTrail",
+   "note": "v0 installed the python3-rich library; v1 installs the rich-cli command. python3 -m rich through Debian python3 is not provided."
   }
  ],
  "smoke": [
@@ -6059,7 +6481,7 @@
     "hello.tex"
    ],
    "produces": "hello.pdf",
-   "producesMagic": "%PDF"
+   "producesMagicHex": "25504446"
   },
   {
    "id": "SMOKE-TYPST",
@@ -6073,7 +6495,7 @@
     "hello.typ"
    ],
    "produces": "hello.pdf",
-   "producesMagic": "%PDF"
+   "producesMagicHex": "25504446"
   },
   {
    "id": "SMOKE-D2",
@@ -6086,8 +6508,7 @@
     "hello.d2",
     "hello.svg"
    ],
-   "produces": "hello.svg",
-   "producesMagic": "<?xml"
+   "produces": "hello.svg"
   },
   {
    "id": "SMOKE-GRAPHVIZ",
@@ -6102,27 +6523,26 @@
     "-o",
     "hello.svg"
    ],
-   "produces": "hello.svg",
-   "producesMagic": "<?xml"
+   "produces": "hello.svg"
   },
   {
    "id": "SMOKE-MERMAID",
    "features": [
+    "node/node",
     "mermaid"
    ],
-   "fixture": "fixtures/v1-05-smoke/hello.mmd",
+   "fixture": "fixtures/v1-05-smoke/mermaid",
    "argv": [
-    "mmdc",
-    "-i",
-    "hello.mmd",
-    "-o",
-    "hello.svg"
+    "sh",
+    "-c",
+    "cd mermaid && mmdc -p puppeteer.json -i hello.mmd -o hello.svg"
    ],
-   "produces": "hello.svg"
+   "produces": "mermaid/hello.svg"
   },
   {
    "id": "SMOKE-VEGA",
    "features": [
+    "node/node",
     "data/visualization"
    ],
    "fixture": "fixtures/v1-05-smoke/hello.vl.json",
@@ -6136,19 +6556,17 @@
   {
    "id": "SMOKE-CHROMIUM",
    "features": [
+    "node/node",
     "browser-testing/chromium"
    ],
    "fixture": "fixtures/v1-05-smoke/hello.html",
    "argv": [
-    "playwright",
-    "screenshot",
-    "--browser",
-    "chromium",
-    "file:///workspace/hello.html",
-    "hello.png"
+    "sh",
+    "-c",
+    "playwright screenshot --browser chromium \"file://$PWD/hello.html\" hello.png"
    ],
    "produces": "hello.png",
-   "producesMagic": "PNG"
+   "producesMagicHex": "89504e470d0a1a0a"
   },
   {
    "id": "SMOKE-HUGO",

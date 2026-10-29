@@ -30,13 +30,6 @@
    "test-id": "AC-TOOLS/present ai/aider",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install aider-chat using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "aider-chat"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -64,73 +57,6 @@
    "test-id": "AC-TOOLS/present ai/claude",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Official signed Claude Code apt repository; preserve stable/latest/exact version channels and disabled absence."
-   },
-   "community-candidates": [
-    {
-     "publisher": "Stuart Bell",
-     "ref": "ghcr.io/stu-bell/devcontainer-features/claude-code:0",
-     "source": "https://github.com/stu-bell/devcontainer-features/tree/main/src/claude-code"
-    },
-    {
-     "publisher": "Joshua Ji",
-     "ref": "ghcr.io/joshuanianji/devcontainer-features/claude-code-persistence:1",
-     "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/claude-code-persistence"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/claude-code:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/claude-code"
-    },
-    {
-     "publisher": "siri404",
-     "ref": "ghcr.io/siri404/devcontainer-ai-features/claude-code:1",
-     "source": "https://github.com/siri404/devcontainer-ai-features"
-    },
-    {
-     "publisher": "baxyz",
-     "ref": "ghcr.io/helpers4/devcontainer/claude-dev:1",
-     "source": "https://github.com/helpers4/devcontainer/tree/main/src/claude-dev"
-    },
-    {
-     "publisher": "esimkowitz",
-     "ref": "ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1",
-     "source": "https://github.com/esimkowitz/devcontainer-features"
-    },
-    {
-     "publisher": "sliekens",
-     "ref": "ghcr.io/sliekens/devcontainer-features/claude:1",
-     "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/claude/README.md"
-    },
-    {
-     "publisher": "PostFinance AG",
-     "ref": "ghcr.io/postfinance/devcontainer-features/claude-code:1",
-     "source": "https://github.com/postfinance/devcontainer-features"
-    },
-    {
-     "publisher": "cjcrobin",
-     "ref": "ghcr.io/cjcrobin/devcontainer-features/claudecode:1",
-     "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/claudecode"
-    },
-    {
-     "publisher": "Stephen Mott",
-     "ref": "ghcr.io/srzstephen/devcontainer-features/claude-code:1",
-     "source": "https://github.com/SrzStephen/devcontainer-features/blob/main/src/claude-code/README.md"
-    },
-    {
-     "publisher": "NolanJX",
-     "ref": "ghcr.io/nolanjx/devcontainer-features/claude-code:1",
-     "source": "https://github.com/NolanJX/devcontainer-features"
-    },
-    {
-     "publisher": "Andrii Pravorskyi",
-     "ref": "registry.gitlab.com/pravorskyi/devcontainer-features/claude-code:1",
-     "source": "https://gitlab.com/pravorskyi/devcontainer-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -160,34 +86,6 @@
    "test-id": "AC-TOOLS/present ai/codex",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @openai/codex from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@openai/codex"
-   },
-   "community-candidates": [
-    {
-     "publisher": "jsburckhardt",
-     "ref": "ghcr.io/jsburckhardt/devcontainer-features/codex:1",
-     "source": "https://github.com/jsburckhardt/devcontainer-features"
-    },
-    {
-     "publisher": "sliekens",
-     "ref": "ghcr.io/sliekens/devcontainer-features/codex:1",
-     "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/codex/README.md"
-    },
-    {
-     "publisher": "cjcrobin",
-     "ref": "ghcr.io/cjcrobin/devcontainer-features/codexcli:1",
-     "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/codexcli"
-    },
-    {
-     "publisher": "NolanJX",
-     "ref": "ghcr.io/nolanjx/devcontainer-features/codex:1",
-     "source": "https://github.com/NolanJX/devcontainer-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -217,13 +115,6 @@
    "test-id": "AC-TOOLS/present ai/continue",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @continuedev/cli from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@continuedev/cli"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -251,19 +142,6 @@
    "test-id": "AC-TOOLS/present ai/copilot",
    "decision": "retained",
    "classification": "gap",
-   "reason": "The official Copilot CLI Feature creates an auto-update flag for version=latest and adds a postStartCommand that runs copilot update. This changes the installed tool after container start, unlike a fixed native build input; select an exact version to suppress auto-update or use a checked native Dockerfile install.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Install an exact Copilot CLI release from verified architecture-specific assets in a native Dockerfile, or choose an exact official Feature version after owner review; do not enable the Feature latest auto-update path.",
-    "owner_option": "Approve exact-version upstream Feature selection once a concrete tool version and both architecture checks are recorded."
-   },
-   "community-candidates": [
-    {
-     "publisher": "Dev Container Spec Maintainers",
-     "ref": "ghcr.io/devcontainers/features/copilot-cli:1.1.3",
-     "source": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/copilot-cli"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -293,29 +171,6 @@
    "test-id": "AC-TOOLS/present ai/gemini",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @google/gemini-cli from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@google/gemini-cli"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Stuart Bell",
-     "ref": "ghcr.io/stu-bell/devcontainer-features/gemini-cli:0",
-     "source": "https://github.com/stu-bell/devcontainer-features/tree/main/src/gemini-cli"
-    },
-    {
-     "publisher": "siri404",
-     "ref": "ghcr.io/siri404/devcontainer-ai-features/gemini-cli:1",
-     "source": "https://github.com/siri404/devcontainer-ai-features"
-    },
-    {
-     "publisher": "marblejenka",
-     "ref": "ghcr.io/marblejenka/devcontainer-feature/gemini-cli:0",
-     "source": "https://github.com/marblejenka/devcontainer-feature/tree/main/src/gemini-cli"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -349,19 +204,6 @@
    "test-id": "AC-TOOLS/present ai/hermes",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install hermes-agent==0.19.0 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "hermes-agent"
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainer.community",
-     "ref": "ghcr.io/devcontainer-community/devcontainer-features/hermes-agent.nousresearch.com:1",
-     "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/hermes-agent.nousresearch.com"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -384,17 +226,6 @@
    "test-id": "AC-TOOLS/trace",
    "decision": "removed",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install mistralai using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "mistralai",
-    "alternative_owner_decision": {
-     "kind": "removal_candidate",
-     "proposal": "Owner may remove the programmatic SDK from the global CLI tooling catalog and keep it in project dependencies."
-    }
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -424,13 +255,6 @@
    "test-id": "AC-TOOLS/present ai/opencode",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from opencode-ai/opencode at 0.0.55 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "opencode-ai/opencode"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -466,24 +290,6 @@
    "test-id": "AC-TOOLS/present ai/tau",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install tau-ai==0.3.13 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "tau-ai"
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/webtau-sdkman:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/webtau-sdkman"
-    },
-    {
-     "publisher": "Olivier Lemasle",
-     "ref": "ghcr.io/olivierlemasle/devcontainers-features/tauri:1",
-     "source": "http://github.com/olivierlemasle/devcontainers-features/tree/main/src/tauri"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -511,13 +317,6 @@
    "test-id": "AC-TOOLS/trace",
    "decision": "removed",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @docusaurus/core@3.10.1 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@docusaurus/core"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -531,8 +330,11 @@
    },
    "v0-versions": [],
    "v1-ref": "docs/hugo",
-   "v1-option": {},
-   "install-owner": "Dev Container Spec Maintainers",
+   "v1-option": {
+    "version": "0.165.0",
+    "extended": true
+   },
+   "install-owner": "upstream",
    "dependency": [],
    "license": "Apache-2.0",
    "digest": "sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509",
@@ -543,9 +345,6 @@
    "test-id": "AC-TOOLS/present docs/hugo",
    "decision": "retained",
    "classification": "qualified_upstream",
-   "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains. Blank v0 declaration hides actual hardcoded 0.165.0 extended binary; preserve this pin. v0 explicitly removed preinstalled Hugo on disable.",
-   "proposed-route": null,
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -573,19 +372,6 @@
    "test-id": "AC-TOOLS/present docs/mdbook",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from rust-lang/mdBook at 0.5.4 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "rust-lang/mdBook"
-   },
-   "community-candidates": [
-    {
-     "publisher": "eitsupi",
-     "ref": "ghcr.io/eitsupi/devcontainer-features/mdbook:1",
-     "source": "https://github.com/eitsupi/devcontainer-features/tree/main/src/mdbook"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -610,13 +396,6 @@
    "test-id": "AC-TOOLS/trace",
    "decision": "removed",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install mkdocs==1.6.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation. Preserve mkdocs-material==9.7.7 as bundled companion dependency.",
-    "package": "mkdocs"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -639,17 +418,6 @@
    "test-id": "AC-TOOLS/trace",
    "decision": "removed",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install create-starlight from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "create-starlight",
-    "alternative_owner_decision": {
-     "kind": "removal_candidate",
-     "proposal": "Owner may remove the global project scaffolder and use project-local create-starlight bootstrap instead. No removal is authorized."
-    }
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -689,13 +457,6 @@
    "test-id": "AC-TOOLS/present docs/zensical",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install zensical==0.0.57 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "zensical"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -727,13 +488,6 @@
    "test-id": "AC-TOOLS/present go/goimports",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Run GOBIN=/usr/local/bin go install golang.org/x/tools/cmd/goimports@v0.48.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
-    "package": "golang.org/x/tools/cmd/goimports"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -765,13 +519,6 @@
    "test-id": "AC-TOOLS/present go/staticcheck",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Run GOBIN=/usr/local/bin go install honnef.co/go/tools/cmd/staticcheck@v0.7.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
-    "package": "honnef.co/go/tools/cmd/staticcheck"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -791,7 +538,9 @@
     "version": "2.12.2"
    },
    "install-owner": "aibox",
-   "dependency": [],
+   "dependency": [
+    "go/go"
+   ],
    "license": "GPL-3.0-only",
    "digest": null,
    "platforms": [
@@ -801,13 +550,6 @@
    "test-id": "AC-TOOLS/present go/golangci-lint",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Run GOBIN=/usr/local/bin go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
-    "package": "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -839,13 +581,6 @@
    "test-id": "AC-TOOLS/present go/govulncheck",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Run GOBIN=/usr/local/bin go install golang.org/x/vuln/cmd/govulncheck@v1.6.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
-    "package": "golang.org/x/vuln/cmd/govulncheck"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -877,13 +612,6 @@
    "test-id": "AC-TOOLS/present go/gosec",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Run GOBIN=/usr/local/bin go install github.com/securego/gosec/v2/cmd/gosec@v2.28.0 in native build stage only when enabled, then copy the binary. Official Go Feature installGoTools bundles unrelated tools and does not independently pin this tool.",
-    "package": "github.com/securego/gosec/v2/cmd/gosec"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -918,13 +646,6 @@
    "test-id": "AC-TOOLS/present go/go",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Install official Go 1.27.0 archive with verified digest, only when enabled; preserve native config without additional container permissions.",
-    "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -952,12 +673,6 @@
    "test-id": "AC-TOOLS/present latex/core",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -985,12 +700,6 @@
    "test-id": "AC-TOOLS/present latex/recommended",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1018,12 +727,6 @@
    "test-id": "AC-TOOLS/present latex/fonts",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1051,12 +754,6 @@
    "test-id": "AC-TOOLS/present latex/biber",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1084,12 +781,6 @@
    "test-id": "AC-TOOLS/present latex/code",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1117,12 +808,6 @@
    "test-id": "AC-TOOLS/present latex/diagrams",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1150,12 +835,6 @@
    "test-id": "AC-TOOLS/present latex/math",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1183,12 +862,6 @@
    "test-id": "AC-TOOLS/present latex/music",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1216,12 +889,6 @@
    "test-id": "AC-TOOLS/present latex/chemistry",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1249,12 +916,6 @@
    "test-id": "AC-TOOLS/present latex/linguistics",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Preserve frozen TeX Live 2025 mirror and exact package-group selections in a native multi-stage Dockerfile. Consider one minimal TeX Live Feature only after owner approves a reusable Feature API for independent group toggles; do not implement automatically."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1280,13 +941,6 @@
    "test-id": "AC-TOOLS/present latex/inkscape",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install inkscape from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "inkscape"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1319,12 +973,6 @@
    "test-id": "AC-TOOLS/present node/node",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
-   "proposed-route": {
-    "kind": "native_image_or_dockerfile",
-    "proposal": "Official Node image or verified Node tarball; independent pnpm/yarn/bun selection. Official Node Feature always installs Yarn and cannot preserve yarn=false."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1364,13 +1012,6 @@
    "test-id": "AC-TOOLS/present node/pnpm",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install pnpm@11.22.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "pnpm"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1404,12 +1045,6 @@
    "test-id": "AC-TOOLS/present node/yarn",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Node Feature supports Node and pnpm versions but unconditionally enables Yarn with no independent Yarn pin/disable option; full node recipe behavior does not match.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Use Corepack exact Yarn activation only when enabled. Official Node Feature has no yarn version or disable option."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1441,24 +1076,6 @@
    "test-id": "AC-TOOLS/present node/bun",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from oven-sh/bun at 1.4.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "oven-sh/bun"
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/bun-package:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/bun-package"
-    },
-    {
-     "publisher": "Markus Zhang",
-     "ref": "ghcr.io/roul/devcontainer-features/mise-bun:1",
-     "source": "https://github.com/RouL/devcontainer-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1492,13 +1109,6 @@
    "test-id": "AC-TOOLS/present python/python",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Python Feature installs matching runtime version but unconditionally bootstraps/provides pip. v0 declares pip=false and provides no clear guarantee that a bundled pip is authorized. Exact independent disable behavior requires owner decision; installation method also changes uv-managed runtime to source-installed Python.",
-   "proposed-route": {
-    "kind": "native_image_or_dockerfile",
-    "proposal": "Keep uv-managed Python 3.14 from official uv image/binary and explicit pip selection in native Dockerfile; verify false means either no pip CLI or owner-approved bundled runtime pip.",
-    "alternative_owner_decision": "Owner may approve bundled pip and official Python Feature runtime installation."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1535,23 +1145,6 @@
    "test-id": "AC-TOOLS/present python/uv",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_image_or_dockerfile",
-    "proposal": "Copy /uv and /uvx from digest-pinned ghcr.io/astral-sh/uv at 0.12.5, only where enabled policy allows; upstream documents this path."
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/uv:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/uv"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/uv-tool:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/uv-tool"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1581,12 +1174,6 @@
    "test-id": "AC-TOOLS/present python/python",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Python Feature always installs/provides pip (ensurepip, pip packages or upgrade), without a separate pip enable/disable option.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Use distro python3-pip/python3-venv only when enabled; decide whether pip supplied by the Python runtime is acceptable when false. Official Python Feature cannot omit bundled pip."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1620,24 +1207,6 @@
    "test-id": "AC-TOOLS/present python/poetry",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install poetry==2.4.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "poetry"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Niko Böckerman",
-     "ref": "ghcr.io/nikobockerman/devcontainer-features/poetry-persistent-cache:1",
-     "source": "https://github.com/nikobockerman/devcontainer-features"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/poetry:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/poetry"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1674,19 +1243,6 @@
    "test-id": "AC-TOOLS/present python/pdm",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install pdm==2.28.2 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "pdm"
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/pdm:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/pdm"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1725,13 +1281,6 @@
    "test-id": "AC-TOOLS/present rust/rustc",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
-    "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1759,13 +1308,6 @@
    "test-id": "AC-TOOLS/present rust/clippy",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
-    "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1793,13 +1335,6 @@
    "test-id": "AC-TOOLS/present rust/rustfmt",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature installs the tool with matching version/component options but its OCI metadata unconditionally adds SYS_PTRACE and seccomp=unconfined. This changes v0 security posture and cannot be suppressed through Feature options. Owner decision or native installation needed; source-trust does not establish behavioral parity.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use rustup minimal profile, pinned toolchain 1.98.0 and explicit enabled components in native Dockerfile; exclude this component when disabled. Preserve existing container permissions.",
-    "alternative_owner_decision": "Owner may explicitly accept upstream Feature added ptrace/unconfined permissions; then existing feature_options can be used. No approval assumed."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1829,12 +1364,6 @@
    "test-id": "AC-TOOLS/present rust/cargo-audit",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "cargo install cargo-audit --locked in a native Rust build stage only when enabled; resolve and lock a version for reproducibility."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1862,12 +1391,6 @@
    "test-id": "AC-TOOLS/present rust/x86-64-cross",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Rust Feature can add the rustup target but does not supply the matching cross compiler/sysroot or aibox Cargo linker configuration.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Rust Feature targets option alone is insufficient: install gcc-x86-64-linux-gnu/libc6-dev-amd64-cross and preserve Cargo linker config; condition all three on enable."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1899,24 +1422,6 @@
    "test-id": "AC-TOOLS/present typst",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from typst/typst at 0.15.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "typst/typst"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Michael Lohr",
-     "ref": "ghcr.io/michidk/devcontainers-features/typst:1",
-     "source": "https://github.com/michidk/devcontainers-features/tree/main/src/typst"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/typst:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/typst"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1942,13 +1447,6 @@
    "test-id": "AC-TOOLS/present audio/voice",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install sox from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "sox"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -1974,13 +1472,6 @@
    "test-id": "AC-TOOLS/present audio/voice",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install libsox-fmt-pulse from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "libsox-fmt-pulse"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2006,13 +1497,6 @@
    "test-id": "AC-TOOLS/present audio/voice",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install pulseaudio-utils from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "pulseaudio-utils"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2038,13 +1522,6 @@
    "test-id": "AC-TOOLS/present audio/voice",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install libasound2-plugins from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "libasound2-plugins"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2076,34 +1553,6 @@
    "test-id": "AC-TOOLS/present browser-testing/playwright",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @playwright/test@1.62.1 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@playwright/test"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Ty Schlichenmeyer",
-     "ref": "ghcr.io/schlich/devcontainer-features/playwright:0",
-     "source": "https://github.com/schlich/devcontainer-features"
-    },
-    {
-     "publisher": "baxyz",
-     "ref": "ghcr.io/helpers4/devcontainer/playwright-dev:1",
-     "source": "https://github.com/helpers4/devcontainer/tree/main/src/playwright-dev"
-    },
-    {
-     "publisher": "PostFinance AG",
-     "ref": "ghcr.io/postfinance/devcontainer-features/playwright-deps:2",
-     "source": "https://github.com/postfinance/devcontainer-features"
-    },
-    {
-     "publisher": "cjcrobin",
-     "ref": "ghcr.io/cjcrobin/devcontainer-features/playwright-cli:1",
-     "source": "https://github.com/cjcrobin/devcontainer-features/tree/master/src/playwright-cli"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2135,13 +1584,6 @@
    "test-id": "AC-TOOLS/present browser-testing/axe-playwright",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @axe-core/playwright@4.13.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable. Also install axe-core@4.13.0 as in v0; catalog name refers to @axe-core/playwright, not the separate axe-playwright package.",
-    "package": "@axe-core/playwright"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2169,12 +1611,6 @@
    "test-id": "AC-TOOLS/present browser-testing/chromium",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use exact Playwright package plus playwright install --with-deps --no-shell chromium, only when enabled; browser revision follows 1.62.1. Official Playwright image brings browsers that violate individual toggles."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2202,12 +1638,6 @@
    "test-id": "AC-TOOLS/present browser-testing/firefox",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use Playwright install firefox only when enabled, locked to Playwright 1.62.1 browser revision."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2235,12 +1665,6 @@
    "test-id": "AC-TOOLS/present browser-testing/webkit",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Use Playwright install webkit only when enabled, locked to Playwright 1.62.1 browser revision."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2254,8 +1678,10 @@
    },
    "v0-versions": [],
    "v1-ref": "cloud/aws",
-   "v1-option": {},
-   "install-owner": "Dev Container Spec Maintainers",
+   "v1-option": {
+    "version": "2.39.1"
+   },
+   "install-owner": "upstream",
    "dependency": [],
    "license": "Apache-2.0",
    "digest": "sha256:1f93c8315b7a6d76982ebb2269f8b0d50413fc0f965c032edf4aee0caceb73ef",
@@ -2266,9 +1692,6 @@
    "test-id": "AC-TOOLS/present cloud/aws",
    "decision": "retained",
    "classification": "qualified_upstream",
-   "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
-   "proposed-route": null,
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2298,9 +1721,6 @@
    "test-id": "AC-TOOLS/present cloud/azure",
    "decision": "retained",
    "classification": "qualified_upstream",
-   "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
-   "proposed-route": null,
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2315,7 +1735,7 @@
    "v0-versions": [],
    "v1-ref": "cloud/gcp",
    "v1-option": {
-    "version": "591.0.0-0"
+    "version": "591.0.0"
    },
    "install-owner": "aibox",
    "dependency": [],
@@ -2328,48 +1748,6 @@
    "test-id": "AC-TOOLS/present cloud/gcp",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install from official signed Google Cloud apt repository in a native Dockerfile, conditional on enable; lock version/snapshot."
-   },
-   "community-candidates": [
-    {
-     "publisher": "Eric Ho",
-     "ref": "ghcr.io/dhoeric/features/google-cloud-cli:1",
-     "source": "https://github.com/dhoeric/features/tree/main/src/google-cloud-cli"
-    },
-    {
-     "publisher": "Joshua Ji",
-     "ref": "ghcr.io/joshuanianji/devcontainer-features/gcloud-cli-persistence:1",
-     "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/gcloud-cli-persistence"
-    },
-    {
-     "publisher": "Joshua Ji",
-     "ref": "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1",
-     "source": "https://github.com/joshuanianji/devcontainer-features/tree/main/src/google-cloud-cli"
-    },
-    {
-     "publisher": "Bart Venter",
-     "ref": "ghcr.io/bartventer/arch-devcontainer-features/gcloud-cli:1",
-     "source": "https://github.com/bartventer/arch-devcontainer-features/tree/main/src/gcloud-cli"
-    },
-    {
-     "publisher": "John Ajera",
-     "ref": "ghcr.io/jajera/features/gcloud-cli:1",
-     "source": "https://cloud.google.com/sdk/docs/install"
-    },
-    {
-     "publisher": "siri404",
-     "ref": "ghcr.io/siri404/devcontainer-ai-features/gcloud:1",
-     "source": "https://github.com/siri404/devcontainer-ai-features"
-    },
-    {
-     "publisher": "aqua",
-     "ref": "ghcr.io/aqua/devcontainer-gcloud/gcloud:1",
-     "source": "https://github.com/aqua/devcontainer-gcloud"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2397,12 +1775,6 @@
    "test-id": "AC-TOOLS/present cloud/cloudflared",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install from official signed Cloudflare apt repository conditional on enable; lock version/snapshot."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2428,13 +1800,6 @@
    "test-id": "AC-TOOLS/present data/preview/sqlite3",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install sqlite3 from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "sqlite3"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2464,13 +1829,6 @@
    "test-id": "AC-TOOLS/present data/preview/csvkit",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install csvkit from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "csvkit"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2500,13 +1858,6 @@
    "test-id": "AC-TOOLS/present data/visualization",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install vega-cli@6.4.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "vega-cli"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2536,13 +1887,6 @@
    "test-id": "AC-TOOLS/present data/visualization",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install vega-lite@6.4.3 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "vega-lite"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2572,13 +1916,6 @@
    "test-id": "AC-TOOLS/present diagramming/d2",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from d2lang/d2 at 0.7.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "d2lang/d2"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2604,13 +1941,6 @@
    "test-id": "AC-TOOLS/present diagramming/graphviz",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install graphviz from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "graphviz"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2624,8 +1954,10 @@
    },
    "v0-versions": [],
    "v1-ref": "git-ui/gh",
-   "v1-option": {},
-   "install-owner": "Dev Container Spec Maintainers",
+   "v1-option": {
+    "version": "2.103.3"
+   },
+   "install-owner": "upstream",
    "dependency": [],
    "license": "MIT",
    "digest": "sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2",
@@ -2636,9 +1968,6 @@
    "test-id": "AC-TOOLS/present git-ui/gh",
    "decision": "retained",
    "classification": "qualified_upstream",
-   "reason": "Official Dev Container Spec Maintainers Feature has matching version/install options. Disable by omitting this Feature (or excluding bundled component) and rebuilding a clean base image; verify no preinstalled copy remains.",
-   "proposed-route": null,
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2666,44 +1995,6 @@
    "test-id": "AC-TOOLS/present git-ui/lazygit",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install lazygit from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "lazygit"
-   },
-   "community-candidates": [
-    {
-     "publisher": "jsburckhardt",
-     "ref": "ghcr.io/jsburckhardt/devcontainer-features/lazygit:1",
-     "source": "https://github.com/jsburckhardt/devcontainer-features"
-    },
-    {
-     "publisher": "cirolosapio",
-     "ref": "ghcr.io/cirolosapio/devcontainers-features/alpine-lazygit:0",
-     "source": "https://github.com/cirolosapio/devcontainers-features/tree/main/src/alpine-lazygit"
-    },
-    {
-     "publisher": "Georg Ofenbeck",
-     "ref": "ghcr.io/georgofenbeck/features/lazygit-homebrew:1",
-     "source": "https://github.com/GeorgOfenbeck/features/tree/main/src/lazygit-homebrew"
-    },
-    {
-     "publisher": "Georg Ofenbeck",
-     "ref": "ghcr.io/georgofenbeck/features/lazygit-linuxbinary:1",
-     "source": "https://github.com/GeorgOfenbeck/features/tree/main/src/lazygit-linuxbinary"
-    },
-    {
-     "publisher": "devcontainer.community",
-     "ref": "ghcr.io/devcontainer-community/devcontainer-features/lazygit:1",
-     "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/lazygit"
-    },
-    {
-     "publisher": "TheDiveO",
-     "ref": "ghcr.io/thediveo/devcontainer-features/lazygit:0",
-     "source": "https://github.com/thediveo/devcontainer-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2723,7 +2014,9 @@
     "version": "2.17.1"
    },
    "install-owner": "aibox",
-   "dependency": [],
+   "dependency": [
+    "go/go"
+   ],
    "license": "MIT",
    "digest": null,
    "platforms": [
@@ -2733,29 +2026,6 @@
    "test-id": "AC-TOOLS/present go/goreleaser",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from goreleaser/goreleaser at 2.17.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "goreleaser/goreleaser"
-   },
-   "community-candidates": [
-    {
-     "publisher": "guiyomh",
-     "ref": "ghcr.io/guiyomh/features/goreleaser:0",
-     "source": "https://github.com/guiyomh/features"
-    },
-    {
-     "publisher": "Marco Zaccaro",
-     "ref": "ghcr.io/marcozac/devcontainer-features/goreleaser:1",
-     "source": "https:/github.com/marcozac/devcontainer-features/tree/main/src/goreleaser"
-    },
-    {
-     "publisher": "PostFinance AG",
-     "ref": "ghcr.io/postfinance/devcontainer-features/goreleaser:1",
-     "source": "https://github.com/postfinance/devcontainer-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2790,29 +2060,6 @@
    "test-id": "AC-TOOLS/present infrastructure/opentofu",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from opentofu/opentofu at 1.12.6 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "opentofu/opentofu"
-   },
-   "community-candidates": [
-    {
-     "publisher": "John Rowley",
-     "ref": "ghcr.io/robbert229/devcontainer-features/opentofu:1",
-     "source": "https://github.com/robbert229/devcontainer-features"
-    },
-    {
-     "publisher": "cirolosapio",
-     "ref": "ghcr.io/cirolosapio/devcontainers-features/alpine-opentofu:0",
-     "source": "https://github.com/cirolosapio/devcontainers-features/tree/main/src/alpine-opentofu"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/opentofu:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/opentofu"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2848,34 +2095,6 @@
    "test-id": "AC-TOOLS/present infrastructure/ansible",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install ansible==14.3.1 using a native Dockerfile and isolated uv tool or venv, conditional on enable; preserve executable exposure and dependency isolation.",
-    "package": "ansible"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Hans Spaans",
-     "ref": "ghcr.io/hspaans/devcontainer-features/ansible-lint:2",
-     "source": "http://github.com/hspaans/devcontainer-features/tree/master/src/ansible-lint"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/ansible:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/ansible"
-    },
-    {
-     "publisher": "sliekens",
-     "ref": "ghcr.io/sliekens/devcontainer-features/ansible-core:1",
-     "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/ansible-core/README.md"
-    },
-    {
-     "publisher": "sliekens",
-     "ref": "ghcr.io/sliekens/devcontainer-features/ansible-lint:1",
-     "source": "https://github.com/sliekens/devcontainer-features/blob/main/src/ansible-lint/README.md"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2908,19 +2127,6 @@
    "test-id": "AC-TOOLS/present infrastructure/packer",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from hashicorp/packer at 1.16.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "hashicorp/packer"
-   },
-   "community-candidates": [
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/packer-asdf:2",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/packer-asdf"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2946,12 +2152,6 @@
    "test-id": "AC-TOOLS/present infrastructure/podman",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install podman/buildah/skopeo/slirp4netns/fuse-overlayfs from selected distro only when enabled; separately decide required user namespaces/cgroups rather than substituting Docker Feature."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -2984,13 +2184,6 @@
    "test-id": "AC-TOOLS/present kubernetes/kubectl",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature matches exact version/independent tool enable options, but OCI metadata unconditionally creates minikube-config volume mounted at /home/vscode/.minikube even when minikube=none. This adds persistent provider-named runtime configuration absent from v0 addon and cannot be disabled by a Feature option. Owner decision required.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Install kubectl 1.36.4 from verified official release assets only when enabled, using a native Dockerfile and preserving current mounts.",
-    "alternative_owner_decision": "Owner may approve the upstream Feature unconditional named Minikube volume; existing feature_options then apply."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3024,13 +2217,6 @@
    "test-id": "AC-TOOLS/present kubernetes/helm",
    "decision": "retained",
    "classification": "gap",
-   "reason": "Official Feature matches exact version/independent tool enable options, but OCI metadata unconditionally creates minikube-config volume mounted at /home/vscode/.minikube even when minikube=none. This adds persistent provider-named runtime configuration absent from v0 addon and cannot be disabled by a Feature option. Owner decision required.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Install helm 4.2.4 from verified official release assets only when enabled, using a native Dockerfile and preserving current mounts.",
-    "alternative_owner_decision": "Owner may approve the upstream Feature unconditional named Minikube volume; existing feature_options then apply."
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3061,24 +2247,6 @@
    "test-id": "AC-TOOLS/present kubernetes/kustomize",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from kubernetes-sigs/kustomize at 5.8.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "kubernetes-sigs/kustomize"
-   },
-   "community-candidates": [
-    {
-     "publisher": "rio",
-     "ref": "ghcr.io/rio/features/kustomize:1",
-     "source": "https://github.com/rio/features"
-    },
-    {
-     "publisher": "audacioustux",
-     "ref": "ghcr.io/audacioustux/devcontainers/kustomize:1",
-     "source": "https://github.com/audacioustux/devcontainers"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3109,39 +2277,6 @@
    "test-id": "AC-TOOLS/present kubernetes/k9s",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from derailed/k9s at 0.51.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "derailed/k9s"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Eric Ho",
-     "ref": "ghcr.io/dhoeric/features/k9s:1",
-     "source": "https://github.com/dhoeric/features/tree/main/src/k9s"
-    },
-    {
-     "publisher": "Nate Scherer",
-     "ref": "ghcr.io/natescherer/devcontainers-custom-features/k9s:1",
-     "source": "https://github.com/natescherer/devcontainers-custom-features"
-    },
-    {
-     "publisher": "rio",
-     "ref": "ghcr.io/rio/features/k9s:1",
-     "source": "https://github.com/rio/features"
-    },
-    {
-     "publisher": "audacioustux",
-     "ref": "ghcr.io/audacioustux/devcontainers/k9s:1",
-     "source": "https://github.com/audacioustux/devcontainers"
-    },
-    {
-     "publisher": "devcontainer.community",
-     "ref": "ghcr.io/devcontainer-community/devcontainer-features/k9scli.io:1",
-     "source": "https://github.com/devcontainer-community/devcontainer-features/tree/main/src/k9scli.io"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3171,13 +2306,6 @@
    "test-id": "AC-TOOLS/present mermaid",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install @mermaid-js/mermaid-cli@11.16.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable.",
-    "package": "@mermaid-js/mermaid-cli"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3207,13 +2335,6 @@
    "test-id": "AC-TOOLS/present mermaid",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install puppeteer@25.9.0 from npm in a native Dockerfile only when enabled; retain pinned transitive/browser dependencies where applicable. Preserve puppeteer@25.9.0 plus its compatible Chrome headless shell and runtime libraries; package alone is insufficient.",
-    "package": "puppeteer"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3239,13 +2360,6 @@
    "test-id": "AC-TOOLS/present preview/archive/chafa",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install chafa from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "chafa"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3271,13 +2385,6 @@
    "test-id": "AC-TOOLS/present preview/archive/librsvg",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install librsvg2-bin from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "librsvg2-bin"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3303,13 +2410,6 @@
    "test-id": "AC-TOOLS/present preview/archive/poppler",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install poppler-utils from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "poppler-utils"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3335,13 +2435,6 @@
    "test-id": "AC-TOOLS/present preview/archive/timg",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install timg from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "timg"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3367,13 +2460,6 @@
    "test-id": "AC-TOOLS/present preview/archive/mupdf",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install mupdf-tools from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "mupdf-tools"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3399,13 +2485,6 @@
    "test-id": "AC-TOOLS/present preview/archive/entr",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install entr from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "entr"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3431,13 +2510,6 @@
    "test-id": "AC-TOOLS/present preview/archive/p7zip",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install p7zip-full from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "p7zip-full"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3467,13 +2539,6 @@
    "test-id": "AC-TOOLS/present preview/archive/resvg",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists. Frozen v0 source has real x86_64 asset but an error-returning placeholder on other architectures; do not claim ARM64 functional parity.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from linebender/resvg at 0.47.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "linebender/resvg"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3499,13 +2564,6 @@
    "test-id": "AC-TOOLS/present preview/enhanced/ffmpeg",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install ffmpeg from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "ffmpeg"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3531,13 +2589,6 @@
    "test-id": "AC-TOOLS/present preview/enhanced/ghostscript",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install ghostscript from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "ghostscript"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3567,13 +2618,6 @@
    "test-id": "AC-TOOLS/present preview/enhanced/rich",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_package",
-    "proposal": "Install python3-rich from the selected distro in a native Dockerfile only when enabled; preserve disabled-tool purge/absence guards where v0 supplied them. Pin the base image and package repository snapshot.",
-    "package": "python3-rich"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3603,34 +2647,6 @@
    "test-id": "AC-TOOLS/present release/shellcheck",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from koalaman/shellcheck at 0.11.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "koalaman/shellcheck"
-   },
-   "community-candidates": [
-    {
-     "publisher": "lukewiwa",
-     "ref": "ghcr.io/lukewiwa/features/shellcheck:0",
-     "source": "https://github.com/lukewiwa/features"
-    },
-    {
-     "publisher": "Marco Zaccaro",
-     "ref": "ghcr.io/marcozac/devcontainer-features/shellcheck:1",
-     "source": "https://github.com/marcozac/devcontainer-features/tree/main/src/shellcheck"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/shellcheck:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/shellcheck"
-    },
-    {
-     "publisher": "Stephen Mott",
-     "ref": "ghcr.io/srzstephen/devcontainer-features/bash-language-server:1",
-     "source": "https://github.com/SrzStephen/devcontainer-features/blob/main/src/bash-language-server/README.md"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3660,19 +2676,6 @@
    "test-id": "AC-TOOLS/present release/hadolint",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from hadolint/hadolint at 2.15.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "hadolint/hadolint"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Eric Ho",
-     "ref": "ghcr.io/dhoeric/features/hadolint:1",
-     "source": "https://github.com/dhoeric/features/tree/main/src/hadolint"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3702,24 +2705,6 @@
    "test-id": "AC-TOOLS/present security/scan/gitleaks",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from gitleaks/gitleaks at 8.30.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "gitleaks/gitleaks"
-   },
-   "community-candidates": [
-    {
-     "publisher": "jsburckhardt",
-     "ref": "ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1",
-     "source": "https://github.com/jsburckhardt/devcontainer-features"
-    },
-    {
-     "publisher": "Matthieu Fronton",
-     "ref": "ghcr.io/frntn/devcontainers-features/gitleaks:1",
-     "source": "https://github.com/frntn/devcontainers-features"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3749,13 +2734,6 @@
    "test-id": "AC-TOOLS/present security/scan/osv-scanner",
    "decision": "retained",
    "classification": "gap",
-   "reason": "No matching Feature in the official devcontainers/features collection; absence of a qualified Feature is not a claim that no community implementation exists.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from google/osv-scanner at 2.4.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "google/osv-scanner"
-   },
-   "community-candidates": [],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3785,24 +2763,6 @@
    "test-id": "AC-TOOLS/present security/scan/syft",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from anchore/syft at 1.50.0 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "anchore/syft"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Dasith Wijes",
-     "ref": "ghcr.io/dasiths/devcontainer-features/syft:1",
-     "source": "https://github.com/dasiths/devcontainer-features"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/syft:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/syft"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3832,24 +2792,6 @@
    "test-id": "AC-TOOLS/present security/scan/grype",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from anchore/grype at 0.116.1 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "anchore/grype"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Dasith Wijes",
-     "ref": "ghcr.io/dasiths/devcontainer-features/grype:1",
-     "source": "https://github.com/dasiths/devcontainer-features"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/grype:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/grype"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   },
   {
@@ -3879,24 +2821,6 @@
    "test-id": "AC-TOOLS/present security/scan/cosign",
    "decision": "retained",
    "classification": "uncertain",
-   "reason": "Registered community candidates exist, but catalog membership alone proves neither publisher trust, ongoing maintenance, nor exact pin/disable behavior. None is approved by this audit; primary publisher source is linked for follow-up review.",
-   "proposed-route": {
-    "kind": "native_dockerfile",
-    "proposal": "Download verified architecture-specific assets from sigstore/cosign at 3.1.2 in a native Dockerfile, conditional on enable; avoid a new Feature wrapper unless reusable installation/configuration needs justify it.",
-    "upstream": "sigstore/cosign"
-   },
-   "community-candidates": [
-    {
-     "publisher": "Ravikanth Chaganti",
-     "ref": "ghcr.io/rchaganti/vsc-devcontainer-features/cosign:1",
-     "source": "https://github.com/rchaganti/vsc-devcontainer-features"
-    },
-    {
-     "publisher": "devcontainers-extra",
-     "ref": "ghcr.io/devcontainers-extra/features/cosign:1",
-     "source": "http://github.com/devcontainers-extra/features/tree/main/src/cosign"
-    }
-   ],
    "decision-record": "DEC-20261029_0835-HumbleBridge"
   }
  ]
