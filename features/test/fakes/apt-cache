@@ -1,0 +1,14 @@
+#!/bin/sh
+# Test double (Fake) for apt-cache policy. A package has a candidate when it
+# is listed in $FAKE_STATE/available and the package lists were downloaded.
+[ "$1" = policy ] || { echo "fake apt-cache: unsupported arguments: $*" >&2; exit 2; }
+shift
+lists="$AIBOX_FEATURE_ROOT/var/lib/apt/lists"
+for pkg in "$@"; do
+  printf '%s:\n' "$pkg"
+  if ls "$lists"/*_Packages >/dev/null 2>&1 && grep -qx "$pkg" "$FAKE_STATE/available"; then
+    printf '  Installed: (none)\n  Candidate: 1.0-1\n'
+  elif grep -qx "$pkg" "$FAKE_STATE/available" 2>/dev/null; then
+    printf '  Installed: (none)\n  Candidate: (none)\n'
+  fi
+done

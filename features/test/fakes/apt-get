@@ -1,0 +1,40 @@
+#!/bin/sh
+# Test double (Fake) for apt-get. Records each invocation in $FAKE_STATE/apt.log
+# and keeps the installed package set in $FAKE_STATE/installed. A package
+# listed in $FAKE_STATE/requires-<pkg> pulls those packages in as dependencies.
+printf '%s\n' "$*" >> "$FAKE_STATE/apt.log"
+touch "$FAKE_STATE/installed"
+lists="$AIBOX_FEATURE_ROOT/var/lib/apt/lists"
+command=""
+for arg in "$@"; do
+  case "$arg" in -*) ;; *) command=$arg; break ;; esac
+done
+case "$command" in
+  update)
+    [ -f "$FAKE_STATE/update-fails" ] && exit 100
+    mkdir -p "$lists/partial"
+    : > "$lists/snapshot.debian.org_trixie_main_binary-fake_Packages"
+    ;;
+  install)
+    seen=0
+    for arg in "$@"; do
+      if [ $seen = 0 ]; then [ "$arg" = install ] && seen=1; continue; fi
+      case "$arg" in -*) continue ;; esac
+      grep -qx "$arg" "$FAKE_STATE/available" || { echo "E: Unable to locate package $arg" >&2; exit 100; }
+      echo "$arg" >> "$FAKE_STATE/installed"
+      [ -f "$FAKE_STATE/requires-$arg" ] && cat "$FAKE_STATE/requires-$arg" >> "$FAKE_STATE/installed"
+    done
+    sort -u -o "$FAKE_STATE/installed" "$FAKE_STATE/installed"
+    ;;
+  purge|remove)
+    seen=0
+    for arg in "$@"; do
+      if [ $seen = 0 ]; then [ "$arg" = "$command" ] && seen=1; continue; fi
+      case "$arg" in -*) continue ;; esac
+      grep -vx "$arg" "$FAKE_STATE/installed" > "$FAKE_STATE/installed.new" || true
+      mv "$FAKE_STATE/installed.new" "$FAKE_STATE/installed"
+    done
+    ;;
+  clean) ;;
+  *) echo "fake apt-get: unsupported arguments: $*" >&2; exit 2 ;;
+esac

@@ -1,0 +1,29 @@
+#!/bin/sh
+# Test double (Fake) for dpkg-query -W over $FAKE_STATE/installed (one
+# installed package per line). Supports the ${Package} and
+# ${db:Status-Status} format fields.
+touch "$FAKE_STATE/installed"
+[ "$1" = -W ] || { echo "fake dpkg-query: unsupported arguments: $*" >&2; exit 2; }
+shift
+format='${Package}\n'
+case "$1" in
+  --showformat=*) format=${1#--showformat=}; shift ;;
+  -f) format=$2; shift 2 ;;
+esac
+show() {
+  printf '%s\n' "$format" | sed -e "s/\${Package}/$1/g" -e 's/\${db:Status-Status}/installed/g' -e 's/\\n$//'
+}
+if [ $# -eq 0 ]; then
+  for pkg in $(sort -u "$FAKE_STATE/installed"); do show "$pkg"; done
+  exit 0
+fi
+status=0
+for pkg in "$@"; do
+  if grep -qx "$pkg" "$FAKE_STATE/installed"; then
+    show "$pkg"
+  else
+    echo "dpkg-query: no packages found matching $pkg" >&2
+    status=1
+  fi
+done
+exit $status

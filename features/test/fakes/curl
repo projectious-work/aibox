@@ -1,0 +1,21 @@
+#!/bin/sh
+# Test double (Fake) for curl. Serves URLs listed in $FAKE_STATE/urls as
+# "<url> <file>" lines; any other URL fails like curl -f with HTTP 404.
+out=""
+url=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o|--output) out=$2; shift 2 ;;
+    --proto|--retry|--connect-timeout|--max-time|--tlsv1.2) 
+      case "$1" in --tlsv1.2) shift ;; *) shift 2 ;; esac ;;
+    -*) shift ;;
+    *) url=$1; shift ;;
+  esac
+done
+printf '%s\n' "$url" >> "$FAKE_STATE/curl.log"
+file=$(awk -v u="$url" '$1 == u { print $2; exit }' "$FAKE_STATE/urls" 2>/dev/null)
+if [ -z "$file" ]; then
+  echo "curl: (22) The requested URL returned error: 404" >&2
+  exit 22
+fi
+if [ -n "$out" ]; then cp "$file" "$out"; else cat "$file"; fi
