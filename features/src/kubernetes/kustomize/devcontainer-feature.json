@@ -1,0 +1,17 @@
+{
+  "id": "kustomize",
+  "version": "1.0.0",
+  "name": "kustomize",
+  "description": "Installs kustomize (aibox catalog ID kubernetes/kustomize).",
+  "documentationURL": "https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "5.8.1"
+      ],
+      "default": "5.8.1",
+      "description": "Version of kustomize to install."
+    }
+  }
+}

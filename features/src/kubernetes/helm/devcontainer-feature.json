@@ -1,0 +1,17 @@
+{
+  "id": "helm",
+  "version": "1.0.0",
+  "name": "helm",
+  "description": "Installs helm (aibox catalog ID kubernetes/helm).",
+  "documentationURL": "https://helm.sh/docs/intro/install/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "4.2.4"
+      ],
+      "default": "4.2.4",
+      "description": "Version of helm to install."
+    }
+  }
+}

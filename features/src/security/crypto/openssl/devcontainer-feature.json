@@ -1,0 +1,8 @@
+{
+  "id": "openssl",
+  "version": "1.0.0",
+  "name": "openssl",
+  "description": "Installs openssl (aibox catalog ID security/crypto/openssl).",
+  "documentationURL": "https://packages.debian.org/trixie/openssl",
+  "options": {}
+}

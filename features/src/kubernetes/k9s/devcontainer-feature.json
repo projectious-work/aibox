@@ -1,0 +1,17 @@
+{
+  "id": "k9s",
+  "version": "1.0.0",
+  "name": "k9s",
+  "description": "Installs k9s (aibox catalog ID kubernetes/k9s).",
+  "documentationURL": "https://k9scli.io/topics/install/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.51.0"
+      ],
+      "default": "0.51.0",
+      "description": "Version of k9s to install."
+    }
+  }
+}

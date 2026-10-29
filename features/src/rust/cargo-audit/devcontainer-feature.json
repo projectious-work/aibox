@@ -1,0 +1,20 @@
+{
+  "id": "cargo-audit",
+  "version": "1.0.0",
+  "name": "cargo-audit",
+  "description": "Installs cargo-audit (aibox catalog ID rust/cargo-audit).",
+  "documentationURL": "https://github.com/rustsec/rustsec/tree/main/cargo-audit#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.22.2"
+      ],
+      "default": "0.22.2",
+      "description": "Version of cargo-audit to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/rust/rustc"
+  ]
+}

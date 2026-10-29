@@ -1,0 +1,11 @@
+{
+  "id": "firefox",
+  "version": "1.0.0",
+  "name": "firefox",
+  "description": "Installs firefox (aibox catalog ID browser-testing/firefox).",
+  "documentationURL": "https://playwright.dev/docs/browsers#install-browsers",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/browser-testing/playwright:1": {}
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "resvg",
+  "version": "1.0.0",
+  "name": "resvg",
+  "description": "Installs resvg (aibox catalog ID preview/archive/resvg).",
+  "documentationURL": "https://github.com/linebender/resvg#install",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.49.0"
+      ],
+      "default": "0.49.0",
+      "description": "Version of resvg to install."
+    }
+  }
+}

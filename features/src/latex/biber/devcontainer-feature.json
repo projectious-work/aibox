@@ -1,0 +1,11 @@
+{
+  "id": "biber",
+  "version": "1.0.0",
+  "name": "texlive-biber",
+  "description": "Installs texlive-biber (aibox catalog ID latex/biber).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

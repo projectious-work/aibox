@@ -1,0 +1,17 @@
+{
+  "id": "oxlint",
+  "version": "1.0.0",
+  "name": "oxlint",
+  "description": "Installs oxlint (aibox catalog ID typescript/oxlint).",
+  "documentationURL": "https://oxc.rs/docs/guide/usage/linter.html",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.90.0"
+      ],
+      "default": "1.90.0",
+      "description": "Version of oxlint to install."
+    }
+  }
+}

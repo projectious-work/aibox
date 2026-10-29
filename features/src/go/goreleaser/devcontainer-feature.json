@@ -1,0 +1,20 @@
+{
+  "id": "goreleaser",
+  "version": "1.0.0",
+  "name": "goreleaser",
+  "description": "Installs goreleaser (aibox catalog ID go/goreleaser).",
+  "documentationURL": "https://goreleaser.com/install/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.17.1"
+      ],
+      "default": "2.17.1",
+      "description": "Version of goreleaser to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/go/go"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "opentofu",
+  "version": "1.0.0",
+  "name": "opentofu",
+  "description": "Installs opentofu (aibox catalog ID infrastructure/opentofu).",
+  "documentationURL": "https://opentofu.org/docs/intro/install/standalone/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.12.6"
+      ],
+      "default": "1.12.6",
+      "description": "Version of opentofu to install."
+    }
+  }
+}

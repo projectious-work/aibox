@@ -1,0 +1,8 @@
+{
+  "id": "librsvg",
+  "version": "1.0.0",
+  "name": "librsvg",
+  "description": "Installs librsvg (aibox catalog ID preview/archive/librsvg).",
+  "documentationURL": "https://packages.debian.org/trixie/librsvg2-bin",
+  "options": {}
+}

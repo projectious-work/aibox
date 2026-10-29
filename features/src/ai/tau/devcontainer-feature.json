@@ -1,0 +1,20 @@
+{
+  "id": "tau",
+  "version": "1.0.0",
+  "name": "tau",
+  "description": "Installs tau (aibox catalog ID ai/tau).",
+  "documentationURL": "https://twotimespi.dev",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.3.13"
+      ],
+      "default": "0.3.13",
+      "description": "Version of tau to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

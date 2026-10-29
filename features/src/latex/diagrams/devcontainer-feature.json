@@ -1,0 +1,11 @@
+{
+  "id": "diagrams",
+  "version": "1.0.0",
+  "name": "texlive-diagrams",
+  "description": "Installs texlive-diagrams (aibox catalog ID latex/diagrams).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

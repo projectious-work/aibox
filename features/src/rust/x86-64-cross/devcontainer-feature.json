@@ -1,0 +1,11 @@
+{
+  "id": "x86-64-cross",
+  "version": "1.0.0",
+  "name": "x86-64-cross",
+  "description": "Installs x86-64-cross (aibox catalog ID rust/x86-64-cross).",
+  "documentationURL": "https://packages.debian.org/trixie/gcc-x86-64-linux-gnu",
+  "options": {},
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/rust/rustc"
+  ]
+}

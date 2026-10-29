@@ -1,0 +1,20 @@
+{
+  "id": "axe-playwright",
+  "version": "1.0.0",
+  "name": "axe-playwright",
+  "description": "Installs axe-playwright (aibox catalog ID browser-testing/axe-playwright).",
+  "documentationURL": "https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/README.md",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "4.13.0"
+      ],
+      "default": "4.13.0",
+      "description": "Version of axe-playwright to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/browser-testing/playwright:1": {}
+  }
+}

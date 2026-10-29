@@ -1,0 +1,8 @@
+{
+  "id": "openssh-client",
+  "version": "1.0.0",
+  "name": "openssh-client",
+  "description": "Installs openssh-client (aibox catalog ID security/crypto/openssh-client).",
+  "documentationURL": "https://packages.debian.org/trixie/openssh-client",
+  "options": {}
+}

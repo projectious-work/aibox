@@ -1,0 +1,17 @@
+{
+  "id": "osv-scanner",
+  "version": "1.0.0",
+  "name": "osv-scanner",
+  "description": "Installs osv-scanner (aibox catalog ID security/scan/osv-scanner).",
+  "documentationURL": "https://google.github.io/osv-scanner/installation/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.4.0"
+      ],
+      "default": "2.4.0",
+      "description": "Version of osv-scanner to install."
+    }
+  }
+}

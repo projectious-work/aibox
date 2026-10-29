@@ -1,0 +1,20 @@
+{
+  "id": "golangci-lint",
+  "version": "1.0.0",
+  "name": "golangci-lint",
+  "description": "Installs golangci-lint (aibox catalog ID go/golangci-lint).",
+  "documentationURL": "https://golangci-lint.run/docs/welcome/install/local/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.12.2"
+      ],
+      "default": "2.12.2",
+      "description": "Version of golangci-lint to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/go/go"
+  ]
+}
