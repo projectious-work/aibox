@@ -45,14 +45,14 @@ RUN ARCH="$(uname -m)" && \
     (cd /tmp && sha256sum -c rustup-init.sha256) && \
     chmod +x /tmp/rustup-init && \
     /tmp/rustup-init -y \
-      --default-toolchain 1.96.1 \
+      --default-toolchain 1.97.1 \
       --component clippy \
       --component rustfmt && \
     rm /tmp/rustup-init /tmp/rustup-init.sha256
 
 ENV PATH="/home/aibox/.cargo/bin:${PATH}"
 
-RUN cargo install cargo-audit
+RUN cargo install cargo-audit --locked
 
 RUN install -d /usr/local/bin && \
     for bin in /home/aibox/.cargo/bin/*; do \
@@ -73,13 +73,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG RESVG_SHA256_X86_64=5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
+      case "0.48.1" in \
+        0.47.0) RESVG_SHA256="5c84dcbcd032fe7e8d96e616fd6807a2f9df6561d2e6582b37e91e63c6cb4fe7" ;; \
+        0.48.1) RESVG_SHA256="fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d" ;; \
+        *) echo "Unsupported resvg version" >&2; exit 1 ;; \
+      esac && \
       curl -fsSL \
-        "https://github.com/linebender/resvg/releases/download/v0.47.0/resvg-linux-${ARCH}.tar.gz" \
+        "https://github.com/linebender/resvg/releases/download/v0.48.1/resvg-linux-${ARCH}.tar.gz" \
         -o /tmp/resvg.tar.gz && \
-      echo "${RESVG_SHA256_X86_64}  /tmp/resvg.tar.gz" | sha256sum -c - && \
+      echo "${RESVG_SHA256}  /tmp/resvg.tar.gz" | sha256sum -c - && \
       tar -xz -C /usr/local/bin -f /tmp/resvg.tar.gz resvg && \
       chmod +x /usr/local/bin/resvg && \
       rm /tmp/resvg.tar.gz; \
@@ -90,7 +94,7 @@ RUN ARCH=$(uname -m) && \
     fi
 
 
-FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.28.4 AS aibox
+FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.35.4 AS aibox
 
 ENV SHELL=/bin/bash
 ENV UV_CACHE_DIR=/tmp/aibox/uv-cache
@@ -149,7 +153,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     esac && \
     NODE_DIST_URL="https://nodejs.org/dist/latest-v26.x" && \
     curl -fsSL "${NODE_DIST_URL}/SHASUMS256.txt" -o /tmp/node-shasums.txt && \
-    NODE_ARCHIVE="$(awk -v arch="${NODE_ARCH}" '$2 ~ ("node-v[0-9.]+-linux-" arch "\\\\.tar\\\\.xz$") { print $2; exit }' /tmp/node-shasums.txt)" && \
+    NODE_ARCHIVE="$(awk -v arch="${NODE_ARCH}" '$2 ~ ("node-v[0-9.]+-linux-" arch "\\.tar\\.xz$") { print $2; exit }' /tmp/node-shasums.txt)" && \
     test -n "${NODE_ARCHIVE}" && \
     curl -fsSL "${NODE_DIST_URL}/${NODE_ARCHIVE}" -o "/tmp/${NODE_ARCHIVE}" && \
     (cd /tmp && grep "  ${NODE_ARCHIVE}$" node-shasums.txt | sha256sum -c -) && \
@@ -157,7 +161,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     rm -f "/tmp/${NODE_ARCHIVE}" /tmp/node-shasums.txt && \
     node --version && npm --version
 
-RUN npm install -g pnpm@11.10.0 && \
+RUN npm install -g pnpm@11.18.0 && \
     npm cache clean --force
 
 
@@ -211,6 +215,8 @@ RUN UV_PYTHON_INSTALL_DIR=/opt/aibox-python uv python install 3.14 && \
     ln -sf "$py_dir/pip" /usr/local/bin/pip
 
 
+COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uvx /usr/local/bin/uvx
 
 
 
@@ -273,6 +279,6 @@ EOF
 
 # Record image version inside container for runtime checks
 USER root
-LABEL aibox.version="0.28.4"
+LABEL aibox.version="0.35.4"
 LABEL aibox.profile="human-dev"
-RUN echo "0.28.4" > /etc/aibox-version
+RUN echo "0.35.4" > /etc/aibox-version

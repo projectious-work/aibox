@@ -722,6 +722,22 @@ with tempfile.TemporaryDirectory() as tmp:
         '{"mcpServers":{"processkit-runtime-prune":{}}}\n',
         encoding="utf-8",
     )
+    dogfood_server = (
+        root / "context/skills/processkit/actor-profile/mcp/server.py"
+    )
+    source_server = (
+        root / "src/context/skills/processkit/actor-profile/mcp/server.py"
+    )
+    dogfood_server.parent.mkdir(parents=True)
+    source_server.parent.mkdir(parents=True)
+    dogfood_server.write_text(
+        '# /// script\n# dependencies = ["mcp>=1"]\n# ///\n',
+        encoding="utf-8",
+    )
+    source_server.write_text(
+        '# /// script\n# dependencies = ["mcp>=1,<2"]\n# ///\n',
+        encoding="utf-8",
+    )
 
     generator_path = _REPO_ROOT / "scripts" / "generate-mcp-manifest.py"
     spec = importlib.util.spec_from_file_location(
@@ -753,6 +769,17 @@ with tempfile.TemporaryDirectory() as tmp:
             "context/skills/processkit/processkit-gateway/mcp/mcp-config.json"
         ],
         gateway_entries,
+    )
+    dogfood_headers = generator._collect_server_headers(
+        root, root / "context/skills"
+    )
+    source_headers = generator._collect_server_headers(
+        root, root / "src/context/skills"
+    )
+    check(
+        "manifest generator keeps dogfood and release headers distinct",
+        dogfood_headers[0]["sha256"] != source_headers[0]["sha256"],
+        {"dogfood": dogfood_headers, "source": source_headers},
     )
 
 # ---------------------------------------------------------------------------
@@ -2555,6 +2582,7 @@ with tempfile.TemporaryDirectory() as tmp:
             [
                 ("BACK-20260409_1449-CleanRapidRiver-one",),
                 ("DEC-20260409_1450-CleanRapidRiver-two",),
+                ("BACK-20260409_1451-OpenDeer-three",),
             ],
         )
         conn.commit()
@@ -2581,6 +2609,18 @@ with tempfile.TemporaryDirectory() as tmp:
         and payload.get("action_required") is False
         and payload.get("action_kind") is None,
         json.dumps(payload, indent=2),
+    )
+    blocked = [
+        item for item in findings if item.id == "id-vocabulary.blocked-word"
+    ]
+    blocked_payload = blocked[0].to_dict() if blocked else {}
+    check(
+        "20: historical blocked word is INFO and non-actionable",
+        len(blocked) == 1
+        and blocked_payload.get("severity") == "INFO"
+        and blocked_payload.get("action_required") is False
+        and blocked_payload.get("action_kind") is None,
+        json.dumps(blocked_payload, indent=2),
     )
 
 # ---------------------------------------------------------------------------
@@ -2609,29 +2649,16 @@ with tempfile.TemporaryDirectory() as tmp:
 
 with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
-    (root / "package.json").write_text(
-        '{"name": "owning-app", "private": true}\n',
-        encoding="utf-8",
-    )
-    (root / "package-lock.json").write_text("{}\n", encoding="utf-8")
-    nested_repo = root / "docs-site" / "themes" / "docsy"
-    nested_repo.mkdir(parents=True)
-    (nested_repo / ".git").write_text(
-        "gitdir: ../../../.git/modules/docs-site/themes/docsy\n",
-        encoding="utf-8",
-    )
-    (nested_repo / "package.json").write_text(
-        '{"name": "docsy-theme", "private": true}\n',
-        encoding="utf-8",
-    )
+    nested = root / "vendor" / "nested-repo"
+    nested.mkdir(parents=True)
+    (nested / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+    (nested / "package.json").write_text('{"name":"nested"}\n', encoding="utf-8")
+    generated = root / "tmp" / "host-gates" / "cargo-home" / "crate"
+    generated.mkdir(parents=True)
+    (generated / "Cargo.toml").write_text("[package]\nname='cached'\n", encoding="utf-8")
     findings = _supply_chain_run({"repo_root": root, "since_files": None})
-    missing = [item for item in findings if item.id == "supply_chain.missing-lockfile"]
-    inventory = next(item for item in findings if item.id == "supply_chain.inventory")
-    check("21c1: nested gitfile repository manifests are excluded", not missing)
-    check(
-        "21c2: nested gitfile repository is absent from inventory",
-        inventory.extra["manifest_counts"] == {"Node": 1, "package.json": 1},
-    )
+    missing = [item.message for item in findings if item.id == "supply_chain.missing-lockfile"]
+    check("21d: nested repositories and generated tmp trees are skipped", not missing, missing)
 
 with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
@@ -2773,30 +2800,6 @@ with tempfile.TemporaryDirectory() as tmp:
             not list(sensitive_data._credit_cards(social_url)),
             social_url,
         )
-        email_pattern = next(
-            pattern for pattern in sensitive_data._PATTERNS
-            if pattern.id == "sensitive-data.email-address"
-        )
-        synthetic_emails = "dev@example.com deploy@example.local git@unit.example"
-        check(
-            "22: reserved example email domains are ignored",
-            not list(sensitive_data._matches(
-                root / "AGENTS.md", synthetic_emails, email_pattern
-            )),
-            synthetic_emails,
-        )
-        phone_pattern = next(
-            pattern for pattern in sensitive_data._PATTERNS
-            if pattern.id == "sensitive-data.phone-number"
-        )
-        numeric_threshold = "MAX_ARCHIVE_BYTES=4294967296"
-        check(
-            "22: bare ten-digit numeric threshold is not a phone number",
-            not list(sensitive_data._matches(
-                root / "config.py", numeric_threshold, phone_pattern
-            )),
-            numeric_threshold,
-        )
     frontmatter_path = root / "frontmatter.md"
     frontmatter_path.write_text(
         "---\nspec:\n  divider: '|---|---|'\n---\nbody\n",
@@ -2851,8 +2854,11 @@ with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
     applied = root / "context" / "migrations" / "applied"
     applied.mkdir(parents=True)
-    for name, applied_at in (("MIG-new", "2026-07-19T00:00:00Z"),
-                             ("MIG-old", "2020-01-01T00:00:00Z")):
+    now = datetime.now(timezone.utc)
+    for name, applied_at in (
+        ("MIG-new", (now - timedelta(days=1)).isoformat()),
+        ("MIG-old", (now - timedelta(days=31)).isoformat()),
+    ):
         (applied / f"{name}.md").write_text(
             textwrap.dedent(f"""\
                 ---

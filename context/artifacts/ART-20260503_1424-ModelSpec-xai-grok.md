@@ -5,15 +5,26 @@ metadata:
   id: ART-20260503_1424-ModelSpec-xai-grok
   created: '2026-05-03T14:24:00Z'
 spec:
-  name: Grok 4.20
+  name: Grok 4.5
   kind: model-spec
   format: markdown
   provider: xai
   family: grok
   legacy_model_id: MODEL-xai-grok
   profile_ids:
+  - grok-4.5
   - grok-4.20
   versions:
+  - version_id: '4.5'
+    status: ga
+    context_window: 500000
+    pricing_usd_per_1m:
+      input: 20
+      output: 100
+    pricing_note: Official xAI catalog pricing, USD per 1M text tokens.
+    lifecycle: active
+    source_urls: &id001
+    - https://docs.x.ai/docs/models
   - version_id: '4.20'
     status: ga
     context_window: 2000000
@@ -22,7 +33,7 @@ spec:
       output: 6.0
     pricing_note: xAI Grok 4.20 API pricing.
     lifecycle: active
-    source_urls: &id001
+    source_urls:
     - https://x.ai/api
     - https://docs.x.ai/docs/models
   efforts_supported:
@@ -46,7 +57,7 @@ spec:
   access_tier: public
   equivalent_tier: xxl
   status_page_url: https://status.x.ai/
-  rationale: Frontier reasoning
+  rationale: Frontier reasoning and agentic coding
   lifecycle: active
   source_urls: *id001
   model_classes:

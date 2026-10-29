@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "validated": "2026-Q2",
+    "validated": "2026-Q3",
     "schema_version": "1.2",
     "pricing_note": "USD per 1M tokens, approximate as of 2026-Q2. Prices change frequently; verify provider pricing pages before budgeting.",
     "dimensions": [
@@ -9030,6 +9030,1369 @@
         "bulk_generation": 5,
         "privacy_sensitive": 4,
         "self_hosted_enterprise": 4
+      }
+    },
+    {
+      "id": "claude-opus-4.8",
+      "name": "Claude Opus 4.8",
+      "provider": "Anthropic",
+      "tier": "Frontier reasoning and agentic coding",
+      "lifecycle": "active",
+      "context_k": 1000,
+      "governance_warning": null,
+      "source_urls": [
+        "https://docs.anthropic.com/en/docs/about-claude/models/overview"
+      ],
+      "model_classes": [
+        "powerful"
+      ],
+      "pricing": {
+        "input_per_1m": 5,
+        "output_per_1m": 25,
+        "currency": "USD",
+        "hosting": "api",
+        "note": "Current Anthropic flagship API model; official pricing."
+      },
+      "dimensions": {
+        "R": {
+          "score": 5,
+          "sub": {
+            "math_reasoning": 5,
+            "scientific_reasoning": 5,
+            "abstract_reasoning": 5,
+            "logical_chains": 5,
+            "debugging_chains": 5
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 2,
+          "sub": {
+            "ttft": 2,
+            "throughput": 2,
+            "cost_efficiency": 2
+          }
+        },
+        "B": {
+          "score": 5,
+          "sub": {
+            "context_window": 5,
+            "long_doc_faithfulness": 5,
+            "vision": 5,
+            "audio": 5,
+            "video": 5,
+            "multilingual": 5,
+            "structured_output": 5
+          }
+        },
+        "L": {
+          "score": 5,
+          "sub": {
+            "instruction_following": 5,
+            "hallucination_resistance": 5,
+            "consistency": 5,
+            "safety": 5,
+            "format_adherence": 5
+          }
+        },
+        "G": {
+          "score": 5,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 4,
+            "self_hostable": 2,
+            "compliance_certs": 5,
+            "audit_logging": 5
+          }
+        }
+      },
+      "best_for": [
+        "Hard architecture",
+        "High-stakes code review",
+        "Research synthesis",
+        "Sensitive enterprise work"
+      ],
+      "avoid_for": [
+        "High-volume cheap tasks"
+      ],
+      "task_suitability": {
+        "architecture": 5,
+        "algorithm_design": 5,
+        "debugging": 5,
+        "implementation": 5,
+        "refactoring": 5,
+        "code_review": 5,
+        "test_generation": 4,
+        "repo_navigation": 5,
+        "agentic_workflow": 5,
+        "tool_calling": 5,
+        "structured_output": 5,
+        "data_extraction": 5,
+        "summarization": 5,
+        "long_context_synthesis": 5,
+        "rag": 5,
+        "citation_answering": 5,
+        "research_synthesis": 5,
+        "math_reasoning": 5,
+        "scientific_reasoning": 5,
+        "legal_analysis": 5,
+        "medical_admin": 5,
+        "financial_analysis": 5,
+        "translation": 5,
+        "multilingual_chat": 5,
+        "classification": 3,
+        "sentiment_analysis": 3,
+        "creative_writing": 4,
+        "marketing_copy": 4,
+        "data_analysis": 5,
+        "sql_generation": 5,
+        "spreadsheet_analysis": 5,
+        "ocr": 5,
+        "image_understanding": 5,
+        "chart_understanding": 5,
+        "diagram_reasoning": 5,
+        "voice": 4,
+        "audio_transcription": 4,
+        "video_understanding": 5,
+        "low_latency_chat": 3,
+        "bulk_generation": 3,
+        "privacy_sensitive": 5,
+        "self_hosted_enterprise": 4
+      }
+    },
+    {
+      "id": "claude-sonnet-5",
+      "name": "Claude Sonnet 5",
+      "provider": "Anthropic",
+      "tier": "Frontier coding and agentic work",
+      "context_k": 200,
+      "governance_warning": null,
+      "pricing": {
+        "input_per_1m": 2,
+        "output_per_1m": 10,
+        "currency": "USD",
+        "hosting": "api",
+        "note": "Introductory API pricing through 2026-08-31; verify after expiry."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 4,
+            "abstract_reasoning": 4,
+            "logical_chains": 4,
+            "debugging_chains": 4
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 3,
+          "sub": {
+            "ttft": 3,
+            "throughput": 3,
+            "cost_efficiency": 3
+          }
+        },
+        "B": {
+          "score": 4,
+          "sub": {
+            "context_window": 4,
+            "long_doc_faithfulness": 4,
+            "vision": 4,
+            "audio": 1,
+            "video": 1,
+            "multilingual": 4,
+            "structured_output": 5
+          }
+        },
+        "L": {
+          "score": 4,
+          "sub": {
+            "instruction_following": 4,
+            "hallucination_resistance": 4,
+            "consistency": 4,
+            "safety": 5,
+            "format_adherence": 5
+          }
+        },
+        "G": {
+          "score": 5,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 4,
+            "self_hostable": 2,
+            "compliance_certs": 5,
+            "audit_logging": 5
+          }
+        }
+      },
+      "best_for": [
+        "Everyday engineering",
+        "Code review",
+        "Refactoring",
+        "Agentic workflows",
+        "Sensitive/enterprise data",
+        "Claude Code native model"
+      ],
+      "avoid_for": [
+        "Extreme cost sensitivity at very high volume",
+        "Real-time <100ms UX",
+        "Native audio/video"
+      ],
+      "source_urls": [
+        "https://docs.anthropic.com/en/docs/about-claude/models/overview"
+      ],
+      "model_classes": [],
+      "lifecycle": "active",
+      "_estimated": true,
+      "task_suitability": {
+        "architecture": 4,
+        "algorithm_design": 4,
+        "debugging": 4,
+        "implementation": 4,
+        "refactoring": 4,
+        "code_review": 4,
+        "test_generation": 3,
+        "repo_navigation": 4,
+        "agentic_workflow": 4,
+        "tool_calling": 4,
+        "structured_output": 4,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 3,
+        "scientific_reasoning": 3,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 3,
+        "multilingual_chat": 3,
+        "classification": 3,
+        "sentiment_analysis": 3,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 4,
+        "sql_generation": 4,
+        "spreadsheet_analysis": 4,
+        "ocr": 3,
+        "image_understanding": 3,
+        "chart_understanding": 3,
+        "diagram_reasoning": 3,
+        "voice": 2,
+        "audio_transcription": 2,
+        "video_understanding": 2,
+        "low_latency_chat": 3,
+        "bulk_generation": 3,
+        "privacy_sensitive": 4,
+        "self_hosted_enterprise": 3
+      }
+    },
+    {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "provider": "Moonshot AI",
+      "tier": "Frontier reasoning and coding",
+      "context_k": 256,
+      "governance_warning": "Chinese company. Via Moonshot API: G:1. Self-hosted open weights (Modified MIT, Hugging Face) raise governance to G:3–4.",
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "api",
+        "note": "Official catalog confirms availability; pricing requires account-specific confirmation."
+      },
+      "dimensions": {
+        "R": {
+          "score": 5,
+          "sub": {
+            "math_reasoning": 5,
+            "scientific_reasoning": 5,
+            "abstract_reasoning": 5,
+            "logical_chains": 5,
+            "debugging_chains": 5
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 3,
+          "sub": {
+            "ttft": 3,
+            "throughput": 3,
+            "cost_efficiency": 4
+          }
+        },
+        "B": {
+          "score": 5,
+          "sub": {
+            "context_window": 4,
+            "long_doc_faithfulness": 4,
+            "vision": 4,
+            "audio": 2,
+            "video": 2,
+            "multilingual": 5,
+            "structured_output": 4
+          }
+        },
+        "L": {
+          "score": 4,
+          "sub": {
+            "instruction_following": 5,
+            "hallucination_resistance": 4,
+            "consistency": 4,
+            "safety": 4,
+            "format_adherence": 5
+          }
+        },
+        "G": {
+          "score": 1,
+          "sub": {
+            "data_retention_policy": 1,
+            "data_sovereignty": 1,
+            "self_hostable": 4,
+            "compliance_certs": 1,
+            "audit_logging": 1
+          }
+        }
+      },
+      "best_for": [
+        "Frontier-class open-weight reasoning and coding (rivals GPT-5.4 on SWE-Bench Pro)",
+        "Agent-swarm workloads (300 sub-agents, 4000 coordinated steps per coverage)",
+        "Self-hosted alternative to closed frontier models"
+      ],
+      "avoid_for": [
+        "Via Moonshot API for any sensitive data (G:1)",
+        "Tasks requiring strong audio/video multimodal",
+        "Workflows without GPU infrastructure for self-host"
+      ],
+      "source_urls": [
+        "https://platform.moonshot.ai/docs/guide/use-kimi-k2-thinking-model"
+      ],
+      "model_classes": [],
+      "lifecycle": "unverified",
+      "task_suitability": {
+        "architecture": 5,
+        "algorithm_design": 5,
+        "debugging": 5,
+        "implementation": 5,
+        "refactoring": 5,
+        "code_review": 5,
+        "test_generation": 4,
+        "repo_navigation": 5,
+        "agentic_workflow": 5,
+        "tool_calling": 4,
+        "structured_output": 4,
+        "data_extraction": 5,
+        "summarization": 5,
+        "long_context_synthesis": 5,
+        "rag": 5,
+        "citation_answering": 5,
+        "research_synthesis": 5,
+        "math_reasoning": 5,
+        "scientific_reasoning": 5,
+        "legal_analysis": 3,
+        "medical_admin": 3,
+        "financial_analysis": 3,
+        "translation": 4,
+        "multilingual_chat": 4,
+        "classification": 3,
+        "sentiment_analysis": 3,
+        "creative_writing": 4,
+        "marketing_copy": 4,
+        "data_analysis": 5,
+        "sql_generation": 5,
+        "spreadsheet_analysis": 5,
+        "ocr": 4,
+        "image_understanding": 4,
+        "chart_understanding": 4,
+        "diagram_reasoning": 4,
+        "voice": 3,
+        "audio_transcription": 3,
+        "video_understanding": 4,
+        "low_latency_chat": 3,
+        "bulk_generation": 3,
+        "privacy_sensitive": 2,
+        "self_hosted_enterprise": 3
+      }
+    },
+    {
+      "_estimated": true,
+      "id": "gemini-3.6-flash",
+      "name": "Gemini 3.6 Flash",
+      "provider": "Google",
+      "tier": "Current fast Gemini model",
+      "context_k": 1000,
+      "governance_warning": null,
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "api",
+        "note": "Official model catalog confirms availability; pricing must be checked against the active Gemini API price table."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 3,
+            "abstract_reasoning": 3,
+            "logical_chains": 4,
+            "debugging_chains": 3
+          }
+        },
+        "E": {
+          "score": 3,
+          "sub": {
+            "function_codegen": 3,
+            "repo_scale_tasks": 3,
+            "tool_use": 4,
+            "agentic_planning": 3,
+            "codebase_navigation": 3
+          }
+        },
+        "S": {
+          "score": 5,
+          "sub": {
+            "ttft": 5,
+            "throughput": 5,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 5,
+          "sub": {
+            "context_window": 5,
+            "long_doc_faithfulness": 5,
+            "vision": 5,
+            "audio": 5,
+            "video": 5,
+            "multilingual": 5,
+            "structured_output": 5
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 4,
+            "format_adherence": 4
+          }
+        },
+        "G": {
+          "score": 2,
+          "sub": {
+            "data_retention_policy": 2,
+            "data_sovereignty": 2,
+            "self_hostable": 1,
+            "compliance_certs": 3,
+            "audit_logging": 2
+          }
+        }
+      },
+      "best_for": [
+        "Massive context + multimodal at minimal cost (estimated)"
+      ],
+      "avoid_for": [
+        "Sensitive data",
+        "Tasks requiring high reliability"
+      ],
+      "source_urls": [
+        "https://ai.google.dev/gemini-api/docs/models"
+      ],
+      "model_classes": [],
+      "lifecycle": "unverified",
+      "task_suitability": {
+        "architecture": 3,
+        "algorithm_design": 3,
+        "debugging": 2,
+        "implementation": 2,
+        "refactoring": 2,
+        "code_review": 2,
+        "test_generation": 3,
+        "repo_navigation": 2,
+        "agentic_workflow": 2,
+        "tool_calling": 3,
+        "structured_output": 3,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 3,
+        "scientific_reasoning": 3,
+        "legal_analysis": 2,
+        "medical_admin": 2,
+        "financial_analysis": 2,
+        "translation": 3,
+        "multilingual_chat": 3,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 4,
+        "marketing_copy": 4,
+        "data_analysis": 3,
+        "sql_generation": 3,
+        "spreadsheet_analysis": 3,
+        "ocr": 4,
+        "image_understanding": 4,
+        "chart_understanding": 4,
+        "diagram_reasoning": 4,
+        "voice": 4,
+        "audio_transcription": 4,
+        "video_understanding": 4,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 2,
+        "self_hosted_enterprise": 1
+      }
+    },
+    {
+      "_estimated": true,
+      "id": "minimax-m3",
+      "name": "MiniMax M3",
+      "provider": "MiniMax",
+      "tier": "Current MiniMax coding and agentic model",
+      "context_k": 256,
+      "governance_warning": "Chinese company. Via MiniMax API: G:1. Self-hosted open weights raise governance to G:3.",
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "api-or-self-hosted",
+        "note": "Official catalog confirms availability; public API pricing not captured in this refresh."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 3,
+            "abstract_reasoning": 3,
+            "logical_chains": 4,
+            "debugging_chains": 3
+          }
+        },
+        "E": {
+          "score": 3,
+          "sub": {
+            "function_codegen": 3,
+            "repo_scale_tasks": 3,
+            "tool_use": 3,
+            "agentic_planning": 3,
+            "codebase_navigation": 3
+          }
+        },
+        "S": {
+          "score": 3,
+          "sub": {
+            "ttft": 3,
+            "throughput": 3,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 5,
+          "sub": {
+            "context_window": 5,
+            "long_doc_faithfulness": 4,
+            "vision": 3,
+            "audio": 2,
+            "video": 1,
+            "multilingual": 4,
+            "structured_output": 3
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 3,
+            "format_adherence": 3
+          }
+        },
+        "G": {
+          "score": 2,
+          "sub": {
+            "data_retention_policy": 2,
+            "data_sovereignty": 2,
+            "self_hostable": 4,
+            "compliance_certs": 1,
+            "audit_logging": 2
+          }
+        }
+      },
+      "best_for": [
+        "1M context at low cost, non-sensitive data (estimated)"
+      ],
+      "avoid_for": [
+        "Sensitive/regulated data via API",
+        "Tasks requiring strong coding capability"
+      ],
+      "source_urls": [
+        "https://platform.minimax.io/docs/guides/models-intro"
+      ],
+      "model_classes": [],
+      "lifecycle": "unverified",
+      "task_suitability": {
+        "architecture": 3,
+        "algorithm_design": 3,
+        "debugging": 2,
+        "implementation": 2,
+        "refactoring": 2,
+        "code_review": 2,
+        "test_generation": 2,
+        "repo_navigation": 2,
+        "agentic_workflow": 2,
+        "tool_calling": 2,
+        "structured_output": 2,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 3,
+        "scientific_reasoning": 3,
+        "legal_analysis": 2,
+        "medical_admin": 2,
+        "financial_analysis": 2,
+        "translation": 3,
+        "multilingual_chat": 3,
+        "classification": 3,
+        "sentiment_analysis": 3,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 3,
+        "sql_generation": 3,
+        "spreadsheet_analysis": 3,
+        "ocr": 3,
+        "image_understanding": 3,
+        "chart_understanding": 3,
+        "diagram_reasoning": 3,
+        "voice": 2,
+        "audio_transcription": 2,
+        "video_understanding": 3,
+        "low_latency_chat": 3,
+        "bulk_generation": 3,
+        "privacy_sensitive": 2,
+        "self_hosted_enterprise": 3
+      }
+    },
+    {
+      "id": "grok-4.5",
+      "name": "Grok 4.5",
+      "provider": "xAI",
+      "tier": "Frontier reasoning and agentic coding",
+      "lifecycle": "active",
+      "context_k": 500,
+      "governance_warning": null,
+      "source_urls": [
+        "https://docs.x.ai/docs/models"
+      ],
+      "model_classes": [
+        "standard",
+        "powerful"
+      ],
+      "pricing": {
+        "input_per_1m": 20,
+        "output_per_1m": 100,
+        "currency": "USD",
+        "hosting": "api",
+        "note": "Official xAI catalog pricing, USD per 1M text tokens."
+      },
+      "dimensions": {
+        "R": {
+          "score": 5,
+          "sub": {
+            "math_reasoning": 5,
+            "scientific_reasoning": 5,
+            "abstract_reasoning": 5,
+            "logical_chains": 5,
+            "debugging_chains": 5
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 4,
+          "sub": {
+            "ttft": 4,
+            "throughput": 4,
+            "cost_efficiency": 4
+          }
+        },
+        "B": {
+          "score": 5,
+          "sub": {
+            "context_window": 5,
+            "long_doc_faithfulness": 5,
+            "vision": 5,
+            "audio": 5,
+            "video": 5,
+            "multilingual": 5,
+            "structured_output": 5
+          }
+        },
+        "L": {
+          "score": 5,
+          "sub": {
+            "instruction_following": 5,
+            "hallucination_resistance": 4,
+            "consistency": 5,
+            "safety": 3,
+            "format_adherence": 5
+          }
+        },
+        "G": {
+          "score": 2,
+          "sub": {
+            "data_retention_policy": 2,
+            "data_sovereignty": 2,
+            "self_hostable": 1,
+            "compliance_certs": 2,
+            "audit_logging": 2
+          }
+        }
+      },
+      "best_for": [
+        "Real-time research",
+        "Tool-heavy public workflows",
+        "Long-context reasoning"
+      ],
+      "avoid_for": [
+        "Sensitive regulated data"
+      ],
+      "task_suitability": {
+        "architecture": 5,
+        "algorithm_design": 5,
+        "debugging": 5,
+        "implementation": 5,
+        "refactoring": 5,
+        "code_review": 5,
+        "test_generation": 5,
+        "repo_navigation": 5,
+        "agentic_workflow": 5,
+        "tool_calling": 5,
+        "structured_output": 5,
+        "data_extraction": 5,
+        "summarization": 5,
+        "long_context_synthesis": 5,
+        "rag": 5,
+        "citation_answering": 5,
+        "research_synthesis": 5,
+        "math_reasoning": 5,
+        "scientific_reasoning": 5,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 5,
+        "multilingual_chat": 5,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 5,
+        "marketing_copy": 5,
+        "data_analysis": 5,
+        "sql_generation": 5,
+        "spreadsheet_analysis": 5,
+        "ocr": 5,
+        "image_understanding": 5,
+        "chart_understanding": 5,
+        "diagram_reasoning": 5,
+        "voice": 5,
+        "audio_transcription": 5,
+        "video_understanding": 5,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 3,
+        "self_hosted_enterprise": 3
+      }
+    },
+    {
+      "id": "subq-1.1-small",
+      "name": "SubQ 1.1 Small",
+      "provider": "Subquadratic",
+      "tier": "Early-access long-context model",
+      "lifecycle": "unverified",
+      "context_k": 12000,
+      "governance_warning": null,
+      "source_urls": [
+        "https://subq.ai",
+        "https://subq.ai/docs/subq-1-1-small-model-card.pdf"
+      ],
+      "model_classes": [
+        "standard"
+      ],
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "self-hosted-or-hosted",
+        "note": "Early-access API; provider publishes no public token pricing."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 4,
+            "abstract_reasoning": 4,
+            "logical_chains": 4,
+            "debugging_chains": 4
+          }
+        },
+        "E": {
+          "score": 4,
+          "sub": {
+            "function_codegen": 4,
+            "repo_scale_tasks": 4,
+            "tool_use": 4,
+            "agentic_planning": 4,
+            "codebase_navigation": 4
+          }
+        },
+        "S": {
+          "score": 4,
+          "sub": {
+            "ttft": 4,
+            "throughput": 4,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 3,
+          "sub": {
+            "context_window": 3,
+            "long_doc_faithfulness": 3,
+            "vision": 2,
+            "audio": 1,
+            "video": 1,
+            "multilingual": 3,
+            "structured_output": 3
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 3,
+            "format_adherence": 3
+          }
+        },
+        "G": {
+          "score": 5,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 5,
+            "self_hostable": 5,
+            "compliance_certs": 5,
+            "audit_logging": 5
+          }
+        }
+      },
+      "best_for": [
+        "Self-hosted enterprise agents",
+        "Privacy-sensitive coding",
+        "RAG"
+      ],
+      "avoid_for": [
+        "Consumer multimodal voice/video"
+      ],
+      "task_suitability": {
+        "architecture": 4,
+        "algorithm_design": 4,
+        "debugging": 4,
+        "implementation": 4,
+        "refactoring": 4,
+        "code_review": 4,
+        "test_generation": 4,
+        "repo_navigation": 4,
+        "agentic_workflow": 4,
+        "tool_calling": 3,
+        "structured_output": 3,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 4,
+        "scientific_reasoning": 4,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 3,
+        "multilingual_chat": 3,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 4,
+        "sql_generation": 4,
+        "spreadsheet_analysis": 4,
+        "ocr": 3,
+        "image_understanding": 3,
+        "chart_understanding": 3,
+        "diagram_reasoning": 3,
+        "voice": 3,
+        "audio_transcription": 3,
+        "video_understanding": 3,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 5,
+        "self_hosted_enterprise": 5
+      }
+    },
+    {
+      "id": "qwen3.8-max-preview",
+      "name": "Qwen 3.8 Max Preview",
+      "provider": "Alibaba / Open",
+      "tier": "Current Alibaba flagship preview",
+      "lifecycle": "unverified",
+      "context_k": 1000,
+      "governance_warning": "Via Alibaba Cloud API: G:1. Self-hosted (Apache 2.0): G:4. Recommended deployment is self-hosted for any proprietary code.",
+      "source_urls": [
+        "https://help.aliyun.com/zh/model-studio/models"
+      ],
+      "model_classes": [
+        "standard"
+      ],
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "third-party-or-self-hosted",
+        "note": "Official Model Studio catalog confirms availability; regional/token-plan pricing varies."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 4,
+            "abstract_reasoning": 4,
+            "logical_chains": 4,
+            "debugging_chains": 4
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 4,
+          "sub": {
+            "ttft": 4,
+            "throughput": 4,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 3,
+          "sub": {
+            "context_window": 3,
+            "long_doc_faithfulness": 3,
+            "vision": 1,
+            "audio": 1,
+            "video": 1,
+            "multilingual": 4,
+            "structured_output": 4
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 3,
+            "format_adherence": 4
+          }
+        },
+        "G": {
+          "score": 4,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 5,
+            "self_hostable": 5,
+            "compliance_certs": 2,
+            "audit_logging": 3
+          }
+        }
+      },
+      "best_for": [
+        "Self-hosted coding",
+        "Function generation",
+        "Multilingual code tasks"
+      ],
+      "avoid_for": [
+        "Sensitive data via Alibaba API"
+      ],
+      "task_suitability": {
+        "architecture": 4,
+        "algorithm_design": 4,
+        "debugging": 4,
+        "implementation": 4,
+        "refactoring": 4,
+        "code_review": 4,
+        "test_generation": 4,
+        "repo_navigation": 4,
+        "agentic_workflow": 4,
+        "tool_calling": 4,
+        "structured_output": 4,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 4,
+        "scientific_reasoning": 4,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 4,
+        "multilingual_chat": 4,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 4,
+        "sql_generation": 4,
+        "spreadsheet_analysis": 4,
+        "ocr": 2,
+        "image_understanding": 2,
+        "chart_understanding": 2,
+        "diagram_reasoning": 2,
+        "voice": 3,
+        "audio_transcription": 3,
+        "video_understanding": 3,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 4,
+        "self_hosted_enterprise": 5
+      }
+    },
+    {
+      "id": "qwen3.7-max",
+      "name": "Qwen 3.7 Max",
+      "provider": "Alibaba / Open",
+      "tier": "Current Alibaba flagship",
+      "lifecycle": "unverified",
+      "context_k": 1000,
+      "governance_warning": "Via Alibaba Cloud API: G:1. Self-hosted (Apache 2.0): G:4. Recommended deployment is self-hosted for any proprietary code.",
+      "source_urls": [
+        "https://help.aliyun.com/zh/model-studio/models"
+      ],
+      "model_classes": [
+        "standard"
+      ],
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "third-party-or-self-hosted",
+        "note": "Official Model Studio catalog confirms availability; regional pricing varies."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 4,
+            "abstract_reasoning": 4,
+            "logical_chains": 4,
+            "debugging_chains": 4
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 4,
+          "sub": {
+            "ttft": 4,
+            "throughput": 4,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 3,
+          "sub": {
+            "context_window": 3,
+            "long_doc_faithfulness": 3,
+            "vision": 1,
+            "audio": 1,
+            "video": 1,
+            "multilingual": 4,
+            "structured_output": 4
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 3,
+            "format_adherence": 4
+          }
+        },
+        "G": {
+          "score": 4,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 5,
+            "self_hostable": 5,
+            "compliance_certs": 2,
+            "audit_logging": 3
+          }
+        }
+      },
+      "best_for": [
+        "Self-hosted coding",
+        "Function generation",
+        "Multilingual code tasks"
+      ],
+      "avoid_for": [
+        "Sensitive data via Alibaba API"
+      ],
+      "task_suitability": {
+        "architecture": 4,
+        "algorithm_design": 4,
+        "debugging": 4,
+        "implementation": 4,
+        "refactoring": 4,
+        "code_review": 4,
+        "test_generation": 4,
+        "repo_navigation": 4,
+        "agentic_workflow": 4,
+        "tool_calling": 4,
+        "structured_output": 4,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 4,
+        "scientific_reasoning": 4,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 4,
+        "multilingual_chat": 4,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 4,
+        "sql_generation": 4,
+        "spreadsheet_analysis": 4,
+        "ocr": 2,
+        "image_understanding": 2,
+        "chart_understanding": 2,
+        "diagram_reasoning": 2,
+        "voice": 3,
+        "audio_transcription": 3,
+        "video_understanding": 3,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 4,
+        "self_hosted_enterprise": 5
+      }
+    },
+    {
+      "id": "qwen3.6-flash",
+      "name": "Qwen 3.6 Flash",
+      "provider": "Alibaba / Open",
+      "tier": "Current Alibaba fast model",
+      "lifecycle": "unverified",
+      "context_k": 1000,
+      "governance_warning": "Via Alibaba Cloud API: G:1. Self-hosted (Apache 2.0): G:4. Recommended deployment is self-hosted for any proprietary code.",
+      "source_urls": [
+        "https://help.aliyun.com/zh/model-studio/models"
+      ],
+      "model_classes": [
+        "standard"
+      ],
+      "pricing": {
+        "input_per_1m": null,
+        "output_per_1m": null,
+        "currency": "USD",
+        "hosting": "third-party-or-self-hosted",
+        "note": "Official Model Studio catalog confirms availability; regional pricing varies."
+      },
+      "dimensions": {
+        "R": {
+          "score": 4,
+          "sub": {
+            "math_reasoning": 4,
+            "scientific_reasoning": 4,
+            "abstract_reasoning": 4,
+            "logical_chains": 4,
+            "debugging_chains": 4
+          }
+        },
+        "E": {
+          "score": 5,
+          "sub": {
+            "function_codegen": 5,
+            "repo_scale_tasks": 5,
+            "tool_use": 5,
+            "agentic_planning": 5,
+            "codebase_navigation": 5
+          }
+        },
+        "S": {
+          "score": 4,
+          "sub": {
+            "ttft": 4,
+            "throughput": 4,
+            "cost_efficiency": 5
+          }
+        },
+        "B": {
+          "score": 3,
+          "sub": {
+            "context_window": 3,
+            "long_doc_faithfulness": 3,
+            "vision": 1,
+            "audio": 1,
+            "video": 1,
+            "multilingual": 4,
+            "structured_output": 4
+          }
+        },
+        "L": {
+          "score": 3,
+          "sub": {
+            "instruction_following": 3,
+            "hallucination_resistance": 3,
+            "consistency": 3,
+            "safety": 3,
+            "format_adherence": 4
+          }
+        },
+        "G": {
+          "score": 4,
+          "sub": {
+            "data_retention_policy": 5,
+            "data_sovereignty": 5,
+            "self_hostable": 5,
+            "compliance_certs": 2,
+            "audit_logging": 3
+          }
+        }
+      },
+      "best_for": [
+        "Self-hosted coding",
+        "Function generation",
+        "Multilingual code tasks"
+      ],
+      "avoid_for": [
+        "Sensitive data via Alibaba API"
+      ],
+      "task_suitability": {
+        "architecture": 4,
+        "algorithm_design": 4,
+        "debugging": 4,
+        "implementation": 4,
+        "refactoring": 4,
+        "code_review": 4,
+        "test_generation": 4,
+        "repo_navigation": 4,
+        "agentic_workflow": 4,
+        "tool_calling": 4,
+        "structured_output": 4,
+        "data_extraction": 3,
+        "summarization": 3,
+        "long_context_synthesis": 3,
+        "rag": 3,
+        "citation_answering": 3,
+        "research_synthesis": 3,
+        "math_reasoning": 4,
+        "scientific_reasoning": 4,
+        "legal_analysis": 4,
+        "medical_admin": 4,
+        "financial_analysis": 4,
+        "translation": 4,
+        "multilingual_chat": 4,
+        "classification": 4,
+        "sentiment_analysis": 4,
+        "creative_writing": 3,
+        "marketing_copy": 3,
+        "data_analysis": 4,
+        "sql_generation": 4,
+        "spreadsheet_analysis": 4,
+        "ocr": 2,
+        "image_understanding": 2,
+        "chart_understanding": 2,
+        "diagram_reasoning": 2,
+        "voice": 3,
+        "audio_transcription": 3,
+        "video_understanding": 3,
+        "low_latency_chat": 4,
+        "bulk_generation": 4,
+        "privacy_sensitive": 4,
+        "self_hosted_enterprise": 5
       }
     }
   ]
