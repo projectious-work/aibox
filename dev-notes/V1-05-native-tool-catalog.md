@@ -1,9 +1,10 @@
 # V1-05 native tool catalog
 
 V1-05 contract is frozen at contract commit
-`59c35acc1cf230c81658a5763205b1f91a0b1092` on `contract/v1-05-tool-catalog`
-(amendment 1, DEC-20261029_1725-AmberBeam), which replaces the first contract
-commit `34d06da0cf42d73ff05971c7235ae1324d7e768a`
+`d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` on `contract/v1-05-tool-catalog`
+(amendment 2, DEC-20261029_2134-NobleBlossom). It replaces amendment 1,
+`59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam), and
+the first contract commit `34d06da0cf42d73ff05971c7235ae1324d7e768a`
 (DEC-20261029_1515-ShinySpire). The acceptance-test and implementation tracks
 continue from that commit.
 
@@ -182,3 +183,4 @@ no blocking findings. Its notes are applied: the exempt-command sentence covers
 | 2026-10-29 | Tracks started: tests `799d234b`..`b646e40a`, implementation waves 1–2 `2cfa66e5`..`977a7eed`. Amendment 1 drafted from their contract questions; review pending. |
 | 2026-10-29 | Owner approved amendment 1 as contract commit `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam); both tracks move onto it. |
 | 2026-10-29 | Tracks reported: tests `85d77f02`, implementation wave 3 `5b38f55d`. Amendment 2 drafted (rich replaced by glow and bat); review pending. |
+| 2026-10-29 | Implementation wave 4 reported (`13997c2a`). Owner approved amendment 2 as contract commit `d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` (DEC-20261029_2134-NobleBlossom); both tracks move onto it. |
