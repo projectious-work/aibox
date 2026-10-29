@@ -92,10 +92,36 @@ provider Anthropic. `route_task` proposed no TeamMember for this review.
 | Round | Commit | Result |
 |---|---|---|
 | 1 | `a3850809` | Not test-ready: 11 blocking findings. Owner decisions in DEC-20261029_1409-DaringTrail; remaining findings fixed as contract defects. |
+| 2 | `25c5a472` | Not test-ready: 10 of 11 round-1 findings resolved; 3 new blocking findings (Rust `PATH` syntax, sibling commands provided by rustup proxies and the TeX Live scheme, error-line Feature ID for dependencies). Final round; closed by the integration owner below. |
+
+### Integration-owner closure of round 2
+
+R-REVIEW allows two rounds, so the integration owner closed the round 2
+findings against the baseline:
+
+- Rust `containerEnv.PATH` uses `${PATH}`, the Feature `containerEnv` form.
+- `rust/clippy`, `rust/rustfmt` and the `latex/*` collections list no
+  `commands`; their `command` and `texlive` checks identify the component,
+  because rustup proxies and the TeX Live scheme can provide the executables.
+- An `AIBOX_FEATURE_UNSUPPORTED_TARGET` line may name any Feature in the
+  dependency closure of the Feature under test.
+- Non-blocking: the ledger audit field is renamed `audit-classification` and
+  marked historical; `ai/claude` sets `DISABLE_UPDATES=1`, which the Claude
+  Code environment variable reference documents as blocking all updates;
+  Debian installs use `--no-install-recommends`; the starter suite change is
+  worded as V1-05 work; `requires` counts as a dependency for isolation.
+- Debian package versions were already resolved from snapshot
+  `20261028T000000Z` for both architectures, not from live indexes.
+- The pinned CLI `0.89.0` selects plain HTTP for a `localhost` registry
+  (`src/spec-configuration/containerCollectionsOCI.ts`, the protocol
+  selection for `localhost`) and its Feature option type declares `enum`
+  without enforcing it. If integration shows otherwise, the failure is a
+  contract defect under R-CYCLE step 8.
 
 ## Logbook
 
 | Date | Entry |
 |---|---|
 | 2026-10-29 | Contract drafted on `contract/v1-05-tool-catalog` (`a3850809`). |
-| 2026-10-29 | Review round 1 findings resolved; round 2 pending. |
+| 2026-10-29 | Review round 1 findings resolved (`25c5a472`). |
+| 2026-10-29 | Review round 2 findings closed by the integration owner; owner freeze pending. |

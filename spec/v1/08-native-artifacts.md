@@ -236,10 +236,11 @@ option key its Feature does not declare.
 
 **Debian packages.** A tool with method `debian-package` installs the
 candidate version of each named package from the base's configured
-repositories; the base's snapshot pin, not the Feature, fixes that version.
-Such a Feature does not add or change APT sources. The `version` of a
-`package` check is the version expected on the reference base. The minimal
-and curated starters configure `trixie`, `trixie-updates` and
+repositories with `--no-install-recommends`; the base's snapshot pin, not the
+Feature, fixes that version. Such a Feature does not add or change APT
+sources. The `version` of a
+`package` check is the version expected on the reference base. V1-05 changes
+the minimal and curated starters to configure `trixie`, `trixie-updates` and
 `trixie-security` from one snapshot.
 
 **Dependencies.** Each `dependsOn` entry becomes a standard `dependsOn`
@@ -269,7 +270,10 @@ absence, isolation, bundles and smoke tests on the supported targets.
 and exits non-zero, so the Dev Container build fails. A test passes when the
 build fails and some line of its combined output contains
 `aibox-feature error <CODE> feature=<catalog-id>`, regardless of any prefix the
-build adds. `beforeInstall` errors leave no package, file or user change
+build adds. For `AIBOX_FEATURE_UNSUPPORTED_TARGET` the catalog ID may be the
+Feature under test or any Feature it transitively `dependsOn` or `requires`,
+because the first Feature in install order fails; for every other code it is
+the Feature under test. `beforeInstall` errors leave no package, file or user change
 behind. Errors marked `component` are verified by implementation-track
 component tests because black-box tests cannot inject the fault.
 
@@ -280,8 +284,8 @@ With no Feature selected, no other catalog `commands` entry resolves through
 `command -v`, no other `package` check is installed and no `path` check
 exists. For a semantic member selected alone, together with the Features it
 `requires`, the commands, packages and paths of every sibling that is neither
-a dependency nor listed in an installed tool's `alsoProvides` for that
-target are absent. Disabling a tool means omitting its Feature.
+a `dependsOn` or `requires` dependency nor listed in an installed tool's
+`alsoProvides` for that target are absent. Disabling a tool means omitting its Feature.
 
 **Checks.** Every check is evaluated in the running container, as the
 fixture's `remoteUser` through `devcontainer exec`, and again as `root`

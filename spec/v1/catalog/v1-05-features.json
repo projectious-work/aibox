@@ -65,7 +65,7 @@
   },
   {
    "code": "AIBOX_FEATURE_PACKAGE_UNAVAILABLE",
-   "when": "The exact Debian package version is not available from the configured repositories.",
+   "when": "A required Debian package has no installation candidate in the configured repositories.",
    "beforeInstall": true,
    "verification": "component"
   }
@@ -679,7 +679,7 @@
    ],
    "requires": [],
    "containerEnv": {
-    "DISABLE_AUTOUPDATER": "1"
+    "DISABLE_UPDATES": "1"
    }
   },
   {
@@ -2658,7 +2658,7 @@
    "containerEnv": {
     "RUSTUP_HOME": "/usr/local/rustup",
     "CARGO_HOME": "/usr/local/cargo",
-    "PATH": "/usr/local/cargo/bin:${containerEnv:PATH}"
+    "PATH": "/usr/local/cargo/bin:${PATH}"
    }
   },
   {
@@ -2695,10 +2695,7 @@
        "regex": "^clippy "
       }
      ],
-     "commands": [
-      "cargo-clippy",
-      "clippy-driver"
-     ],
+     "commands": [],
      "notes": "Component version is coupled to the toolchain: clippy-preview 0.1.98 for rustc 1.98.0 (0.1.N tracks rustc 1.N; use a regex on 0.1.<minor> not the full {version}). v0 unversioned -> exact = toolchain version 1.98.0. Install in the same 'rustup toolchain install' via --component clippy.",
      "versionFrom": "rust/rustc"
     }
@@ -2740,10 +2737,7 @@
        "regex": "^rustfmt "
       }
      ],
-     "commands": [
-      "rustfmt",
-      "cargo-fmt"
-     ],
+     "commands": [],
      "notes": "rustfmt-preview component version for toolchain 1.98.0 is 1.9.0 (1.8.0 for 1.90-1.94, 1.9.0 for 1.96-1.98). Versions are toolchain-coupled; exact = toolchain 1.98.0. Output text from memory (inferred).",
      "versionFrom": "rust/rustc"
     }
@@ -2822,9 +2816,9 @@
      "rows": [
       "ADDON:rust/x86_64-cross"
      ],
-     "method": "debian-package",
+     "method": "rustup",
      "docsUrl": "https://packages.debian.org/trixie/gcc-x86-64-linux-gnu",
-     "source": "apt-get install gcc-x86-64-linux-gnu=4:14.2.0-1 libc6-dev-amd64-cross=2.41-11cross1 ; rustup target add x86_64-unknown-linux-gnu --toolchain 1.98.0",
+     "source": "debian-13-arm64: Debian packages gcc-x86-64-linux-gnu and libc6-dev-amd64-cross from the base repositories, then rustup target add x86_64-unknown-linux-gnu for every installed toolchain; debian-13-amd64: no change",
      "verification": "apt-signed",
      "license": "GPL-3.0-or-later",
      "checks": [
@@ -3256,9 +3250,7 @@
        "package": "collection-latexrecommended"
       }
      ],
-     "commands": [
-      "latexmk"
-     ],
+     "commands": [],
      "notes": "tlmgr packages (exact, from v0 recipe): latex latex-bin latexmk collection-latexrecommended. TeX Live 2025 frozen mirror (v0 CTAN_MIRROR) https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final ; installer https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final/install-tl-unx.tar.gz sha256 311df9f1477fd90c520159d1feddc2d6270f010d8349d1f6bdb9461a93b48a5c (sha512 a307d7d11bcbd1f054ad0b0d476f7f12bc1a40d07445020edef8713b44453831d18a2f1722c3d2b0ea2e4fe6c06183a79d1c4049495113f412a9f5a570a8614d == published .sha512 on mirror; .sha512.asc also published; installer dir install-tl-20260301 reports 'TeX Live version 2025', ReleaseYear 2025; tlpdb 00texlive.config depend release/2025). v0 recipe: debian:trixie-slim builder, selected_scheme scheme-basic, TEXDIR /usr/local/texlive, option_doc 0, option_src 0, then 'tlmgr install --no-execute-actions <packages>' + mktexlsr, updmap-sys, fmtutil-sys --all; runtime image copies /usr/local/texlive and symlinks /usr/local/texlive/bin/*/* into /usr/local/bin. Mirror is HTTPS+TLS and installer verifies signed TLPDB (gpg needed for full verification; TeX Live key https://tug.org/texlive/files/texlive.asc, URL responds 200). Both aarch64-linux and x86_64-linux binary packages exist in the 2025 tlpdb (e.g. biber.aarch64-linux r75744, biber.x86_64-linux r75738) -> binary arch token is aarch64-linux / x86_64-linux. Per-package versions are tlpdb revisions, not semver, so exact version = TeX Live release '2025'. TeX Live current release is 2026; this mirror is the immutable 2025 final snapshot (Last-Modified 2026-03-01). All package names verified present in 2025 tlpdb. collection-latexrecommended is a TeX Live collection (verified in tlpdb). Command latexmk is provided by package latexmk.",
      "packages": [
       "latex",
@@ -3366,9 +3358,7 @@
        "package": "selnolig"
       }
      ],
-     "commands": [
-      "lualatex"
-     ],
+     "commands": [],
      "notes": "tlmgr packages (exact, from v0 recipe): luatex luaotfload luatexbase luacolor lua-ul fontspec unicode-math lualatex-math luahbtex lm lm-math sourcecodepro sourcesanspro tex-gyre gnu-freefont collection-fontsrecommended selnolig. TeX Live 2025 frozen mirror (v0 CTAN_MIRROR) https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final ; installer https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final/install-tl-unx.tar.gz sha256 311df9f1477fd90c520159d1feddc2d6270f010d8349d1f6bdb9461a93b48a5c (sha512 a307d7d11bcbd1f054ad0b0d476f7f12bc1a40d07445020edef8713b44453831d18a2f1722c3d2b0ea2e4fe6c06183a79d1c4049495113f412a9f5a570a8614d == published .sha512 on mirror; .sha512.asc also published; installer dir install-tl-20260301 reports 'TeX Live version 2025', ReleaseYear 2025; tlpdb 00texlive.config depend release/2025). v0 recipe: debian:trixie-slim builder, selected_scheme scheme-basic, TEXDIR /usr/local/texlive, option_doc 0, option_src 0, then 'tlmgr install --no-execute-actions <packages>' + mktexlsr, updmap-sys, fmtutil-sys --all; runtime image copies /usr/local/texlive and symlinks /usr/local/texlive/bin/*/* into /usr/local/bin. Mirror is HTTPS+TLS and installer verifies signed TLPDB (gpg needed for full verification; TeX Live key https://tug.org/texlive/files/texlive.asc, URL responds 200). Both aarch64-linux and x86_64-linux binary packages exist in the 2025 tlpdb (e.g. biber.aarch64-linux r75744, biber.x86_64-linux r75738) -> binary arch token is aarch64-linux / x86_64-linux. Per-package versions are tlpdb revisions, not semver, so exact version = TeX Live release '2025'. TeX Live current release is 2026; this mirror is the immutable 2025 final snapshot (Last-Modified 2026-03-01). All package names verified present in 2025 tlpdb. collection-fontsrecommended is a TeX Live collection.",
      "packages": [
       "luatex",
@@ -3433,9 +3423,7 @@
        "package": "csquotes"
       }
      ],
-     "commands": [
-      "biber"
-     ],
+     "commands": [],
      "notes": "tlmgr packages (exact, from v0 recipe): biblatex biber csquotes. TeX Live 2025 frozen mirror (v0 CTAN_MIRROR) https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final ; installer https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final/install-tl-unx.tar.gz sha256 311df9f1477fd90c520159d1feddc2d6270f010d8349d1f6bdb9461a93b48a5c (sha512 a307d7d11bcbd1f054ad0b0d476f7f12bc1a40d07445020edef8713b44453831d18a2f1722c3d2b0ea2e4fe6c06183a79d1c4049495113f412a9f5a570a8614d == published .sha512 on mirror; .sha512.asc also published; installer dir install-tl-20260301 reports 'TeX Live version 2025', ReleaseYear 2025; tlpdb 00texlive.config depend release/2025). v0 recipe: debian:trixie-slim builder, selected_scheme scheme-basic, TEXDIR /usr/local/texlive, option_doc 0, option_src 0, then 'tlmgr install --no-execute-actions <packages>' + mktexlsr, updmap-sys, fmtutil-sys --all; runtime image copies /usr/local/texlive and symlinks /usr/local/texlive/bin/*/* into /usr/local/bin. Mirror is HTTPS+TLS and installer verifies signed TLPDB (gpg needed for full verification; TeX Live key https://tug.org/texlive/files/texlive.asc, URL responds 200). Both aarch64-linux and x86_64-linux binary packages exist in the 2025 tlpdb (e.g. biber.aarch64-linux r75744, biber.x86_64-linux r75738) -> binary arch token is aarch64-linux / x86_64-linux. Per-package versions are tlpdb revisions, not semver, so exact version = TeX Live release '2025'. TeX Live current release is 2026; this mirror is the immutable 2025 final snapshot (Last-Modified 2026-03-01). All package names verified present in 2025 tlpdb.",
      "packages": [
       "biblatex",
@@ -6444,8 +6432,7 @@
     "ADDON:preview-archive/poppler",
     "ADDON:preview-archive/timg",
     "ADDON:preview-enhanced/ffmpeg",
-    "ADDON:preview-enhanced/ghostscript",
-    "ADDON:rust/x86_64-cross"
+    "ADDON:preview-enhanced/ghostscript"
    ],
    "decision": "DEC-20261029_1409-DaringTrail",
    "note": "Debian-route tools install the version the base's configured repositories provide; the base's snapshot pin, not the Feature, fixes their version."

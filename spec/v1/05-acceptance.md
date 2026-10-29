@@ -205,8 +205,9 @@ Cartesian-product testing.
 V1-05 realizes AC-TOOLS through the Tool Feature interface in chapter 8 and
 the catalog. Each acceptance test names one of these items and, where it
 applies, the catalog Feature ID, tool and target ID, for example
-`AC-TOOLS/present python/uv debian-13-arm64`. Every selection also includes the
-Features that each selected Feature `requires`, at their defaults. Items
+`AC-TOOLS/present python/uv debian-13-arm64`. Except for `AC-TOOLS/requires`, every
+selection also includes the Features that each selected Feature `requires`,
+at their defaults. Items
 marked "aibox" apply only to Features with `owner` `aibox`.
 
 | Item | Verified behavior | Per |
@@ -234,9 +235,9 @@ and `browser-testing/all`; `latex/all` with `preview/archive/all` and
 `preview/enhanced/all`; `go/all` with `rust/all` and `zig/all`;
 `security/crypto/all` with `security/scan/all`. These stacks are the pairwise
 interaction evidence for V1-05. The base toolchain is verified by the V1-04
-starter checks, not by AC-TOOLS. The minimal and curated starters configure
-`trixie`, `trixie-updates` and `trixie-security` from one snapshot, verified by
-the existing starter checks. Component-verified error codes are listed in the
+starter checks, not by AC-TOOLS. V1-05 changes the minimal and curated starters
+to configure `trixie`, `trixie-updates` and `trixie-security` from one
+snapshot; the existing starter checks verify the changed starters. Component-verified error codes are listed in the
 catalog.
 
 ### AC-HARNESS — installation, state and integration

@@ -44,7 +44,7 @@ require(set(audited) == set(expected), "audit coverage")
 for key, row in rows.items():
     require(row["v0-source"] == expected[key]["source"], f"{key}: v0 source")
     require(row["v0-source-sha256"] == expected[key]["sha256"], f"{key}: v0 source hash")
-    require(row["classification"] == audited[key]["status"], f"{key}: audit classification")
+    require(row["audit-classification"] == audited[key]["status"], f"{key}: audit classification")
 
 targets = {target["id"]: target for target in catalog["targets"]}
 require({(t["architecture"], t["unameMachine"]) for t in targets.values()} == {("amd64", "x86_64"), ("arm64", "aarch64")},
