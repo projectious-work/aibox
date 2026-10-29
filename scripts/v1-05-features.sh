@@ -12,8 +12,11 @@
 #   scripts/v1-05-features.sh generate
 #       Regenerates devcontainer-feature.json, lib/aibox-feature.sh and
 #       lib/catalog.sh for every Feature directory with an install.sh.
+#   scripts/v1-05-features.sh docs
+#       Regenerates the user reference docs-site/content/docs/tool-catalog.md.
 #   scripts/v1-05-features.sh check [--complete]
-#       Fails when generated files drift from the catalog or the library.
+#       Fails when generated files or the tool catalog page drift from the
+#       catalog or the library.
 #   scripts/v1-05-features.sh test
 #       Runs the component tests in features/test.
 set -euo pipefail
@@ -27,7 +30,7 @@ fail() {
 }
 
 usage() {
-  sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -77,7 +80,7 @@ command=$1
 shift
 case "$command" in
   publish) publish "$@" ;;
-  generate|check) exec node "$repo_root/scripts/v1-05-features.mjs" "$command" "$@" ;;
+  generate|docs|check) exec node "$repo_root/scripts/v1-05-features.mjs" "$command" "$@" ;;
   test) exec node --test "$repo_root"/features/test/*.test.mjs ;;
   -h|--help|help) usage ;;
   *) fail "unknown command: $command" ;;
