@@ -161,8 +161,15 @@ existing contract and need no change.
 
 glow 3.0.0 and bat 0.26.1 were checked on 2026-10-29: archive checksums agree
 with the GitHub asset digests and glow's `checksums.txt`, and both arm64
-binaries print the catalog version. glow drops front matter, so previews show
-it through bat.
+binaries print the catalog version; amd64 binaries are checked by hash only
+until the host run. glow drops front matter, so previews show it through bat.
+The v0 base installed bat; if a later base revision restores it, `bat` must be
+added to `baseline.provides` (V1-13 hand-off).
+
+Amendment review (sage, `claude-opus-5-5`, Anthropic) approved `48f54282` with
+no blocking findings. Its notes are applied: the exempt-command sentence covers
+`baseline.provides` and `alsoProvides`, chapter 4 marks glow as new, and
+`COMPAT-V0-REQUIRES` no longer lists the removed rich row.
 
 ## Logbook
 

@@ -292,9 +292,10 @@ closure `requires`, the same observables of every sibling are absent unless
 the sibling is in that member's transitive `dependsOn` or `requires` closure.
 An installed tool's `alsoProvides` entry for the target exempts only what it
 names: a `command` or `package` exempts that command or package, and a
-`feature` exempts every observable of that Feature. An exempt command name
-exempts only the matching `commands` entry, not a `command` check that runs
-that command. `version` and `texlive`
+`feature` exempts every observable of that Feature. A command name in
+`baseline.provides`, or in an installed tool's `alsoProvides` `command` entry,
+exempts only the matching `commands` entry; a `command` check whose `argv`
+runs that command is still an absence observable. `version` and `texlive`
 checks are not absence observables. A tool whose observables are all exempt or
 in `baseline.provides` has no absence test. Disabling a tool means omitting its
 Feature.
