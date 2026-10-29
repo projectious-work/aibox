@@ -175,7 +175,8 @@ class Executor:
                 return [result_record(t, [f"devcontainer up failed (exit {up.exit_code})"],
                                       log=f"builds/{build.key}.log") for t in tests]
             container_id = outcome["containerId"]
-            workspace_changes = metadata.snapshot_changes(before, metadata.snapshot(workspace))
+            workspace_changes = metadata.snapshot_changes(
+                before, metadata.snapshot(workspace), exempt=(metadata.CLI_LOCKFILE,))
             outcomes = self.probe_all(tests, common, label, container_id, log)
             records = []
             for test in tests:

@@ -11,8 +11,10 @@ import tarfile
 from pathlib import Path
 from typing import Mapping
 
-LIFECYCLE_KEYS = ("onCreateCommand", "updateContentCommand", "postCreateCommand",
-                  "postStartCommand", "postAttachCommand")
+FORBIDDEN_KEYS = ("onCreateCommand", "updateContentCommand", "postCreateCommand",
+                  "postStartCommand", "postAttachCommand", "mounts", "privileged", "capAdd",
+                  "securityOpt", "init", "entrypoint")
+CLI_LOCKFILE = ".devcontainer/devcontainer-lock.json"
 
 
 def feature_json_from_layer(layer: bytes) -> dict:
@@ -28,21 +30,15 @@ def feature_json_from_layer(layer: bytes) -> dict:
 
 
 def side_effect_violations(metadata: Mapping, expected_env: Mapping[str, str]) -> list[str]:
-    """Chapter 8 Side effects: no lifecycle commands, no mounts, no
-    privileged mode, no capabilities; containerEnv equals the catalog."""
-    violations = []
-    for key in LIFECYCLE_KEYS:
-        if metadata.get(key) not in (None, "", [], {}):
-            violations.append(f"declares lifecycle command {key}")
-    if metadata.get("mounts") not in (None, []):
-        violations.append("declares mounts")
-    if metadata.get("privileged") not in (None, False):
-        violations.append("declares privileged mode")
-    if metadata.get("capAdd") not in (None, []):
-        violations.append("declares capabilities (capAdd)")
-    published_env = metadata.get("containerEnv") or {}
-    if dict(published_env) != dict(expected_env):
-        violations.append(f"containerEnv {json.dumps(published_env, sort_keys=True)} "
+    """Chapter 8 Side effects: none of the forbidden keys is present, and
+    `containerEnv` equals the catalog's or is absent when the catalog has none."""
+    violations = [f"declares {key}" for key in FORBIDDEN_KEYS if key in metadata]
+    if not expected_env:
+        if "containerEnv" in metadata:
+            violations.append(f"declares containerEnv {json.dumps(metadata['containerEnv'])} "
+                              "although the catalog has none")
+    elif metadata.get("containerEnv") != dict(expected_env):
+        violations.append(f"containerEnv {json.dumps(metadata.get('containerEnv'), sort_keys=True)} "
                           f"differs from catalog {json.dumps(dict(expected_env), sort_keys=True)}")
     return violations
 
@@ -68,9 +64,12 @@ def snapshot(root: Path) -> dict[str, str]:
     return entries
 
 
-def snapshot_changes(before: Mapping[str, str], after: Mapping[str, str]) -> list[str]:
+def snapshot_changes(before: Mapping[str, str], after: Mapping[str, str],
+                     exempt: tuple[str, ...] = ()) -> list[str]:
     changes = []
     for path in sorted(set(before) | set(after)):
+        if path in exempt:
+            continue
         if path not in after:
             changes.append(f"deleted {path}")
         elif path not in before:

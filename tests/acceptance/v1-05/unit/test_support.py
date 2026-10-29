@@ -30,15 +30,31 @@ class MetadataTest(unittest.TestCase):
 
     def test_clean_metadata_has_no_violations(self):
         env = {"PATH": "/usr/local/cargo/bin:${PATH}"}
-        self.assertEqual(metadata.side_effect_violations(
-            {"id": "rustc", "containerEnv": env, "privileged": False}, env), [])
-        self.assertEqual(metadata.side_effect_violations({"id": "uv"}, {}), [])
+        self.assertEqual(metadata.side_effect_violations({"id": "rustc", "containerEnv": env},
+                                                         env), [])
+        self.assertEqual(metadata.side_effect_violations({"id": "uv", "version": "1.0.0"}, {}),
+                         [])
 
-    def test_each_forbidden_declaration_is_reported(self):
-        violations = metadata.side_effect_violations(
-            {"postCreateCommand": "x", "mounts": [{"source": "a", "target": "/b"}],
-             "privileged": True, "capAdd": ["SYS_PTRACE"], "containerEnv": {"A": "1"}}, {})
-        self.assertEqual(len(violations), 5)
+    def test_every_listed_key_is_forbidden_even_when_empty_or_false(self):
+        for key in ("onCreateCommand", "updateContentCommand", "postCreateCommand",
+                    "postStartCommand", "postAttachCommand", "mounts", "privileged", "capAdd",
+                    "securityOpt", "init", "entrypoint"):
+            value = False if key in ("privileged", "init") else []
+            self.assertEqual(metadata.side_effect_violations({key: value}, {}),
+                             [f"declares {key}"], key)
+
+    def test_container_env_must_equal_catalog_or_be_absent(self):
+        self.assertEqual(len(metadata.side_effect_violations({"containerEnv": {}}, {})), 1)
+        self.assertEqual(len(metadata.side_effect_violations({"containerEnv": {"A": "1"}},
+                                                             {"A": "2"})), 1)
+        self.assertEqual(len(metadata.side_effect_violations({}, {"A": "1"})), 1)
+
+    def test_cli_lockfile_is_the_only_exempt_workspace_change(self):
+        before = {".devcontainer": "dir:755", "x": "file:644:a"}
+        after = dict(before, **{metadata.CLI_LOCKFILE: "file:644:b", "y": "file:644:c"})
+        self.assertEqual(metadata.snapshot_changes(before, after,
+                                                   exempt=(metadata.CLI_LOCKFILE,)),
+                         ["added y"])
 
     def test_snapshot_detects_added_modified_and_deleted_entries(self):
         with tempfile.TemporaryDirectory() as directory:
