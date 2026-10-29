@@ -1,8 +1,9 @@
 # V1-05 native tool catalog
 
-V1-05 is in the phase-contract step of R-CYCLE. The contract is drafted on
-`contract/v1-05-tool-catalog` and awaits independent review and owner freeze.
-No implementation or acceptance-test track has started from it.
+V1-05 contract is frozen at contract commit
+`34d06da0cf42d73ff05971c7235ae1324d7e768a` on `contract/v1-05-tool-catalog`
+(DEC-20261029_1515-ShinySpire). The acceptance-test and implementation tracks
+start from that commit.
 
 ## Baseline
 
@@ -124,4 +125,5 @@ findings against the baseline:
 |---|---|
 | 2026-10-29 | Contract drafted on `contract/v1-05-tool-catalog` (`a3850809`). |
 | 2026-10-29 | Review round 1 findings resolved (`25c5a472`). |
-| 2026-10-29 | Review round 2 findings closed by the integration owner; owner freeze pending. |
+| 2026-10-29 | Review round 2 findings closed by the integration owner (`34d06da0`). |
+| 2026-10-29 | Owner froze the contract at `34d06da0` (DEC-20261029_1515-ShinySpire). |
