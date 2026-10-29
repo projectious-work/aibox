@@ -17,7 +17,7 @@ license/supply-chain clearance.
 | PR workflow | Optional [gh-dash](https://github.com/dlvhdr/gh-dash) plus gh | GitHub-specific review integration; native forge web fallback; not a new forge abstraction. |
 | Harness sidebar | Evaluate [tmux-agent-status](https://github.com/samleeney/tmux-agent-status) first | Session scoping, theme/layout integration, hook compatibility and telemetry gaps; AC-SIDEBAR. |
 | Rich monitoring alternative | [agent-dashboard](https://github.com/bjornjee/agent-dashboard) | Not selected: orchestration/workflow/remote control exceed monitoring scope; evaluate only a separable observational mode. |
-| Preview/render | Existing Poppler, resvg/librsvg, Ghostscript, Rich, ffmpeg, csvkit, SQLite, bat, chafa/timg/mutool/entr | Preserve small glue where native plugins do not cover existing behavior. |
+| Preview/render | Existing Poppler, resvg/librsvg, Ghostscript, glow, ffmpeg, csvkit, SQLite, bat, chafa/timg/mutool/entr | Preserve small glue where native plugins do not cover existing behavior. |
 | Processkit integration | Product-owned supported installer/config/migration APIs | G02: API availability and pinned compatibility require qualification; do not copy process logic. |
 | Config schema/JSONC | Upstream schema and maintained Go parser/validator | G01/G04: select dependencies after conformance test; no new JSONC parser. |
 | Image supply chain | Existing SBOM/scanning/signing tools | Exact-artifact evidence, local release workflow; AC-RELEASE. |

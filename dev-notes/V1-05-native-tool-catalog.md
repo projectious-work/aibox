@@ -34,7 +34,7 @@ continue from that commit.
 
 | Artifact | Role |
 |---|---|
-| [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 119 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
+| [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 120 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
 | [`spec/v1/feature-catalog.schema.json`](../spec/v1/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
 | [Chapter 8, Tool Feature interface](../spec/v1/08-native-artifacts.md#tool-feature-interface) | Identity, shapes, options, dependencies, targets, errors, presence, absence, side effects, publishing for tests, inspection |
 | [Chapter 5, AC-TOOLS items](../spec/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix) | Acceptance item IDs and known-risk stacks |
@@ -44,9 +44,9 @@ continue from that commit.
 | `spec/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
 | `spec/v1/scripts/validate-v1-05-catalog.py` | Cross-reference checks between census, catalog and table |
 
-Census result: 94 rows retained, 4 removed (mistral, starlight, docusaurus,
-mkdocs). Catalog additions without a census row: vibe, typescript (tsc,
-biome, oxlint), zig (zig, zls), security/crypto (age, sops, gnupg,
+Census result: 93 rows retained, 5 removed (mistral, starlight, docusaurus,
+mkdocs, rich). Catalog additions without a census row: vibe, typescript (tsc,
+biome, oxlint), zig (zig, zls), preview-enhanced (glow, bat), security/crypto (age, sops, gnupg,
 openssh-client, minisign, openssl) and semgrep.
 
 Version and install-route data were researched on 2026-10-29 from producer
@@ -152,6 +152,18 @@ Tests Q10 (MCP inspection), Q14 (requires target) and the implementation's
 error-code mapping for apt update and tool-internal downloads follow the
 existing contract and need no change.
 
+## Contract amendment 2
+
+| Source | Defect | Change |
+|---|---|---|
+| Implementation (wave 3) | `rich-cli` 1.8.1 prints version 1.8.0, so `AC-TOOLS/present preview/enhanced/rich` cannot pass; with uv-managed Python the rich library cannot serve aibox's Yazi preview glue | Owner removed rich and added `preview/enhanced/glow` 3.0.0 and `preview/enhanced/bat` 0.26.1 (DEC-20261029_2107-QuietSeal); census row removed; `COMPAT-RICH` updated |
+| Tests A1 | Whether an exempt command name also exempts a `command` check was unstated | It exempts only the matching `commands` entry |
+
+glow 3.0.0 and bat 0.26.1 were checked on 2026-10-29: archive checksums agree
+with the GitHub asset digests and glow's `checksums.txt`, and both arm64
+binaries print the catalog version. glow drops front matter, so previews show
+it through bat.
+
 ## Logbook
 
 | Date | Entry |
@@ -162,3 +174,4 @@ existing contract and need no change.
 | 2026-10-29 | Owner froze the contract at `34d06da0` (DEC-20261029_1515-ShinySpire). |
 | 2026-10-29 | Tracks started: tests `799d234b`..`b646e40a`, implementation waves 1–2 `2cfa66e5`..`977a7eed`. Amendment 1 drafted from their contract questions; review pending. |
 | 2026-10-29 | Owner approved amendment 1 as contract commit `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam); both tracks move onto it. |
+| 2026-10-29 | Tracks reported: tests `85d77f02`, implementation wave 3 `5b38f55d`. Amendment 2 drafted (rich replaced by glow and bat); review pending. |

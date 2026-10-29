@@ -2601,23 +2601,16 @@
     "effectiveVersion": "unversioned/distro-or-latest"
    },
    "v0-versions": [],
-   "v1-ref": "preview/enhanced/rich",
-   "v1-option": {
-    "version": "1.8.1"
-   },
-   "install-owner": "aibox",
-   "dependency": [
-    "python/uv"
-   ],
-   "license": "MIT",
+   "v1-ref": null,
+   "v1-option": null,
+   "install-owner": null,
+   "dependency": [],
+   "license": null,
    "digest": null,
-   "platforms": [
-    "linux/amd64",
-    "linux/arm64"
-   ],
-   "test-id": "AC-TOOLS/present preview/enhanced/rich",
-   "decision": "retained",
-   "decision-record": "DEC-20261029_0835-HumbleBridge",
+   "platforms": [],
+   "test-id": "AC-TOOLS/trace",
+   "decision": "removed",
+   "decision-record": "DEC-20261029_2107-QuietSeal",
    "audit-classification": "gap"
   },
   {
