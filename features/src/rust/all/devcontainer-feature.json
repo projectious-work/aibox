@@ -1,0 +1,14 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "rust bundle",
+  "description": "Installs every rust member Feature through dependsOn (aibox catalog ID rust/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/rust/cargo-audit:1": {},
+    "ghcr.io/projectious-work/aibox-features/rust/clippy:1": {},
+    "ghcr.io/projectious-work/aibox-features/rust/rustc:1": {},
+    "ghcr.io/projectious-work/aibox-features/rust/rustfmt:1": {},
+    "ghcr.io/projectious-work/aibox-features/rust/x86-64-cross:1": {}
+  }
+}

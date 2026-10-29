@@ -73,6 +73,22 @@ describe('publish', () => {
       ['localhost:5000/aibox-features/node/node']);
   });
 
+  it('publishes every aibox-owned Feature, bundles included, when no --feature is given', () => {
+    const {cli, state} = fakeCli();
+    const result = publish(['--registry', 'localhost:5000/aibox-features'], {cli});
+    assert.equal(result.status, 0, result.output);
+    for (const feature of catalog.features) {
+      const metadata = published(state, 'localhost:5000', `aibox-features/${feature.id}`);
+      assert.equal(metadata !== undefined, feature.owner === 'aibox', feature.id);
+    }
+    const bundle = published(state, 'localhost:5000', 'aibox-features/git-ui/all');
+    const upstream = catalog.features.find((f) => f.id === 'git-ui/gh').upstream;
+    assert.deepEqual(bundle.dependsOn, {
+      [upstream.ref]: upstream.options,
+      'localhost:5000/aibox-features/git-ui/lazygit:1': {},
+    });
+  });
+
   it('leaves the source metadata unchanged', () => {
     const {cli} = fakeCli();
     const before = readFileSync(join(featuresSrc, 'python/python/devcontainer-feature.json'), 'utf8');

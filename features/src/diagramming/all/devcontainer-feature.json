@@ -1,0 +1,11 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "diagramming bundle",
+  "description": "Installs every diagramming member Feature through dependsOn (aibox catalog ID diagramming/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/diagramming/d2:1": {},
+    "ghcr.io/projectious-work/aibox-features/diagramming/graphviz:1": {}
+  }
+}

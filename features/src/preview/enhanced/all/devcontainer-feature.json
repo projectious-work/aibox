@@ -1,0 +1,12 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "preview-enhanced bundle",
+  "description": "Installs every preview-enhanced member Feature through dependsOn (aibox catalog ID preview/enhanced/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/preview/enhanced/ffmpeg:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/enhanced/ghostscript:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/enhanced/rich:1": {}
+  }
+}

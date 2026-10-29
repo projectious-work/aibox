@@ -1,0 +1,13 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "kubernetes bundle",
+  "description": "Installs every kubernetes member Feature through dependsOn (aibox catalog ID kubernetes/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/kubernetes/helm:1": {},
+    "ghcr.io/projectious-work/aibox-features/kubernetes/k9s:1": {},
+    "ghcr.io/projectious-work/aibox-features/kubernetes/kubectl:1": {},
+    "ghcr.io/projectious-work/aibox-features/kubernetes/kustomize:1": {}
+  }
+}

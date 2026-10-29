@@ -3,7 +3,8 @@
 // catalog (spec/v1/catalog/v1-05-features.json).
 //
 // For each Feature directory features/src/<catalog-id>/ that holds a
-// hand-written install.sh, this script owns three generated files:
+// hand-written install.sh, this script owns three generated files (and for a
+// bundle also install.sh, so every catalog bundle is generated whole):
 //   devcontainer-feature.json  metadata derived from the catalog entry
 //   lib/aibox-feature.sh       copy of the shared library features/lib/aibox-feature.sh
 //   lib/catalog.sh             the entry's guard data (targets, versions, requires, coupling)
@@ -16,7 +17,7 @@
 //   node scripts/v1-05-features.mjs stage --registry <host>/<prefix> --out <dir> [--feature <id>]...
 // Common option: --features-dir <dir> (default features/src).
 import {
-  cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync,
+  chmodSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync,
 } from 'node:fs';
 import {dirname, join, relative, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -113,14 +114,37 @@ export function renderCatalogShell(feature, catalog) {
   ].join('');
 }
 
+// A bundle installs nothing itself: the Dev Container CLI installs its
+// members through dependsOn. Its install.sh only applies the guards.
+export function renderBundleInstall(feature) {
+  return [
+    '#!/bin/sh',
+    `# ${generatedHeader}`,
+    `# ${feature.id}: bundle of the ${feature.group} group. It installs nothing itself;`,
+    '# the Dev Container CLI installs every member through dependsOn.',
+    'set -eu',
+    'feature_dir=$(cd "${0%/*}" && pwd)',
+    '. "$feature_dir/lib/catalog.sh"',
+    '. "$feature_dir/lib/aibox-feature.sh"',
+    'af_init',
+    'af_finish',
+    '',
+  ].join('\n');
+}
+
 // Generated files for one Feature, keyed by path relative to its directory.
+// Bundles are generated completely, including install.sh.
 export function renderFeatureFiles(feature, catalog) {
-  return {
+  const files = {
     'devcontainer-feature.json': renderMetadata(feature, catalog),
     'lib/aibox-feature.sh': readFileSync(libraryPath, 'utf8'),
     'lib/catalog.sh': renderCatalogShell(feature, catalog),
   };
+  if (feature.role === 'bundle') files['install.sh'] = renderBundleInstall(feature);
+  return files;
 }
+
+const bundleIds = (catalog) => catalog.features.filter((f) => f.role === 'bundle').map((f) => f.id);
 
 // Feature source directories: every directory holding an install.sh.
 export function featureDirectories(featuresDir = defaultFeaturesDir) {
@@ -141,6 +165,9 @@ export function checkSources(catalog, {featuresDir = defaultFeaturesDir, complet
   const problems = [];
   const owned = new Map(catalog.features.filter((f) => f.owner === 'aibox').map((f) => [f.id, f]));
   const present = featureDirectories(featuresDir);
+  for (const id of bundleIds(catalog)) {
+    if (!present.includes(id)) problems.push(`features/src/${id}/install.sh is missing; run generate`);
+  }
   for (const id of present) {
     const feature = owned.get(id);
     if (!feature) {
@@ -154,6 +181,7 @@ export function checkSources(catalog, {featuresDir = defaultFeaturesDir, complet
       const file = join(featuresDir, id, path);
       if (!existsSync(file)) problems.push(`features/src/${id}/${path} is missing; run generate`);
       else if (readFileSync(file, 'utf8') !== expected) problems.push(`features/src/${id}/${path} differs from the catalog; run generate`);
+      else if (path === 'install.sh' && !(statSync(file).mode & 0o111)) problems.push(`features/src/${id}/install.sh is not executable; run generate`);
     }
   }
   if (complete) {
@@ -167,14 +195,17 @@ export function checkSources(catalog, {featuresDir = defaultFeaturesDir, complet
 export function generateSources(catalog, {featuresDir = defaultFeaturesDir} = {}) {
   const owned = new Map(catalog.features.filter((f) => f.owner === 'aibox').map((f) => [f.id, f]));
   const written = [];
-  for (const id of featureDirectories(featuresDir)) {
+  for (const id of new Set([...featureDirectories(featuresDir), ...bundleIds(catalog)])) {
     const feature = owned.get(id);
     if (!feature) throw new Error(`features/src/${id} is not an aibox-owned catalog Feature`);
     for (const [path, content] of Object.entries(renderFeatureFiles(feature, catalog))) {
       const file = join(featuresDir, id, path);
-      if (existsSync(file) && readFileSync(file, 'utf8') === content) continue;
+      const executable = path === 'install.sh';
+      if (existsSync(file) && readFileSync(file, 'utf8') === content
+        && (!executable || statSync(file).mode & 0o111)) continue;
       mkdirSync(dirname(file), {recursive: true});
-      writeFileSync(file, content);
+      writeFileSync(file, content, executable ? {mode: 0o755} : undefined);
+      if (executable) chmodSync(file, 0o755);
       written.push(`features/src/${id}/${path}`);
     }
   }
