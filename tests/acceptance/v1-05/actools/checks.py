@@ -33,15 +33,19 @@ class Outcome:
 @dataclass(frozen=True)
 class Expectation:
     """`rule` is one of: version, command, package, texlive, path (presence
-    kinds of chapter 8) or command-absent, package-absent, path-absent."""
+    kinds of chapter 8) or command-absent, command-check-absent,
+    package-absent, path-absent (absence observables). `scope` names the
+    Feature and tool the expectation belongs to in aggregate tests."""
     rule: str
     probe: Probe
     subject: str
     regex: str | None = None
     expected: str | None = None
+    scope: str = ""
 
     def describe(self) -> str:
-        return f"{self.rule} {self.subject}"
+        prefix = f"{self.scope}: " if self.scope else ""
+        return f"{prefix}{self.rule} {self.subject}"
 
 
 def ecmascript_escape(text: str) -> str:
@@ -105,8 +109,8 @@ def presence_expectations(tool: Mapping, version: str | None, *,
 
 def absence_expectations(tool: Mapping, *, skip_commands: Iterable[str] = (),
                          skip_packages: Iterable[str] = ()) -> list[Expectation]:
-    """Chapter 8: absence is judged through `commands`, `package` checks and
-    `path` checks only."""
+    """Chapter 8 absence observables: `commands` entries and `command`,
+    `package` and `path` checks; `version` and `texlive` checks are not."""
     skip_commands, skip_packages = set(skip_commands), set(skip_packages)
     expectations = [Expectation("command-absent", command_probe(name), name)
                     for name in tool.get("commands", []) if name not in skip_commands]
@@ -118,6 +122,9 @@ def absence_expectations(tool: Mapping, *, skip_commands: Iterable[str] = (),
         elif check["kind"] == "path":
             expectations.append(Expectation("path-absent", path_probe(check["path"]),
                                             check["path"]))
+        elif check["kind"] == "command":
+            expectations.append(Expectation("command-check-absent", Probe(tuple(check["argv"])),
+                                            " ".join(check["argv"]), regex=check["regex"]))
     return expectations
 
 
@@ -140,6 +147,9 @@ def passes(expectation: Expectation, outcome: Outcome) -> bool:
         return not (outcome.exit_code == 0 and outcome.output.strip() == "installed")
     if rule == "path-absent":
         return outcome.exit_code != 0
+    if rule == "command-check-absent":
+        return not (outcome.exit_code == 0 and bool(
+            compile_ecmascript(expectation.regex or "").search(outcome.output)))
     raise ValueError(f"unknown rule {rule}")
 
 

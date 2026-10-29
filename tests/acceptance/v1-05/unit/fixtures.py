@@ -54,7 +54,9 @@ def feature(feature_id, group, *, role="tool", owner="aibox", versions=None, dep
 
 
 def synthetic() -> Catalog:
-    """runtime <- (lib requires runtime), kit/{a,b,c,all}, plus an upstream tool."""
+    """runtime; semantic kit/{a..e,all} where kit/a requires runtime, kit/b
+    dependsOn kit/a, kit/a's alsoProvides exempts command c-cmd and Feature
+    kit/e on amd64, kit/d has only a texlive check; plus an upstream tool."""
     data = copy.deepcopy({k: v for k, v in REAL.data.items()
                           if k in ("schemaVersion", "targets", "errors", "unsupportedTargets",
                                    "baseline")})
@@ -65,23 +67,27 @@ def synthetic() -> Catalog:
         feature("kit/a", "kit", versions=["1.0", "1.1"], requires=["runtime"],
                 tools=[tool("a", commands=["a", "shared"],
                             also=[{"kind": "command", "name": "c-cmd",
+                                   "targets": ["debian-13-amd64"]},
+                                  {"kind": "feature", "name": "kit/e",
                                    "targets": ["debian-13-amd64"]}])]),
         feature("kit/b", "kit", depends=["kit/a"],
                 tools=[tool("b", commands=["b"], version="3.0",
                             checks=[{"kind": "package", "package": "libb", "version": "3.0-1"},
                                     {"kind": "package", "package": "libshared",
                                      "version": "1"}])]),
-        feature("kit/c", "kit", tools=[tool("c", commands=["c-cmd"], version="1.0")]),
+        feature("kit/c", "kit", tools=[tool("c", commands=["c-cmd"], version="1.0", checks=[
+            {"kind": "command", "argv": ["c-cmd", "--help"], "regex": "^c "}])]),
+        feature("kit/e", "kit", tools=[tool("e", commands=["e"], version="1.0")]),
         feature("kit/d", "kit", tools=[tool("d", commands=[], version="1.0",
                                             checks=[{"kind": "texlive", "package": "dpkg"}])]),
-        feature("kit/all", "kit", role="bundle", depends=["kit/a", "kit/b", "kit/c", "kit/d"]),
+        feature("kit/all", "kit", role="bundle", depends=["kit/a", "kit/b", "kit/c", "kit/d", "kit/e"]),
         feature("up/tool", "uptool", owner="upstream",
                 tools=[tool("up", commands=["up"], version="9.9.9", method="upstream-feature")]),
     ]
     data["groups"] = [
         {"id": "runtime", "shape": "single", "features": ["runtime"], "v0Recipes": []},
         {"id": "kit", "shape": "semantic", "bundle": "kit/all", "v0Recipes": [],
-         "features": ["kit/a", "kit/b", "kit/c", "kit/d", "kit/all"]},
+         "features": ["kit/a", "kit/b", "kit/c", "kit/d", "kit/e", "kit/all"]},
         {"id": "uptool", "shape": "single", "features": ["up/tool"], "v0Recipes": []},
     ]
     data["removed"] = []

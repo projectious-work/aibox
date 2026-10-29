@@ -5,7 +5,8 @@ fixture with an exact Feature selection; tests that define the identical
 selection share it (chapter 8 allows sharing for presence checks; for the
 other items an identical selection is still exactly the selection the item
 defines). Test IDs follow chapter 5:
-`AC-TOOLS/<item> <Feature> [<tool>] <target> [qualifier=value ...]`.
+`AC-TOOLS/<item> [<feature-id> [<tool>]] [<target-id>] [<key>=<value> ...]`
+with the per-item slots of chapter 5.
 """
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ from __future__ import annotations
 import fnmatch
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Callable, Iterable, Mapping
 
 from . import checks
@@ -57,6 +58,14 @@ class Test:
     payload: Mapping = field(default_factory=dict)
 
 
+@dataclass
+class Exemptions:
+    """What installed tools' `alsoProvides` exempt from absence checks."""
+    commands: set = field(default_factory=set)
+    packages: set = field(default_factory=set)
+    features: set = field(default_factory=set)
+
+
 def test_id(item: str, *parts: str | None, qualifiers: Iterable[tuple[str, str]] = ()) -> str:
     tokens = [f"AC-TOOLS/{item}", *[part for part in parts if part]]
     tokens += [f"{key}={value}" for key, value in qualifiers]
@@ -95,8 +104,27 @@ class Planner:
         result = []
         for tool in self.catalog.feature(feature_id)["tools"]:
             version = self.catalog.selected_version(feature_id, tool, options)
-            result.append((tool, checks.presence_expectations(
-                tool, version, include_commands=include_commands)))
+            expectations = checks.presence_expectations(tool, version,
+                                                        include_commands=include_commands)
+            scope = f"{feature_id} {tool['name']}"
+            result.append((tool, [replace(e, scope=scope) for e in expectations]))
+        return result
+
+    def all_presence(self, feature_ids: Iterable[str]) -> list[checks.Expectation]:
+        return [e for feature_id in feature_ids for _, expectations in self.presence(feature_id)
+                for e in expectations]
+
+    def absence(self, feature_id: str, exempt: "Exemptions") -> list[checks.Expectation]:
+        """Absence observables of a Feature that are neither exempt nor in
+        `baseline.provides` (chapter 8 Reference base and absence)."""
+        if feature_id in exempt.features:
+            return []
+        result = []
+        for tool in self.catalog.feature(feature_id)["tools"]:
+            expectations = checks.absence_expectations(
+                tool, skip_commands=self.catalog.baseline_commands | exempt.commands,
+                skip_packages=self.catalog.baseline_packages | exempt.packages)
+            result += [replace(e, scope=f"{feature_id} {tool['name']}") for e in expectations]
         return result
 
     def supported(self, feature_id: str, target: str) -> bool:
@@ -105,7 +133,7 @@ class Planner:
     def plan_present(self, target: str) -> None:
         for feature_id, feature in self.catalog.features.items():
             if feature["role"] == "bundle" or not self.supported(feature_id, target):
-                continue  # contract question Q2: a bundle has no checks of its own
+                continue  # chapter 5: present is per non-bundle Feature
             key = self.build(self.catalog.with_requires({feature_id: {}}))
             for tool, expectations in self.presence(feature_id):
                 self.add(Test(test_id("present", feature_id, tool["name"], target), "present",
@@ -128,65 +156,51 @@ class Planner:
                                   tuple(expectations)))
 
     def plan_absent(self, target: str) -> None:
-        key = self.build({})
-        for feature_id, feature in self.catalog.features.items():
-            for tool in feature["tools"]:
-                expectations = checks.absence_expectations(
-                    tool, skip_commands=self.catalog.baseline_commands,
-                    skip_packages=self.catalog.baseline_packages)
-                if expectations:  # contract question Q3: nothing observable otherwise
-                    self.add(Test(test_id("absent", feature_id, tool["name"], target),
-                                  "absent", target, feature_id, tool["name"],
-                                  subjects=(feature_id,), build=key,
-                                  expectations=tuple(expectations)))
+        expectations = [e for feature_id in self.catalog.features
+                        for e in self.absence(feature_id, Exemptions())]
+        self.add(Test(test_id("absent", target), "absent", target,
+                      subjects=tuple(self.catalog.features), build=self.build({}),
+                      expectations=tuple(expectations)))
 
-    def also_provided(self, installed: Iterable[str], target: str) -> tuple[set[str], set[str]]:
-        commands, packages = set(), set()
+    def exemptions(self, installed: Iterable[str], target: str) -> "Exemptions":
+        exempt = Exemptions()
         for feature_id in installed:
             for tool in self.catalog.feature(feature_id)["tools"]:
                 for entry in tool.get("alsoProvides", []):
                     if target in entry["targets"]:
-                        (commands if entry["kind"] == "command" else packages).add(entry["name"])
-        return commands, packages
+                        {"command": exempt.commands, "package": exempt.packages,
+                         "feature": exempt.features}[entry["kind"]].add(entry["name"])
+        return exempt
 
     def plan_isolated(self, target: str) -> None:
         for group, member in self.catalog.semantic_members():
             if not self.supported(member, target):
                 continue
             selection = self.catalog.with_requires({member: {}})
-            installed = self.catalog.install_closure(selection)
-            also_commands, also_packages = self.also_provided(installed, target)
+            exempt = self.exemptions(self.catalog.install_closure(selection), target)
+            closure = self.catalog.install_closure([member])
+            siblings = [s for s in group["features"]
+                        if s not in (member, group["bundle"]) and s not in closure]
+            expectations = [e for sibling in siblings for e in self.absence(sibling, exempt)]
+            if not expectations:
+                continue  # every sibling observable is exempt or a dependency
             key = self.build(selection)
-            for sibling in group["features"]:
-                if sibling in (member, group["bundle"]) or sibling in installed:
-                    continue
-                for tool in self.catalog.feature(sibling)["tools"]:
-                    expectations = checks.absence_expectations(
-                        tool, skip_commands=self.catalog.baseline_commands | also_commands,
-                        skip_packages=self.catalog.baseline_packages | also_packages)
-                    if not expectations:
-                        continue  # contract question Q3
-                    qualifiers = (("sibling", sibling),)
-                    self.add(Test(test_id("isolated", member, tool["name"], target,
-                                          qualifiers=qualifiers), "isolated", target,
-                                  member, tool["name"], qualifiers, (member,), key,
-                                  tuple(expectations)))
+            for tool in self.catalog.feature(member)["tools"]:
+                self.add(Test(test_id("isolated", member, tool["name"], target), "isolated",
+                              target, member, tool["name"], subjects=(member,), build=key,
+                              expectations=tuple(expectations),
+                              payload={"siblings": siblings}))
 
     def plan_bundle(self, target: str) -> None:
         for group in self.catalog.groups:
             if group["shape"] != "semantic" or not self.supported(group["bundle"], target):
                 continue
             bundle = group["bundle"]
+            members = [m for m in group["features"] if m != bundle]
             key = self.build(self.catalog.with_requires({bundle: {}}))
-            for member in group["features"]:
-                if member == bundle:
-                    continue
-                for tool, expectations in self.presence(member):
-                    qualifiers = (("member", member),)
-                    self.add(Test(test_id("bundle", bundle, tool["name"], target,
-                                          qualifiers=qualifiers), "bundle", target, bundle,
-                                  tool["name"], qualifiers, (bundle, member), key,
-                                  tuple(expectations)))
+            self.add(Test(test_id("bundle", bundle, target), "bundle", target, bundle,
+                          subjects=(bundle, *members), build=key,
+                          expectations=tuple(self.all_presence(members))))
 
     def plan_depends(self, target: str) -> None:
         for feature_id, feature in self.catalog.features.items():
@@ -195,18 +209,19 @@ class Planner:
             key = self.build(self.catalog.with_requires({feature_id: {}}))
             for dependency in feature["dependsOn"]:
                 for tool, expectations in self.presence(dependency):
-                    qualifiers = (("dependency", dependency),)
-                    self.add(Test(test_id("depends", feature_id, tool["name"], target,
-                                          qualifiers=qualifiers), "depends", target,
-                                  feature_id, tool["name"], qualifiers,
-                                  (feature_id, dependency), key, tuple(expectations)))
+                    self.add(Test(test_id("depends", feature_id, tool["name"], target),
+                                  "depends", target, feature_id, tool["name"],
+                                  subjects=(feature_id, dependency), build=key,
+                                  expectations=tuple(expectations),
+                                  payload={"dependency": dependency}))
 
-    def error_test(self, item: str, feature_id: str, target: str, key: str, code: str,
+    def error_test(self, item: str, feature_id: str, target: str | None, key: str, code: str,
                    features: Iterable[str], must_name: Iterable[str] | None = None,
                    qualifiers: tuple[tuple[str, str], ...] = (),
-                   subjects: tuple[str, ...] = ()) -> None:
-        self.add(Test(test_id(item, feature_id, target, qualifiers=qualifiers), item, target,
-                      feature_id, None, qualifiers, subjects or (feature_id,), key,
+                   subjects: tuple[str, ...] = (), host_target: str | None = None) -> None:
+        self.add(Test(test_id(item, feature_id, target, qualifiers=qualifiers), item,
+                      host_target or target, feature_id, None, qualifiers,
+                      subjects or (feature_id,), key,
                       error={"code": code, "features": sorted(features),
                              "mustName": sorted(must_name) if must_name else None}))
 
@@ -236,32 +251,36 @@ class Planner:
             key = self.build(self.catalog.with_requires(
                 {feature_id: {"version": UNSUPPORTED_VERSION}}), expect_failure=True)
             self.error_test("unsupported-version", feature_id, target, key,
-                            "AIBOX_FEATURE_UNSUPPORTED_VERSION", [feature_id],
-                            qualifiers=(("version", UNSUPPORTED_VERSION),))
+                            "AIBOX_FEATURE_UNSUPPORTED_VERSION", [feature_id])
 
     def plan_unsupported_target(self, target: str) -> None:
+        # The test ID has a fixture slot instead of a target: one test per
+        # Feature x fixture, run on whichever host target executes the plan.
+        if any(test.item == "unsupported-target" for test in self.tests):
+            return
         for feature_id, feature in self.catalog.features.items():
             if feature["owner"] != "aibox":
                 continue
             for unsupported in self.catalog.data["unsupportedTargets"]:
                 key = self.build(self.catalog.with_requires({feature_id: {}}),
                                  fixture=unsupported["id"], expect_failure=True)
-                self.error_test("unsupported-target", feature_id, target, key,
+                self.error_test("unsupported-target", feature_id, None, key,
                                 "AIBOX_FEATURE_UNSUPPORTED_TARGET",
                                 self.catalog.install_closure([feature_id]),
-                                qualifiers=(("fixture", unsupported["id"]),))
+                                qualifiers=(("fixture", unsupported["id"]),),
+                                host_target=target)
 
     def plan_conflict(self, target: str) -> None:
         for group, member in self.catalog.semantic_members():
             versions = self.catalog.non_default_versions(member)
             if not versions or not self.supported(member, target):
                 continue
-            version = versions[0]  # contract question Q9: one non-default value per member
+            version = versions[0]  # chapter 5: the first non-default enum value
             bundle = group["bundle"]
             key = self.build(self.catalog.with_requires(
                 {bundle: {}, member: {"version": version}}), expect_failure=True)
             self.error_test("conflict", member, target, key, "AIBOX_FEATURE_VERSION_CONFLICT",
-                            [member], qualifiers=(("bundle", bundle), ("version", version)),
+                            [member], qualifiers=(("version", version),),
                             subjects=(member, bundle))
 
     def plan_side_effects(self, target: str) -> None:
@@ -286,20 +305,18 @@ class Planner:
                                    "magicHex": smoke.get("producesMagicHex")}))
 
     def plan_stack(self, target: str) -> None:
-        for lead, selected in known_risk_stacks(self.catalog):
+        for stack_id, selected in known_risk_stacks(self.catalog):
             selection = self.catalog.with_requires({f: {} for f in selected})
-            key = self.build(selection)
-            for feature_id in sorted(self.catalog.depends_closure(selection)):
-                for tool, expectations in self.presence(feature_id):
-                    qualifiers = (("stack", lead),)
-                    self.add(Test(test_id("stack", feature_id, tool["name"], target,
-                                          qualifiers=qualifiers), "stack", target, feature_id,
-                                  tool["name"], qualifiers, (lead, *selected), key,
-                                  tuple(expectations)))
+            installed = sorted(f for f in self.catalog.depends_closure(selection)
+                               if not self.catalog.is_bundle(f))
+            self.add(Test(test_id("stack", stack_id, target), "stack", target, stack_id,
+                          subjects=(stack_id, *selected), build=self.build(selection),
+                          expectations=tuple(self.all_presence(installed)),
+                          payload={"features": installed}))
 
     def plan_inspect(self) -> None:
         for example in INSPECT_EXAMPLES:
-            self.add(Test(test_id("inspect", example), "inspect", None,
+            self.add(Test(test_id("inspect", qualifiers=(("example", example),)), "inspect", None,
                           payload={"example": example}))
 
     def plan_trace(self, census_rows: Iterable[str]) -> None:
@@ -308,18 +325,18 @@ class Planner:
 
 
 def known_risk_stacks(catalog: Catalog) -> list[tuple[str, list[str]]]:
-    """Chapter 5 "Known-risk stacks"; the lead Feature names the stack (Q7).
+    """Chapter 5 "Known-risk stacks" with their stack IDs.
     `node/node`, `go/go` and `rust/rustc` are added by with_requires where a
     member requires them."""
     uv_tools = sorted(feature_id for feature_id, feature in catalog.features.items()
                       if any(tool["method"] == "uv-tool" for tool in feature["tools"]))
     return [
-        ("python/all", ["python/all", *uv_tools]),
-        ("node/all", ["node/all", "typescript/all", "mermaid", "data/visualization",
+        ("STACK-PYTHON", ["python/all", *uv_tools]),
+        ("STACK-NODE", ["node/all", "typescript/all", "mermaid", "data/visualization",
                       "browser-testing/all"]),
-        ("latex/all", ["latex/all", "preview/archive/all", "preview/enhanced/all"]),
-        ("go/all", ["go/all", "rust/all", "zig/all"]),
-        ("security/crypto/all", ["security/crypto/all", "security/scan/all"]),
+        ("STACK-DOCS", ["latex/all", "preview/archive/all", "preview/enhanced/all"]),
+        ("STACK-NATIVE", ["go/all", "rust/all", "zig/all"]),
+        ("STACK-SECURITY", ["security/crypto/all", "security/scan/all"]),
     ]
 
 

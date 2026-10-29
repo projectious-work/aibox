@@ -90,6 +90,17 @@ class OtherKindsTest(unittest.TestCase):
         self.assertFalse(checks.passes(package, Outcome(0, "installed")))
         self.assertTrue(checks.passes(path, Outcome(1, "")))
 
+    def test_command_check_is_absent_unless_it_would_pass(self):
+        tool = {"name": "clippy", "commands": [],
+                "checks": [{"kind": "command", "argv": ["cargo", "clippy", "--version"],
+                            "regex": "^clippy "},
+                           {"kind": "version", "argv": ["x"], "regex": "{version}"}]}
+        (expectation,) = checks.absence_expectations(tool)
+        self.assertEqual(expectation.rule, "command-check-absent")
+        self.assertTrue(checks.passes(expectation, Outcome(101, "error: no such command")))
+        self.assertTrue(checks.passes(expectation, Outcome(0, "cargo-clippy missing")))
+        self.assertFalse(checks.passes(expectation, Outcome(0, "clippy 0.1.98")))
+
 
 class ProbeScriptTest(unittest.TestCase):
     def test_script_round_trip_merges_streams_and_keeps_exit_codes(self):
