@@ -1,0 +1,766 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectious.work/aibox/v1/feature-catalog.schema.json",
+  "title": "aibox v1 tool Feature interface catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "baselineRevision",
+    "registry",
+    "targets",
+    "errors",
+    "groups",
+    "features",
+    "removed",
+    "compatibilityNotes"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "aibox.feature-catalog/v1"
+    },
+    "baselineRevision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "registry": {
+      "const": "ghcr.io/projectious-work/aibox-features"
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/error"
+      }
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/group"
+      }
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/feature"
+      }
+    },
+    "removed": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/removal"
+      }
+    },
+    "compatibilityNotes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/compatibilityNote"
+      }
+    },
+    "smoke": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/smoke"
+      }
+    }
+  },
+  "$defs": {
+    "featureId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*){0,2}$"
+    },
+    "row": {
+      "type": "string",
+      "pattern": "^ADDON:[a-z0-9-]+/[a-z0-9_.-]+$"
+    },
+    "decision": {
+      "type": "string",
+      "pattern": "^DEC-[0-9]{8}_[0-9]{4}-[A-Za-z]+(?:-[a-z0-9-]+)?$"
+    },
+    "exactVersion": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9A-Za-z][0-9A-Za-z.+~:_-]*$"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "distro",
+        "release",
+        "versionId",
+        "architecture",
+        "unameMachine"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "distro": {
+          "const": "debian"
+        },
+        "release": {
+          "const": "trixie"
+        },
+        "versionId": {
+          "const": "13"
+        },
+        "architecture": {
+          "enum": [
+            "amd64",
+            "arm64"
+          ]
+        },
+        "unameMachine": {
+          "enum": [
+            "x86_64",
+            "aarch64"
+          ]
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "when",
+        "beforeInstall",
+        "verification"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^AIBOX_FEATURE_[A-Z_]+$"
+        },
+        "when": {
+          "type": "string",
+          "minLength": 1
+        },
+        "beforeInstall": {
+          "type": "boolean"
+        },
+        "verification": {
+          "enum": [
+            "acceptance",
+            "component"
+          ]
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "shape",
+        "features",
+        "v0Recipes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "shape": {
+          "enum": [
+            "single",
+            "atomic",
+            "semantic"
+          ]
+        },
+        "features": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/featureId"
+          }
+        },
+        "bundle": {
+          "$ref": "#/$defs/featureId"
+        },
+        "v0Recipes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "shape": {
+                "const": "semantic"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "bundle"
+            ]
+          }
+        }
+      ]
+    },
+    "versionOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "enum",
+        "default"
+      ],
+      "properties": {
+        "type": {
+          "const": "string"
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/exactVersion"
+          }
+        },
+        "default": {
+          "$ref": "#/$defs/exactVersion"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "default"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "boolean"
+          ]
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "default": {},
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "version",
+            "command",
+            "package",
+            "texlive",
+            "path"
+          ]
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "regex": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/exactVersion"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "version"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "argv",
+              "regex"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "command"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "argv",
+              "regex"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "package"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "package",
+              "version"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "texlive"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "package"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "path"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "path"
+            ]
+          }
+        }
+      ]
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "rows",
+        "method",
+        "docsUrl",
+        "source",
+        "verification",
+        "license",
+        "checks"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$"
+        },
+        "rows": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/row"
+          }
+        },
+        "commands": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]*$"
+          }
+        },
+        "versionFrom": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "enum": [
+            "producer-release",
+            "producer-apt-repo",
+            "npm-global",
+            "uv-tool",
+            "uv-python",
+            "go-install",
+            "rustup",
+            "debian-package",
+            "texlive-installer",
+            "upstream-feature",
+            "cargo-install",
+            "playwright-install"
+          ]
+        },
+        "docsUrl": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/exactVersion"
+        },
+        "absenceTargets": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "packages": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "publisher",
+        "source",
+        "featureVersion",
+        "options"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/devcontainers/features/[a-z0-9-]+@sha256:[0-9a-f]{64}$"
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "featureVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "object"
+        }
+      }
+    },
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "group",
+        "role",
+        "owner",
+        "targets",
+        "options",
+        "dependsOn",
+        "tools"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/featureId"
+        },
+        "group": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "role": {
+          "enum": [
+            "tool",
+            "atomic",
+            "bundle"
+          ]
+        },
+        "owner": {
+          "enum": [
+            "aibox",
+            "upstream"
+          ]
+        },
+        "featureVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "upstream": {
+          "$ref": "#/$defs/upstream"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/option"
+          },
+          "properties": {
+            "version": {
+              "$ref": "#/$defs/versionOption"
+            }
+          }
+        },
+        "dependsOn": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/featureId"
+          }
+        },
+        "versionCoupling": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "feature",
+            "rule"
+          ],
+          "properties": {
+            "feature": {
+              "$ref": "#/$defs/featureId"
+            },
+            "rule": {
+              "enum": [
+                "equal",
+                "table"
+              ]
+            },
+            "table": {
+              "type": "object"
+            }
+          }
+        },
+        "privileges": {
+          "type": "string"
+        },
+        "tools": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/tool"
+          }
+        },
+        "containerEnv": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner": {
+                "const": "aibox"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "featureVersion"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner": {
+                "const": "upstream"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "upstream"
+            ]
+          }
+        }
+      ]
+    },
+    "removal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row",
+        "decision",
+        "reason",
+        "report"
+      ],
+      "properties": {
+        "row": {
+          "$ref": "#/$defs/row"
+        },
+        "decision": {
+          "$ref": "#/$defs/decision"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "compatibilityNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "rows",
+        "decision",
+        "note"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^COMPAT-[A-Z0-9-]+$"
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/row"
+          }
+        },
+        "decision": {
+          "$ref": "#/$defs/decision"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "smoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "features",
+        "fixture",
+        "argv",
+        "produces"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^SMOKE-[A-Z0-9-]+$"
+        },
+        "features": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/featureId"
+          }
+        },
+        "fixture": {
+          "type": "string",
+          "pattern": "^fixtures/v1-05-smoke/"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "produces": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producesMagic": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

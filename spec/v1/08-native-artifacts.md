@@ -197,6 +197,102 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 5. Prove that native project lockfiles remain authoritative for application
    dependencies; bundled convenience tools never rewrite them.
 
+### Tool Feature interface
+
+[`catalog/v1-05-features.json`](catalog/v1-05-features.json), validated by
+[`feature-catalog.schema.json`](feature-catalog.schema.json), is the frozen
+interface catalog for retained and added tools. It lists every group with its
+shape, every Feature with its ID, owner, options, dependencies, tools,
+installation provenance and observable checks, every removed census row, every
+compatibility note, the supported targets and the error codes. Prose in this
+section defines how those fields are realized; where prose and catalog differ,
+the catalog wins and the difference is a contract defect.
+
+**Identity.** An aibox-owned Feature with catalog ID `<parent>/<name>` is
+published as `<registry>/<parent>/<name>:<featureVersion>` with the moving
+tags `<major>` and `<major>.<minor>`. Its `devcontainer-feature.json` has
+`id` = `<name>` and `version` = `featureVersion`. Sources live in
+`features/src/<catalog-id>/` with `devcontainer-feature.json`, `install.sh` and
+any helper files; nothing outside that directory is packaged. Upstream
+Features are referenced at the catalog's `upstream.ref` digest with the
+catalog's `upstream.options`; aibox does not republish them.
+
+**Shapes.** A `single` group has one tool Feature. An `atomic` group has one
+Feature that installs all members and has no member or bundle Feature. A
+`semantic` group has one Feature per member and a bundle Feature
+`<group-path>/all` whose `dependsOn` lists every member at its default
+options; the bundle installs nothing itself and has no options.
+
+**Options.** A Feature whose catalog entry has `options.version` declares a
+string `version` option with exactly that `enum` and `default`. Any other value
+fails with `AIBOX_FEATURE_UNSUPPORTED_VERSION` before installation. A Feature
+without `options.version` installs exactly the versions in its checks. No
+option accepts `latest`, a range or a URL. The specification checks reject an
+example that sets an option key its Feature does not declare.
+
+**Dependencies.** Each `dependsOn` entry becomes a standard `dependsOn`
+reference to `<registry>/<id>:<major>` with an empty option object. A
+`versionCoupling` of rule `equal` requires the coupled Feature's installed
+version to equal this Feature's `version`; `table` uses the listed mapping.
+A violation fails with `AIBOX_FEATURE_VERSION_CONFLICT`. When the same tool is
+requested twice with different versions, for example through a bundle and an
+explicit member selection, the second installation fails with
+`AIBOX_FEATURE_VERSION_CONFLICT`; an identical repeat succeeds without change.
+
+**Targets.** Before any change to the image, `install.sh` reads
+`/etc/os-release` and `dpkg --print-architecture`. A combination not listed in
+the Feature's `targets` fails with `AIBOX_FEATURE_UNSUPPORTED_TARGET`; this
+includes other Debian releases, Ubuntu, non-Debian distributions and other
+architectures.
+
+**Errors.** Every failure listed in the catalog's `errors` writes exactly one
+line `aibox-feature error <CODE> feature=<catalog-id> <detail>` to standard
+error and exits non-zero, so the Dev Container build fails. `beforeInstall`
+errors leave no package, file or user change behind in the failed layer's
+inputs. Errors marked `component` are verified by implementation-track
+component tests because black-box tests cannot inject the fault.
+
+**Presence.** For each selected Feature, every `version` check runs as the
+example's `remoteUser` through `devcontainer exec`, exits 0, and its combined
+output matches `regex` after `{version}` is replaced by the regular-expression
+escaped selected version. A tool with `versionFrom` uses the named option or
+Feature version instead of its own. Every `package` check finds the package
+installed by `dpkg-query` at exactly `version`.
+
+**Absence.** In a workspace built from the minimal example with no Feature
+selected, no catalog `commands` entry resolves through `command -v` for the
+remote user or root and no `package` check is installed. For each semantic
+member selected alone, the commands and packages of its siblings, other than
+its declared dependencies, are absent. Disabling a tool means omitting its
+Feature; no Feature accepts an `enabled` option.
+
+**Side effects.** Owned Features declare no lifecycle commands, no
+`postCreateCommand`/`postStartCommand`, no auto-update configuration, no
+mounts, no `privileged` or capability changes unless the catalog `privileges`
+field says so, and write nothing under the workspace folder. Tools never
+replace project lockfiles; the workspace Git status is unchanged by a build.
+
+**Smoke tests.** Each `smoke` entry runs `argv` in a workspace with the listed
+Features selected and the fixture copied into the workspace folder, exits 0,
+and produces the named file, which starts with `producesMagic` when given.
+
+**Publishing for tests.** `scripts/v1-05-features.sh publish --registry
+<host>/<prefix>` publishes every aibox-owned Feature to
+`<host>/<prefix>/<catalog-id>:<featureVersion>` plus moving tags and rewrites
+aibox `dependsOn` references to that prefix; upstream references are
+unchanged. Acceptance tests use only this command, a registry they start, the
+pinned Dev Container CLI and the examples. Production publication to the
+registry and the public Feature index are out of V1-05 scope.
+
+**Inspection.** `aibox inspect` and the MCP `inspect_workspace` tool report a
+configuration entry with key `devcontainer.features`, value the sorted list of
+selected Feature references, `layer` `project`, `source`
+`.devcontainer/devcontainer.json`, `domain` `native`, `redacted` false and
+`invocationOnly` false. Feature options are never echoed. The entry is absent
+when no Feature is selected.
+
+### Census traceability
+
 The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and

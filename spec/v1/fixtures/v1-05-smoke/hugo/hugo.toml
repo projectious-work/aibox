@@ -1,0 +1,5 @@
+baseURL = "https://example.invalid/"
+title = "smoke"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
+[outputs]
+home = ["HTML"]

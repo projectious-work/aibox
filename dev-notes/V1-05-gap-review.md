@@ -1,5 +1,9 @@
 # Native Feature and gap review
 
+> Superseded input. Owner decisions DEC-20261029_0835-HumbleBridge and
+> DEC-20261029_1034-ActiveJay resolved every row; the contract is
+> [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json).
+
 Frozen baseline `9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6`: **98 rows; 4 source-reviewed upstream, 68 gaps, 26 uncertain community candidates**. All 98 original addon source hashes match the ledger. Current addon checkout differs in 38 entries (including absent recipes and hidden Hugo pin drift); frozen baseline governs this audit. No gap implementation or removal is approved. V1-05 remains in progress; source review does not satisfy the required live installation and two-architecture checks.
 
 Qualification is source/OCI review, not runtime validation. Disabled Features must be omitted on a clean base and absence checked after rebuild. Community registry membership is discovery evidence only.

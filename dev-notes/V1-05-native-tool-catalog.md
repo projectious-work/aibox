@@ -1,53 +1,76 @@
 # V1-05 native tool catalog
 
-V1-05 is in progress on `feat/v1-05-native-tool-catalog`. The phase maps the
-frozen v0 tool ledger to first-party Dev Container Features for retained
-capabilities. Tightly coupled groups, such as `audio-voice`, are one atomic
-Feature. Semantic groups, such as `data-preview`, offer individual tool
-Features and a fixed-version `all` bundle using `dependsOn`. Each Feature
-follows the producer's documented installation route for its selected tool
-version and base. A distribution package is a fallback only after exact-version,
-provenance, dependency and runtime verification for that distro release and
-architecture. No public Feature index submission is planned yet.
-`customizations.aibox` remains optional workspace UX metadata and does not
-install tools. The owner still decides which rows to retain or remove.
-Unsupported combinations fail clearly; Arch and Nix require separate
-qualification.
+V1-05 is in the phase-contract step of R-CYCLE. The contract is drafted on
+`contract/v1-05-tool-catalog` and awaits independent review and owner freeze.
+No implementation or acceptance-test track has started from it.
 
-## Current work
+## Baseline
 
-- The frozen ledger has 98 rows and 41 recipes. Source and OCI review found
-  four upstream Feature mappings, 68 gaps, and 26 community candidates needing
-  further qualification. All 98 frozen source hashes match; 38 current v0
-  checkout entries differ from that frozen baseline. The durable audit and OCI
-  evidence are under `spec/v1/evidence/V1-05/`.
-- `spec/v1/ledger/v1-05-tool-selection.json` accounts for each row with its
-  current classification, source, native proposal, and decision state.
-  `spec/v1/scripts/validate-v1-05-catalog.py` checks full census coverage and
-  the active example against the reviewed mapping.
-- The customized example now selects the upstream Hugo Feature at an immutable
-  OCI manifest digest with the frozen `0.165.0` extended version. Its source,
-  options and intended architectures are recorded in
-  `spec/v1/fixtures/v1-05-native-features.json`. Minimal remains feature-free.
-- Go CLI and local MCP inspection now report the selected Feature references
-  without exposing their options. The paired inspection test covers the
-  customized example. Source-level validation passes; live Hugo installation
-  and absence checks remain pending.
-- `scripts/verify-v1-05-host.sh` is the Python-only host gate for the active
-  Hugo selection. It checks enabled and disabled containers with the pinned
-  Dev Container CLI and records source, architecture, step logs and scoped
-  cleanup. It must be run by the host operator on both Linux architectures.
-- `dev-notes/V1-05-gap-review.md` lists all 94 unresolved rows, each proposed
-  native route as a prospective Feature installer implementation, conditional
-  upstream alternatives, and two suggested removal candidates. Group cohesion
-  classifications still need to be completed. Owner
-  retain/remove decisions are pending. No gap installer or removal has been
-  implemented.
+- Specification base: `v1.x-dev` at `9cdcbcbe` (R-CYCLE from PR #496).
+- Phase: V1-05, restore the complete optional tool catalog.
+- Chapters: 04 reuse targets, 05 acceptance (`AC-TOOLS`), 08 native
+  artifacts (Feature composition contract and Tool Feature interface), 19
+  configuration realization.
+- Requirements: R-REUSE, R-DEPENDENCIES, R-CYCLE, R-REVIEW.
+- Census baseline: v0 `9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6`, 98 addon
+  tool rows in 41 recipes.
+- Decisions:
+  - DEC-20261002_0046-SmoothLotus and DEC-20261002_0054-AmberCompass:
+    grouped Features, per-cell qualification.
+  - DEC-20261026_1412-FastForge: frozen test-ready contract and parallel
+    tracks.
+  - DEC-20261029_0802-DeepOtter: trixie amd64/arm64 only, exact pins,
+    upstream Features used directly, separate contract branch.
+  - DEC-20261029_0835-HumbleBridge: row dispositions and removals.
+  - DEC-20261029_1034-ActiveJay: additions, uv-managed Python, security
+    groups.
 
-## Acceptance still pending
+## Contract contents
 
-V1-05 remains in progress until owner dispositions for the unresolved rows,
-chosen install units, two-architecture installation checks, and final v1 docs
-validation pass. The four upstream mappings have source and OCI evidence only;
-their install/version/disable behavior has not yet passed live tests. No v1
-Feature artifact or release has been published.
+| Artifact | Role |
+|---|---|
+| [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 119 Features, removals, compatibility notes, error codes, targets, smoke tests |
+| [`spec/v1/feature-catalog.schema.json`](../spec/v1/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
+| [Chapter 8, Tool Feature interface](../spec/v1/08-native-artifacts.md#tool-feature-interface) | Identity, shapes, options, dependencies, targets, errors, presence, absence, side effects, publishing for tests, inspection |
+| [Chapter 5, AC-TOOLS items](../spec/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix) | Acceptance item IDs and known-risk stacks |
+| [`spec/v1/ledger/v1-05-tool-selection.json`](../spec/v1/ledger/v1-05-tool-selection.json) | Census table: each of the 98 rows retained with its Feature or removed with its decision |
+| `spec/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
+| `spec/v1/scripts/validate-v1-05-catalog.py` | Cross-reference checks between census, catalog and table |
+
+Census result: 94 rows retained, 4 removed (mistral, starlight, docusaurus,
+mkdocs). Catalog additions without a census row: vibe, typescript (tsc,
+biome, oxlint), zig (zig, zls), security/crypto (age, sops, gnupg,
+openssh-client, minisign, openssl) and semgrep.
+
+Version and install-route data were researched on 2026-10-29 from producer
+release data, registries and the trixie, trixie-updates and trixie-security
+package indexes for both architectures. Version-output regular expressions use
+a version-token rule rather than exact output formats, so an output layout
+change does not become a false contract failure. The
+[gap review](V1-05-gap-review.md) is the pre-decision input and is superseded
+by the catalog.
+
+## Plan
+
+Waves for the implementation track, in dependency order:
+
+1. Shared conventions: target and option guard, error line, download and
+   verification helpers with component tests for the component-verified error
+   codes, and `scripts/v1-05-features.sh publish`.
+2. Foundation Features: `python/uv`, `node/node`, `go/go`, `rust/rustc`,
+   `zig/zig`, `latex/core`, `browser-testing/playwright`.
+3. Dependent and independent tool Features, then atomic Features.
+4. Bundles and the customized example; inspection parity for
+   `devcontainer.features`.
+5. User documentation for selection, versions, removal and compatibility
+   notes; v1 site build.
+
+The acceptance-test track works on a tests-only branch from the contract
+commit and covers the `AC-TOOLS/*` items. The implementation track reuses the
+inspection code from PR #493 where it matches the contract.
+
+## Logbook
+
+| Date | Entry |
+|---|---|
+| 2026-10-29 | Contract drafted on `contract/v1-05-tool-catalog`; independent review pending. |

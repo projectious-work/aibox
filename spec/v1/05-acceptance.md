@@ -202,6 +202,34 @@ license/provenance clearance per row. Use pairwise interactions plus explicit
 known-risk full stacks; justify combinations rather than claiming exhaustive
 Cartesian-product testing.
 
+V1-05 realizes AC-TOOLS through the Feature interface in chapter 8 and the
+catalog. Each acceptance test names one of these items and, where it applies,
+the catalog Feature ID, tool and target ID, for example
+`AC-TOOLS/present python/uv debian-13-arm64`:
+
+| Item | Verified behavior | Per |
+|---|---|---|
+| `AC-TOOLS/present` | Presence checks pass for the default version | Feature × target |
+| `AC-TOOLS/version` | Presence checks pass for each non-default `enum` value | Feature × version × target |
+| `AC-TOOLS/absent` | No catalog command or package exists with no Feature selected | target |
+| `AC-TOOLS/isolated` | A semantic member selected alone leaves undeclared siblings absent | member × target |
+| `AC-TOOLS/bundle` | A bundle installs every member at its default and nothing else from the catalog | bundle × target |
+| `AC-TOOLS/depends` | Selecting a Feature installs its `dependsOn` Features without explicit selection | Feature with dependencies × target |
+| `AC-TOOLS/unsupported-version` | A value outside `enum` fails with its error code before installation | Feature with `version` |
+| `AC-TOOLS/unsupported-target` | A non-trixie Debian base and an Ubuntu base fail with their error code | Feature, one target each |
+| `AC-TOOLS/conflict` | Coupled or repeated versions that disagree fail with their error code | coupling and bundle-plus-member case |
+| `AC-TOOLS/side-effects` | Published metadata declares no lifecycle commands, mounts or privileges beyond `privileges`; Git status unchanged | Feature |
+| `AC-TOOLS/smoke` | Each catalog smoke entry produces its file | smoke × target |
+| `AC-TOOLS/stack` | Each known-risk stack below builds and passes presence checks | stack × target |
+| `AC-TOOLS/inspect` | CLI and MCP inspection report `devcontainer.features` identically, without options | customized and minimal examples |
+| `AC-TOOLS/trace` | Every census row maps to a catalog Feature tool or a removal with decision | specification check |
+
+Known-risk stacks: `python/all` with every `uv-tool` Feature; `node/all` with
+`typescript/all`, `mermaid`, `data/visualization` and `browser-testing/all`;
+`latex/all` with `preview/archive/all` and `preview/enhanced/all`;
+`go/all` with `rust/all` and `zig/all`; `security/crypto/all` with
+`security/scan/all`. Component-verified error codes are listed in the catalog.
+
 ### AC-HARNESS — installation, state and integration
 
 For each supported harness identity, test enabled/install/version/order choices,
