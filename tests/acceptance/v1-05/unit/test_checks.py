@@ -90,6 +90,15 @@ class OtherKindsTest(unittest.TestCase):
         self.assertFalse(checks.passes(package, Outcome(0, "installed")))
         self.assertTrue(checks.passes(path, Outcome(1, "")))
 
+    def test_exempt_command_name_keeps_command_checks_that_run_it(self):
+        # Chapter 8 (amendment 2): an exempt command name exempts only the
+        # matching `commands` entry.
+        tool = {"name": "x", "commands": ["shared", "x"],
+                "checks": [{"kind": "command", "argv": ["shared", "--x"], "regex": "^x"}]}
+        rules = [(e.rule, e.subject)
+                 for e in checks.absence_expectations(tool, skip_commands={"shared"})]
+        self.assertEqual(rules, [("command-absent", "x"), ("command-check-absent", "shared --x")])
+
     def test_command_check_is_absent_unless_it_would_pass(self):
         tool = {"name": "clippy", "commands": [],
                 "checks": [{"kind": "command", "argv": ["cargo", "clippy", "--version"],
