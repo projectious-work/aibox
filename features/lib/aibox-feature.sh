@@ -33,6 +33,13 @@ af_fail() {
   exit 1
 }
 
+# af_die MESSAGE: fail for a defect in the Feature itself, which no catalog
+# error code covers.
+af_die() {
+  printf 'aibox-feature %s: internal error: %s\n' "$AIBOX_FEATURE_ID" "$*" >&2
+  exit 1
+}
+
 af_log() {
   printf 'aibox-feature %s: %s\n' "$AIBOX_FEATURE_ID" "$*"
 }

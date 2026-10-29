@@ -1,0 +1,23 @@
+{
+  "id": "playwright",
+  "version": "1.0.0",
+  "name": "playwright",
+  "description": "Installs playwright (aibox catalog ID browser-testing/playwright).",
+  "documentationURL": "https://playwright.dev/docs/intro",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.62.1"
+      ],
+      "default": "1.62.1",
+      "description": "Version of playwright to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/node/node"
+  ],
+  "containerEnv": {
+    "PLAYWRIGHT_BROWSERS_PATH": "/opt/aibox/ms-playwright"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "core",
+  "version": "1.0.0",
+  "name": "texlive-core",
+  "description": "Installs texlive-core (aibox catalog ID latex/core).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2025"
+      ],
+      "default": "2025",
+      "description": "Version of texlive-core to install."
+    }
+  }
+}

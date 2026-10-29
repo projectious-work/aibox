@@ -7,7 +7,7 @@
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {
-  cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync,
+  cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync,
 } from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join, relative} from 'node:path';
@@ -23,8 +23,15 @@ export const osReleases = {
   'ubuntu-24.04': 'PRETTY_NAME="Ubuntu 24.04.3 LTS"\nNAME="Ubuntu"\nVERSION_ID="24.04"\nVERSION="24.04.3 LTS (Noble Numbat)"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\n',
 };
 
+const created = [];
+process.on('exit', () => {
+  for (const dir of created) rmSync(dir, {recursive: true, force: true});
+});
+
 export function tempDir(prefix) {
-  return mkdtempSync(join(tmpdir(), `aibox-feature-${prefix}-`));
+  const dir = mkdtempSync(join(tmpdir(), `aibox-feature-${prefix}-`));
+  created.push(dir);
+  return dir;
 }
 
 // A fake container: a root directory plus the state of the fake executables.

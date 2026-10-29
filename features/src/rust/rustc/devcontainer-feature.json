@@ -1,0 +1,24 @@
+{
+  "id": "rustc",
+  "version": "1.0.0",
+  "name": "rustc",
+  "description": "Installs rustc (aibox catalog ID rust/rustc).",
+  "documentationURL": "https://rust-lang.github.io/rustup/installation/index.html",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.96.1",
+        "1.97.1",
+        "1.98.0"
+      ],
+      "default": "1.98.0",
+      "description": "Version of rustc to install."
+    }
+  },
+  "containerEnv": {
+    "RUSTUP_HOME": "/usr/local/rustup",
+    "CARGO_HOME": "/usr/local/cargo",
+    "PATH": "/usr/local/cargo/bin:${PATH}"
+  }
+}

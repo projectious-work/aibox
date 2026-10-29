@@ -1,0 +1,19 @@
+{
+  "id": "go",
+  "version": "1.0.0",
+  "name": "go",
+  "description": "Installs go (aibox catalog ID go/go).",
+  "documentationURL": "https://go.dev/doc/install",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.25.12",
+        "1.26.6",
+        "1.27.0"
+      ],
+      "default": "1.27.0",
+      "description": "Version of go to install."
+    }
+  }
+}

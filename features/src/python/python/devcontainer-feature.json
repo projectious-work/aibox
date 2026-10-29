@@ -1,0 +1,22 @@
+{
+  "id": "python",
+  "version": "1.0.0",
+  "name": "python",
+  "description": "Installs python (aibox catalog ID python/python).",
+  "documentationURL": "https://docs.astral.sh/uv/guides/install-python/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "3.12.14",
+        "3.13.15",
+        "3.14.7"
+      ],
+      "default": "3.14.7",
+      "description": "Version of python to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}
