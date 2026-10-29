@@ -143,6 +143,8 @@ rule failed by construction. The rule now exempts that file. Non-blocking:
 per-item test-ID slots, `AC-TOOLS/absent` wording aligned with chapter 8,
 metadata read from the test registry, and the `requires` closure repeated to a
 fixed point.
+Round 2 of the amendment review approved `4ec6dc8e` with no blocking findings;
+its cosmetic test-ID note is applied.
 
 Tests Q10 (MCP inspection), Q14 (requires target) and the implementation's
 error-code mapping for apt update and tool-internal downloads follow the

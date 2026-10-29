@@ -205,7 +205,7 @@ Cartesian-product testing.
 V1-05 realizes AC-TOOLS through the Tool Feature interface in chapter 8 and
 the catalog. Each acceptance test names one of these items and, where it
 applies, the catalog Feature ID, tool and target ID in the form
-`AC-TOOLS/<item> [<feature-id> [<tool>]] <target-id> [<key>=<value> ...]`, for
+`AC-TOOLS/<item> [<feature-id> [<tool>]] [<target-id>] [<key>=<value> ...]`, with slots per item as listed below, for
 example `AC-TOOLS/present python/uv uv debian-13-arm64` or
 `AC-TOOLS/stack STACK-PYTHON debian-13-amd64`. Except for `AC-TOOLS/requires`,
 every selection also includes, at their defaults, the Features that any
