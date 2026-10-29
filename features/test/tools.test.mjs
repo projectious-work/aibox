@@ -38,6 +38,7 @@ const releaseTokens = {
   'security/scan/gitleaks': ['x64', 'arm64'], 'security/scan/osv-scanner': ['amd64', 'arm64'],
   'security/scan/syft': ['amd64', 'arm64'], 'security/scan/grype': ['amd64', 'arm64'],
   'security/scan/cosign': ['amd64', 'arm64'],
+  'preview/enhanced/glow': ['x86_64', 'arm64'], 'preview/enhanced/bat': ['x86_64', 'aarch64'],
 };
 // First npm package each npm Feature downloads.
 const firstNpmPackage = {

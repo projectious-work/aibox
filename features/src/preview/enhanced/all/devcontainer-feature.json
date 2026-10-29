@@ -7,6 +7,7 @@
   "dependsOn": {
     "ghcr.io/projectious-work/aibox-features/preview/enhanced/ffmpeg:1": {},
     "ghcr.io/projectious-work/aibox-features/preview/enhanced/ghostscript:1": {},
-    "ghcr.io/projectious-work/aibox-features/preview/enhanced/rich:1": {}
+    "ghcr.io/projectious-work/aibox-features/preview/enhanced/glow:1": {},
+    "ghcr.io/projectious-work/aibox-features/preview/enhanced/bat:1": {}
   }
 }
