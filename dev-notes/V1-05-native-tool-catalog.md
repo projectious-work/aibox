@@ -1,9 +1,11 @@
 # V1-05 native tool catalog
 
 V1-05 contract is frozen at contract commit
-`34d06da0cf42d73ff05971c7235ae1324d7e768a` on `contract/v1-05-tool-catalog`
+`59c35acc1cf230c81658a5763205b1f91a0b1092` on `contract/v1-05-tool-catalog`
+(amendment 1, DEC-20261029_1725-AmberBeam), which replaces the first contract
+commit `34d06da0cf42d73ff05971c7235ae1324d7e768a`
 (DEC-20261029_1515-ShinySpire). The acceptance-test and implementation tracks
-start from that commit.
+continue from that commit.
 
 ## Baseline
 
@@ -159,3 +161,4 @@ existing contract and need no change.
 | 2026-10-29 | Review round 2 findings closed by the integration owner (`34d06da0`). |
 | 2026-10-29 | Owner froze the contract at `34d06da0` (DEC-20261029_1515-ShinySpire). |
 | 2026-10-29 | Tracks started: tests `799d234b`..`b646e40a`, implementation waves 1–2 `2cfa66e5`..`977a7eed`. Amendment 1 drafted from their contract questions; review pending. |
+| 2026-10-29 | Owner approved amendment 1 as contract commit `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam); both tracks move onto it. |
