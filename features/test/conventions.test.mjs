@@ -27,6 +27,12 @@ af_init
 af_apt_require \${SAMPLE_RUNTIME_PACKAGES:-} \${SAMPLE_HELPER_PACKAGES:-}
 [ -z "\${SAMPLE_RUNTIME_PACKAGES:-}" ] || af_apt_install $SAMPLE_RUNTIME_PACKAGES
 [ -z "\${SAMPLE_HELPER_PACKAGES:-}" ] || af_helper_install $SAMPLE_HELPER_PACKAGES
+[ -z "\${SAMPLE_HELPER_PACKAGES2:-}" ] || af_helper_install $SAMPLE_HELPER_PACKAGES2
+if [ -n "\${SAMPLE_CLEANUP_PATH:-}" ]; then
+  af_cleanup_path "$AF_ROOT/$SAMPLE_CLEANUP_PATH"
+  mkdir -p "$AF_ROOT/$SAMPLE_CLEANUP_PATH"
+fi
+[ -z "\${SAMPLE_EXACT_PACKAGE:-}" ] || af_apt_require_version "\${SAMPLE_EXACT_PACKAGE%%=*}" "\${SAMPLE_EXACT_PACKAGE#*=}"
 if [ -n "\${SAMPLE_URL:-}" ]; then
   af_download "$SAMPLE_URL" "$AF_TMP/artifact"
   case "\${SAMPLE_DIGEST:-}" in
@@ -319,6 +325,42 @@ describe('Debian packages', () => {
     const result = runFeature(sampleFeature(), container, {env: {SAMPLE_HELPER_PACKAGES: 'xz-utils'}});
     assert.notEqual(result.status, 0, result.output);
     assert.match(result.stderr, /cannot remove build-only packages: xz-utils/);
+  });
+
+  it('removes the helpers of every af_helper_install call', () => {
+    const container = makeContainer({available: ['xz-utils', 'minisign']});
+    const result = runFeature(sampleFeature(), container, {
+      env: {SAMPLE_HELPER_PACKAGES: 'xz-utils', SAMPLE_HELPER_PACKAGES2: 'minisign'},
+    });
+    assert.equal(result.status, 0, result.output);
+    assert.deepEqual(installedPackages(container), []);
+  });
+
+  it('accepts an exact package version the repositories offer', () => {
+    const container = makeContainer({available: ['google-cloud-cli']});
+    writeFileSync(join(container.state, 'versions-google-cloud-cli'), '592.0.0-0\n591.0.0-0\n');
+    const result = runFeature(sampleFeature(), container, {env: {SAMPLE_EXACT_PACKAGE: 'google-cloud-cli=591.0.0-0'}});
+    assert.equal(result.status, 0, result.output);
+  });
+
+  it('fails with PACKAGE_UNAVAILABLE for an exact version the repositories lack', () => {
+    const container = makeContainer({available: ['google-cloud-cli']});
+    writeFileSync(join(container.state, 'versions-google-cloud-cli'), '592.0.0-0\n591.0.0-01\n');
+    const before = snapshot(container);
+    const result = runFeature(sampleFeature(), container, {env: {SAMPLE_EXACT_PACKAGE: 'google-cloud-cli=591.0.0-0'}});
+    assertError(result, 'AIBOX_FEATURE_PACKAGE_UNAVAILABLE', 'sample/tool', /package=google-cloud-cli=591\.0\.0-0/);
+    assertUnchanged(container, before);
+  });
+
+  it('removes a registered cleanup path on success and on failure', () => {
+    for (const url of [undefined, 'https://example.invalid/missing']) {
+      const container = makeContainer();
+      const result = runFeature(sampleFeature(), container, {
+        env: {SAMPLE_CLEANUP_PATH: 'etc/apt/sources.list.d', ...(url ? {SAMPLE_URL: url, SAMPLE_DIGEST: '0'.repeat(64)} : {})},
+      });
+      assert.equal(result.status === 0, url === undefined, result.output);
+      assert.equal(existsSync(join(container.root, 'etc/apt/sources.list.d')), false);
+    }
   });
 
   it('keeps a helper that was installed before the Feature ran', () => {

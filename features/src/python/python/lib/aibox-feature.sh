@@ -26,6 +26,11 @@ AF_TMP=""
 AF_APT_READY=0
 AF_APT_CLEAN_LISTS=0
 AF_HELPERS=""
+AF_CLEANUP_PATHS=""
+AF_NPM_PACKAGES=""
+# Registry resolution of transitive Python and npm dependencies is frozen at
+# the catalog research date, so a rebuild resolves the same versions.
+AF_RESOLUTION_DATE=2026-10-29T23:59:59Z
 
 # af_fail CODE DETAIL: write the contract error line and exit non-zero.
 af_fail() {
@@ -47,10 +52,14 @@ af_log() {
 af_cleanup() {
   af_status=$?
   set +e
+  for af_path in $AF_CLEANUP_PATHS; do
+    rm -rf "$af_path"
+  done
   if [ -n "$AF_HELPERS" ]; then
     # shellcheck disable=SC2086
     if ! DEBIAN_FRONTEND=noninteractive apt-get purge -y $AF_HELPERS >/dev/null; then
-      printf 'aibox-feature %s: internal error: cannot remove build-only packages:%s\n' "$AIBOX_FEATURE_ID" " $AF_HELPERS" >&2
+      # shellcheck disable=SC2086
+      printf 'aibox-feature %s: internal error: cannot remove build-only packages: %s\n' "$AIBOX_FEATURE_ID" "$(echo $AF_HELPERS)" >&2
       [ "$af_status" -ne 0 ] || af_status=1
     fi
   fi
@@ -249,7 +258,7 @@ af_helper_install() {
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $af_new \
     || af_fail DOWNLOAD_FAILED "packages=$(printf '%s' "${af_new# }" | tr ' ' ',') reason=apt-get-install-failed"
   af_installed_packages > "$AF_TMP/packages-after"
-  AF_HELPERS=$(comm -13 "$AF_TMP/packages-before" "$AF_TMP/packages-after" | tr '\n' ' ')
+  AF_HELPERS="$AF_HELPERS $(comm -13 "$AF_TMP/packages-before" "$AF_TMP/packages-after" | tr '\n' ' ')"
 }
 
 # af_download URL DESTINATION
@@ -300,4 +309,118 @@ af_finish() {
   mkdir -p "$AF_STATE_DIR/$AIBOX_FEATURE_ID"
   printf '%s\n' "${AF_VERSION:-none}" > "$(af_marker "$AIBOX_FEATURE_ID")"
   af_log "installed ${AF_VERSION:-version from catalog} for $AF_TARGET"
+}
+
+# af_cleanup_path PATH: remove PATH when install.sh exits, on success and on
+# failure (for example a temporary APT source).
+af_cleanup_path() {
+  AF_CLEANUP_PATHS="$AF_CLEANUP_PATHS $1"
+}
+
+# af_apt_require_version PACKAGE VERSION: fail with PACKAGE_UNAVAILABLE unless
+# the configured repositories offer exactly VERSION of PACKAGE.
+af_apt_require_version() {
+  af_apt_prepare || af_fail PACKAGE_UNAVAILABLE "package=$1=$2 reason=apt-get-update-failed"
+  if ! apt-cache policy "$1" 2>/dev/null | grep -Eq "^[ *]+$(printf '%s' "$2" | sed 's/[.+]/\\&/g') "; then
+    af_fail PACKAGE_UNAVAILABLE "package=$1=$2"
+  fi
+}
+
+# af_debian_install PACKAGE...: method debian-package. Install the candidate
+# of each package from the base's configured repositories.
+af_debian_install() {
+  af_apt_require "$@"
+  af_apt_install "$@"
+}
+
+# af_install_bin SOURCE NAME: install an executable as /usr/local/bin/NAME.
+af_install_bin() {
+  install -d "$AF_ROOT/usr/local/bin"
+  install -m 0755 "$1" "$AF_ROOT/usr/local/bin/$2"
+}
+
+# af_extract ARCHIVE DIRECTORY: unpack a .tar.gz, .tar.xz or .zip archive.
+# A .tar.xz archive needs the xz-utils helper.
+af_extract() {
+  install -d "$2"
+  case "$1" in
+    *.tar.gz|*.tgz) tar -xzf "$1" -C "$2" --no-same-owner ;;
+    *.tar.xz) tar -xJf "$1" -C "$2" --no-same-owner ;;
+    *.zip) unzip -q -o "$1" -d "$2" ;;
+    *) af_die "unknown archive type: $1" ;;
+  esac
+}
+
+# af_uv_tool_install UV-TOOL-ARGUMENT...: method uv-tool. Installs a Python
+# tool with the python/uv Feature into /opt/aibox/uv/tools and links its
+# executables into /usr/local/bin. uv verifies each wheel against the hashes
+# the package index publishes.
+af_uv_tool_install() {
+  af_uv="$AF_ROOT/usr/local/bin/uv"
+  [ -x "$af_uv" ] || af_die "uv is missing although python/uv is a dependsOn dependency"
+  UV_TOOL_DIR="$AF_ROOT/opt/aibox/uv/tools" UV_TOOL_BIN_DIR="$AF_ROOT/usr/local/bin" \
+    UV_PYTHON_INSTALL_DIR="$AF_ROOT/opt/aibox/python" UV_PYTHON_INSTALL_BIN=0 \
+    UV_PYTHON_PREFERENCE=only-managed UV_CACHE_DIR="$AF_TMP/uv-cache" UV_NO_CONFIG=1 \
+    UV_EXCLUDE_NEWER="$AF_RESOLUTION_DATE" \
+    "$af_uv" tool install "$@" \
+    || af_fail DOWNLOAD_FAILED "source=pypi arguments=$(printf '%s' "$*" | tr ' ' ',')"
+}
+
+# af_npm_fetch NAME VERSION INTEGRITY: download and verify one npm package
+# tarball for af_npm_install.
+af_npm_fetch() {
+  af_base=${1##*/}
+  af_file="$AF_TMP/npm/$af_base-$2.tgz"
+  install -d "$AF_TMP/npm"
+  af_download "https://registry.npmjs.org/$1/-/$af_base-$2.tgz" "$af_file"
+  af_verify_integrity "$af_file" "$3"
+  AF_NPM_PACKAGES="$AF_NPM_PACKAGES $af_file"
+}
+
+# af_npm_install [NPM-ARGUMENT...]: method npm-global. Installs the fetched
+# tarballs globally under /usr/local with the node/node Feature's npm. npm
+# verifies dependencies against the registry's integrity values; package
+# install scripts do not run.
+af_npm_install() {
+  af_npm="$AF_ROOT/usr/local/bin/npm"
+  [ -x "$af_npm" ] || af_die "npm is missing although node/node is a required Feature"
+  # shellcheck disable=SC2086
+  npm_config_cache="$AF_TMP/npm-cache" npm_config_logs_dir="$AF_TMP/npm-logs" \
+    npm_config_update_notifier=false npm_config_fund=false npm_config_audit=false \
+    "$af_npm" install --global --prefix "$AF_ROOT/usr/local" --ignore-scripts \
+    --before="$AF_RESOLUTION_DATE" "$@" $AF_NPM_PACKAGES \
+    || af_fail DOWNLOAD_FAILED "source=npm packages=$(printf '%s' "${AF_NPM_PACKAGES# }" | sed 's|[^ ]*/||g' | tr ' ' ',')"
+}
+
+# af_go_install MODULE@VERSION: method go-install with the required go/go
+# Feature. The Go checksum database verifies every module.
+af_go_install() {
+  af_go="$AF_ROOT/usr/local/bin/go"
+  [ -x "$af_go" ] || af_die "go is missing although go/go is a required Feature"
+  GOBIN="$AF_ROOT/usr/local/bin" GOPATH="$AF_TMP/gopath" GOCACHE="$AF_TMP/gocache" \
+    GOMODCACHE="$AF_TMP/gomodcache" GOTOOLCHAIN=local GOFLAGS=-modcacherw \
+    "$af_go" install "$1" \
+    || af_fail DOWNLOAD_FAILED "module=$1"
+}
+
+# af_rust_env: point rustup and cargo at the rust/rustc installation.
+af_rust_env() {
+  export RUSTUP_HOME="$AF_ROOT/usr/local/rustup"
+  export CARGO_HOME="$AF_ROOT/usr/local/cargo"
+  AF_RUSTUP="$CARGO_HOME/bin/rustup"
+  [ -x "$AF_RUSTUP" ] || af_die "rustup is missing although rust/rustc is a required Feature"
+}
+
+# af_texlive_install TEXLIVE-PACKAGE...: method texlive-installer for a
+# collection Feature. tlmgr installs from the repository latex/core
+# configured and verifies its signed package database with a build-only
+# GnuPG; af_apt_require gnupg must run before any change.
+af_texlive_install() {
+  af_platform=$(af_arch_name x86_64-linux aarch64-linux)
+  af_tlmgr="$AF_ROOT/usr/local/texlive/bin/$af_platform/tlmgr"
+  [ -x "$af_tlmgr" ] || af_die "tlmgr is missing although latex/core is a dependsOn dependency"
+  af_helper_install gnupg
+  "$af_tlmgr" install "$@" \
+    || af_fail DOWNLOAD_FAILED "source=texlive packages=$(printf '%s' "$*" | tr ' ' ',')"
+  "$af_tlmgr" path add
 }

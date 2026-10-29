@@ -63,10 +63,8 @@ PROFILE
 TEXLIVE_INSTALL_NO_WELCOME=1 perl "$AF_TMP/install-tl/install-tl" \
   --profile "$AF_TMP/texlive.profile" --repository "$repository" \
   || af_fail DOWNLOAD_FAILED "url=$repository"
-tlmgr="$texdir/bin/$platform/tlmgr"
 # shellcheck disable=SC2086
-"$tlmgr" install $packages || af_fail DOWNLOAD_FAILED "url=$repository"
-"$tlmgr" path add
+af_texlive_install $packages
 "$texdir/bin/$platform/pdflatex" --version | grep -q "TeX Live $AF_VERSION" \
   || af_die "pdflatex does not report TeX Live $AF_VERSION"
 
