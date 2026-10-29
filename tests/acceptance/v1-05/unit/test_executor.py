@@ -85,8 +85,7 @@ class ExecutorTest(unittest.TestCase):
         self.output.mkdir()
         self.work = root / "work"
         self.work.mkdir()
-        cli = DevContainerCli(Path(sys.executable), self.fake_dir / "devcontainer.py", {},
-                              self.fake_dir)
+        cli = DevContainerCli([sys.executable, str(self.fake_dir / "devcontainer.py")], {})
         self.catalog = mini_catalog()
         self.context = Context(self.catalog, "unit", self.output, self.work,
                                docker=Docker(str(docker)), cli=cli, progress=lambda _: None)

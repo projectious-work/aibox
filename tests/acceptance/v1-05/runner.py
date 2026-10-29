@@ -61,6 +61,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                                            "with the Docker daemon (default: system temp)")
     parser.add_argument("--aibox", help="aibox binary for AC-TOOLS/inspect "
                                         "(default: build from this checkout in a Go container)")
+    parser.add_argument("--cli-from-path", action="store_true",
+                        help="use devcontainer (must be 0.89.0) and node from PATH instead of "
+                             "bootstrapping the vendored CLI and a verified Node download")
     parser.add_argument("--registry-image", default=host.DEFAULT_REGISTRY_IMAGE,
                         help="OCI Distribution registry image for localhost:5000")
     return parser.parse_args(argv)
@@ -97,6 +100,22 @@ def print_summary(plan: Plan) -> None:
     for item in ITEMS:
         if counts[item]:
             print(f"#   AC-TOOLS/{item}: {counts[item]}")
+
+
+def summary_text(evidence: dict) -> str:
+    lines = [f"V1-05 AC-TOOLS {evidence['status']} on {evidence.get('target')} "
+             f"(run {evidence['runId']}, source {evidence.get('sourceCommit')})",
+             f"tests {evidence['summary']['tests']}, passed {evidence['summary']['passed']}, "
+             f"not passed {evidence['summary']['failed']}"]
+    for item, counts in evidence["summary"]["byItem"].items():
+        lines.append(f"  {item}: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
+    lines += [f"run failure: {f}" for f in evidence["failures"]]
+    lines += [f"cleanup failure: {f}" for f in evidence["cleanupFailures"]]
+    for record in evidence["results"]:
+        if record["status"] != "passed":
+            lines.append(f"{record['status'].upper()} {record['id']}: "
+                         + "; ".join(record["failures"][:5]))
+    return "\n".join(lines) + "\n"
 
 
 def source_state() -> dict:
@@ -180,7 +199,8 @@ def main(argv: list[str]) -> int:
                 context.aibox, evidence["aibox"] = host.build_aibox(context.docker, work, log)
         if any(t.build for t in plan.tests):
             assert context.docker
-            context.cli = host.DevContainerCli.bootstrap(work, output)
+            context.cli = (host.DevContainerCli.from_path(output) if args.cli_from_path
+                           else host.DevContainerCli.bootstrap(work, output))
             evidence["devcontainerCli"] = context.cli.runtime
             registry = host.Registry(context.docker, args.registry_image,
                                      f"aibox-v1-05-registry-{run_id}")
@@ -232,6 +252,7 @@ def main(argv: list[str]) -> int:
                                  "byItem": {k: dict(v) for k, v in sorted(by_item.items())}},
                      "failures": failures, "cleanupFailures": cleanup, "results": results})
     (output / "evidence.json").write_text(json.dumps(evidence, indent=2) + "\n")
+    (output / "summary.txt").write_text(summary_text(evidence))
     print(f"V1-05 AC-TOOLS: {evidence['summary']['passed']} passed, "
           f"{evidence['summary']['failed']} not passed; evidence: {output / 'evidence.json'}")
     return 0 if passed else 1

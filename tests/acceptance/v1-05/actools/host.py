@@ -78,10 +78,12 @@ def load_v1_04_verifier():
 
 @dataclass
 class DevContainerCli:
-    node: Path
-    cli: Path
+    """The pinned Dev Container CLI. `prefix` is the argv that runs it; the
+    publish script finds the same CLI and Node as `devcontainer` and `node`
+    on PATH (chapter 8 Publishing), with `shim_dir` first when bootstrapped."""
+    prefix: list
     runtime: dict
-    shim_dir: Path
+    shim_dir: Path | None = None
 
     @classmethod
     def bootstrap(cls, work: Path, output: Path) -> "DevContainerCli":
@@ -95,14 +97,32 @@ class DevContainerCli:
             shim = shim_dir / name
             shim.write_text(f'#!/bin/sh\nexec {target} "$@"\n')
             shim.chmod(0o755)
-        return cls(node, cli, runtime, shim_dir)
+        runtime["source"] = "bootstrapped from tools/vendor"
+        return cls([str(node), str(cli)], runtime, shim_dir)
+
+    @classmethod
+    def from_path(cls, output: Path) -> "DevContainerCli":
+        """Use `devcontainer` and `node` already on PATH; the CLI must be the
+        pinned version."""
+        devcontainer, node = shutil.which("devcontainer"), shutil.which("node")
+        if not devcontainer or not node:
+            raise RuntimeError("--cli-from-path needs devcontainer and node on PATH")
+        version = execute([devcontainer, "--version"]).stdout.strip()
+        expected = load_v1_04_verifier().CLI_VERSION
+        if version != expected:
+            raise RuntimeError(f"devcontainer on PATH is {version!r}; the pinned CLI is {expected}")
+        runtime = {"source": "PATH", "cliPath": devcontainer, "cliVersion": version,
+                   "nodePath": node, "nodeVersion": execute([node, "--version"]).stdout.strip()}
+        (output / "cli-runtime.json").write_text(json.dumps(runtime, indent=2) + "\n")
+        return cls([devcontainer], runtime)
 
     def argv(self, *args: str) -> list[str]:
-        return [str(self.node), str(self.cli), *args]
+        return [*self.prefix, *args]
 
     def environment(self) -> dict:
         env = dict(os.environ)
-        env["PATH"] = f"{self.shim_dir}{os.pathsep}{env.get('PATH', '')}"
+        if self.shim_dir is not None:
+            env["PATH"] = f"{self.shim_dir}{os.pathsep}{env.get('PATH', '')}"
         return env
 
 
