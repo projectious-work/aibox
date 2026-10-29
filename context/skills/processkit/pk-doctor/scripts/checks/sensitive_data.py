@@ -476,9 +476,6 @@ def _is_false_positive(
             return True
         if "identity.toml" in lowered_line:
             return True
-        domain = lowered_excerpt.rsplit("@", 1)[-1]
-        if domain == "example.com" or domain.endswith(".example") or domain.endswith(".local"):
-            return True
 
     if pattern.id == "sensitive-data.phone-number":
         if path.suffix == ".md" and "skills" in path.parts:
@@ -491,10 +488,6 @@ def _is_false_positive(
         if "http://" in lowered_line or "https://" in lowered_line:
             return True
         if "phone number" in lowered_line or "working_hours" in lowered_line:
-            return True
-        # A bare ten-digit integer is commonly a byte-size threshold, ID, or
-        # other numeric literal. Require phone-like formatting for that form.
-        if re.fullmatch(r"\d{10}", excerpt):
             return True
 
     if pattern.id == "sensitive-data.generic-assigned-secret":

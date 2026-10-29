@@ -52,6 +52,13 @@ daemon when the port is not already listening; pass `--no-start-daemon` when
 an external supervisor owns daemon lifecycle. The proxy must not import source
 processkit MCP servers.
 
+A reused daemon retains the environment of the process that started it. For
+refreshable GitHub CLI authentication, configure
+`PROCESSKIT_GITHUB_TOKEN_FILE` as an owner-only `0600` token file.
+`repo-management` reads it immediately before each `gh` invocation, so token
+rotation does not require a daemon restart. Do not place token values in MCP
+configuration, tool arguments, or gateway diagnostics.
+
 Set `PROCESSKIT_GATEWAY_IMPORT_MODE=lazy-catalog` or
 `PROCESSKIT_GATEWAY_LAZY=true` to use the catalog-backed lazy registration
 path. Generate the catalog with `catalog --write` before enabling lazy mode.
@@ -89,6 +96,8 @@ configure a harness to launch the stdio command.
 
 - `PROCESSKIT_GATEWAY_IMPORT_MODE=lazy-catalog`
 - `PROCESSKIT_GATEWAY_LAZY=true`
+- `PROCESSKIT_GITHUB_TOKEN_FILE=/run/secrets/processkit-github-token`
+- `PROCESSKIT_GITHUB_ENTERPRISE_TOKEN_FILE=/run/secrets/processkit-ghe-token`
 
 ### Provided MCP tools
 
