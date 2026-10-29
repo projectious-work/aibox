@@ -319,12 +319,14 @@ version the tool follows and does not change how its checks run. A tool's
 through checks and commands.
 
 **Side effects.** The published `devcontainer-feature.json` of an owned
-Feature has none of `onCreateCommand`, `updateContentCommand`,
+Feature, read from the Feature's tarball layer in the test registry, has none
+of `onCreateCommand`, `updateContentCommand`,
 `postCreateCommand`, `postStartCommand`, `postAttachCommand`, `mounts`,
 `privileged`, `capAdd`, `securityOpt`, `init` and `entrypoint`; `privileges`
 is explanatory text only. Its `containerEnv` is exactly the catalog's
 `containerEnv`, or absent when the catalog has none. A build creates, changes
-or removes no file under the workspace folder. A tool that would update itself
+or removes no file under the workspace folder other than the Dev Container
+CLI's own `.devcontainer/devcontainer-lock.json`. A tool that would update itself
 is configured not to. Tools never replace project lockfiles.
 
 **Smoke tests.** For each `smoke` entry, the fixture file or directory is

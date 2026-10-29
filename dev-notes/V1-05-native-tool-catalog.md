@@ -136,6 +136,14 @@ contract defects under R-CYCLE step 8 and fixed in amendment 1:
 | Implementation 3 | `versionCoupling` table direction | Key is this Feature's version; missing coupled Feature fails |
 | Implementation 4 | Upstream Features in `dependsOn` | Use `upstream.ref` and `upstream.options` |
 
+Amendment review (sage, `claude-opus-5-5`, Anthropic) of `16a8b73d` found one
+blocking defect: the Dev Container CLI writes
+`.devcontainer/devcontainer-lock.json` into the workspace, so the workspace
+rule failed by construction. The rule now exempts that file. Non-blocking:
+per-item test-ID slots, `AC-TOOLS/absent` wording aligned with chapter 8,
+metadata read from the test registry, and the `requires` closure repeated to a
+fixed point.
+
 Tests Q10 (MCP inspection), Q14 (requires target) and the implementation's
 error-code mapping for apt update and tool-internal downloads follow the
 existing contract and need no change.

@@ -209,14 +209,15 @@ applies, the catalog Feature ID, tool and target ID in the form
 example `AC-TOOLS/present python/uv uv debian-13-arm64` or
 `AC-TOOLS/stack STACK-PYTHON debian-13-amd64`. Except for `AC-TOOLS/requires`,
 every selection also includes, at their defaults, the Features that any
-Feature in the selection's transitive `dependsOn` closure `requires`. Items
+Feature in the selection's transitive `dependsOn` closure `requires`, repeated
+until no Feature is added. Items
 marked "aibox" apply only to Features with `owner` `aibox`.
 
 | Item | Verified behavior | Per |
 |---|---|---|
 | `AC-TOOLS/present` | All checks and commands pass for the default version | non-bundle Feature × target |
 | `AC-TOOLS/version` | All checks pass for each non-default `enum` value | Feature × version × target |
-| `AC-TOOLS/absent` | Reference base with no Feature has no catalog command, package or path outside `baseline.provides` | target |
+| `AC-TOOLS/absent` | Reference base with no Feature has no absence observable of chapter 8 outside `baseline.provides` | target |
 | `AC-TOOLS/isolated` | A semantic member alone leaves its other siblings absent | member × target |
 | `AC-TOOLS/bundle` | A bundle passes the presence checks of every member | bundle × target |
 | `AC-TOOLS/depends` | A Feature's `dependsOn` Features pass presence without explicit selection | Feature with `dependsOn` × target |
@@ -229,6 +230,16 @@ marked "aibox" apply only to Features with `owner` `aibox`.
 | `AC-TOOLS/stack` | Each known-risk stack below builds and passes presence checks | stack × target |
 | `AC-TOOLS/inspect` | CLI and MCP inspection report `devcontainer.features` identically, without options | customized and minimal examples |
 | `AC-TOOLS/trace` | Every census row maps to a catalog Feature tool or a removal with decision | specification check |
+
+Test-ID slots per item: `present`, `version`, `isolated` and `depends` use
+Feature, tool and target, with `version=<value>` for `version`; `absent` uses
+the target only; `bundle`, `side-effects`, `requires` and `unsupported-version`
+use Feature and target, with `missing=<feature-id>` for `requires`;
+`unsupported-target` uses Feature and `fixture=<unsupportedTargets id>` in
+place of the target; `conflict` uses the member Feature, target and
+`version=<value>`; `smoke` and `stack` use the smoke or stack ID in the
+Feature slot; `inspect` uses `example=<name>`; `trace` uses the census row in
+the Feature slot.
 
 Known-risk stacks, each with `node/node`, `go/go` and `rust/rustc` where a
 member requires them: `STACK-PYTHON`, `python/all` with every Feature whose
