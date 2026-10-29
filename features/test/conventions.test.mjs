@@ -305,6 +305,14 @@ describe('Debian packages', () => {
     assert.deepEqual(installedPackages(container), ['bash', 'gcc']);
   });
 
+  it('fails when a build-only helper cannot be removed', () => {
+    const container = makeContainer({available: ['xz-utils']});
+    writeFileSync(join(container.state, 'purge-fails'), '');
+    const result = runFeature(sampleFeature(), container, {env: {SAMPLE_HELPER_PACKAGES: 'xz-utils'}});
+    assert.notEqual(result.status, 0, result.output);
+    assert.match(result.stderr, /cannot remove build-only packages: xz-utils/);
+  });
+
   it('keeps a helper that was installed before the Feature ran', () => {
     const container = makeContainer({available: ['xz-utils', 'minisign'], installed: ['xz-utils']});
     const result = runFeature(sampleFeature(), container, {env: {SAMPLE_HELPER_PACKAGES: 'xz-utils minisign'}});

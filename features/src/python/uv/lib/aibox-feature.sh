@@ -49,7 +49,10 @@ af_cleanup() {
   set +e
   if [ -n "$AF_HELPERS" ]; then
     # shellcheck disable=SC2086
-    DEBIAN_FRONTEND=noninteractive apt-get purge -y $AF_HELPERS >/dev/null
+    if ! DEBIAN_FRONTEND=noninteractive apt-get purge -y $AF_HELPERS >/dev/null; then
+      printf 'aibox-feature %s: internal error: cannot remove build-only packages:%s\n' "$AIBOX_FEATURE_ID" " $AF_HELPERS" >&2
+      [ "$af_status" -ne 0 ] || af_status=1
+    fi
   fi
   if [ "$AF_APT_READY" = 1 ]; then
     apt-get clean >/dev/null 2>&1
@@ -291,16 +294,6 @@ af_verify_minisign() {
 af_fetch() {
   af_download "$1" "$2"
   af_verify_sha256 "$2" "$3"
-}
-
-# af_remote_user: print the remote user the Dev Container CLI passes to
-# Features when it is a non-root account that exists, otherwise nothing.
-af_remote_user() {
-  case "${_REMOTE_USER:-root}" in
-    root|"") return 0 ;;
-  esac
-  id -u "$_REMOTE_USER" >/dev/null 2>&1 && printf '%s' "$_REMOTE_USER"
-  return 0
 }
 
 af_finish() {

@@ -27,6 +27,7 @@ case "$command" in
     sort -u -o "$FAKE_STATE/installed" "$FAKE_STATE/installed"
     ;;
   purge|remove)
+    [ -f "$FAKE_STATE/purge-fails" ] && exit 100
     seen=0
     for arg in "$@"; do
       if [ $seen = 0 ]; then [ "$arg" = "$command" ] && seen=1; continue; fi
