@@ -202,6 +202,58 @@ license/provenance clearance per row. Use pairwise interactions plus explicit
 known-risk full stacks; justify combinations rather than claiming exhaustive
 Cartesian-product testing.
 
+V1-05 realizes AC-TOOLS through the Tool Feature interface in chapter 8 and
+the catalog. Each acceptance test names one of these items and, where it
+applies, the catalog Feature ID, tool and target ID in the form
+`AC-TOOLS/<item> [<feature-id> [<tool>]] [<target-id>] [<key>=<value> ...]`, with slots per item as listed below, for
+example `AC-TOOLS/present python/uv uv debian-13-arm64` or
+`AC-TOOLS/stack STACK-PYTHON debian-13-amd64`. Except for `AC-TOOLS/requires`,
+every selection also includes, at their defaults, the Features that any
+Feature in the selection's transitive `dependsOn` closure `requires`, repeated
+until no Feature is added. Items
+marked "aibox" apply only to Features with `owner` `aibox`.
+
+| Item | Verified behavior | Per |
+|---|---|---|
+| `AC-TOOLS/present` | All checks and commands pass for the default version | non-bundle Feature × target |
+| `AC-TOOLS/version` | All checks pass for each non-default `enum` value | Feature × version × target |
+| `AC-TOOLS/absent` | Reference base with no Feature has no absence observable of chapter 8 outside `baseline.provides` | target |
+| `AC-TOOLS/isolated` | A semantic member alone leaves its other siblings absent | member × target |
+| `AC-TOOLS/bundle` | A bundle passes the presence checks of every member | bundle × target |
+| `AC-TOOLS/depends` | A Feature's `dependsOn` Features pass presence without explicit selection | Feature with `dependsOn` × target |
+| `AC-TOOLS/requires` | A Feature selected without a Feature it `requires` fails with `AIBOX_FEATURE_DEPENDENCY_MISSING` naming it (aibox) | Feature with `requires` |
+| `AC-TOOLS/unsupported-version` | `version` value `0.0.0-unsupported` fails with its error code (aibox) | Feature with `version` |
+| `AC-TOOLS/unsupported-target` | Each `unsupportedTargets` fixture fails with its error code (aibox) | Feature × fixture |
+| `AC-TOOLS/conflict` | A bundle plus its member with the first non-default `enum` value fails with `AIBOX_FEATURE_VERSION_CONFLICT` | member with more than one `enum` value |
+| `AC-TOOLS/side-effects` | Published metadata meets chapter 8 "Side effects" and the workspace folder is unchanged after build (aibox) | Feature |
+| `AC-TOOLS/smoke` | Each smoke entry creates its file | smoke × target |
+| `AC-TOOLS/stack` | Each known-risk stack below builds and passes presence checks | stack × target |
+| `AC-TOOLS/inspect` | CLI and MCP inspection report `devcontainer.features` identically, without options | customized and minimal examples |
+| `AC-TOOLS/trace` | Every census row maps to a catalog Feature tool or a removal with decision | specification check |
+
+Test-ID slots per item: `present`, `version`, `isolated` and `depends` use
+Feature, tool and target, with `version=<value>` for `version`; `absent` uses
+the target only; `bundle`, `side-effects`, `requires` and `unsupported-version`
+use Feature and target, with `missing=<feature-id>` for `requires`;
+`unsupported-target` uses Feature and `fixture=<unsupportedTargets id>` in
+place of the target; `conflict` uses the member Feature, target and
+`version=<value>`; `smoke` and `stack` use the smoke or stack ID in the
+Feature slot; `inspect` uses `example=<name>`; `trace` uses the census row in
+the Feature slot.
+
+Known-risk stacks, each with `node/node`, `go/go` and `rust/rustc` where a
+member requires them: `STACK-PYTHON`, `python/all` with every Feature whose
+tool method is `uv-tool`; `STACK-NODE`, `node/all` with `typescript/all`,
+`mermaid`, `data/visualization` and `browser-testing/all`; `STACK-DOCS`,
+`latex/all` with `preview/archive/all` and `preview/enhanced/all`;
+`STACK-NATIVE`, `go/all` with `rust/all` and `zig/all`; `STACK-SECURITY`,
+`security/crypto/all` with `security/scan/all`. These stacks are the pairwise
+interaction evidence for V1-05. The base toolchain is verified by the V1-04
+starter checks, not by AC-TOOLS. V1-05 changes the minimal and curated starters
+to configure `trixie`, `trixie-updates` and `trixie-security` from one
+snapshot; the existing starter checks verify the changed starters.
+Component-verified error codes are listed in the catalog.
+
 ### AC-HARNESS — installation, state and integration
 
 For each supported harness identity, test enabled/install/version/order choices,

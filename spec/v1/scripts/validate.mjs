@@ -124,6 +124,9 @@ for(const row of json('ledger/configuration.json').filter(x=>x.path.startsWith('
   current=current.properties[key];if(segment.endsWith('[]'))current=current.items;
  }
 }
+const featureCatalog=json('catalog/v1-05-features.json');
+schemaCheck(featureCatalog,json('feature-catalog.schema.json'));
+execFileSync('python3',[path.join(root,'scripts/validate-v1-05-catalog.py')],{stdio:'pipe'});
 const logEventSchema=json('log-event.schema.json');
 const logEventExample={schemaVersion:'aibox.log-event/v1',timestamp:'2026-09-26T12:00:00Z',severity:'info',event:'operation.started',component:'app',requestId:'example-1',sequence:0,fields:{scope:'operator'}};
 schemaCheck(logEventExample,logEventSchema);

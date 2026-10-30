@@ -114,7 +114,7 @@ there is no permissive opaque extension bag.
 | Setting class | Authoritative input | Interpreter | Durable user override |
 |---|---|---|---|
 | Workspace name, image/build, user, ports, mounts, lifecycle | Standard `devcontainer.json`, native Dockerfile/Compose | Dev Container CLI and native tools | Edited native file; operator policy may deny unsafe requests |
-| Install/disable/version of optional tool or harness | Feature presence and documented Feature options | Feature installer and upstream CLI | Project edit of Feature reference/options |
+| Install/disable/version of optional tool or harness | Native Feature/image/Dockerfile/package inputs | Native installer and upstream CLI | Project edit of native selection/build inputs |
 | Theme family/mode/variant, prompt/layout, tmux/status/title UX | Versioned distribution defaults and optional `customizations.aibox.workspace`; no duplicate Feature preference options | Bounded local UX renderer; native-only operation also supported | Tool-native user files in persistent home |
 | Native tool advanced settings | Native tmux, PowerKit, Yazi, Vim, Starship, LazyGit and harness files | Owning tool | User-owned native file; never copied back into namespace |
 | Optional audio client | Audio Feature and approved native env/mount declarations | Package manager, runtime and client tools | Host audio service remains operator-owned |
@@ -132,35 +132,248 @@ conversion is never silently reported as parity.
 
 ## Feature composition contract
 
-Use the Dev Container Feature mechanism for installable capabilities. A
-Feature is a packaged installer with declared options, dependencies and
-entry point; it is not an aibox package-manager API. Standard or
-maintainer-owned Features are preferred when they meet the complete tool
-contract. An aibox-owned Feature is permitted only for a proven gap or
-aibox-specific integration, and must reuse existing package managers/tool
-distribution rather than implement another resolver. A thin aibox Feature MAY
-compose several upstream Features when conditional v0 bundle behavior cannot
-be expressed otherwise; it must not hide an unbounded addon registry.
+Classify each retained v0 addon group by the usefulness of selecting its
+members separately. A tightly coupled group is one aibox-owned Feature with
+no subtool Feature routes or `all` bundle: `audio-voice` is the example, under
+`ghcr.io/projectious-work/aibox-features/audio/voice`. A semantic collection
+of independently useful tools has one Feature per selectable tool and a
+versioned `all` bundle using standard `dependsOn`: `data-preview` is the
+example, under `.../data/preview/<tool>` and `.../data/preview/all`.
+Only publish an `all` bundle where its members also have individual routes;
+avoid using a collection's metadata artifact as a Feature. Document each
+group's classification and the member-to-Feature mapping in the selection
+table. The 98 v0 rows remain individually traceable even when one Feature
+installs several coupled components. Do not submit these collections to the
+public Feature index yet. Record exact release references only after artifacts
+exist. If a v0 project used per-tool switches within a now-atomic group, the
+converter must report those states as an explicit compatibility decision;
+it must not silently claim that the single Feature preserves them.
+
+Each Feature owns a support matrix by selected tool version, container distro
+and release, and architecture. Its `install.sh` selects an applicable canonical
+method from the tool producer's installation documentation for that matrix
+cell; different tool versions may need different methods. If the producer has
+no applicable method, an official distro package is an allowed fallback only
+after checking that the exact requested tool version is available from the
+selected base's configured repository on that architecture, that its provenance
+and dependencies are acceptable, and that installation and runtime tests pass.
+An APT index entry for one release or architecture does not qualify all
+Debian-based images. Pin and verify consumed release or package inputs; the
+Feature's own version does not pin the installed tool version. Reuse a
+qualified upstream Feature, native package manager or official distribution
+*inside* an aibox Feature where it meets that contract. A Feature is a packaged
+installer with declared options, dependencies and entry point; it is not an
+aibox package-manager API. `customizations.aibox` carries UX preferences only
+and must not install tools. An unsupported version/base/architecture combination
+fails clearly at build time before installation; Arch and Nix are not inferred
+as supported from a generic Linux claim. Follow
+DEC-20261002_0054-AmberCompass-qualify-feature-compatibility-per-tool-version.
+Feature compatibility is distinct from any client editor's own container
+requirements; a passing Feature build does not establish VS Code Server or
+extension compatibility on that base.
+
+The owner still decides which v0 rows to retain or remove. The grouped Feature
+direction supersedes DEC-20261001_1954-SmoothTrout's restriction on routine
+aibox-owned installer Features; the group boundary is fixed by
+DEC-20261002_0046-SmoothLotus-package-coupled-addon-groups-atomically-and. Native
+image/Dockerfile/package units are implementation inputs for those Features,
+not a parallel project-facing addon resolver.
 
 Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 
-1. Record one selected v1 install unit/reference and its publisher, immutable
-   digest, license, current maintenance evidence and security review.
+1. Record a selected qualified v1 native install unit/reference and its
+   publisher, immutable inputs, license, maintenance/security evidence, or an
+   explicit owner-approved removal/scope decision. Retain every census row.
 2. Map v0 absent/default-enabled/explicit-enabled/explicit-disabled/version
-   states to Feature presence/options; explicit disable MUST result in absence
-   of the tool where v0 promises it, including from the base image.
-3. Map v0 recipe `requires` into explicit Feature dependencies or a documented
+   states to native selection/options; explicit disable MUST result in absence
+   where v0 promises it, including from the base image. Record any reduced
+   support explicitly for owner decision.
+3. Map v0 recipe `requires` into native dependencies or a documented
    prerequisite; prove there is no hidden addon solver or unexpected extras.
-4. Test default and non-default supported versions on both container
-   architectures, including a failed download/checksum and wrong architecture.
+4. Test default/non-default supported versions and disable on both container
+   architectures, for every declared distro/release cell. Test download/checksum,
+   missing exact package version and wrong-architecture failures where those
+   operations are performed by the selected installation mechanism.
 5. Prove that native project lockfiles remain authoritative for application
    dependencies; bundled convenience tools never rewrite them.
+
+### Tool Feature interface
+
+[`catalog/v1-05-features.json`](catalog/v1-05-features.json), validated by
+[`feature-catalog.schema.json`](feature-catalog.schema.json), is the frozen
+interface catalog for retained and added tools. It lists the reference base,
+supported and unsupported targets, error codes, every group with its shape,
+every Feature with its ID, owner, options, dependencies, environment, tools,
+installation provenance and observable checks, every removed census row,
+every compatibility note and the smoke tests. Prose in this section defines
+how those fields are realized; where prose and catalog differ, the catalog
+wins and the difference is a contract defect. `notes` fields are informative
+research records, not requirements.
+
+**Identity.** An aibox-owned Feature with catalog ID `<parent>/<name>` is
+published as `<registry>/<parent>/<name>:<featureVersion>` with the moving
+tags `<major>` and `<major>.<minor>`. Its `devcontainer-feature.json` has
+`id` = `<name>` and `version` = `featureVersion`. Sources live in
+`features/src/<catalog-id>/` with `devcontainer-feature.json`, `install.sh` and
+any helper files; nothing outside that directory is packaged. Upstream
+Features are referenced at the catalog's `upstream.ref` digest with the
+catalog's `upstream.options`; aibox does not republish them.
+
+**Shapes.** A `single` group has one tool Feature. An `atomic` group has one
+Feature that installs all members and has no member or bundle Feature. A
+`semantic` group has one Feature per member and a bundle Feature
+`<group-path>/all` whose `dependsOn` lists every member at its default
+options; the bundle installs nothing itself and has no options.
+
+**Options.** A Feature whose catalog entry has `options.version` declares a
+string `version` option with exactly that `enum` and `default`. Any other value
+fails with `AIBOX_FEATURE_UNSUPPORTED_VERSION` before installation. The option
+is the tool's own version; a package revision such as an APT `-0` suffix is an
+installation detail. A Feature without `options.version` has no `version`
+option. No option accepts `latest`, a range or a URL, and no Feature has an
+`enabled` option. The specification checks reject an example that sets an
+option key its Feature does not declare.
+
+**Debian packages.** A tool with method `debian-package` installs the
+candidate version of each named package from the base's configured
+repositories with `--no-install-recommends`; the base's snapshot pin, not the
+Feature, fixes that version. Such a Feature does not add or change APT
+sources. The `version` of a
+`package` check is the version expected on the reference base. V1-05 changes
+the minimal and curated starters to configure `trixie`, `trixie-updates` and
+`trixie-security` from one snapshot.
+
+**Dependencies.** Each `dependsOn` entry naming an aibox-owned Feature becomes
+a standard `dependsOn` reference to `<registry>/<id>:<major>` with an empty
+option object; an entry naming an upstream Feature becomes its `upstream.ref`
+with its `upstream.options`. The Dev Container CLI installs it automatically. Each `requires` entry, used only for
+multi-version runtimes, becomes an `installsAfter` reference to
+`<registry>/<id>`; the Feature checks before installation that the runtime is
+installed and otherwise fails with `AIBOX_FEATURE_DEPENDENCY_MISSING`, naming
+the missing Feature ID in the detail. It uses whichever enum version of the
+runtime is installed. A `versionCoupling` of rule `equal` requires the coupled
+Feature's installed version to equal this Feature's `version`; `table` maps
+this Feature's `version` to the coupled Feature's allowed version. A coupled
+Feature that is not installed, or installed at another version, fails with
+`AIBOX_FEATURE_COUPLING_MISMATCH`.
+When a tool is installed twice with different versions, for example through a
+bundle and an explicit member selection with another version, the second
+installation fails with `AIBOX_FEATURE_VERSION_CONFLICT`; an identical repeat
+succeeds without change.
+
+**Targets.** Before any change to the image, `install.sh` reads
+`/etc/os-release` and `dpkg --print-architecture`. A combination not listed in
+the Feature's `targets` fails with `AIBOX_FEATURE_UNSUPPORTED_TARGET`; the
+catalog's `unsupportedTargets` are the fixtures for this behavior. Upstream
+Features have no aibox error contract; for them, V1-05 verifies only presence,
+absence, isolation, bundles and smoke tests on the supported targets.
+
+**Errors.** Every failure listed in the catalog's `errors` writes one line
+`aibox-feature error <CODE> feature=<catalog-id> <detail>` to standard error
+and exits non-zero, so the Dev Container build fails. A test passes when the
+build fails and some line of its combined output contains
+`aibox-feature error <CODE> feature=<catalog-id>`, regardless of any prefix the
+build adds. For `AIBOX_FEATURE_UNSUPPORTED_TARGET` the catalog ID may be the
+Feature under test or any Feature it transitively `dependsOn` or `requires`,
+because the first Feature in install order fails; for every other code it is
+the Feature under test. `beforeInstall` errors leave no package, file or user change
+behind. Errors marked `component` are verified by implementation-track
+component tests because black-box tests cannot inject the fault.
+
+**Reference base and absence.** Acceptance tests build the catalog `baseline`
+fixture and add Features to its `features` object. A command or package in
+`baseline.provides` exists in the base and is excluded from absence checks.
+With no Feature selected, no other catalog `commands` entry resolves through
+`command -v`, no other `package` check is installed, no `path` check exists and
+no `command` check passes. A package is installed only when
+`dpkg-query -W -f '${db:Status-Status}' <package>` prints `installed`. For a
+semantic member selected alone, together with the Features its `dependsOn`
+closure `requires`, the same observables of every sibling are absent unless
+the sibling is in that member's transitive `dependsOn` or `requires` closure.
+An installed tool's `alsoProvides` entry for the target exempts only what it
+names: a `command` or `package` exempts that command or package, and a
+`feature` exempts every observable of that Feature. A command name in
+`baseline.provides`, or in an installed tool's `alsoProvides` `command` entry,
+exempts only the matching `commands` entry; a `command` check whose `argv`
+runs that command is still an absence observable. `version` and `texlive`
+checks are not absence observables. A tool whose observables are all exempt or
+in `baseline.provides` has no absence test. Disabling a tool means omitting its
+Feature.
+
+**Checks.** Every check is evaluated in the running container, as the
+fixture's `remoteUser` through `devcontainer exec`, and again as `root`
+through `docker exec --user root <containerId>`. Every entry in `commands`
+resolves through `command -v`. Regular expressions are ECMAScript, searched
+anywhere in the combined standard output and error, with `^` and `$`
+matching at line boundaries.
+
+| Kind | Passes when |
+|---|---|
+| `version` | `argv` exits 0 and output matches `regex` after `{version}` is replaced by the regular-expression escaped selected version |
+| `command` | `argv` exits 0 and output matches `regex`, which has no placeholder |
+| `package` | `dpkg-query -W -f '${Version}' <package>` exits 0 and prints exactly `version` |
+| `texlive` | `tlmgr info --only-installed --data name <package>` prints `package` |
+| `path` | `test -d <path>` succeeds |
+
+The selected version of a `version` check is the Feature's `version` option
+value, otherwise the tool's `version`. `versionFrom` names the Feature whose
+version the tool follows and does not change how its checks run. A tool's
+`packages` lists what it installs and is informative; absence is judged only
+through checks and commands.
+
+**Side effects.** The published `devcontainer-feature.json` of an owned
+Feature, read from the Feature's tarball layer in the test registry, has none
+of `onCreateCommand`, `updateContentCommand`,
+`postCreateCommand`, `postStartCommand`, `postAttachCommand`, `mounts`,
+`privileged`, `capAdd`, `securityOpt`, `init` and `entrypoint`; `privileges`
+is explanatory text only. Its `containerEnv` is exactly the catalog's
+`containerEnv`, or absent when the catalog has none. A build creates, changes
+or removes no file under the workspace folder other than the Dev Container
+CLI's own `.devcontainer/devcontainer-lock.json`. A tool that would update itself
+is configured not to. Tools never replace project lockfiles.
+
+**Smoke tests.** For each `smoke` entry, the fixture file or directory is
+copied under its base name into the root of the workspace folder, `argv` runs
+there as the remote user, exits 0 and creates `produces` relative to the
+workspace folder. When `producesMagicHex` is given, the file's first bytes
+equal those hexadecimal bytes.
+
+**Publishing and running tests.** `scripts/v1-05-features.sh publish
+--registry <host>/<prefix>` publishes every aibox-owned Feature to
+`<host>/<prefix>/<catalog-id>` with at least the tags `<featureVersion>`,
+`<major>` and `<major>.<minor>`; tags the pinned CLI adds, such as `latest`,
+are allowed but never selected by tests, rewrites aibox `dependsOn` and `installsAfter` references
+to that prefix, leaves upstream references unchanged, exits 0 on success and
+non-zero with a message on failure. It runs from the repository root and uses
+Docker and the `devcontainer` and `node` executables found on `PATH`.
+Acceptance tests run an OCI Distribution registry of
+their choice, recorded in the evidence, on `localhost:5000`, which the pinned CLI contacts over plain HTTP, publish to
+`localhost:5000/aibox-features`, and select aibox Features by their `<major>`
+tag so automatic dependencies resolve to the same instance. Upstream Features
+are selected by digest. A test run covers the host's native architecture;
+acceptance requires one run on each supported target. Presence checks may
+share one build across Features that do not conflict; absence, isolation,
+bundle and error checks use exactly the selection their item defines.
+Production publication and the public Feature index are out of V1-05 scope.
+
+**Inspection.** `aibox inspect` and the MCP `inspect_workspace` tool report a
+configuration entry with key `devcontainer.features`, value the sorted list of
+selected Feature references, `layer` `project`, `source`
+`.devcontainer/devcontainer.json`, `domain` `native`, `redacted` false and
+`invocationOnly` false. Feature options are never echoed. The entry is absent
+when no Feature is selected.
+
+### Census traceability
 
 The selection table is a source file keyed by `ADDON:<recipe>/<tool>`;
 its fields are `v0-source`, `v0-default`, `v0-versions`, `v1-ref`, `v1-option`,
 `install-owner`, `dependency`, `license`, `digest`, `platforms`, `test-id`, and
 `decision`. The current `ledger/addons.json` is only its input. Phase V1-05
-cannot be accepted without the filled table and actual Feature manifests.
+requires the complete table, owner dispositions for removals, group cohesion
+classification, grouped Feature sources and references for retained tools,
+producer installation provenance, and qualification evidence. The 98 census
+rows remain individually traceable; semantic bundles are additional convenience
+selections.
 
 The base image must separately enumerate its packages and runtime glue from
 `ledger/base-build.json`; tools outside the addon catalog do not disappear.

@@ -1,0 +1,6 @@
+{
+  "name": "V1-05 unsupported target ubuntu-24.04",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "remoteUser": "root",
+  "features": {}
+}
