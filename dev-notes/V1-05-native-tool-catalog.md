@@ -172,6 +172,20 @@ no blocking findings. Its notes are applied: the exempt-command sentence covers
 `baseline.provides` and `alsoProvides`, chapter 4 marks glow as new, and
 `COMPAT-V0-REQUIRES` no longer lists the removed rich row.
 
+## Contract amendment 3
+
+The nested Podman light pass on `debian-13-arm64` found two smoke commands that
+cannot pass with any correct implementation (DEC-20261031_1743-MightyRaven):
+
+| Source | Defect | Change |
+|---|---|---|
+| Light pass | mdbook resolves `--dest-dir` from the working directory, so `../mdbook-book` points outside the workspace | `SMOKE-MDBOOK` uses `--dest-dir mdbook-book` |
+| Light pass | `browser-testing/chromium` installs with `--no-shell`, but `playwright screenshot` defaults to the headless shell | `SMOKE-CHROMIUM` adds `--channel chromium`; the Feature keeps `--no-shell`; `COMPAT-CHROMIUM-CHANNEL` documents the channel for users |
+
+Each corrected command passed on `debian-13-arm64` in a temporary catalog edit
+(evidence `mdbook-try-*` and `chromium-try-*` under
+`/var/cache/aibox-test/evidence/`). Neither has run on `debian-13-amd64`.
+
 ## Logbook
 
 | Date | Entry |

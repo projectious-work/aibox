@@ -6502,6 +6502,14 @@
    ],
    "decision": "DEC-20261029_2107-QuietSeal",
    "note": "v0 installed the python3-rich library for aibox's Yazi Markdown/JSON/RST/notebook previews. v1 removes rich; preview/enhanced/glow renders Markdown and preview/enhanced/bat highlights JSON, RST and front matter. Notebook preview is settled in V1-13."
+  },
+  {
+   "id": "COMPAT-CHROMIUM-CHANNEL",
+   "rows": [
+    "ADDON:browser-testing/chromium"
+   ],
+   "decision": "DEC-20261031_1743-MightyRaven",
+   "note": "browser-testing/chromium installs full Chromium without Playwright's headless shell, as v0 did. Headless runs must select the chromium channel, for example `playwright screenshot --browser chromium --channel chromium` or `channel: 'chromium'` in the Playwright configuration."
   }
  ],
  "smoke": [
@@ -6600,7 +6608,7 @@
    "argv": [
     "sh",
     "-c",
-    "playwright screenshot --browser chromium \"file://$PWD/hello.html\" hello.png"
+    "playwright screenshot --browser chromium --channel chromium \"file://$PWD/hello.html\" hello.png"
    ],
    "produces": "hello.png",
    "producesMagicHex": "89504e470d0a1a0a"
@@ -6631,7 +6639,7 @@
     "build",
     "mdbook",
     "--dest-dir",
-    "../mdbook-book"
+    "mdbook-book"
    ],
    "produces": "mdbook-book/index.html"
   },
