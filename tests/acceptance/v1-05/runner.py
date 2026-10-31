@@ -257,10 +257,9 @@ def main(argv: list[str]) -> int:
             cleanup += executor.cleanup_failures
         if registry is not None:
             cleanup += registry.stop(log)
-        for engine in [*context.engines, context.docker]:
-            if engine is not None:
-                cleanup += engine.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
-                cleanup += engine.remove_images(f"aibox-v1-05-{run_id}-*", log)
+        if context.docker is not None:
+            cleanup += context.docker.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
+            cleanup += context.docker.remove_images(f"aibox-v1-05-{run_id}-*", log)
         shutil.rmtree(work, ignore_errors=True)
 
     if plan is not None:

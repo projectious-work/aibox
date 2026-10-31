@@ -87,11 +87,11 @@ smoke IDs, and `--test` takes glob patterns for full test IDs. A partial run
 is diagnostic only; acceptance needs a run of every item.
 
 `--jobs` sets how many builds run at once; the default comes from the host's
-CPUs and memory, with at most 4. Each Podman slot uses its own image store under
-`aibox-v1-05-workers` beside the default store. A small Podman 5.4.2 build reused
-a `RUN --mount` layer built from other content, so a build that takes a Feature
-step from the layer cache fails. To free the stores, run
-`podman unshare rm -rf <store>/aibox-v1-05-workers` between runs. Temporary build
+CPUs and memory, with at most 4. Parallel builds share the engine's image store
+and remove their images at the end of the run, so a run needs more space than
+with `--jobs 1`. A build that takes a Feature step from the Podman layer cache
+fails, because a small Podman 5.4.2 build reused a `RUN --mount` layer built from
+other content. Temporary build
 data goes to the system temporary directory unless you pass `--work-dir`, so give
 it room for several builds at once.
 

@@ -150,30 +150,11 @@ class Docker:
         return "podman" if Path(self.binary).name == "podman" else "docker"
 
     def for_worker(self, index: int, work: Path) -> "Docker":
-        """An engine for one parallel build slot. Podman slots get separate
-        stores so that removing one build's image cannot remove layers another
-        build has just matched. Stores persist beside the default store to keep
-        base layers across runs; Podman records the run root and temporary
-        directory in the store, so their paths must not change between runs.
-        Port 5000 keeps a second run from sharing the stores."""
-        slot = work / f"worker-{index}"
-        tmp = slot / "tmp"
+        """An engine for one parallel build slot: the same engine and store,
+        with a temporary directory of its own for the Dev Container CLI."""
+        tmp = work / f"worker-{index}" / "tmp"
         tmp.mkdir(parents=True)
-        environment = {"TMPDIR": str(tmp)}
-        if self.kind != "podman":
-            return Docker(self.binary, cli_environment=environment)
-        root, run_root = self.run("info", "--format",
-                                  "{{.Store.GraphRoot}} {{.Store.RunRoot}}").stdout.split()
-        store = Path(root).parent / "aibox-v1-05-workers" / f"worker-{index}"
-        state = Path(run_root).parent / "aibox-v1-05-workers" / f"worker-{index}"
-        store.mkdir(parents=True, exist_ok=True)
-        state.mkdir(parents=True, exist_ok=True)
-        shim = slot / "bin" / "podman"
-        shim.parent.mkdir()
-        shim.write_text(f'#!/bin/sh\nexec "{self.binary}" --root "{store}" '
-                        f'--runroot "{state}/run" --tmpdir "{state}/libpod" "$@"\n')
-        shim.chmod(0o755)
-        return Docker(str(shim), cli_environment=environment)
+        return Docker(self.binary, cli_environment={"TMPDIR": str(tmp)})
 
     def run(self, *args: str, log: Path | None = None, timeout: float | None = None) -> Completed:
         return execute([self.binary, *args], log=log, timeout=timeout)

@@ -191,10 +191,14 @@ class Executor:
                             f"{cached} Feature steps came from the Podman layer cache")
             return records
         finally:
-            self.cleanup_failures += self.docker.remove_images(
-                f"vsc-{workspace.name}*", log)
-            self.cleanup_failures += self.docker.remove_images(
-                f"aibox-v1-05-{self.ctx.run_id}-{index:04d}*", log)
+            # Parallel builds share the engine's store, where removing an image
+            # could remove layers another build has just matched; the runner
+            # removes the run's images at the end.
+            if len(self.ctx.engines) <= 1:
+                self.cleanup_failures += self.docker.remove_images(
+                    f"vsc-{workspace.name}*", log)
+                self.cleanup_failures += self.docker.remove_images(
+                    f"aibox-v1-05-{self.ctx.run_id}-{index:04d}*", log)
             shutil.rmtree(workspace, ignore_errors=True)
 
     def run_failing_build(self, index: int, build: Build, tests: list[Test],
