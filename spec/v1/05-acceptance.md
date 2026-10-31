@@ -221,15 +221,24 @@ marked "aibox" apply only to Features with `owner` `aibox`.
 | `AC-TOOLS/isolated` | A semantic member alone leaves its other siblings absent | member × target |
 | `AC-TOOLS/bundle` | A bundle passes the presence checks of every member | bundle × target |
 | `AC-TOOLS/depends` | A Feature's `dependsOn` Features pass presence without explicit selection | Feature with `dependsOn` × target |
-| `AC-TOOLS/requires` | A Feature selected without a Feature it `requires` fails with `AIBOX_FEATURE_DEPENDENCY_MISSING` naming it (aibox) | Feature with `requires` |
-| `AC-TOOLS/unsupported-version` | `version` value `0.0.0-unsupported` fails with its error code (aibox) | Feature with `version` |
-| `AC-TOOLS/unsupported-target` | Each `unsupportedTargets` fixture fails with its error code (aibox) | Feature × fixture |
+| `AC-TOOLS/requires` | A Feature selected without a Feature it `requires` fails with `AIBOX_FEATURE_DEPENDENCY_MISSING` naming it (aibox) | Distinct `requires` set (sampled) |
+| `AC-TOOLS/unsupported-version` | `version` value `0.0.0-unsupported` fails with its error code (aibox) | Install method among Features with `version` (sampled) |
+| `AC-TOOLS/unsupported-target` | Each `unsupportedTargets` fixture fails with its error code (aibox) | Install method × fixture (sampled) |
 | `AC-TOOLS/conflict` | A bundle plus its member with the first non-default `enum` value fails with `AIBOX_FEATURE_VERSION_CONFLICT` | member with more than one `enum` value |
 | `AC-TOOLS/side-effects` | Published metadata meets chapter 8 "Side effects" and the workspace folder is unchanged after build (aibox) | Feature |
 | `AC-TOOLS/smoke` | Each smoke entry creates its file | smoke × target |
 | `AC-TOOLS/stack` | Each known-risk stack below builds and passes presence checks | stack × target |
 | `AC-TOOLS/inspect` | CLI and MCP inspection report `devcontainer.features` identically, without options | customized and minimal examples |
 | `AC-TOOLS/trace` | Every census row maps to a catalog Feature tool or a removal with decision | specification check |
+| `AC-TOOLS/guards` | The component tests pass, which verify the error codes of the three sampled items for every aibox Feature without a container | run |
+
+A sampled item builds the first Feature in catalog order for each value of its
+key: a bundle's install method is `bundle`, and any other Feature's is the
+`method` of its first tool. Full scope builds every eligible Feature instead:
+`requires` per Feature with `requires`, `unsupported-version` per Feature with
+`version`, and `unsupported-target` per Feature × fixture. An acceptance run
+uses sampled scope; full scope runs on the owner's command. Test IDs are the
+same in both scopes.
 
 Test-ID slots per item: `present`, `version`, `isolated` and `depends` use
 Feature, tool and target, with `version=<value>` for `version`; `absent` uses
@@ -239,7 +248,7 @@ use Feature and target, with `missing=<feature-id>` for `requires`;
 place of the target; `conflict` uses the member Feature, target and
 `version=<value>`; `smoke` and `stack` use the smoke or stack ID in the
 Feature slot; `inspect` uses `example=<name>`; `trace` uses the census row in
-the Feature slot.
+the Feature slot; `guards` has no slots.
 
 Known-risk stacks, each with `node/node`, `go/go` and `rust/rustc` where a
 member requires them: `STACK-PYTHON`, `python/all` with every Feature whose
