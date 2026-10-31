@@ -215,11 +215,15 @@ still has offline evidence for these error codes. What sampled scope gives up
 is real-container failure evidence for each Feature, which full scope provides
 on the owner's command.
 
-Podman matches a `RUN --mount` layer without its mounted content: on Podman
-5.4.2 a rebuild with changed mounted content reused the other content's layer.
-Feature install steps have that form, so the runner gives each parallel Podman
-build its own store and fails a build that takes a Feature step from the cache.
-Reusing `latex/core` layers on Podman was rejected for the same reason.
+Feature install steps never hit the layer cache on Podman: 0 of 268 real build
+logs show a hit, because the Dev Container CLI's steps carry a digest that differs
+per build. Reusing `latex/core` layers is therefore not available through the
+pinned CLI on Podman and is not implemented, which departs from
+DEC-20261031_1856-CuriousBeacon. A small Podman 5.4.2 build did reuse a
+`RUN --mount` layer built from other mounted content, so the runner fails a build
+that takes a Feature step from the cache. Parallel Podman builds use separate
+stores so that removing one build's image cannot remove layers another has just
+matched; that race is reasoned, not observed.
 
 ## Logbook
 
