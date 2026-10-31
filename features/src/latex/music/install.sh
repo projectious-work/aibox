@@ -8,7 +8,8 @@ feature_dir=$(cd "${0%/*}" && pwd)
 af_init
 af_apt_require gnupg lilypond
 
-af_texlive_install musixtex
+# Before the GnuPG helper: purging it must not remove packages lilypond needs.
 af_apt_install lilypond
+af_texlive_install musixtex
 
 af_finish

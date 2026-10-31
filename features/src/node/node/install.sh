@@ -7,7 +7,7 @@ feature_dir=$(cd "${0%/*}" && pwd)
 . "$feature_dir/lib/catalog.sh"
 . "$feature_dir/lib/aibox-feature.sh"
 af_init
-af_apt_require xz-utils
+af_apt_require xz-utils libatomic1
 
 arch=$(af_arch_name x64 arm64)
 case "$AF_VERSION/$AF_ARCH" in
@@ -22,6 +22,8 @@ esac
 name="node-v$AF_VERSION-linux-$arch"
 
 af_fetch "https://nodejs.org/dist/v$AF_VERSION/$name.tar.xz" "$AF_TMP/$name.tar.xz" "$sha256"
+# The node binary links libatomic.so.1 on both architectures.
+af_apt_install libatomic1
 af_helper_install xz-utils
 tar -xJf "$AF_TMP/$name.tar.xz" -C "$AF_TMP" --no-same-owner
 install -d "$AF_ROOT/usr/local" "$AF_ROOT/usr/local/etc" "$AF_ROOT/usr/local/share/licenses/node"

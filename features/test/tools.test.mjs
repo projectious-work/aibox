@@ -288,7 +288,10 @@ for (const id of features) {
           for (const platform of ['x86_64-linux', 'aarch64-linux']) fakeTool(container, `usr/local/texlive/bin/${platform}/tlmgr`, {exit: 1});
           const before = snapshot(container);
           assertError(run(id, container), 'AIBOX_FEATURE_DOWNLOAD_FAILED', id, 'source=texlive');
-          assert.deepEqual(snapshot(container), before);
+          // latex/music installs lilypond before the GnuPG helper, so that purging
+          // the helper keeps what lilypond needs; a failed build discards the layer.
+          const expected = id === 'latex/music' ? {...before, packages: ['lilypond']} : before;
+          assert.deepEqual(snapshot(container), expected);
         });
         break;
       }

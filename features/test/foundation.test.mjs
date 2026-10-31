@@ -22,7 +22,7 @@ const fromSource = (id, tokens) => (version, arch) => byId.get(id).tools[0].sour
 const features = {
   'python/uv': {url: fromSource('python/uv', {amd64: 'x86_64', arm64: 'aarch64'})},
   'python/python': {preinstalled: ['python/uv'], download: false},
-  'node/node': {url: fromSource('node/node', {amd64: 'x64', arm64: 'arm64'}), packages: ['xz-utils']},
+  'node/node': {url: fromSource('node/node', {amd64: 'x64', arm64: 'arm64'}), packages: ['xz-utils', 'libatomic1']},
   'go/go': {url: fromSource('go/go', {amd64: 'amd64', arm64: 'arm64'})},
   'rust/rustc': {
     url: (_, arch) => `https://static.rust-lang.org/rustup/archive/1.29.2/${{amd64: 'x86_64', arm64: 'aarch64'}[arch]}-unknown-linux-gnu/rustup-init`,
