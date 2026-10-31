@@ -11,13 +11,13 @@ license/supply-chain clearance.
 | Dev Container interpretation, build/up/exec, Features/Templates | [Dev Container CLI](https://github.com/devcontainers/cli) | Public-command delegation; AC-BUILD/AC-LIFE; no internal API import or compiler. |
 | Stop/remove and Compose services | Runtime CLI / native Compose | Verify exact identity and differences between stop/remove; no daemon API recreation. |
 | MCP protocol | [Official Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Typed bounded tools/resources and stdio; AC-CLI/AC-GUIDE. No custom protocol engine. |
-| Basic language/tool installs | [Maintainer Features](https://github.com/devcontainers/features), native package managers | Evaluate exact options/platform fit; fill proven gaps with small Features. |
+| Basic language/tool installs | [Maintainer Features](https://github.com/devcontainers/features), producer-documented installers and native package managers | Package coupled groups as one aibox Feature and semantic groups as selectable tool Features with an `all` bundle; preserve exact options/platform behavior. |
 | Workspace terminal | tmux, PowerKit, Yazi, Vim, Starship, lnav, native plugins | Retain assets/hooks/palettes; AC-UX/AC-PREVIEW. |
 | Source diff | Git, delta, LazyGit | Curated configuration and convenient launch; AC-REVIEW. |
 | PR workflow | Optional [gh-dash](https://github.com/dlvhdr/gh-dash) plus gh | GitHub-specific review integration; native forge web fallback; not a new forge abstraction. |
 | Harness sidebar | Evaluate [tmux-agent-status](https://github.com/samleeney/tmux-agent-status) first | Session scoping, theme/layout integration, hook compatibility and telemetry gaps; AC-SIDEBAR. |
 | Rich monitoring alternative | [agent-dashboard](https://github.com/bjornjee/agent-dashboard) | Not selected: orchestration/workflow/remote control exceed monitoring scope; evaluate only a separable observational mode. |
-| Preview/render | Existing Poppler, resvg/librsvg, Ghostscript, Rich, ffmpeg, csvkit, SQLite, bat, chafa/timg/mutool/entr | Preserve small glue where native plugins do not cover existing behavior. |
+| Preview/render | Existing Poppler, resvg/librsvg, Ghostscript, ffmpeg, csvkit, SQLite, bat, new glow, chafa/timg/mutool/entr | Preserve small glue where native plugins do not cover existing behavior. |
 | Processkit integration | Product-owned supported installer/config/migration APIs | G02: API availability and pinned compatibility require qualification; do not copy process logic. |
 | Config schema/JSONC | Upstream schema and maintained Go parser/validator | G01/G04: select dependencies after conformance test; no new JSONC parser. |
 | Image supply chain | Existing SBOM/scanning/signing tools | Exact-artifact evidence, local release workflow; AC-RELEASE. |

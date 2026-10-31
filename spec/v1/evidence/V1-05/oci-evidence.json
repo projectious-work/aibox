@@ -1,0 +1,696 @@
+{
+  "copilot-cli": {
+    "ref": "ghcr.io/devcontainers/features/copilot-cli:1.1.3",
+    "manifest_digest": "sha256:e10d091ae7ef9b8d2ed5f601d75f5a090bc04acbac1a26d4cd3c0d5edde4ea10",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/copilot-cli",
+    "metadata": {
+      "id": "copilot-cli",
+      "version": "1.1.3",
+      "name": "GitHub Copilot CLI",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/copilot-cli",
+      "description": "Installs the GitHub Copilot CLI.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "prerelease"
+          ],
+          "default": "latest",
+          "description": "Select version of the GitHub Copilot CLI, if not latest."
+        }
+      },
+      "postStartCommand": "[ -f /etc/devcontainer-copilot-cli/auto-update ] && copilot update || true",
+      "customizations": {
+        "vscode": {
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes the GitHub Copilot CLI (`copilot`), which is pre-installed and available on the `PATH`."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "hugo": {
+    "ref": "ghcr.io/devcontainers/features/hugo:1.1.3",
+    "manifest_digest": "sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/hugo",
+    "metadata": {
+      "id": "hugo",
+      "version": "1.1.3",
+      "name": "Hugo",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/hugo",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest"
+          ],
+          "default": "latest",
+          "description": "Select or enter a version."
+        },
+        "extended": {
+          "type": "boolean",
+          "default": false,
+          "description": "Install Hugo extended for SASS/SCSS changes"
+        }
+      },
+      "containerEnv": {
+        "HUGO_DIR": "/usr/local/hugo",
+        "PATH": "/usr/local/hugo/bin:${PATH}"
+      },
+      "customizations": {
+        "vscode": {
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes Hugo, a popular open-source static site generator written in Go, pre-installed and available on the `PATH`."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "aws-cli": {
+    "ref": "ghcr.io/devcontainers/features/aws-cli:1.1.4",
+    "manifest_digest": "sha256:1f93c8315b7a6d76982ebb2269f8b0d50413fc0f965c032edf4aee0caceb73ef",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/aws-cli",
+    "metadata": {
+      "id": "aws-cli",
+      "version": "1.1.4",
+      "name": "AWS CLI",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/aws-cli",
+      "description": "Installs the AWS CLI along with needed dependencies. Useful for base Dockerfiles that often are missing required install dependencies like gpg.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest"
+          ],
+          "default": "latest",
+          "description": "Select or enter an AWS CLI version."
+        },
+        "verbose": {
+          "type": "boolean",
+          "default": true,
+          "description": "Suppress verbose output."
+        }
+      },
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "AmazonWebServices.aws-toolkit-vscode"
+          ],
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes the AWS CLI along with needed dependencies pre-installed and available on the `PATH`, along with the AWS Toolkit extensions for AWS development."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "azure-cli": {
+    "ref": "ghcr.io/devcontainers/features/azure-cli:1.3.0",
+    "manifest_digest": "sha256:d98f1066c077be0fa9d115b718f458bd803e415181b4a96f82a6f5d9f77241ac",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/azure-cli",
+    "metadata": {
+      "id": "azure-cli",
+      "version": "1.3.0",
+      "name": "Azure CLI",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/azure-cli",
+      "description": "Installs the Azure CLI along with needed dependencies. Useful for base Dockerfiles that often are missing required install dependencies like gpg.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest"
+          ],
+          "default": "latest",
+          "description": "Select or enter an Azure CLI version. (Available versions may vary by Linux distribution.)"
+        },
+        "extensions": {
+          "type": "string",
+          "default": "",
+          "description": "Optional comma separated list of Azure CLI extensions to install in profile."
+        },
+        "installBicep": {
+          "type": "boolean",
+          "description": "Optionally install Azure Bicep",
+          "default": false
+        },
+        "bicepVersion": {
+          "type": "string",
+          "proposals": [
+            "latest"
+          ],
+          "default": "latest",
+          "description": "Select or enter a Bicep version. ('latest' or a specic version such as 'v0.31.92')"
+        },
+        "installUsingPython": {
+          "type": "boolean",
+          "description": "Install Azure CLI using Python instead of pipx",
+          "default": false
+        }
+      },
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "ms-vscode.azurecli"
+          ],
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes the Azure CLI along with needed dependencies pre-installed and available on the `PATH`, along with the Azure CLI extension for Azure development."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "github-cli": {
+    "ref": "ghcr.io/devcontainers/features/github-cli:1.1.3",
+    "manifest_digest": "sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/github-cli",
+    "metadata": {
+      "id": "github-cli",
+      "version": "1.1.3",
+      "name": "GitHub CLI",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/github-cli",
+      "description": "Installs the GitHub CLI. Auto-detects latest version and installs needed dependencies.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none"
+          ],
+          "default": "latest",
+          "description": "Select version of the GitHub CLI, if not latest."
+        },
+        "installDirectlyFromGitHubRelease": {
+          "type": "boolean",
+          "default": true
+        },
+        "extensions": {
+          "type": "string",
+          "default": "",
+          "description": "Comma-separated list of GitHub CLI extensions to install (e.g. 'dlvhdr/gh-dash,github/gh-aw')."
+        }
+      },
+      "customizations": {
+        "vscode": {
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes the GitHub CLI (`gh`), which is pre-installed and available on the `PATH`. IMPORTANT: `gh api -f` does not support object values, use multiple `-f` flags with hierarchical keys and string values instead. When using GitHub actions `actions/upload-artifact` or `actions/download-artifact` use v4 or later."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils",
+        "ghcr.io/devcontainers/features/git"
+      ]
+    }
+  },
+  "go": {
+    "ref": "ghcr.io/devcontainers/features/go:1.4.0",
+    "manifest_digest": "sha256:3b2c7acfdb24de88292283d10eb7517ccc45f60ae22a97030f1cf4fbd03634f3",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/go",
+    "metadata": {
+      "id": "go",
+      "version": "1.4.0",
+      "name": "Go",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/go",
+      "description": "Installs Go and common Go utilities. Auto-detects latest version and installs needed dependencies.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none",
+            "1.24",
+            "1.23"
+          ],
+          "default": "latest",
+          "description": "Select or enter a Go version to install"
+        },
+        "golangciLintVersion": {
+          "type": "string",
+          "default": "latest",
+          "description": "Version of golangci-lint to install"
+        },
+        "installGoTools": {
+          "type": "boolean",
+          "default": true,
+          "description": "Install common Go tools (gopls, staticcheck, golint, revive, dlv, gomodifytags, goplay, gotests, impl, golangci-lint). Set to false to skip - useful when your postCreateCommand or CI already installs the tools it needs, or when you just want `go build`/`go install` support without the extra download/compile time."
+        }
+      },
+      "init": true,
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "golang.Go"
+          ],
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes Go and common Go utilities pre-installed and available on the `PATH`, along with the Go language extension for Go development."
+              }
+            ]
+          }
+        }
+      },
+      "containerEnv": {
+        "GOROOT": "/usr/local/go",
+        "GOPATH": "/go",
+        "PATH": "/usr/local/go/bin:/go/bin:${PATH}"
+      },
+      "capAdd": [
+        "SYS_PTRACE"
+      ],
+      "securityOpt": [
+        "seccomp=unconfined"
+      ],
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "rust": {
+    "ref": "ghcr.io/devcontainers/features/rust:1.6.0",
+    "manifest_digest": "sha256:846c949f52c9dea98d4f90a11957cbf152fb3f6e8a70ddd7cb83014a7d1d0c98",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/rust",
+    "metadata": {
+      "id": "rust",
+      "version": "1.6.0",
+      "name": "Rust",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/rust",
+      "description": "Installs Rust, common Rust utilities, and their required dependencies",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none",
+            "1.87",
+            "1.86",
+            "1.85",
+            "1.84",
+            "1.83",
+            "1.82",
+            "1.81",
+            "1.80",
+            "1.79",
+            "1.78",
+            "1.77",
+            "1.76",
+            "1.75",
+            "1.74",
+            "1.73",
+            "1.72",
+            "1.71",
+            "1.70",
+            "1.69",
+            "1.68",
+            "1.67",
+            "1.66",
+            "1.65",
+            "1.64"
+          ],
+          "default": "latest",
+          "description": "Select or enter a version of Rust to install."
+        },
+        "profile": {
+          "type": "string",
+          "proposals": [
+            "minimal",
+            "default",
+            "complete"
+          ],
+          "default": "minimal",
+          "description": "Select a rustup install profile."
+        },
+        "targets": {
+          "type": "string",
+          "default": "",
+          "description": "Optional comma separated list of additional Rust targets to install.",
+          "proposals": [
+            "aarch64-unknown-linux-gnu",
+            "armv7-unknown-linux-gnueabihf",
+            "x86_64-unknown-redox,x86_64-unknown-uefi"
+          ]
+        },
+        "components": {
+          "type": "string",
+          "default": "rust-analyzer,rust-src,rustfmt,clippy",
+          "description": "Optional, comma separated list of Rust components to be installed. Set to 'none' to install no components beyond the selected profile.",
+          "proposals": [
+            "rust-analyzer,rust-src,rustfmt,clippy",
+            "rust-analyzer,rust-src",
+            "rustfmt,clippy,rust-docs",
+            "llvm-tools-preview,rust-src,rustfmt",
+            "none"
+          ]
+        }
+      },
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "vadimcn.vscode-lldb",
+            "rust-lang.rust-analyzer",
+            "tamasfe.even-better-toml"
+          ],
+          "settings": {
+            "files.watcherExclude": {
+              "**/target/**": true
+            },
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes Rust, common Rust utilities, and needed dependencies pre-installed and available on the `PATH`, along with the Rust language extension for Rust development."
+              }
+            ]
+          }
+        }
+      },
+      "containerEnv": {
+        "CARGO_HOME": "/usr/local/cargo",
+        "RUSTUP_HOME": "/usr/local/rustup",
+        "PATH": "/usr/local/cargo/bin:${PATH}"
+      },
+      "capAdd": [
+        "SYS_PTRACE"
+      ],
+      "securityOpt": [
+        "seccomp=unconfined"
+      ],
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "python": {
+    "ref": "ghcr.io/devcontainers/features/python:1.8.0",
+    "manifest_digest": "sha256:fbcad6955caeecc5ad3f7886baf652e25cba5225a6c4c2287c536de2e5607511",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/python",
+    "metadata": {
+      "id": "python",
+      "version": "1.8.0",
+      "name": "Python",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/python",
+      "description": "Installs the provided version of Python, as well as PIPX, and other common Python utilities.  JupyterLab is conditionally installed with the python feature. Note: May require source code compilation.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "os-provided",
+            "none",
+            "3.12",
+            "3.11",
+            "3.10",
+            "3.9",
+            "3.8",
+            "3.7",
+            "3.6"
+          ],
+          "default": "os-provided",
+          "description": "Select a Python version to install."
+        },
+        "installTools": {
+          "type": "boolean",
+          "default": true,
+          "description": "Flag indicating whether or not to install the tools specified via the 'toolsToInstall' option. Default is 'true'."
+        },
+        "toolsToInstall": {
+          "type": "string",
+          "default": "flake8,autopep8,black,yapf,mypy,pydocstyle,pycodestyle,bandit,pipenv,virtualenv,pytest,pylint",
+          "description": "Comma-separated list of tools to install when 'installTools' is true. Defaults to a set of common Python tools like pylint."
+        },
+        "optimize": {
+          "type": "boolean",
+          "default": false,
+          "description": "Optimize Python for performance when compiled (slow)"
+        },
+        "enableShared": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable building a shared Python library"
+        },
+        "installPath": {
+          "type": "string",
+          "default": "/usr/local/python",
+          "description": "The path where python will be installed."
+        },
+        "installJupyterlab": {
+          "type": "boolean",
+          "default": false,
+          "description": "Install JupyterLab, a web-based interactive development environment for notebooks"
+        },
+        "configureJupyterlabAllowOrigin": {
+          "type": "string",
+          "default": "",
+          "description": "Configure JupyterLab to accept HTTP requests from the specified origin"
+        },
+        "httpProxy": {
+          "type": "string",
+          "default": "",
+          "description": "Connect to GPG keyservers using a proxy for fetching source code signatures by configuring this option"
+        }
+      },
+      "containerEnv": {
+        "PYTHON_PATH": "/usr/local/python/current",
+        "PIPX_HOME": "/usr/local/py-utils",
+        "PIPX_BIN_DIR": "/usr/local/py-utils/bin",
+        "PATH": "/usr/local/python/current/bin:/usr/local/py-utils/bin:/usr/local/jupyter:${PATH}"
+      },
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.autopep8"
+          ],
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes `python3` and `pip3` pre-installed and available on the `PATH`, along with the Python language extensions for Python development."
+              }
+            ],
+            "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
+            "[python]": {
+              "editor.defaultFormatter": "ms-python.autopep8"
+            }
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils",
+        "ghcr.io/devcontainers/features/oryx"
+      ]
+    }
+  },
+  "kubectl-helm-minikube": {
+    "ref": "ghcr.io/devcontainers/features/kubectl-helm-minikube:1.3.1",
+    "manifest_digest": "sha256:bbe8adf6b37fff8c67412ab0a4579f4c2f30bbaba1d9a5cebd9e38bade54025b",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/kubectl-helm-minikube",
+    "metadata": {
+      "id": "kubectl-helm-minikube",
+      "version": "1.3.1",
+      "name": "Kubectl, Helm, and Minikube",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/kubectl-helm-minikube",
+      "description": "Installs latest version of kubectl, Helm, and optionally minikube. Auto-detects latest versions and installs needed dependencies.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none",
+            "1.23",
+            "1.22",
+            "1.21",
+            "none"
+          ],
+          "default": "latest",
+          "description": "Select or enter a Kubernetes version to install"
+        },
+        "helm": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none"
+          ],
+          "default": "latest",
+          "description": "Select or enter a Helm version to install"
+        },
+        "minikube": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "none"
+          ],
+          "default": "latest",
+          "description": "Select or enter a Minikube version to install"
+        },
+        "kubectlFallbackVersion": {
+          "type": "string",
+          "default": "v1.35.1",
+          "description": "Fallback kubectl version to use when the latest stable version cannot be fetched"
+        }
+      },
+      "mounts": [
+        {
+          "source": "minikube-config",
+          "target": "/home/vscode/.minikube",
+          "type": "volume"
+        }
+      ],
+      "customizations": {
+        "vscode": {
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes kubectl, Helm, optionally minikube, and needed dependencies pre-installed and available on the `PATH`. When configuring Ingress for your Kubernetes cluster, note that by default Kubernetes will bind to a specific interface's IP rather than localhost or all interfaces. This is why you need to use the Kubernetes Node's IP when connecting - even if there's only one Node as in the case of Minikube."
+              }
+            ]
+          }
+        }
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  },
+  "node": {
+    "ref": "ghcr.io/devcontainers/features/node:2.1.0",
+    "manifest_digest": "sha256:586c9a6f7dd40bd3ba2cd41e7f2f88dcc31fbe5d1442afcbf07ffbc66b686857",
+    "publisher": "Dev Container Spec Maintainers",
+    "source_url": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/node",
+    "metadata": {
+      "id": "node",
+      "version": "2.1.0",
+      "name": "Node.js (via nvm), yarn and pnpm.",
+      "documentationURL": "https://github.com/devcontainers/features/tree/main/src/node",
+      "description": "Installs Node.js, nvm, yarn, pnpm, and needed dependencies.",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [
+            "lts",
+            "latest",
+            "none",
+            "22",
+            "20"
+          ],
+          "default": "lts",
+          "description": "Select or enter a Node.js version to install"
+        },
+        "nodeGypDependencies": {
+          "type": "boolean",
+          "default": true,
+          "description": "Install dependencies to compile native node modules (node-gyp)?"
+        },
+        "nvmInstallPath": {
+          "type": "string",
+          "default": "/usr/local/share/nvm",
+          "description": "The path where NVM will be installed."
+        },
+        "npmVersion": {
+          "type": "string",
+          "proposals": [
+            "lts",
+            "latest",
+            "10.9.0",
+            "10.8.0",
+            "10.7.0",
+            "9.9.3",
+            "8.19.4",
+            "none"
+          ],
+          "default": "none",
+          "description": "Select or enter a specific NPM version to install globally. Use 'latest' for the latest version, 'none' to skip npm version update, or specify a version like '10.9.0'."
+        },
+        "pnpmVersion": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "8.8.0",
+            "8.0.0",
+            "7.30.0",
+            "6.14.8",
+            "5.18.10",
+            "none"
+          ],
+          "default": "latest",
+          "description": "Select or enter the PNPM version to install"
+        },
+        "nvmVersion": {
+          "type": "string",
+          "proposals": [
+            "latest",
+            "0.39"
+          ],
+          "default": "latest",
+          "description": "Version of NVM to install."
+        },
+        "installYarnUsingApt": {
+          "type": "boolean",
+          "default": false,
+          "description": "On Debian and Ubuntu systems, you have the option to install Yarn globally via APT. If you choose not to use this option, Yarn will be set up using Corepack instead. This choice is specific to Debian and Ubuntu; for other Linux distributions, Yarn is always installed using Corepack, with a fallback to installation via NPM if an error occurs."
+        }
+      },
+      "customizations": {
+        "vscode": {
+          "extensions": [
+            "dbaeumer.vscode-eslint"
+          ],
+          "settings": {
+            "github.copilot.chat.codeGeneration.instructions": [
+              {
+                "text": "This dev container includes `node`, `npm` and `eslint` pre-installed and available on the `PATH` for Node.js and JavaScript development."
+              }
+            ]
+          }
+        }
+      },
+      "containerEnv": {
+        "NVM_DIR": "/usr/local/share/nvm",
+        "NVM_SYMLINK_CURRENT": "true",
+        "PATH": "/usr/local/share/nvm/current/bin:${PATH}"
+      },
+      "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+      ]
+    }
+  }
+}

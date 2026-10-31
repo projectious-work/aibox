@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "aibox.v1-05-native-features/v1",
+  "selected": {
+    "ghcr.io/devcontainers/features/hugo@sha256:15465c956810aa164c9644b6df5ca36f6cac3e7a86b7dcc474a1fb830b21c509": {
+      "version": "0.165.0",
+      "extended": true
+    }
+  },
+  "provenance": [
+    {
+      "ledgerTool": "ADDON:docs-hugo/hugo",
+      "publisher": "Dev Container Spec Maintainers",
+      "featureVersion": "1.1.3",
+      "source": "https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src/hugo",
+      "license": "MIT",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "v0DefaultEnabled": false,
+      "v0EffectiveVersion": "0.165.0",
+      "selection": "Add the Feature entry to enable; omit it to disable. Version and extended options select the frozen v0 behavior.",
+      "qualification": "source-reviewed; live build/up/exec pending"
+    }
+  ]
+}

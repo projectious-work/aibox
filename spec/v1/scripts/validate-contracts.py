@@ -118,6 +118,9 @@ legacy_completion = copy.deepcopy(roadmap)
 legacy_completion["groups"][0]["phases"][2]["implementationStatus"] = "done"
 check("roadmap.schema.json", legacy_completion, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
+native_features = json.loads((root / "fixtures/v1-05-native-features.json").read_text())
+assert native_features["schemaVersion"] == "aibox.v1-05-native-features/v1"
+assert len(native_features["selected"]) == 1
 for example_name in ("minimal", "customized"):
     example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"
     # The maintained files are JSONC option catalogs: whole-line comments
@@ -125,7 +128,10 @@ for example_name in ("minimal", "customized"):
     active_lines = (line for line in example_path.read_text().splitlines()
                     if not line.lstrip().startswith("//"))
     example = json.loads("\n".join(active_lines))
-    assert "features" not in example, f"{example_name}: unqualified Feature reference"
+    if example_name == "minimal":
+        assert "features" not in example, "minimal: optional Feature selected"
+    else:
+        assert example.get("features") == native_features["selected"], "customized: native Feature selection drift"
     assert "aibox" not in example, f"{example_name}: misplaced aibox configuration"
     extension = example.get("customizations", {}).get("aibox")
     if example_name == "minimal":
