@@ -6509,7 +6509,7 @@
     "ADDON:browser-testing/chromium"
    ],
    "decision": "DEC-20261031_1743-MightyRaven",
-   "note": "browser-testing/chromium installs full Chromium without Playwright's headless shell, as v0 did. Headless runs must select the chromium channel, for example `playwright screenshot --browser chromium --channel chromium` or `channel: 'chromium'` in the Playwright configuration."
+   "note": "browser-testing/chromium installs full Chromium without Playwright's headless shell, as v0 did. Headless runs must select the chromium channel, for example `playwright screenshot --browser chromium --channel chromium <url> <file>`, `use: { channel: 'chromium' }` in the Playwright configuration, or `chromium.launch({ channel: 'chromium' })`. Without it, Playwright reports a missing headless shell executable and suggests `npx playwright install`; selecting the channel is the fix."
   }
  ],
  "smoke": [

@@ -180,11 +180,21 @@ cannot pass with any correct implementation (DEC-20261031_1743-MightyRaven):
 | Source | Defect | Change |
 |---|---|---|
 | Light pass | mdbook resolves `--dest-dir` from the working directory, so `../mdbook-book` points outside the workspace | `SMOKE-MDBOOK` uses `--dest-dir mdbook-book` |
-| Light pass | `browser-testing/chromium` installs with `--no-shell`, but `playwright screenshot` defaults to the headless shell | `SMOKE-CHROMIUM` adds `--channel chromium`; the Feature keeps `--no-shell`; `COMPAT-CHROMIUM-CHANNEL` documents the channel for users |
+| Re-run after the node fix (`rerun2-arm64-211050`); the light pass failed earlier on the same test because of the missing `libatomic1` | `browser-testing/chromium` installs with `--no-shell`, but `playwright screenshot` defaults to the headless shell | `SMOKE-CHROMIUM` adds `--channel chromium`; the Feature keeps `--no-shell`; `COMPAT-CHROMIUM-CHANNEL` documents the channel for users |
 
 Each corrected command passed on `debian-13-arm64` in a temporary catalog edit
-(evidence `mdbook-try-*` and `chromium-try-*` under
-`/var/cache/aibox-test/evidence/`). Neither has run on `debian-13-amd64`.
+under rootless Podman, from the dirty tree at `3ca64b86` that also carried the
+Feature fixes (`mdbook-try-*` and `chromium-try-*`, in the local test cache only).
+Neither has run on `debian-13-amd64` or Docker. The defects are not attributed
+to the engine because of how the tools resolve these paths, not because of a
+Docker run.
+
+Amendment review (sage, `claude-opus-5-5`, Anthropic) approved `f01b7111` with
+no blocking findings. Its notes are applied: the compatibility note's examples
+are complete and name the `use` option and `chromium.launch`, and this section
+states the evidence precisely. Integration must regenerate the catalog reference
+when it moves onto this commit, and changes the page's wording so that a note
+may record behaviour unchanged from v0.
 
 ## Logbook
 
