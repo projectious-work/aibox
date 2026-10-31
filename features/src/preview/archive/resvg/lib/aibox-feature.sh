@@ -263,7 +263,7 @@ af_helper_install() {
 
 # af_download URL DESTINATION
 af_download() {
-  if ! curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 30 -o "$2" "$1"; then
+  if ! curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --retry-all-errors --connect-timeout 30 -o "$2" "$1"; then
     rm -f "$2"
     af_fail DOWNLOAD_FAILED "url=$1"
   fi
