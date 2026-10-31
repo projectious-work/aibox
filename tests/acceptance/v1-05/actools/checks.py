@@ -206,3 +206,14 @@ def error_line_matches(output: str, code: str, feature_ids: Iterable[str],
                                           + r"($|[^A-Za-z0-9/_-])", rest) for name in names):
                 return True
     return False
+
+
+def cached_feature_steps(build_log: str) -> int:
+    """Feature install steps a Podman build took from its layer cache. Buildah
+    matches these `RUN --mount` steps without the mounted Feature content or
+    options, so a hit can be another version's layer."""
+    lines = build_log.splitlines()
+    return sum("STEP" in line and "RUN --mount" in line
+               and "from=dev_containers_feature_content_source" in line
+               and "Using cache" in following
+               for line, following in zip(lines, lines[1:]))

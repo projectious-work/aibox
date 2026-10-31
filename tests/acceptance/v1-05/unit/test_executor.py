@@ -102,6 +102,13 @@ class ExecutorTest(unittest.TestCase):
         executor.run_builds()
         return {r["id"]: r for r in executor.results}, executor
 
+    def test_parallel_slots_run_every_build_and_keep_plan_order(self):
+        self.context.engines = [self.context.docker, Docker(self.context.docker.binary)]
+        plan = make_plan(self.catalog, [TARGET], [], items=["present"])
+        executor = Executor(self.context, plan)
+        executor.run_builds()
+        self.assertEqual([r["id"] for r in executor.results], [t.id for t in plan.tests])
+
     def test_presence_passes_for_remote_user_and_root(self):
         results, executor = self.run_items("present", features=["t/here"])
         record = results[f"AC-TOOLS/present t/here here {TARGET}"]

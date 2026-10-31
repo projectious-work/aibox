@@ -163,3 +163,19 @@ class ErrorLineTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CachedFeatureStepsTest(unittest.TestCase):
+    STEP = ("[2026-10-31T00:00:00.000Z] [2/3] STEP 6/10: RUN --mount=type=bind,"
+            "from=dev_containers_feature_content_source,source=go_0,target=/x cp -ar /x /y")
+
+    def test_counts_a_feature_step_followed_by_a_cache_hit(self):
+        log = f"{self.STEP}\n[2026-10-31T00:00:00.001Z] --> Using cache abc\n"
+        self.assertEqual(checks.cached_feature_steps(log), 1)
+
+    def test_ignores_a_feature_step_that_ran(self):
+        self.assertEqual(checks.cached_feature_steps(f"{self.STEP}\ninstalling go\n"), 0)
+
+    def test_ignores_cached_base_steps(self):
+        log = "[1/3] STEP 4/10: RUN printf x\n--> Using cache abc\n"
+        self.assertEqual(checks.cached_feature_steps(log), 0)

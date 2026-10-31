@@ -130,6 +130,7 @@ class DevContainerCli:
 class Docker:
     binary: str = "docker"
     resources: dict = field(default_factory=lambda: {"containers": set(), "images": set()})
+    cli_environment: dict = field(default_factory=dict)
 
     @classmethod
     def locate(cls, engine: str | None = None) -> "Docker":
@@ -147,6 +148,27 @@ class Docker:
     @property
     def kind(self) -> str:
         return "podman" if Path(self.binary).name == "podman" else "docker"
+
+    def for_worker(self, index: int, work: Path) -> "Docker":
+        """An engine for one parallel build slot. Podman slots get separate
+        stores because a shared layer cache can match another build's Feature
+        step (checks.cached_feature_steps); the stores persist beside the
+        default store to keep base layers across runs."""
+        slot = work / f"worker-{index}"
+        tmp = slot / "tmp"
+        tmp.mkdir(parents=True)
+        environment = {"TMPDIR": str(tmp)}
+        if self.kind != "podman":
+            return Docker(self.binary, cli_environment=environment)
+        root = self.run("info", "--format", "{{.Store.GraphRoot}}").stdout.strip()
+        store = Path(root).parent / "aibox-v1-05-workers" / f"worker-{index}"
+        store.mkdir(parents=True, exist_ok=True)
+        shim = slot / "bin" / "podman"
+        shim.parent.mkdir()
+        shim.write_text(f'#!/bin/sh\nexec "{self.binary}" --root "{store}" '
+                        f'--runroot "{slot}/run" --tmpdir "{slot}/libpod" "$@"\n')
+        shim.chmod(0o755)
+        return Docker(str(shim), cli_environment=environment)
 
     def run(self, *args: str, log: Path | None = None, timeout: float | None = None) -> Completed:
         return execute([self.binary, *args], log=log, timeout=timeout)

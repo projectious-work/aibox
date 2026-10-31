@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -34,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from actools import host  # noqa: E402
 from actools.catalog import REPO, SPEC, Catalog  # noqa: E402
 from actools.executor import Context, Executor  # noqa: E402
-from actools.plan import DOCKER_ITEMS, ITEMS, Plan, census_rows, make_plan  # noqa: E402
+from actools.plan import DOCKER_ITEMS, ITEMS, SCOPES, Plan, census_rows, make_plan  # noqa: E402
 
 
 def now() -> str:
@@ -62,6 +63,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--engine", choices=("docker", "podman"),
                         help="container engine (default: docker, else podman); "
                              "the evidence records the engine used")
+    parser.add_argument("--scope", choices=SCOPES, default="sampled",
+                        help="sampled: chapter 5 sample of the error items (default); "
+                             "full: every Feature")
+    parser.add_argument("--jobs", type=int, default=default_jobs(),
+                        help="container builds at once (default: %(default)s from this "
+                             "host's CPUs and memory)")
     parser.add_argument("--aibox", help="aibox binary for AC-TOOLS/inspect "
                                         "(default: build from this checkout in a Go container)")
     parser.add_argument("--cli-from-path", action="store_true",
@@ -72,10 +79,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def default_jobs() -> int:
+    """One slot per 2 CPUs and per 2 GiB of memory, at most 4."""
+    memory = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // 2**30
+    return max(1, min((os.cpu_count() or 1) // 2, memory // 2, 4))
+
+
 def build_plan(catalog: Catalog, args: argparse.Namespace, targets: list[str]) -> Plan:
     addons = json.loads((SPEC / "ledger" / "addons.json").read_text())
     return make_plan(catalog, targets, census_rows(addons), items=args.item,
-                     features=args.feature, tests=args.test)
+                     features=args.feature, tests=args.test, scope=args.scope)
 
 
 def print_dry_run(catalog: Catalog, plan: Plan) -> None:
@@ -165,6 +178,7 @@ def main(argv: list[str]) -> int:
                       "startedAt": started, **source_state(),
                       "host": {"system": platform.system(), "machine": platform.machine(),
                                "python": platform.python_version()},
+                      "scope": args.scope, "jobs": args.jobs,
                       "selection": {"items": args.item, "features": args.feature,
                                     "tests": args.test}}
     failures: list[str] = []
@@ -201,11 +215,15 @@ def main(argv: list[str]) -> int:
             else:
                 assert context.docker
                 context.aibox, evidence["aibox"] = host.build_aibox(context.docker, work, log)
-        if any(t.build for t in plan.tests):
-            assert context.docker
+        if any(t.build or t.item == "guards" for t in plan.tests):
             context.cli = (host.DevContainerCli.from_path(output) if args.cli_from_path
                            else host.DevContainerCli.bootstrap(work, output))
             evidence["devcontainerCli"] = context.cli.runtime
+        if any(t.build for t in plan.tests):
+            assert context.docker
+            if args.jobs > 1:
+                context.engines = [context.docker.for_worker(slot, work)
+                                   for slot in range(1, args.jobs + 1)]
             registry = host.Registry(context.docker, args.registry_image,
                                      f"aibox-v1-05-registry-{run_id}")
             context.registry = registry
@@ -230,9 +248,10 @@ def main(argv: list[str]) -> int:
     finally:
         if registry is not None:
             cleanup += registry.stop(log)
-        if context.docker is not None:
-            cleanup += context.docker.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
-            cleanup += context.docker.remove_images(f"aibox-v1-05-{run_id}-*", log)
+        for engine in [*context.engines, context.docker]:
+            if engine is not None:
+                cleanup += engine.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
+                cleanup += engine.remove_images(f"aibox-v1-05-{run_id}-*", log)
         shutil.rmtree(work, ignore_errors=True)
 
     if plan is not None:

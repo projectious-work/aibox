@@ -1,6 +1,6 @@
 import unittest
 
-from actools.plan import ITEMS, census_rows, known_risk_stacks, make_plan, normalize_items
+from actools.plan import ITEMS, Planner, census_rows, known_risk_stacks, make_plan, normalize_items
 from unit.fixtures import CENSUS, REAL, synthetic
 
 AMD, ARM = "debian-13-amd64", "debian-13-arm64"
@@ -51,6 +51,7 @@ class TestIdTest(unittest.TestCase):
             "stack": "AC-TOOLS/stack STACK-PYTHON debian-13-arm64",
             "inspect": "AC-TOOLS/inspect example=customized",
             "trace": "AC-TOOLS/trace ADDON:python/pip",
+            "guards": "AC-TOOLS/guards",
         }
         self.assertEqual(set(examples), set(ITEMS))
         for item, example in examples.items():
@@ -62,7 +63,7 @@ class TestIdTest(unittest.TestCase):
 
     def test_target_slot_is_used_except_where_chapter_five_omits_it(self):
         for test in make_plan(REAL, [ARM], CENSUS).tests:
-            if test.item in ("unsupported-target", "inspect", "trace"):
+            if test.item in ("unsupported-target", "inspect", "trace", "guards"):
                 self.assertNotIn(ARM, test.id)
             else:
                 self.assertIn(f" {ARM}", test.id)
@@ -293,5 +294,43 @@ class FilterTest(unittest.TestCase):
                 self.assertEqual(plan.builds[test.build].expect_failure, test.error is not None)
 
 
-if __name__ == "__main__":
-    unittest.main()
+
+
+class SampledScopeTest(unittest.TestCase):
+    def plan(self, *items, scope="sampled"):
+        return make_plan(REAL, [ARM], CENSUS, items=list(items), scope=scope)
+
+    def test_unsupported_target_runs_each_install_method_on_each_fixture(self):
+        plan = self.plan("unsupported-target")
+        planner = Planner(REAL)
+        methods = {planner.install_method(f) for f, feature in REAL.features.items()
+                   if feature["owner"] == "aibox"}
+        self.assertEqual({planner.install_method(t.feature) for t in plan.tests}, methods)
+        self.assertEqual(len(plan.tests), len(methods) * len(REAL.data["unsupportedTargets"]))
+
+    def test_unsupported_version_runs_each_install_method_that_has_a_version(self):
+        plan = self.plan("unsupported-version")
+        planner = Planner(REAL)
+        methods = [planner.install_method(t.feature) for t in plan.tests]
+        self.assertEqual(len(methods), len(set(methods)))
+        self.assertEqual(set(methods), {planner.install_method(t.feature)
+                                        for t in self.plan("unsupported-version", scope="full").tests})
+
+    def test_requires_runs_each_distinct_requirement(self):
+        tests = self.plan("requires").tests
+        self.assertEqual(sorted(t.error["mustName"] for t in tests),
+                         [["go/go"], ["node/node"], ["rust/rustc"]])
+
+    def test_sampling_keeps_test_ids_of_the_full_scope(self):
+        items = ("requires", "unsupported-version", "unsupported-target")
+        full = {t.id for t in self.plan(*items, scope="full").tests}
+        self.assertLess({t.id for t in self.plan(*items).tests}, full)
+
+    def test_sampling_leaves_every_other_item_unchanged(self):
+        items = ("present", "version", "absent", "isolated", "bundle", "depends", "conflict",
+                 "side-effects", "smoke", "stack", "inspect", "trace", "guards")
+        self.assertEqual(ids(self.plan(*items)), ids(self.plan(*items, scope="full")))
+
+    def test_guards_is_one_offline_test(self):
+        (test,) = self.plan("guards").tests
+        self.assertEqual((test.id, test.build), ("AC-TOOLS/guards", None))

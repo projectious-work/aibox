@@ -23,9 +23,11 @@ from .catalog import TEST_REGISTRY, UNSUPPORTED_VERSION, Catalog
 ITEMS = (
     "present", "version", "absent", "isolated", "bundle", "depends", "requires",
     "unsupported-version", "unsupported-target", "conflict", "side-effects",
-    "smoke", "stack", "inspect", "trace",
+    "smoke", "stack", "inspect", "trace", "guards",
 )
-DOCKER_ITEMS = frozenset(ITEMS) - {"inspect", "trace"}
+DOCKER_ITEMS = frozenset(ITEMS) - {"inspect", "trace", "guards"}
+# `full` builds every Feature for the sampled error items of chapter 5.
+SCOPES = ("sampled", "full")
 INSPECT_EXAMPLES = ("customized", "minimal")
 BASE_FIXTURE = "baseline"
 
@@ -73,9 +75,10 @@ def test_id(item: str, *parts: str | None, qualifiers: Iterable[tuple[str, str]]
 
 
 class Planner:
-    def __init__(self, catalog: Catalog, registry: str = TEST_REGISTRY):
+    def __init__(self, catalog: Catalog, registry: str = TEST_REGISTRY, scope: str = "full"):
         self.catalog = catalog
         self.registry = registry
+        self.scope = scope
         self.builds: dict[str, Build] = {}
         self.tests: list[Test] = []
 
@@ -129,6 +132,21 @@ class Planner:
 
     def supported(self, feature_id: str, target: str) -> bool:
         return target in self.catalog.feature(feature_id)["targets"]
+
+    def sample(self, feature_ids: Iterable[str],
+               key: Callable[[str], object]) -> list[str]:
+        """Chapter 5 sampling: the first Feature in catalog order per key."""
+        if self.scope == "full":
+            return list(feature_ids)
+        first: dict[object, str] = {}
+        for feature_id in feature_ids:
+            first.setdefault(key(feature_id), feature_id)
+        return list(first.values())
+
+    def install_method(self, feature_id: str) -> str:
+        if self.catalog.is_bundle(feature_id):
+            return "bundle"
+        return self.catalog.feature(feature_id)["tools"][0]["method"]
 
     def plan_present(self, target: str) -> None:
         for feature_id, feature in self.catalog.features.items():
@@ -226,11 +244,12 @@ class Planner:
                              "mustName": sorted(must_name) if must_name else None}))
 
     def plan_requires(self, target: str) -> None:
-        for feature_id, feature in self.catalog.features.items():
-            if feature["owner"] != "aibox" or not feature["requires"]:
-                continue
-            if not self.supported(feature_id, target):
-                continue
+        eligible = [feature_id for feature_id, feature in self.catalog.features.items()
+                    if feature["owner"] == "aibox" and feature["requires"]
+                    and self.supported(feature_id, target)]
+        for feature_id in self.sample(
+                eligible, lambda f: tuple(sorted(self.catalog.feature(f)["requires"]))):
+            feature = self.catalog.feature(feature_id)
             selection = self.catalog.with_requires({feature_id: {}})
             for required in feature["requires"]:
                 selection.pop(required, None)
@@ -244,10 +263,11 @@ class Planner:
                             qualifiers)
 
     def plan_unsupported_version(self, target: str) -> None:
-        for feature_id, feature in self.catalog.features.items():
-            if (feature["owner"] != "aibox" or self.catalog.version_option(feature_id) is None
-                    or not self.supported(feature_id, target)):
-                continue
+        eligible = [feature_id for feature_id, feature in self.catalog.features.items()
+                    if feature["owner"] == "aibox"
+                    and self.catalog.version_option(feature_id) is not None
+                    and self.supported(feature_id, target)]
+        for feature_id in self.sample(eligible, self.install_method):
             key = self.build(self.catalog.with_requires(
                 {feature_id: {"version": UNSUPPORTED_VERSION}}), expect_failure=True)
             self.error_test("unsupported-version", feature_id, target, key,
@@ -258,9 +278,9 @@ class Planner:
         # Feature x fixture, run on whichever host target executes the plan.
         if any(test.item == "unsupported-target" for test in self.tests):
             return
-        for feature_id, feature in self.catalog.features.items():
-            if feature["owner"] != "aibox":
-                continue
+        eligible = [feature_id for feature_id, feature in self.catalog.features.items()
+                    if feature["owner"] == "aibox"]
+        for feature_id in self.sample(eligible, self.install_method):
             for unsupported in self.catalog.data["unsupportedTargets"]:
                 key = self.build(self.catalog.with_requires({feature_id: {}}),
                                  fixture=unsupported["id"], expect_failure=True)
@@ -318,6 +338,9 @@ class Planner:
         for example in INSPECT_EXAMPLES:
             self.add(Test(test_id("inspect", qualifiers=(("example", example),)), "inspect", None,
                           payload={"example": example}))
+
+    def plan_guards(self) -> None:
+        self.add(Test(test_id("guards"), "guards", None))
 
     def plan_trace(self, census_rows: Iterable[str]) -> None:
         for row in census_rows:
@@ -379,9 +402,10 @@ def normalize_items(items: Iterable[str] | None) -> list[str]:
 
 def make_plan(catalog: Catalog, targets: Iterable[str], census_rows: Iterable[str], *,
               items: Iterable[str] | None = None, features: Iterable[str] = (),
-              tests: Iterable[str] = (), registry: str = TEST_REGISTRY) -> Plan:
+              tests: Iterable[str] = (), registry: str = TEST_REGISTRY,
+              scope: str = "full") -> Plan:
     selected_items = normalize_items(items)
-    planner = Planner(catalog, registry)
+    planner = Planner(catalog, registry, scope)
     for target in targets:
         for item in selected_items:
             if item in PLANNERS:
@@ -390,6 +414,8 @@ def make_plan(catalog: Catalog, targets: Iterable[str], census_rows: Iterable[st
         planner.plan_inspect()
     if "trace" in selected_items:
         planner.plan_trace(census_rows)
+    if "guards" in selected_items:
+        planner.plan_guards()
     chosen = [test for test in planner.tests
               if matches(test, list(features), list(tests))]
     ids = [test.id for test in chosen]

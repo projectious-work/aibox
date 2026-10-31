@@ -4,14 +4,17 @@ Black-box acceptance tests for every `AC-TOOLS/*` item in
 [chapter 5](../../../spec/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix),
 planned from [the catalog](../../../spec/v1/catalog/v1-05-features.json) and
 evaluated as [chapter 8](../../../spec/v1/08-native-artifacts.md#tool-feature-interface)
-defines. Acceptance needs one full run on each supported target.
+defines. Acceptance needs one run on each supported target in the default
+sampled scope; `--scope full` builds every Feature for the error items and runs
+on the owner's command.
 
 ## Prerequisites
 
 - **Docker**: a working `docker` CLI and daemon whose architecture is the
   target you run (`amd64` for `debian-13-amd64`, `arm64` for
-  `debian-13-arm64`). Allow for a long run (about 466 container builds per
-  target) and tens of gigabytes of image space. Port 5000 on localhost must be
+  `debian-13-arm64`). A run makes about 184 container builds per target, or
+  466 with `--scope full`, up to `--jobs` at once, and needs tens of gigabytes
+  of image space. Port 5000 on localhost must be
   free.
 - **Python 3.10 or later.**
 - **Dev Container CLI 0.89.0 and Node.** The runner starts them itself by
@@ -81,7 +84,13 @@ tests/acceptance/v1-05/run.sh --item trace                          # offline, n
 
 `--item` takes AC-TOOLS items, `--feature` takes glob patterns for Feature or
 smoke IDs, and `--test` takes glob patterns for full test IDs. A partial run
-is diagnostic only; acceptance needs the full run.
+is diagnostic only; acceptance needs a run of every item.
+
+`--jobs` sets how many builds run at once; the default comes from the host's
+CPUs and memory, with at most 4. Each Podman slot uses its own image store under
+`aibox-v1-05-workers` beside the default store, because Podman's layer cache can
+match a Feature step built from other content. A build that takes a Feature
+step from that cache fails.
 
 ## Unit tests
 

@@ -4,9 +4,12 @@ tear down its scoped resources and record results."""
 from __future__ import annotations
 
 import json
+import queue
 import shutil
+import threading
 from collections import OrderedDict
-from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -42,6 +45,7 @@ class Context:
     registry: Registry | None = None
     aibox: Path | None = None
     progress: Callable[[str], None] = print
+    engines: list[Docker] = field(default_factory=list)  # one per parallel build slot
 
 
 class Executor:
@@ -50,8 +54,14 @@ class Executor:
         self.plan = plan
         self.results: list[dict] = []
         self.cleanup_failures: list[str] = []
+        self.slot = threading.local()
+        self.lock = threading.Lock()
         (context.output / "builds").mkdir(exist_ok=True)
         (context.output / "tests").mkdir(exist_ok=True)
+
+    @property
+    def docker(self) -> Docker | None:
+        return getattr(self.slot, "engine", self.ctx.docker)
 
     # --- offline items ---------------------------------------------------
     def run_offline(self) -> None:
@@ -64,6 +74,17 @@ class Executor:
                 self.record(result_record(test, failures))
             elif test.item == "inspect":
                 self.record(self.run_inspect(test))
+            elif test.item == "guards":
+                self.record(self.run_guards(test))
+
+    def run_guards(self, test: Test) -> dict:
+        if self.ctx.cli is None:
+            return result_record(test, ["no Node available"])
+        log = self.ctx.output / "tests" / "guards.log"
+        completed = execute([str(REPO / "scripts" / "v1-05-features.sh"), "test"], log=log,
+                            env=self.ctx.cli.environment(), timeout=1800)
+        failures = [f"component tests exited {completed.exit_code}"] if completed.exit_code else []
+        return result_record(test, failures, log="tests/guards.log")
 
     def run_inspect(self, test: Test) -> dict:
         example = test.payload["example"]
@@ -90,8 +111,15 @@ class Executor:
             if test.build:
                 by_build.setdefault(test.build, []).append(test)
         total = len(by_build)
-        for index, (key, tests) in enumerate(by_build.items(), start=1):
+        engines = self.ctx.engines or [self.docker]
+        slots: "queue.SimpleQueue[Docker | None]" = queue.SimpleQueue()
+        for engine in engines:
+            slots.put(engine)
+
+        def run_one(index: int, key: str, tests: list[Test]) -> None:
             build = self.plan.builds[key]
+            engine = slots.get()
+            self.slot.engine = engine
             self.ctx.progress(f"[{index}/{total}] build {key} "
                               f"({'expect failure' if build.expect_failure else 'up'}; "
                               f"{build.fixture}; {len(build.selection)} Features; "
@@ -100,12 +128,23 @@ class Executor:
                 records = self.run_build(index, build, tests)
             except Exception as exc:
                 records = [result_record(t, [f"harness error: {exc}"]) for t in tests]
+            finally:
+                slots.put(engine)
             for record in records:
                 self.record(record)
 
+        with ThreadPoolExecutor(max_workers=len(engines)) as pool:
+            futures = [pool.submit(run_one, index, key, tests)
+                       for index, (key, tests) in enumerate(by_build.items(), start=1)]
+        for future in futures:
+            future.result()
+        order = {test.id: position for position, test in enumerate(self.plan.tests)}
+        self.results.sort(key=lambda record: order[record["id"]])
+
     def record(self, record: dict) -> None:
-        self.results.append(record)
-        self.ctx.progress(f"  {record['status'].upper():6} {record['id']}")
+        with self.lock:
+            self.results.append(record)
+            self.ctx.progress(f"  {record['status'].upper():6} {record['id']}")
 
     def workspace(self, index: int, build: Build) -> Path:
         name = f"aibox-v1-05-{self.ctx.run_id}-{index:04d}"
@@ -125,21 +164,30 @@ class Executor:
         return workspace
 
     def run_build(self, index: int, build: Build, tests: list[Test]) -> list[dict]:
-        assert self.ctx.docker and self.ctx.cli
+        assert self.docker and self.ctx.cli
         log = self.ctx.output / "builds" / f"{build.key}.log"
         log.write_text(json.dumps({"key": build.key, "fixture": build.fixture,
                                    "selection": build.selection_dict(),
                                    "copies": list(build.copies)}, indent=2) + "\n\n")
         workspace = self.workspace(index, build)
-        common = ["--docker-path", self.ctx.docker.binary, "--workspace-folder", str(workspace)]
+        common = ["--docker-path", self.docker.binary, "--workspace-folder", str(workspace)]
         try:
             if build.expect_failure:
-                return self.run_failing_build(index, build, tests, common, log)
-            return self.run_up_build(index, build, tests, common, log, workspace)
+                records = self.run_failing_build(index, build, tests, common, log)
+            else:
+                records = self.run_up_build(index, build, tests, common, log, workspace)
+            if self.docker.kind == "podman":
+                cached = checks.cached_feature_steps(log.read_text(errors="replace"))
+                if cached:
+                    for record in records:
+                        record["status"] = "failed"
+                        record["failures"].append(
+                            f"{cached} Feature steps came from the Podman layer cache")
+            return records
         finally:
-            self.cleanup_failures += self.ctx.docker.remove_images(
+            self.cleanup_failures += self.docker.remove_images(
                 f"vsc-{workspace.name}*", log)
-            self.cleanup_failures += self.ctx.docker.remove_images(
+            self.cleanup_failures += self.docker.remove_images(
                 f"aibox-v1-05-{self.ctx.run_id}-{index:04d}*", log)
             shutil.rmtree(workspace, ignore_errors=True)
 
@@ -165,7 +213,7 @@ class Executor:
 
     def run_up_build(self, index: int, build: Build, tests: list[Test], common: list[str],
                      log: Path, workspace: Path) -> list[dict]:
-        assert self.ctx.docker
+        assert self.docker
         label = f"aibox.v1-05.run={self.ctx.run_id}-{index:04d}"
         before = metadata.snapshot(workspace)
         up = self.cli(["up", *common, "--id-label", label, "--log-format", "text"], log)
@@ -189,28 +237,28 @@ class Executor:
             return records
         finally:
             for container_id in sorted(self.containers(label)):
-                if self.ctx.docker.run("rm", "-f", "-v", container_id, log=log).exit_code:
+                if self.docker.run("rm", "-f", "-v", container_id, log=log).exit_code:
                     self.cleanup_failures.append(f"remove container {container_id}")
 
     def containers(self, label: str) -> set[str]:
-        assert self.ctx.docker
-        listing = self.ctx.docker.run("ps", "-aq", "--filter", f"label={label}")
+        assert self.docker
+        listing = self.docker.run("ps", "-aq", "--filter", f"label={label}")
         return set(listing.stdout.split())
 
     def cli(self, args: list[str], log: Path, timeout: float = 7200) -> Completed:
         assert self.ctx.cli
-        return execute(self.ctx.cli.argv(*args), log=log, env=self.ctx.cli.environment(),
-                       timeout=timeout)
+        env = {**self.ctx.cli.environment(), **(self.docker.cli_environment if self.docker else {})}
+        return execute(self.ctx.cli.argv(*args), log=log, env=env, timeout=timeout)
 
     def probe_all(self, tests: list[Test], common: list[str], label: str, container_id: str,
                   log: Path) -> dict[str, dict]:
-        assert self.ctx.docker
+        assert self.docker
         probes = list(OrderedDict.fromkeys(e.probe for t in tests for e in t.expectations))
         if not probes:
             return {"remote": {}, "root": {}}
         script = checks.probe_script(probes)
         remote = self.cli(["exec", *common, "--id-label", label, "sh", "-c", script], log)
-        root = self.ctx.docker.run("exec", "--user", "root", container_id, "sh", "-c", script,
+        root = self.docker.run("exec", "--user", "root", container_id, "sh", "-c", script,
                                    log=log, timeout=7200)
         return {"remote": self.parse(remote, probes), "root": self.parse(root, probes)}
 
