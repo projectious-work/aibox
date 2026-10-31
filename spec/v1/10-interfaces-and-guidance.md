@@ -60,8 +60,9 @@ code, actionable message, retryability flag and bounded next-action reference.
 
 The default `aibox mcp serve` is a stdio, read-only knowledge server. It
 registers resources `aibox://guides/v1/index` and
-`aibox://guides/v1/{topic}`, a resource template for declared topics, plus
-`product/version` metadata. Operator mode is enabled only by a policy file
+`aibox://guides/v1/{topic}`, a resource template for declared topics,
+`aibox://templates/v1/index` and `aibox://templates/v1/{template}` for declared
+file templates, plus `product/version` metadata. Operator mode is enabled only by a policy file
 outside the project root and explicit launch argument. The server registers
 typed tools `build_environment`, `start_environment`, `stop_environment`,
 `remove_environment`, `rebuild_environment`, `inspect_environment`,
@@ -88,7 +89,7 @@ policies, excluding transport timestamps and progress messages.
 
 The guide manifest lists a stable topic ID, title, summary, applicable
 product version, source Markdown path, source digest and related topics.
-Initial topics: `start`, `tools`, `themes`, `tmux-header`, `terminal-title`,
+Initial topics: `start`, `tools`, `features`, `themes`, `tmux-header`, `terminal-title`,
 `sidebar`, `audio`, `previews`, `review`, `doctor`, `migration`, `authority`,
 `processkit`, `latex`. Each guide states prerequisites, exact file to edit,
 which actor may edit it, example, validation, activation (`refresh` versus
@@ -98,6 +99,23 @@ wins. Generate the embedded index from versioned public Markdown and fail
 CI/local verification if digest or topic linkage drifts. Unsupported topic
 or version is a typed not-found; the server never crawls a repository to
 answer an open-ended question.
+
+The `features` guide covers creating a Feature and adapting an aibox Feature:
+copying its directory as a project-local Feature or into the user's own
+registry, adding a version with its `enum` value, `lib/catalog.sh` entry and
+per-architecture digests, rewriting `dependsOn` references, and using the copy
+through the pinned Dev Container CLI without the aibox binary. It states that
+"do not edit" headers describe aibox's own generated source tree and that a
+copy is owned by the user, who then maintains its pins and security updates.
+
+The template store is read-only and returns file content; it never writes to a
+project. Initial templates are `feature` (a `devcontainer-feature.json` and
+`install.sh` skeleton following the chapter 8 Tool Feature interface) and the
+`minimal` and `curated` starters. Each manifest entry lists a stable ID, title,
+applicable product version, source path, source digest and related guide topic.
+Generate the embedded store from the versioned source files and fail
+CI/local verification on drift. An unsupported template or version is a typed
+not-found.
 
 Doctor checks are registered with `code`, severity (`error`, `warning`,
 `info`), scope (`local`, `operator`), required capability, expected latency,

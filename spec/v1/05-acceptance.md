@@ -389,6 +389,10 @@ the specified release and assert expected results; unsupported version/topic
 is explicit. Human docs, Markdown, MCP and discovery files agree. Measure that
 the initial index is bounded and a theme query retrieves the specific recipe,
 not the full manual. Client compatibility is recorded per protocol version.
+Each declared template resource is byte-identical to its source and carries the
+matching digest. The `features` recipe runs end to end: copy an aibox Feature,
+add a version, select the copy as a local Feature, build with the pinned Dev
+Container CLI without the aibox binary, and observe the added version.
 
 ### AC-RELEASE — delivery and exact evidence
 
