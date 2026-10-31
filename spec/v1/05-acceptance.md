@@ -230,11 +230,13 @@ marked "aibox" apply only to Features with `owner` `aibox`.
 | `AC-TOOLS/stack` | Each known-risk stack below builds and passes presence checks | stack × target |
 | `AC-TOOLS/inspect` | CLI and MCP inspection report `devcontainer.features` identically, without options | customized and minimal examples |
 | `AC-TOOLS/trace` | Every census row maps to a catalog Feature tool or a removal with decision | specification check |
-| `AC-TOOLS/guards` | The component tests pass, which verify the error codes of the three sampled items for every aibox Feature without a container | run |
+| `AC-TOOLS/guards` | The component tests pass with none skipped, and include a test of each of the three sampled items' error codes for every aibox Feature they apply to | run |
 
-A sampled item builds the first Feature in catalog order for each value of its
-key: a bundle's install method is `bundle`, and any other Feature's is the
-`method` of its first tool. Full scope builds every eligible Feature instead:
+A sampled item builds the first eligible Feature in catalog order for each
+value of its key: a bundle's install method is `bundle`, and any other Feature's
+is the `method` of its first tool. Because the first Feature in install order
+fails, an `unsupported-target` build may exercise a dependency's guard rather
+than the sampled Feature's; `AC-TOOLS/guards` covers each Feature's own guard. Full scope builds every eligible Feature instead:
 `requires` per Feature with `requires`, `unsupported-version` per Feature with
 `version`, and `unsupported-target` per Feature × fixture. An acceptance run
 uses sampled scope; full scope runs on the owner's command. Test IDs are the

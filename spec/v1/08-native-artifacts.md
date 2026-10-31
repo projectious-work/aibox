@@ -278,7 +278,9 @@ Feature under test or any Feature it transitively `dependsOn` or `requires`,
 because the first Feature in install order fails; for every other code it is
 the Feature under test. `beforeInstall` errors leave no package, file or user change
 behind. Errors marked `component` are verified by implementation-track
-component tests because black-box tests cannot inject the fault.
+component tests because black-box tests cannot inject the fault. Chapter 5
+samples three of the other errors in containers, and `AC-TOOLS/guards` verifies
+them per Feature through the same component tests.
 
 **Reference base and absence.** Acceptance tests build the catalog `baseline`
 fixture and add Features to its `features` object. A command or package in
