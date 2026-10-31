@@ -197,6 +197,30 @@ states the evidence precisely. Integration must regenerate the catalog reference
 when it moves onto this commit, and changes the page's wording so that a note
 may record behaviour unchanged from v0.
 
+## Contract amendment 4
+
+The owner asked for shorter AC-TOOLS runs (DEC-20261031_1856-CuriousBeacon). A
+full target planned 466 builds, 322 of them expected failures that mostly
+exercise the shared guard code.
+
+| Item | Full scope | Sampled scope |
+|---|---|---|
+| `requires` | 19 | 3 |
+| `unsupported-version` | 65 | 9 |
+| `unsupported-target` | 234 | 24 |
+| Container builds per target | 466 | 184 |
+
+`AC-TOOLS/guards` adds the component tests to each run, so every aibox Feature
+still has offline evidence for these error codes. What sampled scope gives up
+is real-container failure evidence for each Feature, which full scope provides
+on the owner's command.
+
+Podman matches a `RUN --mount` layer without its mounted content: on Podman
+5.4.2 a rebuild with changed mounted content reused the other content's layer.
+Feature install steps have that form, so the runner gives each parallel Podman
+build its own store and fails a build that takes a Feature step from the cache.
+Reusing `latex/core` layers on Podman was rejected for the same reason.
+
 ## Logbook
 
 | Date | Entry |
