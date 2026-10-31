@@ -132,25 +132,35 @@ class Docker:
     resources: dict = field(default_factory=lambda: {"containers": set(), "images": set()})
 
     @classmethod
-    def locate(cls) -> "Docker":
-        binary = shutil.which("docker")
+    def locate(cls, engine: str | None = None) -> "Docker":
+        """Find the named engine, or Docker then Podman. Rootless Podman has no
+        server, so its version and architecture come from the client side."""
+        candidates = (engine,) if engine else ("docker", "podman")
+        binary = next((found for found in map(shutil.which, candidates) if found), None)
         if not binary:
-            raise RuntimeError("Docker is required: no docker executable on PATH")
+            raise RuntimeError(f"a container engine is required: no {' or '.join(candidates)} "
+                               "executable on PATH")
         if execute([binary, "info"]).exit_code:
-            raise RuntimeError("Docker is installed but `docker info` fails")
+            raise RuntimeError(f"{binary} is installed but `{binary} info` fails")
         return cls(binary)
+
+    @property
+    def kind(self) -> str:
+        return "podman" if Path(self.binary).name == "podman" else "docker"
 
     def run(self, *args: str, log: Path | None = None, timeout: float | None = None) -> Completed:
         return execute([self.binary, *args], log=log, timeout=timeout)
 
     def server_architecture(self) -> str:
-        completed = self.run("version", "--format", "{{.Server.Arch}}")
+        completed = (self.run("info", "--format", "{{.Host.Arch}}") if self.kind == "podman"
+                     else self.run("version", "--format", "{{.Server.Arch}}"))
         if completed.exit_code:
-            raise RuntimeError(f"cannot read Docker server architecture: {completed.stderr}")
+            raise RuntimeError(f"cannot read the engine architecture: {completed.stderr}")
         return completed.stdout.strip()
 
     def version(self) -> str:
-        return self.run("version", "--format", "{{.Server.Version}}").stdout.strip()
+        side = "Client" if self.kind == "podman" else "Server"
+        return self.run("version", "--format", f"{{{{.{side}.Version}}}}").stdout.strip()
 
     def image_digest(self, image: str) -> str | None:
         completed = self.run("image", "inspect", "--format", "{{json .RepoDigests}}", image)
@@ -247,8 +257,9 @@ def build_aibox(docker: Docker, work: Path, log: Path) -> tuple[Path, dict]:
     out = work / "aibox-bin"
     out.mkdir()
     image = f"golang:{go_version()}"
+    # Under rootless Podman the container's root is the host user.
     user = ["--user", f"{os.getuid()}:{os.getgid()}", "-e", "HOME=/tmp"] \
-        if platform.system() == "Linux" else []
+        if platform.system() == "Linux" and docker.kind == "docker" else []
     completed = docker.run(
         "run", "--rm", *user, "-v", f"{REPO}:/src:ro", "-v", f"{out}:/out", "-w", "/src",
         "-e", "CGO_ENABLED=0", "-e", f"GOOS={system}", "-e", f"GOARCH={machine}",

@@ -59,6 +59,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                                          "(default: a new temporary directory)")
     parser.add_argument("--work-dir", help="parent for temporary workspaces; must be shared "
                                            "with the Docker daemon (default: system temp)")
+    parser.add_argument("--engine", choices=("docker", "podman"),
+                        help="container engine (default: docker, else podman); "
+                             "the evidence records the engine used")
     parser.add_argument("--aibox", help="aibox binary for AC-TOOLS/inspect "
                                         "(default: build from this checkout in a Go container)")
     parser.add_argument("--cli-from-path", action="store_true",
@@ -171,18 +174,19 @@ def main(argv: list[str]) -> int:
     log = output / "host.log"
     registry = None
     try:
-        probe_plan = build_plan(catalog, args, list(catalog.targets)[:1])
+        probe_plan = build_plan(catalog, args, [args.target] if args.target
+                                else list(catalog.targets))
         needs_docker = any(t.item in DOCKER_ITEMS for t in probe_plan.tests) or (
             any(t.item == "inspect" for t in probe_plan.tests) and not args.aibox)
         target = args.target
         if needs_docker:
-            context.docker = host.Docker.locate()
+            context.docker = host.Docker.locate(args.engine)
             architecture = context.docker.server_architecture()
             detected = catalog.target_for_architecture(architecture)
             if target and target != detected:
                 raise RuntimeError(f"--target {target} does not match the host target {detected}")
             target = detected
-            evidence["engine"] = {"binary": context.docker.binary,
+            evidence["engine"] = {"kind": context.docker.kind, "binary": context.docker.binary,
                                   "serverVersion": context.docker.version(),
                                   "serverArch": architecture}
         evidence["target"] = target
