@@ -1,9 +1,10 @@
 # V1-05 native tool catalog
 
 V1-05 contract is frozen at contract commit
-`d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` on `contract/v1-05-tool-catalog`
-(amendment 2, DEC-20261029_2134-NobleBlossom). It replaces amendment 1,
-`59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam), and
+`d1c7adb487bd4cfa7449550ffcd3da05153537ed` on `contract/v1-05-tool-catalog`
+(amendment 3, DEC-20261031_1750-NeatDaisy). It replaces amendment 2,
+`d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` (DEC-20261029_2134-NobleBlossom),
+amendment 1, `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam), and
 the first contract commit `34d06da0cf42d73ff05971c7235ae1324d7e768a`
 (DEC-20261029_1515-ShinySpire). The acceptance-test and implementation tracks
 continue from that commit.
@@ -208,3 +209,5 @@ may record behaviour unchanged from v0.
 | 2026-10-29 | Owner approved amendment 1 as contract commit `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam); both tracks move onto it. |
 | 2026-10-29 | Tracks reported: tests `85d77f02`, implementation wave 3 `5b38f55d`. Amendment 2 drafted (rich replaced by glow and bat); review pending. |
 | 2026-10-29 | Implementation wave 4 reported (`13997c2a`). Owner approved amendment 2 as contract commit `d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` (DEC-20261029_2134-NobleBlossom); both tracks move onto it. |
+| 2026-10-30 | Nested Podman light pass on `debian-13-arm64`; amendment 3 drafted from its two smoke defects. |
+| 2026-10-31 | Owner approved amendment 3 (DEC-20261031_1743-MightyRaven); sage approved `f01b7111` with no blocking findings; frozen as contract commit `d1c7adb487bd4cfa7449550ffcd3da05153537ed` (DEC-20261031_1750-NeatDaisy). |
