@@ -490,9 +490,9 @@ These v0 addon tools have no v1 Feature:
 
 ## Compatibility notes
 
-Differences from v0 that a migrated project may notice:
+What a project migrated from v0 may notice:
 
-| Note | Affected v0 tools | Change |
+| Note | Affected v0 tools | Detail |
 |---|---|---|
 | COMPAT-PIP | `ADDON:python/pip` | pip comes with the uv-managed CPython and is reached as python -m pip; a v0 'pip disabled' selection cannot be honored while python/python is selected. |
 | COMPAT-OPENCODE | `ADDON:ai-opencode/opencode` | v0 installed the archived opencode-ai/opencode 0.0.55; v1 installs anomalyco/opencode, a different product with the same command name. |
@@ -529,3 +529,4 @@ Differences from v0 that a migrated project may notice:
 | COMPAT-DEBIAN-VERSION | `ADDON:audio-voice/alsa-pulse`, `ADDON:audio-voice/pulseaudio-utils`, `ADDON:audio-voice/sox`, `ADDON:audio-voice/sox-pulse`, `ADDON:data-preview/sqlite3`, `ADDON:diagramming/graphviz`, `ADDON:infrastructure/podman`, `ADDON:latex/svg-inkscape`, `ADDON:preview-archive/chafa`, `ADDON:preview-archive/entr`, `ADDON:preview-archive/librsvg`, `ADDON:preview-archive/mupdf`, `ADDON:preview-archive/p7zip`, `ADDON:preview-archive/poppler`, `ADDON:preview-archive/timg`, `ADDON:preview-enhanced/ffmpeg`, `ADDON:preview-enhanced/ghostscript` | Debian-route tools install the version the base's configured repositories provide; the base's snapshot pin, not the Feature, fixes their version. |
 | COMPAT-AZURE | `ADDON:cloud-azure/azure-cli` | azure-cli is installed with uv from PyPI because Microsoft's apt repository has no trixie distribution. |
 | COMPAT-RICH | `ADDON:preview-enhanced/rich` | v0 installed the python3-rich library for aibox's Yazi Markdown/JSON/RST/notebook previews. v1 removes rich; preview/enhanced/glow renders Markdown and preview/enhanced/bat highlights JSON, RST and front matter. Notebook preview is settled in V1-13. |
+| COMPAT-CHROMIUM-CHANNEL | `ADDON:browser-testing/chromium` | browser-testing/chromium installs full Chromium without Playwright's headless shell, as v0 did. Headless runs must select the chromium channel, for example `playwright screenshot --browser chromium --channel chromium <url> <file>`, `use: { channel: 'chromium' }` in the Playwright configuration, or `chromium.launch({ channel: 'chromium' })`. Without it, Playwright reports a missing headless shell executable and suggests `npx playwright install`; selecting the channel is the fix. |

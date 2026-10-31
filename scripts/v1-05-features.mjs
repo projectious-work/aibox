@@ -355,8 +355,8 @@ export function renderToolCatalogPage(catalog) {
     ...catalog.removed.map((r) => `| ${code(r.row)} | ${md(r.reason)} | ${r.decision} |`),
     '',
     '## Compatibility notes', '',
-    'Differences from v0 that a migrated project may notice:', '',
-    '| Note | Affected v0 tools | Change |', '|---|---|---|',
+    'What a project migrated from v0 may notice:', '',
+    '| Note | Affected v0 tools | Detail |', '|---|---|---|',
     ...catalog.compatibilityNotes.map((n) => `| ${n.id} | ${n.rows.map(code).join(', ')} | ${md(n.note)} |`),
     '');
   return lines.join('\n');
