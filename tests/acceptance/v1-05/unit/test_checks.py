@@ -3,7 +3,7 @@ import unittest
 
 from actools import checks
 from actools.checks import Outcome, Probe
-from unit.fixtures import REAL
+from unit.fixtures import REAL, synthetic
 
 VERSION_REGEX = "(^|[^0-9.]){version}([^0-9]|$)"
 
@@ -179,3 +179,36 @@ class CachedFeatureStepsTest(unittest.TestCase):
     def test_ignores_cached_base_steps(self):
         log = "[1/3] STEP 4/10: RUN printf x\n--> Using cache abc\n"
         self.assertEqual(checks.cached_feature_steps(log), 0)
+
+
+class GuardCoverageTest(unittest.TestCase):
+    CATALOG = synthetic()
+
+    def tap(self, drop=None, summary="# pass 9\n# skipped 0\n# todo 0\n"):
+        lines = []
+        for feature_id, feature in self.CATALOG.features.items():
+            lines.append(f"# Subtest: {feature_id}")
+            titles = [f"fails on {u['id']} with UNSUPPORTED_TARGET"
+                      for u in self.CATALOG.data["unsupportedTargets"]]
+            titles.append("fails with UNSUPPORTED_VERSION")
+            titles += [f"fails with DEPENDENCY_MISSING naming {r}" for r in feature["requires"]]
+            lines += [f"    # Subtest: {title}" for title in titles
+                      if not (drop and drop[0] == feature_id and drop[1] in title)]
+        return "\n".join(lines) + "\n" + summary
+
+    def test_complete_run_has_no_failures(self):
+        self.assertEqual(checks.guard_coverage_failures(self.tap(), self.CATALOG), [])
+
+    def test_names_a_feature_without_a_guard_test(self):
+        failures = checks.guard_coverage_failures(self.tap(drop=("kit/a", "DEPENDENCY")),
+                                                  self.CATALOG)
+        self.assertEqual(failures, ["no component test for kit/a: DEPENDENCY_MISSING runtime"])
+
+    def test_rejects_skipped_tests(self):
+        failures = checks.guard_coverage_failures(
+            self.tap(summary="# pass 9\n# skipped 1\n# todo 0\n"), self.CATALOG)
+        self.assertEqual(failures, ["component tests report skipped 1"])
+
+    def test_rejects_a_run_without_passing_tests(self):
+        failures = checks.guard_coverage_failures(self.tap(summary="# pass 0\n"), self.CATALOG)
+        self.assertEqual(failures, ["component tests report no passing test"])

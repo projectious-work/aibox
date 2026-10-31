@@ -81,9 +81,11 @@ class Executor:
         if self.ctx.cli is None:
             return result_record(test, ["no Node available"])
         log = self.ctx.output / "tests" / "guards.log"
-        completed = execute([str(REPO / "scripts" / "v1-05-features.sh"), "test"], log=log,
+        files = sorted(str(path) for path in (REPO / "features" / "test").glob("*.test.mjs"))
+        completed = execute(["node", "--test", "--test-reporter=tap", *files], log=log,
                             env=self.ctx.cli.environment(), timeout=1800)
         failures = [f"component tests exited {completed.exit_code}"] if completed.exit_code else []
+        failures += checks.guard_coverage_failures(completed.stdout, self.ctx.catalog)
         return result_record(test, failures, log="tests/guards.log")
 
     def run_inspect(self, test: Test) -> dict:
@@ -133,11 +135,15 @@ class Executor:
             for record in records:
                 self.record(record)
 
-        with ThreadPoolExecutor(max_workers=len(engines)) as pool:
+        pool = ThreadPoolExecutor(max_workers=len(engines))
+        try:
             futures = [pool.submit(run_one, index, key, tests)
                        for index, (key, tests) in enumerate(by_build.items(), start=1)]
-        for future in futures:
-            future.result()
+            for future in futures:
+                future.result()
+        finally:
+            # An interrupted run waits for builds in progress, then cleans up.
+            pool.shutdown(wait=True, cancel_futures=True)
         order = {test.id: position for position, test in enumerate(self.plan.tests)}
         self.results.sort(key=lambda record: order[record["id"]])
 
@@ -243,6 +249,8 @@ class Executor:
     def containers(self, label: str) -> set[str]:
         assert self.docker
         listing = self.docker.run("ps", "-aq", "--filter", f"label={label}")
+        if listing.exit_code:
+            self.cleanup_failures.append(f"list containers {label}")
         return set(listing.stdout.split())
 
     def cli(self, args: list[str], log: Path, timeout: float = 7200) -> Completed:

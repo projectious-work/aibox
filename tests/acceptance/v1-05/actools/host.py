@@ -151,22 +151,27 @@ class Docker:
 
     def for_worker(self, index: int, work: Path) -> "Docker":
         """An engine for one parallel build slot. Podman slots get separate
-        stores because a shared layer cache can match another build's Feature
-        step (checks.cached_feature_steps); the stores persist beside the
-        default store to keep base layers across runs."""
+        stores so that removing one build's image cannot remove layers another
+        build has just matched. Stores persist beside the default store to keep
+        base layers across runs; Podman records the run root and temporary
+        directory in the store, so their paths must not change between runs.
+        Port 5000 keeps a second run from sharing the stores."""
         slot = work / f"worker-{index}"
         tmp = slot / "tmp"
         tmp.mkdir(parents=True)
         environment = {"TMPDIR": str(tmp)}
         if self.kind != "podman":
             return Docker(self.binary, cli_environment=environment)
-        root = self.run("info", "--format", "{{.Store.GraphRoot}}").stdout.strip()
+        root, run_root = self.run("info", "--format",
+                                  "{{.Store.GraphRoot}} {{.Store.RunRoot}}").stdout.split()
         store = Path(root).parent / "aibox-v1-05-workers" / f"worker-{index}"
+        state = Path(run_root).parent / "aibox-v1-05-workers" / f"worker-{index}"
         store.mkdir(parents=True, exist_ok=True)
+        state.mkdir(parents=True, exist_ok=True)
         shim = slot / "bin" / "podman"
         shim.parent.mkdir()
         shim.write_text(f'#!/bin/sh\nexec "{self.binary}" --root "{store}" '
-                        f'--runroot "{slot}/run" --tmpdir "{slot}/libpod" "$@"\n')
+                        f'--runroot "{state}/run" --tmpdir "{state}/libpod" "$@"\n')
         shim.chmod(0o755)
         return Docker(str(shim), cli_environment=environment)
 
@@ -195,6 +200,8 @@ class Docker:
         failures = []
         listing = self.run("images", "--filter", f"reference={reference_pattern}",
                            "--format", "{{.Repository}}:{{.Tag}}")
+        if listing.exit_code:
+            failures.append(f"list images {reference_pattern}")
         for image in sorted(set(listing.stdout.split())):
             if self.run("image", "rm", "-f", image, log=log).exit_code:
                 failures.append(f"remove image {image}")

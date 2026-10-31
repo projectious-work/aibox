@@ -209,11 +209,46 @@ def error_line_matches(output: str, code: str, feature_ids: Iterable[str],
 
 
 def cached_feature_steps(build_log: str) -> int:
-    """Feature install steps a Podman build took from its layer cache. Buildah
-    matches these `RUN --mount` steps without the mounted Feature content or
-    options, so a hit can be another version's layer."""
+    """Feature install steps a Podman build took from its layer cache. A small
+    Podman 5.4.2 build reused a `RUN --mount` layer built from other mounted
+    content, so a hit here cannot be trusted to hold the selected Feature."""
     lines = build_log.splitlines()
     return sum("STEP" in line and "RUN --mount" in line
                and "from=dev_containers_feature_content_source" in line
                and "Using cache" in following
                for line, following in zip(lines, lines[1:]))
+
+
+def guard_coverage_failures(tap: str, catalog) -> list[str]:
+    """What a component test run lacks for AC-TOOLS/guards: a guard test per
+    aibox Feature for each sampled error item, and no skipped or todo tests."""
+    children: dict[str, set[str]] = {}
+    path: list[str] = []
+    for line in tap.splitlines():
+        match = re.match(r"( *)# Subtest: (.*)", line)
+        if match:
+            depth = len(match.group(1)) // 4
+            del path[depth:]
+            if path:
+                children.setdefault(path[-1], set()).add(match.group(2))
+            path.append(match.group(2))
+    failures = [f"component tests report {line[2:]}" for line in tap.splitlines()
+                if re.fullmatch(r"# (skipped|todo|cancelled) [1-9][0-9]*", line)]
+    if not re.search(r"^# pass [1-9]", tap, re.M):
+        failures.append("component tests report no passing test")
+
+    def require(feature_id: str, *words: str) -> None:
+        if not any(all(word in title for word in words)
+                   for title in children.get(feature_id, ())):
+            failures.append(f"no component test for {feature_id}: {' '.join(words)}")
+
+    for feature_id, feature in catalog.features.items():
+        if feature["owner"] != "aibox":
+            continue
+        for unsupported in catalog.data["unsupportedTargets"]:
+            require(feature_id, "UNSUPPORTED_TARGET", unsupported["id"])
+        if catalog.version_option(feature_id) is not None:
+            require(feature_id, "UNSUPPORTED_VERSION")
+        for required in feature["requires"]:
+            require(feature_id, "DEPENDENCY_MISSING", required)
+    return failures

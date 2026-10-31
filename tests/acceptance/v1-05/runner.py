@@ -66,7 +66,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--scope", choices=SCOPES, default="sampled",
                         help="sampled: chapter 5 sample of the error items (default); "
                              "full: every Feature")
-    parser.add_argument("--jobs", type=int, default=default_jobs(),
+    parser.add_argument("--jobs", type=positive_int, default=default_jobs(),
                         help="container builds at once (default: %(default)s from this "
                              "host's CPUs and memory)")
     parser.add_argument("--aibox", help="aibox binary for AC-TOOLS/inspect "
@@ -83,6 +83,13 @@ def default_jobs() -> int:
     """One slot per 2 CPUs and per 2 GiB of memory, at most 4."""
     memory = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // 2**30
     return max(1, min((os.cpu_count() or 1) // 2, memory // 2, 4))
+
+
+def positive_int(value: str) -> int:
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return number
 
 
 def build_plan(catalog: Catalog, args: argparse.Namespace, targets: list[str]) -> Plan:
@@ -187,6 +194,7 @@ def main(argv: list[str]) -> int:
     plan = None
     log = output / "host.log"
     registry = None
+    executor = None
     try:
         probe_plan = build_plan(catalog, args, [args.target] if args.target
                                 else list(catalog.targets))
@@ -237,15 +245,16 @@ def main(argv: list[str]) -> int:
             if published.exit_code:
                 failures.append(f"publish failed (exit {published.exit_code}); see publish.log")
         executor = Executor(context, plan)
+        results = executor.results
         executor.run_offline()
         if not failures:
             executor.run_builds()
-        results = executor.results
-        cleanup += executor.cleanup_failures
     except BaseException as exc:  # recorded; cleanup still runs
         failures.append(str(exc) or type(exc).__name__)
         print(f"V1-05 acceptance run failed: {failures[-1]}", file=sys.stderr)
     finally:
+        if executor is not None:
+            cleanup += executor.cleanup_failures
         if registry is not None:
             cleanup += registry.stop(log)
         for engine in [*context.engines, context.docker]:

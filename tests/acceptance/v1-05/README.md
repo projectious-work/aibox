@@ -1,6 +1,6 @@
 # V1-05 AC-TOOLS acceptance suite: host run
 
-Black-box acceptance tests for every `AC-TOOLS/*` item in
+Acceptance tests for every `AC-TOOLS/*` item in
 [chapter 5](../../../spec/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix),
 planned from [the catalog](../../../spec/v1/catalog/v1-05-features.json) and
 evaluated as [chapter 8](../../../spec/v1/08-native-artifacts.md#tool-feature-interface)
@@ -88,9 +88,18 @@ is diagnostic only; acceptance needs a run of every item.
 
 `--jobs` sets how many builds run at once; the default comes from the host's
 CPUs and memory, with at most 4. Each Podman slot uses its own image store under
-`aibox-v1-05-workers` beside the default store, because Podman's layer cache can
-match a Feature step built from other content. A build that takes a Feature
-step from that cache fails.
+`aibox-v1-05-workers` beside the default store. A small Podman 5.4.2 build reused
+a `RUN --mount` layer built from other content, so a build that takes a Feature
+step from the layer cache fails. To free the stores, run
+`podman unshare rm -rf <store>/aibox-v1-05-workers` between runs. Temporary build
+data goes to the system temporary directory unless you pass `--work-dir`, so give
+it room for several builds at once.
+
+`--feature` filters the sampled plan, so a Feature outside the sample may plan
+no error tests; add `--scope full` to select it. `AC-TOOLS/guards` runs the
+component tests in `features/test/` and also fails when any aibox Feature lacks a
+guard test or a test is skipped. It needs the same Node as the CLI, so `--item
+guards` still bootstraps it unless you pass `--cli-from-path`.
 
 ## Unit tests
 

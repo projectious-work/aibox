@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# One full AC-TOOLS host run for one architecture:
+# One AC-TOOLS host run for one architecture:
 #   tests/acceptance/v1-05/run-host.sh debian-13-amd64|debian-13-arm64 [runner options]
 # Starts a registry on localhost:5000, publishes every aibox-owned Feature with
 # scripts/v1-05-features.sh, runs every AC-TOOLS item on this host's target and
