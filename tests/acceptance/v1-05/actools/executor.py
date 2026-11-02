@@ -15,7 +15,8 @@ from typing import Callable, Mapping
 
 from . import checks, inspection, jsonc, metadata, trace
 from .catalog import REPO, SPEC, Catalog
-from .host import Completed, DevContainerCli, Docker, Registry, execute
+from .host import (PROCESS_BUDGET_SHARE, Completed, DevContainerCli, Docker, Registry, execute,
+                   process_usage)
 from .plan import Build, Plan, Test
 
 OUTPUT_LIMIT = 4000
@@ -46,6 +47,7 @@ class Context:
     aibox: Path | None = None
     progress: Callable[[str], None] = print
     engines: list[Docker] = field(default_factory=list)  # one per parallel build slot
+    process_usage: Callable[[], tuple[int, int] | None] = process_usage
 
 
 class Executor:
@@ -54,6 +56,7 @@ class Executor:
         self.plan = plan
         self.results: list[dict] = []
         self.cleanup_failures: list[str] = []
+        self.stop_reason: str | None = None  # remaining builds do not start once set
         self.slot = threading.local()
         self.lock = threading.Lock()
         (context.output / "builds").mkdir(exist_ok=True)
@@ -122,6 +125,10 @@ class Executor:
             build = self.plan.builds[key]
             engine = slots.get()
             self.slot.engine = engine
+            self.check_process_budget()
+            if self.stop_reason:
+                slots.put(engine)
+                return
             self.ctx.progress(f"[{index}/{total}] build {key} "
                               f"({'expect failure' if build.expect_failure else 'up'}; "
                               f"{build.fixture}; {len(build.selection)} Features; "
@@ -146,6 +153,18 @@ class Executor:
             pool.shutdown(wait=True, cancel_futures=True)
         order = {test.id: position for position, test in enumerate(self.plan.tests)}
         self.results.sort(key=lambda record: order[record["id"]])
+
+    def stop(self, reason: str) -> None:
+        with self.lock:
+            if self.stop_reason is None:
+                self.stop_reason = reason
+                self.ctx.progress(f"stopping before the next build: {reason}")
+
+    def check_process_budget(self) -> None:
+        usage = self.ctx.process_usage()
+        if usage and usage[0] >= usage[1] * PROCESS_BUDGET_SHARE:
+            self.stop(f"{usage[0]} of {usage[1]} tasks in use, at or over the "
+                      f"{PROCESS_BUDGET_SHARE:.0%} budget")
 
     def record(self, record: dict) -> None:
         with self.lock:
@@ -249,6 +268,8 @@ class Executor:
             for container_id in sorted(self.containers(label)):
                 if self.docker.run("rm", "-f", "-v", container_id, log=log).exit_code:
                     self.cleanup_failures.append(f"remove container {container_id}")
+                    # A container that cannot be removed keeps its processes.
+                    self.stop(f"container {container_id} could not be removed")
 
     def containers(self, label: str) -> set[str]:
         assert self.docker

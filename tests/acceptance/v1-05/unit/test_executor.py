@@ -3,15 +3,17 @@ Container CLI and Docker ports). Probes run on this machine through the fakes,
 so the real probe script, parsing and evaluation are exercised."""
 
 import json
+import os
 import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from actools.catalog import Catalog
 from actools.executor import Context, Executor
-from actools.host import DevContainerCli, Docker
+from actools.host import DevContainerCli, Docker, process_usage
 from actools.plan import make_plan
 from unit.fixtures import REAL, feature, tool
 
@@ -88,7 +90,8 @@ class ExecutorTest(unittest.TestCase):
         cli = DevContainerCli([sys.executable, str(self.fake_dir / "devcontainer.py")], {})
         self.catalog = mini_catalog()
         self.context = Context(self.catalog, "unit", self.output, self.work,
-                               docker=Docker(str(docker)), cli=cli, progress=lambda _: None)
+                               docker=Docker(str(docker)), cli=cli, progress=lambda _: None,
+                               process_usage=lambda: None)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -108,6 +111,57 @@ class ExecutorTest(unittest.TestCase):
         executor = Executor(self.context, plan)
         executor.run_builds()
         self.assertEqual([r["id"] for r in executor.results], [t.id for t in plan.tests])
+
+    def test_builds_do_not_start_at_the_process_budget(self):
+        self.context.process_usage = lambda: (960, 1200)
+        results, executor = self.run_items("present", features=["t/here"])
+        self.assertEqual(results, {})
+        self.assertIn("960 of 1200 tasks", executor.stop_reason)
+
+    def test_builds_start_under_the_process_budget(self):
+        self.context.process_usage = lambda: (959, 1200)
+        results, executor = self.run_items("present", features=["t/here"])
+        self.assertEqual(len(results), 1)
+        self.assertIsNone(executor.stop_reason)
+
+    def test_a_container_that_cannot_be_removed_stops_the_run(self):
+        docker = self.fake_dir / "docker"
+        docker.write_text(FAKE_DOCKER.replace("ps|images) exit 0 ;;",
+                                              "ps) echo stuck; exit 0 ;;\n  images) exit 0 ;;")
+                          .replace("rm|image) exit 0 ;;", "rm) exit 125 ;;\n  image) exit 0 ;;"))
+        plan = make_plan(self.catalog, [TARGET], [], items=["present"])
+        executor = Executor(self.context, plan)
+        executor.run_builds()
+        self.assertEqual(len(executor.results), 1)
+        self.assertLess(len(executor.results), len({t.build for t in plan.tests}))
+        self.assertEqual(executor.cleanup_failures, ["remove container stuck"])
+        self.assertIn("stuck could not be removed", executor.stop_reason)
+
+    def test_podman_slots_keep_the_runtime_directory_of_the_engine(self):
+        podman = self.fake_dir / "podman"
+        podman.write_text("#!/bin/sh\necho /run/state/podman/podman.sock\n")
+        podman.chmod(0o755)
+        with mock.patch.dict(os.environ):
+            os.environ.pop("XDG_RUNTIME_DIR", None)
+            environment = Docker(str(podman)).for_worker(1, self.work).cli_environment
+            self.assertEqual(environment["XDG_RUNTIME_DIR"], "/run/state")
+            os.environ["XDG_RUNTIME_DIR"] = "/run/user/1000"
+            environment = Docker(str(podman)).for_worker(2, self.work).cli_environment
+            self.assertEqual(environment["XDG_RUNTIME_DIR"], "/run/user/1000")
+        self.assertTrue(environment["TMPDIR"].endswith("worker-2/tmp"))
+
+    def test_docker_slots_need_no_runtime_directory(self):
+        engine = self.context.docker.for_worker(1, self.work)
+        self.assertNotIn("XDG_RUNTIME_DIR", engine.cli_environment)
+
+    def test_process_usage_reads_the_cgroup_limit(self):
+        cgroup = Path(self.temp.name)
+        self.assertIsNone(process_usage(cgroup))
+        (cgroup / "pids.current").write_text("10\n")
+        (cgroup / "pids.max").write_text("max\n")
+        self.assertIsNone(process_usage(cgroup))
+        (cgroup / "pids.max").write_text("1200\n")
+        self.assertEqual(process_usage(cgroup), (10, 1200))
 
     def test_presence_passes_for_remote_user_and_root(self):
         results, executor = self.run_items("present", features=["t/here"])

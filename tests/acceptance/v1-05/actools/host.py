@@ -25,6 +25,18 @@ PUBLISH_SCRIPT = REPO / "scripts" / "v1-05-features.sh"
 REGISTRY_HOST = "localhost:5000"
 REGISTRY_PREFIX = "aibox-features"
 DEFAULT_REGISTRY_IMAGE = "registry:2.8.3"
+CGROUP = Path("/sys/fs/cgroup")
+PROCESS_BUDGET_SHARE = 0.8  # the rest stays free for whatever else shares the cgroup
+
+
+def process_usage(cgroup: Path = CGROUP) -> tuple[int, int] | None:
+    """Tasks in the cgroup and its limit, or None when there is no limit to
+    read. The limit counts threads, not processes."""
+    try:
+        limit = (cgroup / "pids.max").read_text().strip()
+        return (int((cgroup / "pids.current").read_text()), int(limit)) if limit != "max" else None
+    except (OSError, ValueError):
+        return None
 
 
 @dataclass
@@ -154,7 +166,22 @@ class Docker:
         with a temporary directory of its own for the Dev Container CLI."""
         tmp = work / f"worker-{index}" / "tmp"
         tmp.mkdir(parents=True)
-        return Docker(self.binary, cli_environment={"TMPDIR": str(tmp)})
+        environment = {"TMPDIR": str(tmp)}
+        if self.kind == "podman":
+            environment["XDG_RUNTIME_DIR"] = self.runtime_directory()
+        return Docker(self.binary, cli_environment=environment)
+
+    def runtime_directory(self) -> str:
+        """Without XDG_RUNTIME_DIR, rootless Podman keeps runtime state under
+        TMPDIR. A container started with another TMPDIR then cannot be reached
+        by exec, stop or rm, so every slot pins the engine's own directory."""
+        if os.environ.get("XDG_RUNTIME_DIR"):
+            return os.environ["XDG_RUNTIME_DIR"]
+        completed = self.run("info", "--format", "{{.Host.RemoteSocket.Path}}")
+        socket = completed.stdout.strip()
+        if completed.exit_code or not socket:
+            raise RuntimeError(f"cannot read the Podman runtime directory: {completed.stderr}")
+        return str(Path(socket).parent.parent)
 
     def run(self, *args: str, log: Path | None = None, timeout: float | None = None) -> Completed:
         return execute([self.binary, *args], log=log, timeout=timeout)

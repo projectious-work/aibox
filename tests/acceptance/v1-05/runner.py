@@ -249,6 +249,8 @@ def main(argv: list[str]) -> int:
         executor.run_offline()
         if not failures:
             executor.run_builds()
+            if executor.stop_reason:
+                failures.append(f"run stopped early: {executor.stop_reason}")
     except BaseException as exc:  # recorded; cleanup still runs
         failures.append(str(exc) or type(exc).__name__)
         print(f"V1-05 acceptance run failed: {failures[-1]}", file=sys.stderr)

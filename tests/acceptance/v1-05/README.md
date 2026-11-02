@@ -89,7 +89,9 @@ is diagnostic only; acceptance needs a run of every item.
 `--jobs` sets how many builds run at once; the default comes from the host's
 CPUs and memory, with at most 4. Parallel builds share the engine's image store
 and remove their images at the end of the run, so a run needs more space than
-with `--jobs 1`. A build that takes a Feature step from the Podman layer cache
+with `--jobs 1`. The run stops before its next build, and fails, when a container
+cannot be removed or the cgroup reaches 80% of its `pids.max`, which counts
+threads. A build that takes a Feature step from the Podman layer cache
 fails, because a small Podman 5.4.2 build reused a `RUN --mount` layer built from
 other content. Temporary build
 data goes to the system temporary directory unless you pass `--work-dir`, so give
