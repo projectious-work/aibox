@@ -9,7 +9,7 @@ import {describe, it} from 'node:test';
 
 import {loadCatalog, renderFeatureFiles} from '../../scripts/v1-05-features.mjs';
 import {
-  aptLog, errorLines, installedPackages, installedVersion, makeContainer, markInstalled,
+  aptLog, errorLines, installedPackages, installedVersion, interrupt, makeContainer, markInstalled,
   runFeature, serve, sha256, sha512Base64, snapshot, tempDir, writeFile,
 } from './harness.mjs';
 
@@ -393,6 +393,28 @@ describe('downloads and verification', () => {
     assert.equal(result.status, 0, result.output);
     assert.ok(existsSync(join(container.root, 'usr/local/bin/sample')));
     assert.equal(installedVersion(container, 'sample/tool'), '2.0.0');
+  });
+
+  // Regression: a dropped HTTP/2 stream from go.dev failed go/go in a full
+  // AC-TOOLS run because curl --retry alone does not retry it.
+  it('installs after an interrupted transfer', () => {
+    const container = makeContainer();
+    const file = artifact('sample-binary');
+    serve(container, url, file);
+    interrupt(container, url, 1);
+    const result = runFeature(sampleFeature(), container, {env: {SAMPLE_URL: url, SAMPLE_DIGEST: sha256(file)}});
+    assert.equal(result.status, 0, result.output);
+    assert.ok(existsSync(join(container.root, 'usr/local/bin/sample')));
+  });
+
+  it('fails with DOWNLOAD_FAILED when every retry is interrupted', () => {
+    const container = makeContainer();
+    const file = artifact('sample-binary');
+    serve(container, url, file);
+    interrupt(container, url, 4);
+    const result = runFeature(sampleFeature(), container, {env: {SAMPLE_URL: url, SAMPLE_DIGEST: sha256(file)}});
+    assertError(result, 'AIBOX_FEATURE_DOWNLOAD_FAILED', 'sample/tool', new RegExp(`url=${url.replaceAll('.', '\\.')}`));
+    assert.equal(existsSync(join(container.root, 'usr/local/bin/sample')), false);
   });
 
   it('fails with DOWNLOAD_FAILED naming the URL and removes build-only helpers', () => {

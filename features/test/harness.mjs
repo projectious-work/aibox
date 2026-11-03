@@ -52,6 +52,11 @@ export function serve(container, url, file) {
   writeFileSync(join(container.state, 'urls'), `${url} ${file}\n`, {flag: 'a'});
 }
 
+// The fake curl drops the URL's stream on its first `times` attempts.
+export function interrupt(container, url, times) {
+  writeFileSync(join(container.state, 'interrupted'), `${url} ${times}\n`, {flag: 'a'});
+}
+
 export function installedPackages(container) {
   return readFileSync(join(container.state, 'installed'), 'utf8').split('\n').filter(Boolean).sort();
 }
