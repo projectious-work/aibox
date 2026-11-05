@@ -265,16 +265,18 @@ file is the run's own start time.
 | `guards-arm64-fbd178d6`, `--item guards` | `fbd178d6` | 1 of 1 passed | Diagnostic: `fbd178d6` changes only `features/test/`, which `AC-TOOLS/guards` runs |
 
 `fbd178d6` changes no Feature, script or harness file relative to `71124b37`,
-so the arm64 runs at `71124b37` stand for it. The full and sampled runs at the
-same commit, run back to back, are the second clean run that chapter 14 asks
-for on this cell. Both directories carry the time the pair was started; the
-sampled run's own `runId` is its start, after the full run ended.
+so the arm64 runs at `71124b37` stand for it. Both directories carry the time
+the pair was started; the sampled run's own `runId` is its start, after the full
+run ended. Whether these nested runs count as the `debian-13-arm64` host gate,
+and which cell is primary for chapter 14's repeated clean run, awaits the owner
+(verification round 2, finding R1).
 
 The offline gate, `scripts/verify-v1-05.sh`, passed at `d64ad905` on 2026-11-05:
 gofmt, vet, Go tests with the race detector, the CLI/MCP inspection demo, the
 specification and catalog checks, 1576 Feature component tests, 109 harness unit
 tests and the v1 Hugo build (51 pages). It ran in `localhost/aibox-docs-build:go1.27.0`
-on the development container's Podman; the evidence is
+on the development container's Podman. It is an offline gate, not a host check;
+its `actor` is the value the operator sets in `AIBOX_VERIFY_ACTOR`. The evidence is
 [`offline-evidence-d64ad905.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-evidence-d64ad905.json).
 
 ## Host handoff: debian-13-amd64
@@ -283,7 +285,8 @@ Chapter 14 requires a human-authorized operator for host gates. Acceptance needs
 a sampled run on `debian-13-amd64`; it is also the first run on Docker.
 
 - **Commit:** `fbd178d6` on `integration/v1-05-tool-catalog`, from a clean
-  checkout. Later commits on the branch change documentation only.
+  checkout. Later commits change documentation, evidence and
+  `scripts/verify-v1-05.sh`, and no Feature, harness or Go source.
 - **Host:** an amd64 machine with a working `docker` CLI and daemon (daemon
   architecture `amd64`), Python 3.10 or later, Git, port 5000 free on
   localhost, and about 80 GB of free image space (the arm64 full run with
@@ -330,6 +333,7 @@ a sampled run on `debian-13-amd64`; it is also the first run on Docker.
 | 2026-11-03 | Regression test for interrupted downloads (`fbd178d6`); `AC-TOOLS/guards` passed on arm64. Owner chose to run `debian-13-amd64` on an amd64 Docker host; handoff above. |
 | 2026-11-05 | arc42 maintainer architecture documentation added under `docs-site/content/docs/architecture/` (R-CODE). |
 | 2026-11-05 | Verification round 1 (sage, `claude-opus-5-5`) on `768dc328`: blocking B1 (amd64 run), B2 (amendment 4 governance), B3 (test track separation), B4 (no offline gate), B5 (demo and docs evidence); non-blocking N1–N10. B4 and B5: `scripts/verify-v1-05.sh` (`84b2e736`, `d64ad905`) passed at `d64ad905`. N1, N4, N5 and N9 corrected in this note and the risks page. |
+| 2026-11-05 | Verification round 2 (sage) on `a3f6045f`: B2, B3, B4, N1, N3, N4, N5, N9 closed; B5 partly (demo output and MCP transcript now committed with the offline evidence); new R1 (arm64 host-gate status and repeatability, owner decision pending) and R2 (offline gate actor is self-declared; noted). Open: B1, N2, R1; N6–N8 and N10 deferred, N7 before amd64 is advertised. |
 | 2026-11-05 | Owner approved amendment 4; frozen as contract commit `3d93aa7e32f5cd49416da2087348baf4cb8c3d42` (DEC-20261105_1634-ProudFjord). |
-| 2026-11-05 | Track separation exception (B3): `463acc1c` (tests) was committed by the integration owner within 30 s of `57b9de31` (contract) and `8031b4ea` (implementation) on `feat/v1-05-acceptance-speedup`; so were the harness fixes `76828a19`, `dee0b46e`, `df2cac38` and `71124b37`. They change the AC-TOOLS harness, not any check's expectation, and sage reviewed them with the amendment. The owner accepted this without a fresh acceptance-test session (DEC-20261105_1634-ActiveHill). |
+| 2026-11-05 | Track separation exception (B3): `463acc1c` (tests) was committed by the integration owner within 30 s of `57b9de31` (contract) and `8031b4ea` (implementation) on `feat/v1-05-acceptance-speedup`; so were the harness fixes `76828a19`, `dee0b46e`, `df2cac38` and `71124b37`. They change the AC-TOOLS harness, not any check's expectation. Sage's amendment 4 review covered `57b9de31`, `463acc1c` and the fix `dee0b46e`; `df2cac38` and `71124b37` came later and sage saw them only in verification round 1 (the decision's wording that sage reviewed them all with the amendment is corrected here). The owner accepted this without a fresh acceptance-test session (DEC-20261105_1634-ActiveHill). |
 | 2026-11-05 | Out-of-phase content (N3): `fe0433e5` plans Feature adaptation guidance and templates (AC-GUIDE, chapter 10, V1-09 and V1-16 roadmap entries; DEC-20261030_2049-StrongOasis). It is not V1-05 work and was not reviewed with V1-05; the owner chose to carry it to `v1.x-dev` with V1-05 (DEC-20261105_1634-TenderJewel). |
