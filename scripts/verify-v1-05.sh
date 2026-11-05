@@ -39,7 +39,7 @@ uv run --script spec/v1/scripts/validate-contracts.py
 python3 spec/v1/scripts/validate-v1-05-catalog.py
 node spec/v1/scripts/render-devcontainer-examples.mjs --check
 scripts/v1-05-features.sh check --complete
-node --test features/test/ > "$evidence_dir/feature-component-tests.txt"
+node --test 'features/test/*.test.mjs' > "$evidence_dir/feature-component-tests.txt"
 (cd tests/acceptance/v1-05 && python3 -m unittest discover -s unit -t .) 2> "$evidence_dir/acceptance-unit-tests.txt"
 
 ./scripts/build-docs.sh --destination "$evidence_dir/hugo" > "$evidence_dir/hugo-build.txt"
