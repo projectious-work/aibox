@@ -277,7 +277,13 @@ specification and catalog checks, 1576 Feature component tests, 109 harness unit
 tests and the v1 Hugo build (51 pages). It ran in `localhost/aibox-docs-build:go1.27.0`
 on the development container's Podman. It is an offline gate, not a host check;
 its `actor` is the value the operator sets in `AIBOX_VERIFY_ACTOR`. The evidence is
-[`offline-evidence-d64ad905.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-evidence-d64ad905.json).
+[`offline-evidence-d64ad905.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-evidence-d64ad905.json). It passed again at the
+final candidate `92b1f7d1`, with the same counts:
+[`offline-evidence-92b1f7d1.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-evidence-92b1f7d1.json),
+with the demo's observed output
+[`offline-92b1f7d1-inspect-customized.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-92b1f7d1-inspect-customized.json)
+and the MCP parity transcript
+[`offline-92b1f7d1-mcp-parity.txt`](../spec/v1/evidence/V1-05-fbd178d6/offline-92b1f7d1-mcp-parity.txt).
 
 ## Host handoff: debian-13-amd64
 
