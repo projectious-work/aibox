@@ -1,8 +1,10 @@
 # V1-05 native tool catalog
 
 V1-05 contract is frozen at contract commit
-`d1c7adb487bd4cfa7449550ffcd3da05153537ed` on `contract/v1-05-tool-catalog`
-(amendment 3, DEC-20261031_1750-NeatDaisy). It replaces amendment 2,
+`3d93aa7e32f5cd49416da2087348baf4cb8c3d42` on `contract/v1-05-tool-catalog`
+(amendment 4, DEC-20261105_1634-ProudFjord). It replaces amendment 3,
+`d1c7adb487bd4cfa7449550ffcd3da05153537ed` (DEC-20261031_1750-NeatDaisy),
+amendment 2,
 `d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` (DEC-20261029_2134-NobleBlossom),
 amendment 1, `59c35acc1cf230c81658a5763205b1f91a0b1092` (DEC-20261029_1725-AmberBeam), and
 the first contract commit `34d06da0cf42d73ff05971c7235ae1324d7e768a`
@@ -221,27 +223,59 @@ per build. Reusing `latex/core` layers is therefore not available through the
 pinned CLI on Podman and is not implemented, which departs from
 DEC-20261031_1856-CuriousBeacon. A small Podman 5.4.2 build did reuse a
 `RUN --mount` layer built from other mounted content, so the runner fails a build
-that takes a Feature step from the cache. Parallel Podman builds use separate
-stores so that removing one build's image cannot remove layers another has just
-matched; that race is reasoned, not observed.
+that takes a Feature step from the cache. Parallel Podman builds share one image
+store (`df2cac38`): separate per-worker stores left containers that could not be
+exec'd or stopped. Because removing one build's image could remove layers another
+build has just matched, parallel runs keep their images until the end of the run
+and remove them then; that race is reasoned, not observed.
+
+Review: sage (`claude-opus-5-5`, Anthropic) reviewed `57b9de31` together with
+`feat/v1-05-acceptance-speedup` on 2026-10-31 and required changes. Its one
+blocker, worker stores unusable on a second run, was fixed in `dee0b46e`; its
+notes are applied in `3d93aa7e`. The owner approved the amendment and froze it at
+`3d93aa7e` on 2026-11-05 (DEC-20261105_1634-ProudFjord).
+
+The departure from DEC-20261031_1856-CuriousBeacon's LaTeX reuse awaits the
+owner's acknowledgement or a new decision (verification finding N2).
 
 ## Integration loop
 
-All runs used rootless Podman 5.4.2 on `debian-13-arm64`. Evidence outside the
-repository stays in the test cache; the passing runs are copied to
-[`spec/v1/evidence/V1-05-fbd178d6/`](../spec/v1/evidence/V1-05-fbd178d6/).
+All runs used rootless Podman 5.4.2 on `debian-13-arm64`, nested in the aibox
+development container (hostname `aibox`, Linux `aarch64`, OrbStack kernel
+`7.2.12-orbstack`) on the owner's machine. The owner authorized them: the light
+pass on 2026-10-30 ("testing can start" with Podman in this container), the
+amendment 4 runs on 2026-10-31 (DEC-20261031_1856-CuriousBeacon), and the reruns
+after the leak fix on 2026-11-01. The integration owner (`claude-opus-5-5`)
+operated them. The container is not disposable, so these runs are integration
+evidence; the host gate on `debian-13-amd64` below follows chapter 14.
+
+Evidence outside the repository stays in the test cache; the passing runs are
+copied to [`spec/v1/evidence/V1-05-fbd178d6/`](../spec/v1/evidence/V1-05-fbd178d6/).
+Each run is named by its evidence directory; the `runId` inside the evidence
+file is the run's own start time.
 
 | Run | Source | Result | Classification |
 |---|---|---|---|
 | Light pass and reruns, 2026-10-30 | `3ca64b86` (dirty) | Two smoke commands could not pass | Contract defects: amendment 3 |
+| Light pass, 2026-10-30 | `3ca64b86` (dirty) | `node` lacked `libatomic1` at runtime; `lilypond` purged a package it needs at runtime | Implementation defects: fixed in `e3b9af4e` |
 | `full-arm64-20261031T182046Z` | `60567029` | 872 of 875 passed; `go/goreleaser` `present`, `isolated` and `side-effects` failed | Infrastructure failure: go.dev dropped an HTTP/2 stream (curl exit 92) while `go/go` downloaded `go1.27.0.linux-arm64.tar.gz`. `curl --retry` does not retry that error. Hardened with `--retry-all-errors` (`8031b4ea`); regression test `fbd178d6` |
 | `par4-*` and `shared4-*`, `--jobs 4` | `b73bd368`, `df2cac38` | 101 to 443 passed per run; failures were `devcontainer up` errors, `EAGAIN` and incomplete probes | Infrastructure failure in the acceptance harness: workers set `TMPDIR`, and with `XDG_RUNTIME_DIR` unset rootless Podman keeps runtime state there, so `podman rm` could not reach containers the Dev Container CLI started. Each leaked about 27 tasks until the cgroup's 1200-task limit was reached. Fixed by the integration owner in `71124b37` (BACK-20261101_1120-SmoothRiver), with unit tests: workers pin the engine's runtime directory, and a run stops before its next build when a container cannot be removed or tasks reach 80% of `pids.max` |
-| `leakfix4-full-arm64-20261102T181158Z`, `--scope full --jobs 4` | `71124b37` | 876 of 876 passed, no cleanup failures, 51 minutes; peak 429 tasks | Passed |
-| `leakfix4-sampled-arm64-20261102T181158Z`, `--jobs 4` | `71124b37` | 594 of 594 passed, no cleanup failures, 49 minutes | Passed |
+| `leakfix4-full-arm64-20261102T181158Z` (`runId` `20261102t181158`), `--scope full --jobs 4` | `71124b37` | 876 of 876 passed, no cleanup failures, 51 minutes; peak 429 tasks | Passed |
+| `leakfix4-sampled-arm64-20261102T181158Z` (`runId` `20261102t190311`), `--jobs 4` | `71124b37` | 594 of 594 passed, no cleanup failures, 49 minutes | Passed |
 | `guards-arm64-fbd178d6`, `--item guards` | `fbd178d6` | 1 of 1 passed | Diagnostic: `fbd178d6` changes only `features/test/`, which `AC-TOOLS/guards` runs |
 
 `fbd178d6` changes no Feature, script or harness file relative to `71124b37`,
-so the arm64 runs at `71124b37` stand for it.
+so the arm64 runs at `71124b37` stand for it. The full and sampled runs at the
+same commit, run back to back, are the second clean run that chapter 14 asks
+for on this cell. Both directories carry the time the pair was started; the
+sampled run's own `runId` is its start, after the full run ended.
+
+The offline gate, `scripts/verify-v1-05.sh`, passed at `d64ad905` on 2026-11-05:
+gofmt, vet, Go tests with the race detector, the CLI/MCP inspection demo, the
+specification and catalog checks, 1576 Feature component tests, 109 harness unit
+tests and the v1 Hugo build (51 pages). It ran in `localhost/aibox-docs-build:go1.27.0`
+on the development container's Podman; the evidence is
+[`offline-evidence-d64ad905.json`](../spec/v1/evidence/V1-05-fbd178d6/offline-evidence-d64ad905.json).
 
 ## Host handoff: debian-13-amd64
 
@@ -295,3 +329,7 @@ a sampled run on `debian-13-amd64`; it is also the first run on Docker.
 | 2026-11-02 | Runner leak fixed (`71124b37`). Full (876/876) and sampled (594/594) arm64 runs with `--jobs 4` passed. |
 | 2026-11-03 | Regression test for interrupted downloads (`fbd178d6`); `AC-TOOLS/guards` passed on arm64. Owner chose to run `debian-13-amd64` on an amd64 Docker host; handoff above. |
 | 2026-11-05 | arc42 maintainer architecture documentation added under `docs-site/content/docs/architecture/` (R-CODE). |
+| 2026-11-05 | Verification round 1 (sage, `claude-opus-5-5`) on `768dc328`: blocking B1 (amd64 run), B2 (amendment 4 governance), B3 (test track separation), B4 (no offline gate), B5 (demo and docs evidence); non-blocking N1–N10. B4 and B5: `scripts/verify-v1-05.sh` (`84b2e736`, `d64ad905`) passed at `d64ad905`. N1, N4, N5 and N9 corrected in this note and the risks page. |
+| 2026-11-05 | Owner approved amendment 4; frozen as contract commit `3d93aa7e32f5cd49416da2087348baf4cb8c3d42` (DEC-20261105_1634-ProudFjord). |
+| 2026-11-05 | Track separation exception (B3): `463acc1c` (tests) was committed by the integration owner within 30 s of `57b9de31` (contract) and `8031b4ea` (implementation) on `feat/v1-05-acceptance-speedup`; so were the harness fixes `76828a19`, `dee0b46e`, `df2cac38` and `71124b37`. They change the AC-TOOLS harness, not any check's expectation, and sage reviewed them with the amendment. The owner accepted this without a fresh acceptance-test session (DEC-20261105_1634-ActiveHill). |
+| 2026-11-05 | Out-of-phase content (N3): `fe0433e5` plans Feature adaptation guidance and templates (AC-GUIDE, chapter 10, V1-09 and V1-16 roadmap entries; DEC-20261030_2049-StrongOasis). It is not V1-05 work and was not reviewed with V1-05; the owner chose to carry it to `v1.x-dev` with V1-05 (DEC-20261105_1634-TenderJewel). |
