@@ -225,6 +225,58 @@ that takes a Feature step from the cache. Parallel Podman builds use separate
 stores so that removing one build's image cannot remove layers another has just
 matched; that race is reasoned, not observed.
 
+## Integration loop
+
+All runs used rootless Podman 5.4.2 on `debian-13-arm64`. Evidence outside the
+repository stays in the test cache; the passing runs are copied to
+[`spec/v1/evidence/V1-05-fbd178d6/`](../spec/v1/evidence/V1-05-fbd178d6/).
+
+| Run | Source | Result | Classification |
+|---|---|---|---|
+| Light pass and reruns, 2026-10-30 | `3ca64b86` (dirty) | Two smoke commands could not pass | Contract defects: amendment 3 |
+| `full-arm64-20261031T182046Z` | `60567029` | 872 of 875 passed; `go/goreleaser` `present`, `isolated` and `side-effects` failed | Infrastructure failure: go.dev dropped an HTTP/2 stream (curl exit 92) while `go/go` downloaded `go1.27.0.linux-arm64.tar.gz`. `curl --retry` does not retry that error. Hardened with `--retry-all-errors` (`8031b4ea`); regression test `fbd178d6` |
+| `par4-*` and `shared4-*`, `--jobs 4` | `b73bd368`, `df2cac38` | 101 to 443 passed per run; failures were `devcontainer up` errors, `EAGAIN` and incomplete probes | Infrastructure failure in the acceptance harness: workers set `TMPDIR`, and with `XDG_RUNTIME_DIR` unset rootless Podman keeps runtime state there, so `podman rm` could not reach containers the Dev Container CLI started. Each leaked about 27 tasks until the cgroup's 1200-task limit was reached. Fixed by the integration owner in `71124b37` (BACK-20261101_1120-SmoothRiver), with unit tests: workers pin the engine's runtime directory, and a run stops before its next build when a container cannot be removed or tasks reach 80% of `pids.max` |
+| `leakfix4-full-arm64-20261102T181158Z`, `--scope full --jobs 4` | `71124b37` | 876 of 876 passed, no cleanup failures, 51 minutes; peak 429 tasks | Passed |
+| `leakfix4-sampled-arm64-20261102T181158Z`, `--jobs 4` | `71124b37` | 594 of 594 passed, no cleanup failures, 49 minutes | Passed |
+| `guards-arm64-fbd178d6`, `--item guards` | `fbd178d6` | 1 of 1 passed | Diagnostic: `fbd178d6` changes only `features/test/`, which `AC-TOOLS/guards` runs |
+
+`fbd178d6` changes no Feature, script or harness file relative to `71124b37`,
+so the arm64 runs at `71124b37` stand for it.
+
+## Host handoff: debian-13-amd64
+
+Chapter 14 requires a human-authorized operator for host gates. Acceptance needs
+a sampled run on `debian-13-amd64`; it is also the first run on Docker.
+
+- **Commit:** `fbd178d6` on `integration/v1-05-tool-catalog`, from a clean
+  checkout. Later commits on the branch change documentation only.
+- **Host:** an amd64 machine with a working `docker` CLI and daemon (daemon
+  architecture `amd64`), Python 3.10 or later, Git, port 5000 free on
+  localhost, and about 80 GB of free image space (the arm64 full run with
+  `--jobs 4` peaked at about 70 GB).
+- **Network:** Docker Hub, ghcr.io, snapshot.debian.org, the producer download
+  sites in the catalog, and nodejs.org.
+- **Credentials:** none. If Docker Hub rate-limits anonymous pulls, `docker
+  login` with any account first.
+- **Command:**
+
+  ```sh
+  git fetch origin && git checkout --detach fbd178d6
+  tests/acceptance/v1-05/run-host.sh debian-13-amd64
+  ```
+
+  Add `--scope full` for the optional full run. `--jobs` defaults to at most 4
+  from the host's CPUs and memory. Parallel builds have not yet run on Docker;
+  if failures look like resource or engine errors, rerun with `--jobs 1`.
+- **Effects:** starts a registry container on `localhost:5000`, builds the
+  Go binary in `golang:1.27.0`, and builds about 184 workspace images (466
+  with `--scope full`). It removes the run's containers, images, workspaces
+  and registry at the end; pulled base images stay in the Docker cache.
+- **Duration:** about an hour on 8 CPUs.
+- **Return:** the evidence directory the run prints,
+  `$HOME/aibox-v1-05-evidence/debian-13-amd64-<UTC time>`, as a whole. The
+  exit status is 0 only when every test passed and cleanup succeeded.
+
 ## Logbook
 
 | Date | Entry |
@@ -239,3 +291,7 @@ matched; that race is reasoned, not observed.
 | 2026-10-29 | Implementation wave 4 reported (`13997c2a`). Owner approved amendment 2 as contract commit `d3f6e08eaf232eb6aa7c77cf6c6d2fcea10d1c3c` (DEC-20261029_2134-NobleBlossom); both tracks move onto it. |
 | 2026-10-30 | Nested Podman light pass on `debian-13-arm64`; amendment 3 drafted from its two smoke defects. |
 | 2026-10-31 | Owner approved amendment 3 (DEC-20261031_1743-MightyRaven); sage approved `f01b7111` with no blocking findings; frozen as contract commit `d1c7adb487bd4cfa7449550ffcd3da05153537ed` (DEC-20261031_1750-NeatDaisy). |
+| 2026-10-31 | Full arm64 run at `60567029`: 872 of 875 passed; the 3 `go/goreleaser` failures were a dropped download (infrastructure), hardened in `8031b4ea`. Parallel runs exhausted the cgroup task limit (BACK-20261101_1120-SmoothRiver). |
+| 2026-11-02 | Runner leak fixed (`71124b37`). Full (876/876) and sampled (594/594) arm64 runs with `--jobs 4` passed. |
+| 2026-11-03 | Regression test for interrupted downloads (`fbd178d6`); `AC-TOOLS/guards` passed on arm64. Owner chose to run `debian-13-amd64` on an amd64 Docker host; handoff above. |
+| 2026-11-05 | arc42 maintainer architecture documentation added under `docs-site/content/docs/architecture/` (R-CODE). |
