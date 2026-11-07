@@ -320,6 +320,19 @@ a sampled run on `debian-13-amd64`; it is also the first run on Docker.
   `$HOME/aibox-v1-05-evidence/debian-13-amd64-<UTC time>`, as a whole. The
   exit status is 0 only when every test passed and cleanup succeeded.
 
+### Variant: OrbStack amd64 machine on Apple silicon
+
+The owner has no native amd64 host. `tests/acceptance/v1-05/run-orbstack-amd64.sh`,
+run on the Mac, creates a disposable amd64 Debian 13 OrbStack machine, installs
+Debian's Docker, fetches the candidate commit from the Mac's clone, runs
+`run-host.sh debian-13-amd64` `--runs` times, copies each evidence directory
+with an `operator.json` (operator, authorization time, Mac, machine, Docker) to
+`$HOME/aibox-v1-05-evidence/`, and deletes the machine. The amd64 code runs
+under OrbStack's x86_64 translation, not on an amd64 CPU, so this evidence
+covers every amd64 download, hash, package and install path and the Docker
+engine, but not CPU-specific behaviour. Whether it qualifies the amd64 cell is
+the owner's decision.
+
 ## Logbook
 
 | Date | Entry |
