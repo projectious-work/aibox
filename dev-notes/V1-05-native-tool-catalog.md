@@ -322,12 +322,16 @@ a sampled run on `debian-13-amd64`; it is also the first run on Docker.
 
 ### Variant: OrbStack amd64 machine on Apple silicon
 
-The owner has no native amd64 host. `tests/acceptance/v1-05/run-orbstack-amd64.sh`,
-run on the Mac, creates a disposable amd64 Debian 13 OrbStack machine, installs
+The owner has no native amd64 host. `tests/acceptance/run-mac-amd64.sh V1-05`,
+run on the Mac from the owner's checkout, makes a temporary clean checkout one
+level up and runs `tests/acceptance/run-orbstack-amd64.sh V1-05` there, which
+creates a disposable amd64 Debian 13 OrbStack machine, installs
 Debian's Docker, fetches the candidate commit from the Mac's clone, runs
 `run-host.sh debian-13-amd64` `--runs` times, copies each evidence directory
 with an `operator.json` (operator, authorization time, Mac, machine, Docker) to
-`$HOME/aibox-v1-05-evidence/`, and deletes the machine. The amd64 code runs
+`amd64-evidence/v1-05/<time>/` in the owner's checkout, and deletes the machine
+and the temporary checkout. Both scripts take the phase, so later phases reuse
+them by providing `tests/acceptance/<phase>/run-host.sh`. The amd64 code runs
 under OrbStack's x86_64 translation, not on an amd64 CPU, so this evidence
 covers every amd64 download, hash, package and install path and the Docker
 engine, but not CPU-specific behaviour. Whether it qualifies the amd64 cell is
