@@ -61,8 +61,9 @@ fi
 
 remove_checkout() {
   if [ -d "$run_checkout" ]; then
+    # No `git worktree prune`: it would also drop worktrees that live in the
+    # development container, whose paths do not exist on the Mac.
     git -C "$repo" worktree remove --force "$run_checkout" 2>/dev/null || rm -rf "$run_checkout"
-    git -C "$repo" worktree prune
     echo "Removed the temporary checkout $run_checkout"
   fi
 }

@@ -131,13 +131,14 @@ say "Installing Docker, Git and Python"
 in_root sh -euxc '
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  apt-cache policy docker.io docker-buildx
+  apt-cache policy docker.io docker-cli docker-buildx
+  # Debian 13 splits the docker command into docker-cli, which docker.io only recommends.
   apt-get install -y --no-install-recommends ca-certificates curl git python3 xz-utils \
-    iptables docker.io docker-buildx
+    iptables docker.io docker-cli docker-buildx
   systemctl enable --now docker || service docker start
   for attempt in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && exit 0; sleep 3; done
   docker info
-'
+' </dev/null
 linux_user=$(in_user id -un)
 in_root usermod -aG docker "$linux_user"
 say "Checking Docker in the machine"
