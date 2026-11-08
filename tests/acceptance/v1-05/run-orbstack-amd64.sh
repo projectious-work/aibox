@@ -10,14 +10,16 @@
 # the V1-05 handoff commit), runs tests/acceptance/v1-05/run-host.sh
 # debian-13-amd64 N times, copies each evidence directory to
 # $HOME/aibox-v1-05-evidence/ on the Mac with an operator.json that names the
-# operator, the Mac and the machine, and deletes the machine.
+# operator, the Mac and the machine, and deletes the machine. All output also
+# goes to $HOME/aibox-v1-05-evidence/orbstack-amd64-<UTC time>.log; a failing
+# step names itself there and on the terminal.
 #
 # Needs: macOS on Apple silicon, OrbStack with the `orb` CLI, about 80 GB free
 # disk, and network access to deb.debian.org, Docker Hub, ghcr.io,
 # snapshot.debian.org, nodejs.org and the producer download sites in the
 # catalog. No credentials. Runs under translation are slower than native
 # amd64 and are recorded as translated in operator.json.
-set -euo pipefail
+set -Eeuo pipefail
 
 commit=fbd178d6
 runs=1
@@ -31,13 +33,13 @@ while [ $# -gt 0 ]; do
     --keep-machine) keep=1; shift ;;
     --yes) assume_yes=1; shift ;;
     --) shift; runner_args=("$@"); break ;;
-    -h|--help) sed -n 2,19p "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n 2,21p "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1 (runner options go after --)" >&2; exit 2 ;;
   esac
 done
 case "$runs" in ''|*[!0-9]*|0) echo "--runs must be a positive number" >&2; exit 2 ;; esac
 
-say() { printf '\n==> %s\n' "$*"; }
+say() { step=$*; printf '\n==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 [ "$(uname -s)" = Darwin ] || die "run this on the Mac, not inside a container"
@@ -80,6 +82,20 @@ if [ "$assume_yes" != 1 ]; then
 fi
 authorized_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
+# Everything from here on, including the machine's output, also goes to a log
+# on the Mac, and a failing step names itself and shows the log's tail.
+mkdir -p "$evidence_root"
+log="$evidence_root/orbstack-amd64-$stamp.log"
+exec > >(tee -a "$log") 2>&1
+step="start"
+on_error() {
+  local status=$? line=$1 command=$2
+  trap - ERR
+  printf '\nerror: step "%s" failed (exit %s) at line %s: %s\n' "$step" "$status" "$line" "$command"
+  printf 'Full log: %s\nRerun with --keep-machine to inspect it with: orb -m %s\n' "$log" "$machine"
+}
+trap 'on_error $LINENO "$BASH_COMMAND"' ERR
+
 candidate_ref=refs/aibox-v1-05/orbstack-candidate
 cleanup() {
   git -C "$repo" update-ref -d "$candidate_ref" 2>/dev/null || true
@@ -100,15 +116,21 @@ arch=$(in_user uname -m)
 [ "$arch" = x86_64 ] || die "machine reports $arch, not x86_64"
 
 say "Installing Docker, Git and Python"
-in_root sh -euc '
+in_root sh -euxc '
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update -qq
-  apt-get install -y -qq --no-install-recommends ca-certificates curl git python3 xz-utils \
-    docker.io docker-buildx >/dev/null
-  systemctl enable --now docker >/dev/null 2>&1 || service docker start
+  apt-get update
+  apt-cache policy docker.io docker-buildx
+  apt-get install -y --no-install-recommends ca-certificates curl git python3 xz-utils \
+    iptables docker.io docker-buildx
+  systemctl enable --now docker || service docker start
+  for attempt in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && exit 0; sleep 3; done
+  docker info
 '
 linux_user=$(in_user id -un)
 in_root usermod -aG docker "$linux_user"
+say "Checking Docker in the machine"
+in_user docker version
+in_user docker buildx version
 server_arch=$(in_user docker version --format '{{.Server.Arch}}')
 [ "$server_arch" = amd64 ] || die "Docker server architecture is $server_arch, not amd64"
 
@@ -165,11 +187,12 @@ run=1
 while [ "$run" -le "$runs" ]; do
   run_dir="debian-13-amd64-orbstack-$(date -u +%Y%m%dT%H%M%SZ)-run$run"
   say "Run $run of $runs: $run_dir"
-  set +e
-  in_user sh -c "cd \"\$HOME/aibox\" && tests/acceptance/v1-05/run-host.sh debian-13-amd64 \
-    --output \"\$HOME/evidence/$run_dir\"$quoted_args"
-  status=$?
-  set -e
+  if in_user sh -c "cd \"\$HOME/aibox\" && tests/acceptance/v1-05/run-host.sh debian-13-amd64 \
+    --output \"\$HOME/evidence/$run_dir\"$quoted_args"; then
+    status=0
+  else
+    status=$?
+  fi
   mkdir -p "$evidence_root/$run_dir"
   if in_user sh -c "test -d \"\$HOME/evidence/$run_dir\""; then
     in_user sh -c "tar -C \"\$HOME/evidence/$run_dir\" -cf - ." | tar -C "$evidence_root/$run_dir" -xf -
