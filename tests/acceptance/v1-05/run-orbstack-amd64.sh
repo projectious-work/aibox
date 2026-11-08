@@ -2,7 +2,7 @@
 # AC-TOOLS on debian-13-amd64 from an Apple silicon Mac with OrbStack.
 #
 #   tests/acceptance/v1-05/run-orbstack-amd64.sh [--commit SHA] [--runs N]
-#       [--keep-machine] [--yes] [-- runner options, e.g. --scope full --jobs 2]
+#       [--evidence-dir ABS_DIR] [--keep-machine] [--yes] [-- runner options, e.g. --scope full --jobs 2]
 #
 # Creates a disposable amd64 Debian 13 OrbStack machine (x86_64 under
 # OrbStack's Rosetta or QEMU translation), installs Debian's Docker in it,
@@ -23,6 +23,7 @@ set -Eeuo pipefail
 
 commit=fbd178d6
 runs=1
+evidence_root="$HOME/aibox-v1-05-evidence"
 keep=0
 assume_yes=0
 runner_args=()
@@ -30,6 +31,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --commit) commit=${2:?--commit needs a SHA}; shift 2 ;;
     --runs) runs=${2:?--runs needs a number}; shift 2 ;;
+    --evidence-dir) evidence_root=${2:?--evidence-dir needs a path}; shift 2 ;;
     --keep-machine) keep=1; shift ;;
     --yes) assume_yes=1; shift ;;
     --) shift; runner_args=("$@"); break ;;
@@ -37,6 +39,7 @@ while [ $# -gt 0 ]; do
     *) echo "unknown option: $1 (runner options go after --)" >&2; exit 2 ;;
   esac
 done
+case "$evidence_root" in /*) ;; *) echo "--evidence-dir must be absolute" >&2; exit 2 ;; esac
 case "$runs" in ''|*[!0-9]*|0) echo "--runs must be a positive number" >&2; exit 2 ;; esac
 
 say() { step=$*; printf '\n==> %s\n' "$*"; }
@@ -57,7 +60,6 @@ free_gb=$(df -g "$HOME" | awk 'NR==2 {print $4}')
 
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 machine="aibox-v1-05-amd64-$(echo "$stamp" | tr 'TZ' 'tz')"
-evidence_root="$HOME/aibox-v1-05-evidence"
 operator=$(id -un)
 
 cat <<EOF
