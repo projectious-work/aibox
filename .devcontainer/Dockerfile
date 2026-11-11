@@ -277,6 +277,43 @@ if [ -d "$HOME/.cargo/bin" ]; then
 fi
 EOF
 
+# Nested rootless Podman for V1-05 acceptance tests (DEC-20261030_0853-CoolSun).
+# Debian ships newuidmap/newgidmap setuid root, which this kernel refuses inside
+# a container; file capabilities work. Docker masks parts of /proc, so nested
+# containers bind the existing /proc instead of mounting a new one. All test
+# state lives in the aibox-test-cache volume at /var/cache/aibox-test
+# (containers/, registry/, downloads/); remove it with
+# `docker volume rm aibox-test-cache`.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      podman crun uidmap passt libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod u-s /usr/bin/newuidmap /usr/bin/newgidmap \
+    && setcap cap_setuid=ep /usr/bin/newuidmap \
+    && setcap cap_setgid=ep /usr/bin/newgidmap \
+    && (grep -q '^aibox:' /etc/subuid || echo 'aibox:100000:65536' >> /etc/subuid) \
+    && (grep -q '^aibox:' /etc/subgid || echo 'aibox:100000:65536' >> /etc/subgid) \
+    && install -d -o aibox -g aibox /var/cache/aibox-test \
+         /var/cache/aibox-test/containers /var/cache/aibox-test/registry /var/cache/aibox-test/downloads
+
+RUN cat <<'CONF' > /etc/containers/containers.conf
+[containers]
+volumes = ["/proc:/proc"]
+netns = "host"
+cgroups = "disabled"
+
+[engine]
+cgroup_manager = "cgroupfs"
+events_logger = "file"
+CONF
+
+RUN cat <<'CONF' > /etc/containers/storage.conf
+[storage]
+driver = "overlay"
+runroot = "/run/containers/storage"
+graphroot = "/var/lib/containers/storage"
+rootless_storage_path = "/var/cache/aibox-test/containers/storage"
+CONF
+
 # Record image version inside container for runtime checks
 USER root
 LABEL aibox.version="0.35.4"

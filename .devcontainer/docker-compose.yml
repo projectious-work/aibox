@@ -70,7 +70,7 @@ services:
     labels:
       # Fingerprint of the env_file above; `aibox up` recreates the container
       # when it changes because env_file is only read at container creation.
-      aibox.local-env-hash: "79e79fe4e68bd07d"
+      aibox.local-env-hash: "290826634f709763"
     environment:
       AUDIODRIVER: "pulseaudio"
       COLORTERM: "truecolor"
