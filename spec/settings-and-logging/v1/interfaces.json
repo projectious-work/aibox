@@ -131,7 +131,8 @@
         "default": {
           "cli": null,
           "mcp": null
-        }
+        },
+        "viewValue": "the resolved absolute path, with the home prefix as ~"
       },
       {
         "key": "logging.required",
@@ -373,7 +374,9 @@
       },
       "project": "<project>/.devcontainer/devcontainer.json (JSON with comments), object customizations.aibox.workspace, members theme, mode, layout",
       "schema": "schemas/process-settings.schema.json",
-      "pathAnchor": "A relative logging.file in a settings file is anchored to logging.fileSink.stateDirectory."
+      "pathAnchor": "A relative logging.file in a settings file is anchored to logging.fileSink.stateDirectory.",
+      "xdg": "XDG_CONFIG_HOME and XDG_STATE_HOME are used only when set to an absolute path; otherwise $HOME/.config and $HOME/.local/state apply",
+      "projectNote": "Only the three members are read. The rest of customizations.aibox is not validated by this feature."
     },
     "selectors": [
       {
@@ -420,11 +423,11 @@
         "a line that is empty or consists only of spaces and tabs is ignored",
         "a line whose first character is # is a comment",
         "every other line is KEY=VALUE, split at the first =",
-        "KEY must match ^AIBOX_[A-Z0-9_]+$ with no surrounding spaces",
+        "KEY must match ^[A-Z][A-Z0-9_]*$ with no surrounding spaces; any other KEY is malformed",
         "VALUE is every byte after the first = up to the line ending; quotes, spaces and # are literal",
         "no export prefix, no interpolation, no line continuation, no multi-line value"
       ],
-      "permissions": "mode must have no group or other bits (mode & 0o077 == 0)"
+      "maxFiles": 16
     },
     "conversion": {
       "boolean": "exactly true or false",
@@ -438,7 +441,6 @@
       "unreadable",
       "missing_selected_file",
       "not_regular_file",
-      "insecure_permissions",
       "duplicate_key",
       "unknown_key",
       "unsupported_version",
@@ -447,7 +449,9 @@
       "unauthorized_source",
       "unknown_environment_name",
       "relative_env_file",
-      "path_escape"
+      "path_escape",
+      "no_home",
+      "usage_error"
     ],
     "schemaDefects": {
       "unknown member": "unknown_key",
@@ -455,7 +459,12 @@
       "wrong type, enum or range": "invalid_value",
       "not a JSON object or not JSON": "malformed"
     },
-    "registeredEnvironment": "fixtures/registered-environment.json"
+    "registeredEnvironment": {
+      "fixture": "fixtures/registered-environment.json",
+      "rule": "a name is registered if it equals a name in the fixture, or starts with a name in the fixture that ends with an underscore (prefix family, for example AIBOX_TMUX_)"
+    },
+    "failureOrder": "usage errors of the command line first; then layers in the order system, user, project, env_file (in load order), environment, invocation; within a file in document order; within the environment in byte order of the names. For one setting, a shape defect (malformed, unknown_key, invalid_value and the like) is reported before unauthorized_source.",
+    "nearestName": "the env name with the smallest Levenshtein distance to the unknown name; ties go to the earlier key in settings.keys"
   },
   "cli": {
     "flags": [
@@ -510,7 +519,7 @@
         "commands": [
           "inspect"
         ],
-        "note": "boolean operation input; MCP field effectiveConfig"
+        "note": "boolean operation input, no argument; MCP field effectiveConfig"
       },
       {
         "flag": "--context",
@@ -522,7 +531,11 @@
         "note": "unchanged from the operation core; only local"
       }
     ],
-    "syntax": "--name value and --name=value are both accepted; a flag given twice is invalid_input unless repeatable"
+    "syntax": "--name value and --name=value are both accepted. Unknown flag, repeated non-repeatable flag, flag on a command that does not list it, and any positional argument are usage_error.",
+    "noSettings": [
+      "version",
+      "help"
+    ]
   },
   "mcp": {
     "tool": "inspect_workspace",
@@ -536,9 +549,32 @@
       "requestId",
       "projectRoot"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "note": "No tool input sets a settings key, so layer invocation never occurs in an MCP view."
   },
   "effectiveConfig": {
+    "nativeEntries": [
+      {
+        "key": "devcontainer.config",
+        "value": ".devcontainer/devcontainer.json",
+        "redacted": false,
+        "layer": "project",
+        "source": ".devcontainer/devcontainer.json",
+        "domain": "native",
+        "invocationOnly": false,
+        "when": "always"
+      },
+      {
+        "key": "devcontainer.features",
+        "value": "array of the selected Feature references, in declaration order",
+        "redacted": false,
+        "layer": "project",
+        "source": ".devcontainer/devcontainer.json",
+        "domain": "native",
+        "invocationOnly": false,
+        "when": "the declaration selects at least one Feature"
+      }
+    ],
     "entry": {
       "required": [
         "key",
@@ -559,17 +595,20 @@
         "source",
         "value",
         "redacted"
-      ]
+      ],
+      "excludes": "built_in",
+      "maxItems": 32
     },
     "source": {
       "built_in": "built-in",
-      "system": "path of the system settings file",
-      "user": "path of the user settings file",
-      "project": "path of the devcontainer.json",
-      "env_file": "path of the environment file",
+      "system": "absolute path of the system settings file",
+      "user": "absolute path of the user settings file",
+      "project": "absolute path of the devcontainer.json",
+      "env_file": "absolute path of the environment file",
       "environment": "the environment variable name",
-      "invocation": "the flag name for the CLI; request.<field> for MCP"
+      "invocation": "the flag name, for example --color"
     },
+    "pathForm": "Absolute after symlink resolution; a path under the running user's home directory is written with that prefix as ~. This applies to settings sources and to settingsSources[].path, not to the native entries, which keep their project-relative form.",
     "settingsSources": {
       "order": [
         "system",
@@ -587,9 +626,10 @@
           "loaded",
           "absent"
         ]
-      }
+      },
+      "note": "With --settings-file the user element is the selected file. A missing project declaration fails inspection and has no view."
     },
-    "resultSchemaDelta": "operation-result inspect_workspace data gains optional settingsSources (array, max 64) and configuration[].overridden (array, max 8). Both are additive."
+    "schema": "schemas/operation-result.schema.json"
   },
   "output": {
     "formats": [
@@ -598,8 +638,10 @@
       "yaml"
     ],
     "colorRule": "ANSI colour is written only when output.format is human, NO_COLOR is unset or empty, and either output.color is always, or output.color is auto and stdout is a terminal.",
-    "bootstrapDiagnostic": "^aibox: (invalid_input|not_authorized): [a-z_]+: .+$",
-    "bootstrapDiagnosticNote": "Second field is a rejection reason."
+    "bootstrapDiagnostic": "^aibox: invalid_input: [a-z_]+: .+$",
+    "bootstrapDiagnosticNote": "The second field is a rejection reason. The text after it is not a contract.",
+    "yaml": "Block-style YAML 1.2. Every string, including every mapping key, is a double-quoted scalar with JSON escapes; numbers, true, false and null are plain; empty collections are [] and {}.",
+    "preOperationFailure": "A failure before the operation starts (settings or command line) uses operation invalid_request, a generated request ID, no target and no inputDigest."
   },
   "errors": [
     {
@@ -610,16 +652,16 @@
       "nextAction": "edit_configuration"
     },
     {
-      "code": "not_authorized",
-      "category": "denied",
-      "exit": 3,
-      "retryable": false,
-      "nextAction": "edit_configuration"
-    },
-    {
       "code": "operation_timeout",
       "category": "timeout",
       "exit": 124,
+      "retryable": true,
+      "nextAction": "retry_read"
+    },
+    {
+      "code": "operation_cancelled",
+      "category": "interrupted",
+      "exit": 130,
       "retryable": true,
       "nextAction": "retry_read"
     },
@@ -642,7 +684,7 @@
       "warn",
       "error"
     ],
-    "plainLine": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z (TRACE|DEBUG|INFO|WARN|ERROR) [a-z][a-z0-9_.]*( .*)?$",
+    "plainLine": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z (TRACE|DEBUG|INFO|WARN|ERROR) [a-z][a-z0-9_.]*( [A-Za-z][A-Za-z0-9]*=\\S*)*$",
     "schema": "schemas/log-event.schema.json",
     "components": [
       "cli",
@@ -656,126 +698,221 @@
         "event": "process.started",
         "severity": "info",
         "component": "mcp",
-        "emittedBy": [
+        "commands": [
           "mcp serve"
         ],
-        "correlation": "process"
+        "requestId": "process correlation ID",
+        "members": [
+          "executor"
+        ],
+        "fields": []
       },
       {
         "event": "settings.resolved",
         "severity": "debug",
         "component": "settings",
-        "emittedBy": [
+        "commands": [
           "inspect",
           "mcp serve"
         ],
-        "fields": [
-          "layers"
-        ]
+        "requestId": "the operation request ID for inspect; the process correlation ID for mcp serve",
+        "members": [
+          "executor"
+        ],
+        "fields": {
+          "layers": "comma-separated names of the layers that set at least one key, in precedence order; empty string if none"
+        }
       },
       {
         "event": "settings.rejected",
         "severity": "error",
         "component": "settings",
-        "emittedBy": [
+        "commands": [
           "inspect",
           "mcp serve"
         ],
-        "fields": [
-          "key",
-          "layer",
-          "source",
-          "reason"
+        "requestId": "the request ID of the failed command",
+        "members": [
+          "executor",
+          "outcome=failed",
+          "errorCategory=invalid_input"
         ],
-        "when": "a setting is rejected"
+        "fields": {
+          "reason": "a rejection reason",
+          "key": "the settings key, when one is known",
+          "layer": "the layer, when one is known",
+          "source": "as effectiveConfig.source, when known",
+          "suggestion": "only for unknown_environment_name"
+        }
       },
       {
         "event": "operation.started",
         "severity": "info",
         "component": "usecase",
-        "emittedBy": [
+        "commands": [
           "inspect",
           "inspect_workspace"
-        ]
+        ],
+        "members": [
+          "operation=inspect_workspace",
+          "initiator",
+          "executor"
+        ],
+        "fields": {
+          "projectRoot": "the project path as given, made absolute, redacted"
+        }
       },
       {
         "event": "operation.validated",
         "severity": "debug",
         "component": "usecase",
-        "emittedBy": [
+        "commands": [
           "inspect",
           "inspect_workspace"
         ],
-        "when": "the input was accepted"
+        "when": "the project declaration was read and accepted; not emitted when inspection fails",
+        "members": [
+          "operation=inspect_workspace",
+          "initiator",
+          "executor"
+        ],
+        "fields": []
+      },
+      {
+        "event": "operation.cancelled",
+        "severity": "warn",
+        "component": "usecase",
+        "commands": [
+          "inspect"
+        ],
+        "when": "SIGINT or SIGTERM",
+        "members": [
+          "operation=inspect_workspace",
+          "initiator",
+          "executor",
+          "outcome=cancelled",
+          "errorCategory=interrupted"
+        ],
+        "fields": []
       },
       {
         "event": "operation.finished",
         "severity": "info",
         "component": "usecase",
-        "emittedBy": [
+        "commands": [
           "inspect",
           "inspect_workspace"
         ],
-        "sets": [
+        "members": [
+          "operation=inspect_workspace",
+          "initiator",
+          "executor",
           "outcome",
-          "errorCategory on failure"
-        ]
+          "errorCategory only when the outcome carries an error"
+        ],
+        "fields": []
       },
       {
         "event": "logging.sink_degraded",
         "severity": "warn",
         "component": "logging",
-        "fields": [
-          "sink",
-          "reason"
+        "when": "a sink open or write fails; once per sink and process",
+        "members": [
+          "executor"
         ],
-        "when": "a sink write or open fails"
+        "fields": {
+          "sink": "file or stderr",
+          "reason": "open_failed, write_failed or insecure_mode"
+        }
       },
       {
         "event": "logging.dropped",
         "severity": "warn",
         "component": "logging",
-        "fields": [
-          "count"
+        "when": "events were dropped",
+        "members": [
+          "executor"
         ],
-        "when": "events were dropped"
+        "fields": {
+          "count": "number of dropped events"
+        }
       },
       {
-        "event": "logging.flushed",
-        "severity": "debug",
+        "event": "logging.flush_incomplete",
+        "severity": "warn",
         "component": "logging",
-        "fields": [
-          "complete"
+        "when": "the shutdown flush did not complete",
+        "members": [
+          "executor"
         ],
-        "when": "shutdown flush ended"
+        "fields": {
+          "sink": "file or stderr"
+        }
       },
       {
         "event": "process.finished",
         "severity": "info",
         "component": "mcp",
-        "emittedBy": [
+        "commands": [
           "mcp serve"
         ],
-        "correlation": "process"
+        "requestId": "process correlation ID",
+        "members": [
+          "executor"
+        ],
+        "fields": []
       }
     ],
-    "eventOrder": "For inspect: settings.resolved, operation.started, operation.validated, operation.finished. operation is inspect_workspace on the three operation events. initiator is cli or mcp; executor is aibox.",
-    "reserved": "Event names for authorization, dependency invocation, progress, partial effect, cancel and cleanup are defined by the features that add such operations.",
+    "eventOrder": {
+      "inspect, success": [
+        "settings.resolved",
+        "operation.started",
+        "operation.validated",
+        "operation.finished"
+      ],
+      "inspect, inspection fails": [
+        "settings.resolved",
+        "operation.started",
+        "operation.finished"
+      ],
+      "inspect, rejected before start": [
+        "settings.rejected"
+      ],
+      "mcp serve": [
+        "process.started",
+        "settings.resolved",
+        "then per tool call: operation.started, operation.validated (on success), operation.finished",
+        "process.finished"
+      ],
+      "note": "logging.* events appear only under their when condition and take the next sequence of the request that was running, or of the process."
+    },
     "queue": {
       "capacity": 1024,
-      "flushSeconds": 2
+      "flushSeconds": 2,
+      "directWriteMillis": 100
     },
     "fileSink": {
       "stateDirectory": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/logs",
-      "permittedRoot": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/logs",
+      "permittedRoot": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/logs, after symlink resolution of the root itself",
       "operationRecordDirectory": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/operations",
       "directoryMode": "0700",
       "fileMode": "0600",
       "format": "jsonl",
-      "rotation": "Under an exclusive lock on <file>.lock: delete <file>.<retentionFiles-1> if present, rename <file>.<n> to <file>.<n+1> from the highest n down, rename <file> to <file>.1, create a new <file>. At most retentionFiles files exist including the active one. A rotated file whose modification time is older than retentionDays days is deleted.",
+      "append": "For each event: take an exclusive advisory lock on <file>.lock (created 0600); look up <file> by path; rotate if its size is at or above rotationMiB MiB; open it by path with O_APPEND (create 0600), write the whole line with one write call, close it; release the lock. No descriptor of the log file is kept between events.",
+      "rotation": "Inside the same lock. With retentionFiles 1: truncate <file> to zero length. Otherwise: delete <file>.<retentionFiles-1> if present, rename <file>.<n> to <file>.<n+1> from the highest n down, rename <file> to <file>.1. Then delete every rotated file whose modification time is older than retentionDays days. At most retentionFiles files exist including the active one; the lock file is not counted.",
+      "rotationSet": "<file>, <file>.lock and <file>.<n> for n from 1 to 99",
       "maxLineBytes": 65536,
-      "longLine": "fields are dropped from the event until it fits and fields.truncated is set to true"
-    }
+      "longLine": "fields are removed from the event, last name first, until the line fits, and fields.truncated is set to true",
+      "scope": "local file systems; network file systems are unsupported"
+    },
+    "members": {
+      "initiator": "cli for the CLI, mcp for a tool call",
+      "executor": "aibox"
+    },
+    "fieldValues": "Every fields value is a string. Numbers are base-10 text; booleans are true or false.",
+    "rejectionFormat": "jsonl if --log-format jsonl is on the command line or the command is mcp serve; otherwise plain. A rejected logging key does not change this.",
+    "plainLineNote": "After the event name: member=value pairs, then fields as name=value; a value with spaces is JSON-quoted. Tests that read fields use jsonl.",
+    "reserved": "Event names for authorization, dependency invocation, progress, partial effect and cleanup, and child-tool attribution, are defined by the features that add such operations."
   },
   "redaction": {
     "replacement": "[redacted]",
@@ -789,12 +926,22 @@
       "-----BEGIN [A-Z ]*PRIVATE KEY-----",
       "(?i)bearer [A-Za-z0-9._~+/-]{16,}=*"
     ],
-    "homePrefix": "a path that starts with the running user's home directory is written with that prefix replaced by ~",
     "scope": [
-      "every log event field and message",
+      "every log event member and field",
       "effective-configuration values and sources",
+      "settingsSources paths",
+      "result error.message and warnings",
+      "bootstrap diagnostics",
+      "human output"
+    ],
+    "notRedacted": "target.workspaceRoot, which identifies the workspace and must stay an absolute path. It is still subject to RED-001 and RED-002 in human output and in events, not in the json and yaml envelope.",
+    "homePrefixScope": [
+      "log event fields",
+      "effective-configuration values and sources",
+      "settingsSources paths",
       "bootstrap diagnostics"
-    ]
+    ],
+    "limits": "Values shorter than 8 bytes are not treated as secrets. No claim is made to recognize an unknown secret. Provider prompts and personal data do not occur in the events of this version."
   },
   "execution": {
     "classDefaults": {

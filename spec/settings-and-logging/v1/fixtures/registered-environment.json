@@ -1,5 +1,5 @@
 {
-  "description": "AIBOX_* names registered in the v0 environment ledger (spec/v1/ledger/environment.json at main 2b542a4e). They are runtime identifiers, not process settings. A trailing underscore marks a prefix family.",
+  "description": "AIBOX_* names registered in the v0 environment ledger (spec/v1/ledger/environment.json at main 2b542a4e), without the ledger artefact AIBOX_TMUX_BGAIBOX_TMUX_ACTIVE_ATTR. They are runtime identifiers, not process settings. A name that ends with an underscore is a prefix family.",
   "names": [
     "AIBOX_ADDONS_DIR",
     "AIBOX_AGENT_EFFORT",
@@ -54,7 +54,6 @@
     "AIBOX_TMUX_ACCENT",
     "AIBOX_TMUX_ACTIVE_ATTR",
     "AIBOX_TMUX_BG",
-    "AIBOX_TMUX_BGAIBOX_TMUX_ACTIVE_ATTR",
     "AIBOX_TMUX_CONFIG",
     "AIBOX_TMUX_DIM_BG",
     "AIBOX_TMUX_DIM_FG",
