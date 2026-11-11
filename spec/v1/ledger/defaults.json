@@ -1,0 +1,478 @@
+[
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L126",
+    "declaration": "fn default_config_schema() -> String {\n    \"1.0.0\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L130",
+    "declaration": "fn default_image_version() -> String {\n    \"latest\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L134",
+    "declaration": "fn default_api_version() -> String {\n    \"aibox.projectious.work/v1\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L138",
+    "declaration": "fn default_kind() -> String {\n    \"Workspace\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L158",
+    "declaration": "impl Default for ImageSection {\n    fn default() -> Self {\n        Self {\n            version: default_image_version(),\n            base: BaseImage::Debian,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L182",
+    "declaration": "impl Default for AiboxSection {\n    fn default() -> Self {\n        Self {\n            config_schema: default_config_schema(),\n            project_name: String::new(),\n            version: default_image_version(),\n            base: BaseImage::Debian,\n            profile: AiboxProfile::HumanDev,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L251",
+    "declaration": "fn default_user() -> String {\n    \"aibox\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L255",
+    "declaration": "fn default_hostname() -> String {\n    \"aibox\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L283",
+    "declaration": "impl Default for ContainerPathsSection {\n    fn default() -> Self {\n        Self {\n            devcontainer_json: default_devcontainer_json_path(),\n            docker_compose: default_docker_compose_path(),\n            docker_compose_override: default_docker_compose_override_path(),\n            dockerfile: default_dockerfile_path(),\n            dockerfile_local: default_dockerfile_local_path(),\n            local_env: default_local_env_path(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L296",
+    "declaration": "fn default_devcontainer_json_path() -> String {\n    \".devcontainer/devcontainer.json\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L300",
+    "declaration": "fn default_docker_compose_path() -> String {\n    \".devcontainer/docker-compose.yml\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L304",
+    "declaration": "fn default_docker_compose_override_path() -> String {\n    \".devcontainer/docker-compose.override.yml\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L308",
+    "declaration": "fn default_dockerfile_path() -> String {\n    \".devcontainer/Dockerfile\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L312",
+    "declaration": "fn default_dockerfile_local_path() -> String {\n    \".devcontainer/Dockerfile.local\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L316",
+    "declaration": "fn default_local_env_path() -> String {\n    \".aibox-local.env\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L340",
+    "declaration": "impl Default for ResourceThresholdsSection {\n    fn default() -> Self {\n        Self {\n            memory_mib_warn: None,\n            process_count_warn: default_process_count_warn(),\n            processkit_mcp_python_warn: default_processkit_mcp_python_warn(),\n            oom_kill_warn: default_oom_kill_warn(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L351",
+    "declaration": "fn default_process_count_warn() -> Option<usize> {\n    Some(400)\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L355",
+    "declaration": "fn default_processkit_mcp_python_warn() -> Option<usize> {\n    Some(50)\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L359",
+    "declaration": "fn default_oom_kill_warn() -> Option<u64> {\n    Some(0)\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L397",
+    "declaration": "fn default_schema_version() -> String {\n    \"1.0.0\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L401",
+    "declaration": "fn default_context_packages() -> Vec<String> {\n    vec![\"product\".to_string()]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L405",
+    "declaration": "impl Default for ContextSection {\n    fn default() -> Self {\n        Self {\n            mode: ContextMode::default(),\n            schema_version: default_schema_version(),\n            packages: default_context_packages(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L669",
+    "declaration": "fn default_ai_harnesses() -> Vec<AiHarness> {\n    vec![AiHarness::Claude]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1064",
+    "declaration": "impl Default for AiSection {\n    fn default() -> Self {\n        Self {\n            harnesses: default_ai_harnesses(),\n            harness_order: Vec::new(),\n            model_providers: Vec::new(),\n            execution: AiExecutionPolicy::default(),\n            harness: HashMap::new(),\n            providers: Vec::new(),\n            agents: AgentsSection::default(),\n            mcp: McpSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1743",
+    "declaration": "fn default_theme_mode() -> ThemeMode {\n    ThemeMode::default()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2016",
+    "declaration": "fn default_prompt() -> StarshipPreset {\n    StarshipPreset::default()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2047",
+    "declaration": "fn default_layout() -> ConfigLayout {\n    ConfigLayout::default()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2091",
+    "declaration": "fn default_tmux_status_mode() -> TmuxStatusMode {\n    TmuxStatusMode::default()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2095",
+    "declaration": "fn bool_true() -> bool {\n    true\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2099",
+    "declaration": "fn bool_false() -> bool {\n    false\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2103",
+    "declaration": "fn default_tmux_title_format() -> String {\n    \"{state_symbol}{repository}{agent_suffix}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2107",
+    "declaration": "fn default_tmux_title_max_length() -> u32 {\n    60\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2111",
+    "declaration": "fn default_tmux_title_done_ttl_seconds() -> u32 {\n    10\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2115",
+    "declaration": "fn default_tmux_title_message_max_length() -> u32 {\n    32\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2119",
+    "declaration": "fn default_tmux_title_directory_style() -> String {\n    \"basename\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2123",
+    "declaration": "fn default_tmux_title_repository_style() -> String {\n    \"basename\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2127",
+    "declaration": "fn default_tmux_title_agent_style() -> String {\n    \"basename\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2131",
+    "declaration": "fn default_tmux_title_working_symbol() -> String {\n    \"● \".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2135",
+    "declaration": "fn default_tmux_title_question_symbol() -> String {\n    \"❓ \".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2139",
+    "declaration": "fn default_tmux_title_done_symbol() -> String {\n    \"✓ \".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2143",
+    "declaration": "fn default_tmux_title_error_symbol() -> String {\n    \"! \".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2164",
+    "declaration": "impl Default for TmuxTitleStatesSection {\n    fn default() -> Self {\n        Self {\n            working: default_tmux_title_working_symbol(),\n            question: default_tmux_title_question_symbol(),\n            done: default_tmux_title_done_symbol(),\n            error: default_tmux_title_error_symbol(),\n            idle: String::new(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2202",
+    "declaration": "impl Default for TmuxTitleSection {\n    fn default() -> Self {\n        Self {\n            enabled: true,\n            format: default_tmux_title_format(),\n            max_length: default_tmux_title_max_length(),\n            directory_style: default_tmux_title_directory_style(),\n            repository_style: default_tmux_title_repository_style(),\n            agent_style: default_tmux_title_agent_style(),\n            done_ttl_seconds: default_tmux_title_done_ttl_seconds(),\n            message_max_length: default_tmux_title_message_max_length(),\n            states: TmuxTitleStatesSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2218",
+    "declaration": "fn default_tmux_notification_states() -> Vec<String> {\n    vec![\"question\".to_string(), \"error\".to_string()]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2222",
+    "declaration": "fn default_tmux_notification_protocol() -> String {\n    \"osc-9\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2240",
+    "declaration": "impl Default for TmuxNotificationsSection {\n    fn default() -> Self {\n        Self {\n            enabled: false,\n            protocol: default_tmux_notification_protocol(),\n            states: default_tmux_notification_states(),\n            include_message: true,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2268",
+    "declaration": "impl Default for TmuxStatusAiboxMetricsSection {\n    fn default() -> Self {\n        Self {\n            log: true,\n            oom: true,\n            proc: true,\n            ai: true,\n            mcp: true,\n            mig: true,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2340",
+    "declaration": "impl Default for TmuxStatusElementsSection {\n    fn default() -> Self {\n        Self {\n            hostname: true,\n            external_ip: true,\n            ssh: true,\n            uptime: true,\n            weather: true,\n            datetime: true,\n            forge: true,\n            git: false,\n            github: false,\n            kubernetes: true,\n            terraform: true,\n            cloud: true,\n            cloudstatus: false,\n            cpu: true,\n            loadavg: true,\n            mem: true,\n            swap: true,\n            disk: true,\n            gpu: true,\n            netspeed: true,\n            ping: true,\n            aibox: true,\n            aibox_metrics: TmuxStatusAiboxMetricsSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2420",
+    "declaration": "fn default_status_label_aibox_log() -> String {\n    \"\\u{f15ab}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2424",
+    "declaration": "fn default_status_label_aibox_oom() -> String {\n    \"\\u{f035b}\\u{f068c}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2428",
+    "declaration": "fn default_status_label_aibox_proc() -> String {\n    \"\\u{f029a}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2432",
+    "declaration": "fn default_status_label_aibox_ai() -> String {\n    \"\\u{f167a}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2436",
+    "declaration": "fn default_status_label_aibox_mcp() -> String {\n    \"\\u{f0339}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2440",
+    "declaration": "fn default_status_label_aibox_mig() -> String {\n    \"\\u{f06b0}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2444",
+    "declaration": "fn default_status_label_kubernetes() -> String {\n    \"\\u{f10fe}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2448",
+    "declaration": "fn default_status_label_cloud() -> String {\n    \"\\u{f0163}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2452",
+    "declaration": "fn default_status_label_cloud_aws() -> String {\n    \"\\u{f0e0f}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2456",
+    "declaration": "fn default_status_label_cloud_gcp() -> String {\n    \"\\u{f0b20}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2460",
+    "declaration": "fn default_status_label_cloud_azure() -> String {\n    \"\\u{f0805}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2464",
+    "declaration": "fn default_status_label_cloud_multi() -> String {\n    \"\\u{f0164}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2468",
+    "declaration": "fn default_status_label_uptime() -> String {\n    \"\\u{f254}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2472",
+    "declaration": "fn default_status_label_netspeed() -> String {\n    \"\\u{f0b5}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2476",
+    "declaration": "fn default_status_label_netspeed_download() -> String {\n    \"\\u{f01da}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2480",
+    "declaration": "fn default_status_label_netspeed_upload() -> String {\n    \"\\u{f0552}\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2484",
+    "declaration": "impl Default for TmuxStatusLabelsSection {\n    fn default() -> Self {\n        Self {\n            aibox_log: default_status_label_aibox_log(),\n            aibox_oom: default_status_label_aibox_oom(),\n            aibox_proc: default_status_label_aibox_proc(),\n            aibox_ai: default_status_label_aibox_ai(),\n            aibox_mcp: default_status_label_aibox_mcp(),\n            aibox_mig: default_status_label_aibox_mig(),\n            kubernetes: default_status_label_kubernetes(),\n            cloud: default_status_label_cloud(),\n            cloud_aws: default_status_label_cloud_aws(),\n            cloud_gcp: default_status_label_cloud_gcp(),\n            cloud_azure: default_status_label_cloud_azure(),\n            cloud_multi: default_status_label_cloud_multi(),\n            uptime: default_status_label_uptime(),\n            netspeed: default_status_label_netspeed(),\n            netspeed_download: default_status_label_netspeed_download(),\n            netspeed_upload: default_status_label_netspeed_upload(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2537",
+    "declaration": "fn default_tmux_status_separator_style() -> TmuxStatusSeparatorStyle {\n    TmuxStatusSeparatorStyle::Rounded\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2563",
+    "declaration": "fn default_tmux_status_elements_spacing() -> TmuxStatusElementsSpacing {\n    TmuxStatusElementsSpacing::Both\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2578",
+    "declaration": "impl Default for TmuxStatusSeparatorsSection {\n    fn default() -> Self {\n        Self {\n            style: default_tmux_status_separator_style(),\n            edge_style: default_tmux_status_separator_style(),\n            elements_spacing: default_tmux_status_elements_spacing(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2588",
+    "declaration": "fn default_tmux_status_refresh_interval_seconds() -> u32 {\n    15\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2592",
+    "declaration": "fn default_tmux_status_aibox_metrics_cache_ttl_seconds() -> u32 {\n    30\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2596",
+    "declaration": "fn default_tmux_status_netspeed_cache_ttl_seconds() -> u32 {\n    10\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2600",
+    "declaration": "fn default_tmux_status_kubernetes_cache_ttl_seconds() -> u32 {\n    120\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2604",
+    "declaration": "fn default_tmux_status_cloud_cache_ttl_seconds() -> u32 {\n    120\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2608",
+    "declaration": "fn default_tmux_status_github_cache_ttl_seconds() -> u32 {\n    120\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2629",
+    "declaration": "impl Default for TmuxStatusRefreshSection {\n    fn default() -> Self {\n        Self {\n            interval_seconds: default_tmux_status_refresh_interval_seconds(),\n            aibox_metrics_cache_ttl_seconds: default_tmux_status_aibox_metrics_cache_ttl_seconds(),\n            netspeed_cache_ttl_seconds: default_tmux_status_netspeed_cache_ttl_seconds(),\n            kubernetes_cache_ttl_seconds: default_tmux_status_kubernetes_cache_ttl_seconds(),\n            cloud_cache_ttl_seconds: default_tmux_status_cloud_cache_ttl_seconds(),\n            github_cache_ttl_seconds: default_tmux_status_github_cache_ttl_seconds(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2642",
+    "declaration": "fn default_tmux_status_forge_github_hosts() -> Vec<String> {\n    vec![\"github.com\".to_string()]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2653",
+    "declaration": "impl Default for TmuxStatusForgeSection {\n    fn default() -> Self {\n        Self {\n            github_hosts: default_tmux_status_forge_github_hosts(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2661",
+    "declaration": "fn default_model_provider_status_cache_ttl_seconds() -> u32 {\n    300\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2665",
+    "declaration": "fn default_model_provider_status_timeout_seconds() -> u32 {\n    3\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2669",
+    "declaration": "fn default_model_provider_status_checks() -> Vec<String> {\n    vec![\n        \"overall\".to_string(),\n        \"models\".to_string(),\n        \"harness\".to_string(),\n    ]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2677",
+    "declaration": "fn default_quota_window() -> String {\n    \"tokens\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2684",
+    "declaration": "pub fn default_agent_binaries_for(provider: &str) -> Vec<String> {\n    let s = |v: &[&str]| v.iter().map(|x| (*x).to_string()).collect();\n    match provider {\n        \"anthropic\" => s(&[\"claude\"]),\n        \"openai\" => s(&[\"codex\"]),\n        \"google\" => s(&[\"gemini\"]),\n        \"mistral\" => s(&[\"mistral\"]),\n        \"deepseek\" => s(&[\"deepseek\"]),\n        \"cohere\" => s(&[\"cohere\"]),\n        \"xai\" => s(&[\"grok\", \"xai\"]),\n        \"microsoft\" => s(&[\"copilot\"]),\n        _ => Vec::new(),\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2787",
+    "declaration": "pub fn default_model_provider_status_providers() -> Vec<TmuxStatusModelProviderStatusProvider> {\n    fn provider(\n        provider: &str,\n        label: &str,\n        status_url: Option<&str>,\n        checks: &[&str],\n        model_components: &[&str],\n        harness_components: &[&str],\n    ) -> TmuxStatusModelProviderStatusProvider {\n        TmuxStatusModelProviderStatusProvider {\n            provider: provider.to_string(),\n            label: label.to_string(),\n            checks: checks.iter().map(|s| (*s).to_string()).collect(),\n            status_url: status_url.map(str::to_string),\n            overall_components: Vec::new(),\n            model_components: model_components.iter().map(|s| (*s).to_string()).collect(),\n            harness_components: harness_components\n                .iter()\n                .map(|s| (*s).to_string())\n                .collect(),\n            show_agent_count: true,\n            agent_binaries: default_agent_binaries_for(provider),\n            show_quota: false,\n            quota_window: default_quota_window(),\n            quota_api_key_env: None,\n            show_admin_usage: false,\n            admin_api_key_env: None,\n        }\n    }\n\n    vec![\n        provider(\n            \"openai\",\n            \"OAI\",\n            Some(\"https://status.openai.com/api/v2/summary.json\"),\n            &[\"overall\", \"models\", \"harness\"],\n            &[\n                \"Responses\",\n                \"Chat Completions\",\n                \"Embeddings\",\n                \"Realtime\",\n                \"Images\",\n            ],\n            &[\"CLI\", \"Codex API\", \"Codex Web\"],\n        ),\n        provider(\n            \"anthropic\",\n            \"ANT\",\n            Some(\"https://status.claude.com/api/v2/summary.json\"),\n            &[\"overall\", \"models\", \"harness\"],\n            &[\"Claude API\"],\n            &[\"Claude Code\"],\n        ),\n        provider(\n            \"google\",\n            \"GOOG\",\n            Some(\"https://status.cloud.google.com/incidents.json\"),\n            &[\"overall\", \"models\"],\n            &[],\n            &[],\n        ),\n        provider(\n            \"mistral\",\n            \"MST\",\n            Some(\"https://status.mistral.ai/api/v2/summary.json\"),\n            &[\"overall\", \"models\"],\n            &[],\n            &[],\n        ),\n        provider(\n            \"deepseek\",\n            \"DS\",\n            Some(\"https://status.deepseek.com/api/v2/summary.json\"),\n            &[\"overall\", \"models\"],\n            &[],\n            &[],\n        ),\n        provider(\n            \"cohere\",\n            \"COH\",\n            Some(\"https://status.cohere.com/api/v2/summary.json\"),\n            &[\"overall\", \"models\"],\n            &[],\n            &[],\n        ),\n        provider(\"xai\", \"XAI\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"alibaba\", \"QWN\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"aws\", \"AWS\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"meta\", \"META\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"microsoft\", \"MS\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"minimax\", \"MM\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"moonshot\", \"KIMI\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"nvidia\", \"NV\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"xiaomi\", \"MI\", None, &[\"overall\", \"models\"], &[], &[]),\n        provider(\"zai\", \"ZAI\", None, &[\"overall\", \"models\"], &[], &[]),\n    ]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2885",
+    "declaration": "impl Default for TmuxStatusModelProviderStatusSection {\n    fn default() -> Self {\n        Self {\n            enabled: false,\n            cache_ttl_seconds: default_model_provider_status_cache_ttl_seconds(),\n            timeout_seconds: default_model_provider_status_timeout_seconds(),\n            show_glyph_when_ok: false,\n            show_ok: false,\n            admin_usage_enabled: false,\n            providers: default_model_provider_status_providers(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2920",
+    "declaration": "impl Default for TmuxStatusSection {\n    fn default() -> Self {\n        Self {\n            mode: default_tmux_status_mode(),\n            elements: TmuxStatusElementsSection::default(),\n            layout: TmuxStatusLayoutSection::default(),\n            labels: TmuxStatusLabelsSection::default(),\n            separators: TmuxStatusSeparatorsSection::default(),\n            refresh: TmuxStatusRefreshSection::default(),\n            forge: TmuxStatusForgeSection::default(),\n            model_providers: TmuxStatusModelProviderStatusSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2935",
+    "declaration": "fn default_tmux_prefix() -> String {\n    \"C-g\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3002",
+    "declaration": "fn default_tmux_session_name() -> String {\n    String::new()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3031",
+    "declaration": "impl Default for TmuxSection {\n    fn default() -> Self {\n        Self {\n            layout: None,\n            prefix: default_tmux_prefix(),\n            session_name: default_tmux_session_name(),\n            status: TmuxStatusSection::default(),\n            title: TmuxTitleSection::default(),\n            notifications: TmuxNotificationsSection::default(),\n            layout_switch: TmuxLayoutSwitchSection::default(),\n            theme_switch: TmuxThemeSwitchSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3046",
+    "declaration": "fn default_layout_switch_prefix_key() -> String {\n    \"L\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3050",
+    "declaration": "fn default_layout_switch_style() -> String {\n    \"menu\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3054",
+    "declaration": "fn default_theme_switch_prefix_key() -> String {\n    \"T\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3058",
+    "declaration": "fn default_theme_switch_themes() -> Vec<String> {\n    vec![\n        \"gruvbox-dark\".to_string(),\n        \"catppuccin-mocha\".to_string(),\n        \"tokyo-night\".to_string(),\n        \"dracula\".to_string(),\n        \"projectious\".to_string(),\n    ]\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3090",
+    "declaration": "impl Default for TmuxLayoutSwitchSection {\n    fn default() -> Self {\n        Self {\n            enabled: true,\n            prefix_key: default_layout_switch_prefix_key(),\n            style: default_layout_switch_style(),\n            confirm: true,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3125",
+    "declaration": "impl Default for TmuxThemeSwitchSection {\n    fn default() -> Self {\n        Self {\n            enabled: true,\n            prefix_key: default_theme_switch_prefix_key(),\n            themes: default_theme_switch_themes(),\n            include_mode_toggle: true,\n            confirm_restart_tuis: true,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3529",
+    "declaration": "impl Default for CustomizationSection {\n    fn default() -> Self {\n        Self {\n            theme: ThemeFamily::default(),\n            mode: default_theme_mode(),\n            variant: None,\n            emphasis: ThemeEmphasis::default(),\n            emphasis_overrides: std::collections::BTreeMap::new(),\n            prompt: default_prompt(),\n            layout: default_layout(),\n            tmux: TmuxSection::default(),\n            legacy_theme: None,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3587",
+    "declaration": "fn default_processkit_source() -> String {\n    crate::processkit_vocab::PROCESSKIT_GIT_SOURCE.to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3591",
+    "declaration": "fn default_processkit_version() -> String {\n    \"unset\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3595",
+    "declaration": "fn default_processkit_src_path() -> String {\n    \"src\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3737",
+    "declaration": "impl Default for McpGatewaySection {\n    fn default() -> Self {\n        Self {\n            mode: McpGatewayMode::Auto,\n            lazy_catalog: true,\n            host: default_mcp_gateway_host(),\n            port: default_mcp_gateway_port(),\n            path: default_mcp_gateway_path(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3755",
+    "declaration": "fn default_mcp_gateway_host() -> String {\n    \"127.0.0.1\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3759",
+    "declaration": "fn default_mcp_gateway_port() -> u16 {\n    8765\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3763",
+    "declaration": "fn default_mcp_gateway_path() -> String {\n    \"/mcp\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3767",
+    "declaration": "impl Default for ProcessKitSection {\n    fn default() -> Self {\n        Self {\n            source: default_processkit_source(),\n            version: default_processkit_version(),\n            src_path: default_processkit_src_path(),\n            branch: None,\n            release_asset_url_template: None,\n            context: ContextSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3824",
+    "declaration": "fn default_agents_canonical() -> String {\n    crate::processkit_vocab::AGENTS_FILENAME.to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3828",
+    "declaration": "impl Default for AgentsSection {\n    fn default() -> Self {\n        Self {\n            canonical: default_agents_canonical(),\n            provider_mode: AgentsProviderMode::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3869",
+    "declaration": "fn default_audio_install() -> bool {\n    true\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3873",
+    "declaration": "fn default_pulse_server() -> String {\n    \"tcp:host.docker.internal:4714\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3877",
+    "declaration": "impl Default for AudioSection {\n    fn default() -> Self {\n        Self {\n            enabled: false,\n            backend: AudioBackend::Pulseaudio,\n            install: true,\n            pulse_server: default_pulse_server(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3925",
+    "declaration": "fn default_latex_output_dir() -> String {\n    \".latex-cache/output\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3945",
+    "declaration": "fn default_latex_preview_engine() -> String {\n    \"embedpdf\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3949",
+    "declaration": "fn default_latex_preview_bind() -> String {\n    \"127.0.0.1\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3953",
+    "declaration": "fn default_latex_preview_port() -> u16 {\n    8765\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3957",
+    "declaration": "impl Default for LatexPreviewSection {\n    fn default() -> Self {\n        Self {\n            enabled: false,\n            engine: default_latex_preview_engine(),\n            bind: default_latex_preview_bind(),\n            port: default_latex_preview_port(),\n            document: None,\n            allow_public: false,\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3984",
+    "declaration": "fn default_latex_cache_dir() -> String {\n    \".latex-cache\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3988",
+    "declaration": "impl Default for LatexSection {\n    fn default() -> Self {\n        Self {\n            engine: LatexEngine::default(),\n            cache_dir: default_latex_cache_dir(),\n            options: Vec::new(),\n            documents: Vec::new(),\n            preview: LatexPreviewSection::default(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L134",
+    "declaration": "impl Default for McpConfig {\n    fn default() -> Self {\n        Self {\n            default_mode: default_mode(),\n            allow_patterns: Vec::new(),\n            deny_patterns: Vec::new(),\n            harness: BTreeMap::new(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L146",
+    "declaration": "fn default_mode() -> String {\n    \"ask\".to_string()\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L171",
+    "declaration": "impl Default for HarnessOverride {\n    fn default() -> Self {\n        Self {\n            enabled: true,\n            default_mode: None,\n            allow_patterns: Vec::new(),\n            deny_patterns: Vec::new(),\n        }\n    }\n}"
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L183",
+    "declaration": "fn default_true() -> bool {\n    true\n}"
+  }
+]

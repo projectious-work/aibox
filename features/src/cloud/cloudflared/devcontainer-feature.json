@@ -1,0 +1,17 @@
+{
+  "id": "cloudflared",
+  "version": "1.0.0",
+  "name": "cloudflared",
+  "description": "Installs cloudflared (aibox catalog ID cloud/cloudflared).",
+  "documentationURL": "https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2026.10.5"
+      ],
+      "default": "2026.10.5",
+      "description": "Version of cloudflared to install."
+    }
+  }
+}

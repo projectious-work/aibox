@@ -190,8 +190,8 @@ mod tests {
         assert!(py.supported_versions.contains(&"3.14"));
         assert_eq!(py.default_version, "3.14");
         let uv = addon.tools.iter().find(|t| t.name == "uv").unwrap();
-        assert!(uv.supported_versions.contains(&"0.13.5"));
-        assert_eq!(uv.default_version, "0.13.5");
+        assert!(uv.supported_versions.contains(&"0.12.0"));
+        assert_eq!(uv.default_version, "0.12.0");
     }
 
     #[test]
@@ -199,34 +199,8 @@ mod tests {
         ensure_loaded();
         let addon = get_addon("rust").unwrap();
         let rustc = addon.tools.iter().find(|t| t.name == "rustc").unwrap();
-        assert!(rustc.supported_versions.contains(&"1.99.1"));
-        assert_eq!(rustc.default_version, "1.99.1");
-    }
-
-    #[test]
-    fn deferred_v0_dependency_defaults_are_consolidated() {
-        ensure_loaded();
-        for (addon_name, tool_name, expected) in [
-            ("docs-zensical", "zensical", "0.0.72"),
-            ("go", "go", "1.27.3"),
-            ("node", "bun", "1.4.4"),
-            ("python", "pdm", "2.29.3"),
-            ("infrastructure", "opentofu", "1.13.2"),
-            ("kubernetes", "kubectl", "1.37.1"),
-            ("ai-tau", "tau", "0.4.8"),
-        ] {
-            let addon = get_addon(addon_name).unwrap();
-            let tool = addon
-                .tools
-                .iter()
-                .find(|candidate| candidate.name == tool_name)
-                .unwrap();
-            assert_eq!(tool.default_version, expected, "{addon_name}/{tool_name}");
-            assert!(
-                tool.supported_versions.contains(&expected),
-                "{addon_name}/{tool_name} does not support its default {expected}"
-            );
-        }
+        assert!(rustc.supported_versions.contains(&"1.97.1"));
+        assert_eq!(rustc.default_version, "1.97.1");
     }
 
     #[test]
@@ -414,12 +388,6 @@ mod tests {
         assert!(
             !hermes.contains("USER aibox"),
             "Hermes installation must retain root access to /usr/local/bin: {hermes}"
-        );
-        let tau = generate_runtime_commands("ai-tau", &tc(&[("tau", true, "0.3.11")]));
-        assert!(tau.contains("tau-ai==0.3.11"), "{tau}");
-        assert!(
-            tau.contains("UV_TOOL_DIR=/opt/aibox/uv-tools"),
-            "Tau tool environment must use the shared uv path: {tau}"
         );
     }
 }

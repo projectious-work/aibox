@@ -45,7 +45,7 @@ RUN ARCH="$(uname -m)" && \
     (cd /tmp && sha256sum -c rustup-init.sha256) && \
     chmod +x /tmp/rustup-init && \
     /tmp/rustup-init -y \
-      --default-toolchain 1.99.1 \
+      --default-toolchain 1.97.1 \
       --component clippy \
       --component rustfmt && \
     rm /tmp/rustup-init /tmp/rustup-init.sha256
@@ -94,7 +94,7 @@ RUN ARCH=$(uname -m) && \
     fi
 
 
-FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.35.0 AS aibox
+FROM ghcr.io/projectious-work/aibox:base-debian-runtime-v0.35.4 AS aibox
 
 ENV SHELL=/bin/bash
 ENV UV_CACHE_DIR=/tmp/aibox/uv-cache
@@ -134,26 +134,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ── Variant 1 disable-then-purge guards ───────────────────────────────
 
 
-# Addon: docs-hugo
-RUN DEB_ARCH="$(dpkg --print-architecture)" && \
-    case "${DEB_ARCH}" in \
-      amd64) HUGO_ARCH="amd64" ;; \
-      arm64) HUGO_ARCH="arm64" ;; \
-      *) echo "Unsupported Hugo architecture: ${DEB_ARCH}" >&2; exit 1 ;; \
-    esac && \
-    HUGO_VERSION="0.168.0" && \
-    HUGO_ASSET="hugo_extended_${HUGO_VERSION}_linux-${HUGO_ARCH}.tar.gz" && \
-    curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30 \
-      "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_ASSET}" \
-      -o /tmp/hugo.tar.gz && \
-    curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 30 \
-      "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_checksums.txt" \
-      -o /tmp/hugo_checksums.txt && \
-    grep " ${HUGO_ASSET}$" /tmp/hugo_checksums.txt | sed 's#  .*#  /tmp/hugo.tar.gz#' | sha256sum -c && \
-    tar -xz -C /usr/local/bin -f /tmp/hugo.tar.gz hugo && \
-    rm /tmp/hugo.tar.gz /tmp/hugo_checksums.txt
-
-
 # Addon: git-ui — GitHub CLI and lazygit
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -161,38 +141,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lazygit \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Addon: go (runtime)
-RUN ARCH=$(dpkg --print-architecture) && \
-    GO_VERSION="1.27.3" && \
-    case "${GO_VERSION}:${ARCH}" in \
-      1.25.12:amd64) GO_SHA256="234828b7a89e0e303d2556310ee549fbcf253d28de937bac3da13d6294262ac1" ;; \
-      1.25.12:arm64) GO_SHA256="8b5884aef89600aef5b0b051fb971f11f49bb996521e911f30f02a66884f7bd2" ;; \
-      1.26.3:amd64) GO_SHA256="2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556" ;; \
-      1.26.3:arm64) GO_SHA256="9d89a3ea57d141c2b22d70083f2c8459ba3890f2d9e818e7e933b75614936565" ;; \
-      1.26.4:amd64) GO_SHA256="1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f" ;; \
-      1.26.4:arm64) GO_SHA256="ef758ae7c6cf9267c9c0ef080b8965f453d89ab2d25d9eb22de4405925238768" ;; \
-      1.26.5:amd64) GO_SHA256="5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053" ;; \
-      1.26.5:arm64) GO_SHA256="fe4789e92b1f33358680864bbe8704289e7bb5fc207d80623c308935bd696d49" ;; \
-      1.26.6:amd64) GO_SHA256="708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89" ;; \
-      1.26.6:arm64) GO_SHA256="d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e" ;; \
-      1.27.0:amd64) GO_SHA256="675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685" ;; \
-      1.27.0:arm64) GO_SHA256="51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda" ;; \
-      1.27.1:amd64) GO_SHA256="63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445" ;; \
-      1.27.1:arm64) GO_SHA256="3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec" ;; \
-      1.27.3:amd64) GO_SHA256="65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40" ;; \
-      1.27.3:arm64) GO_SHA256="a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49" ;; \
-      *) echo "Unsupported Go version/architecture: ${GO_VERSION}/${ARCH}" >&2; exit 1 ;; \
-    esac && \
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" \
-      -o /tmp/go.tar.gz && \
-    echo "${GO_SHA256}  /tmp/go.tar.gz" | sha256sum -c - && \
-    tar -xz -C /usr/local -f /tmp/go.tar.gz && \
-    rm /tmp/go.tar.gz && \
-    ln -sf /usr/local/go/bin/* /usr/local/bin/
-
-ENV GOPATH="/home/aibox/go"
-ENV PATH="${GOPATH}/bin:${PATH}"
 
 # Addon: node (runtime)
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl libatomic1 xz-utils && \
@@ -213,7 +161,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     rm -f "/tmp/${NODE_ARCHIVE}" /tmp/node-shasums.txt && \
     node --version && npm --version
 
-RUN npm install -g pnpm@12.15.0 && \
+RUN npm install -g pnpm@11.18.0 && \
     npm cache clean --force
 
 
@@ -222,11 +170,11 @@ RUN npm install -g pnpm@12.15.0 && \
 # npm package: @openai/codex | Binary: codex | Config: ~/.codex/
 # Auth: OPENAI_API_KEY (or ChatGPT Plus/Pro/Team/Enterprise account)
 # To pin a version: set [ai.harness.codex] version in aibox.toml
-RUN npm install -g @openai/codex@0.159.0
+RUN npm install -g @openai/codex
 
 
 # Addon: docs-docusaurus
-RUN npm install -g @docusaurus/core@3.10.2 && \
+RUN npm install -g @docusaurus/core@3.10.1 && \
     npm cache clean --force
 
 # Addon: preview-archive — Yazi preview helpers and archive tools.
@@ -267,6 +215,8 @@ RUN UV_PYTHON_INSTALL_DIR=/opt/aibox-python uv python install 3.14 && \
     ln -sf "$py_dir/pip" /usr/local/bin/pip
 
 
+COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uvx /usr/local/bin/uvx
 
 
 
@@ -327,8 +277,45 @@ if [ -d "$HOME/.cargo/bin" ]; then
 fi
 EOF
 
+# Nested rootless Podman for V1-05 acceptance tests (DEC-20261030_0853-CoolSun).
+# Debian ships newuidmap/newgidmap setuid root, which this kernel refuses inside
+# a container; file capabilities work. Docker masks parts of /proc, so nested
+# containers bind the existing /proc instead of mounting a new one. All test
+# state lives in the aibox-test-cache volume at /var/cache/aibox-test
+# (containers/, registry/, downloads/); remove it with
+# `docker volume rm aibox-test-cache`.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      podman crun uidmap passt libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod u-s /usr/bin/newuidmap /usr/bin/newgidmap \
+    && setcap cap_setuid=ep /usr/bin/newuidmap \
+    && setcap cap_setgid=ep /usr/bin/newgidmap \
+    && (grep -q '^aibox:' /etc/subuid || echo 'aibox:100000:65536' >> /etc/subuid) \
+    && (grep -q '^aibox:' /etc/subgid || echo 'aibox:100000:65536' >> /etc/subgid) \
+    && install -d -o aibox -g aibox /var/cache/aibox-test \
+         /var/cache/aibox-test/containers /var/cache/aibox-test/registry /var/cache/aibox-test/downloads
+
+RUN cat <<'CONF' > /etc/containers/containers.conf
+[containers]
+volumes = ["/proc:/proc"]
+netns = "host"
+cgroups = "disabled"
+
+[engine]
+cgroup_manager = "cgroupfs"
+events_logger = "file"
+CONF
+
+RUN cat <<'CONF' > /etc/containers/storage.conf
+[storage]
+driver = "overlay"
+runroot = "/run/containers/storage"
+graphroot = "/var/lib/containers/storage"
+rootless_storage_path = "/var/cache/aibox-test/containers/storage"
+CONF
+
 # Record image version inside container for runtime checks
 USER root
-LABEL aibox.version="0.35.0"
+LABEL aibox.version="0.35.4"
 LABEL aibox.profile="human-dev"
-RUN echo "0.35.0" > /etc/aibox-version
+RUN echo "0.35.4" > /etc/aibox-version

@@ -1,0 +1,11 @@
+{
+  "id": "music",
+  "version": "1.0.0",
+  "name": "texlive-music",
+  "description": "Installs texlive-music (aibox catalog ID latex/music).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

@@ -1,0 +1,5 @@
+=== RUN   TestPreviewBinaryMCPParity
+    main_test.go:165: stdio MCP registry=inspect_workspace success=succeeded refusal=invalid_input parity=passed
+--- PASS: TestPreviewBinaryMCPParity (0.54s)
+PASS
+ok  	github.com/projectious-work/aibox/cmd/aibox	0.540s

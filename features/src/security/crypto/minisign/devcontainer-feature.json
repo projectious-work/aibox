@@ -1,0 +1,17 @@
+{
+  "id": "minisign",
+  "version": "1.0.0",
+  "name": "minisign",
+  "description": "Installs minisign (aibox catalog ID security/crypto/minisign).",
+  "documentationURL": "https://jedisct1.github.io/minisign/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.12"
+      ],
+      "default": "0.12",
+      "description": "Version of minisign to install."
+    }
+  }
+}

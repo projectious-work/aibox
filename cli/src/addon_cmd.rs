@@ -286,7 +286,6 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
                 description: &'a str,
                 addon_version: &'a str,
                 requires: &'a [String],
-                groups: &'a std::collections::HashMap<String, String>,
                 profile_intent: Option<&'static str>,
                 usage_class: Option<&'static str>,
                 profiles: Vec<&'static str>,
@@ -299,7 +298,6 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
                 description: &loaded.description,
                 addon_version: &loaded.addon_version,
                 requires: &loaded.requires,
-                groups: &loaded.groups,
                 profile_intent: loaded.profile_intent.map(|v| v.as_str()),
                 usage_class: loaded.usage_class.map(|v| v.as_str()),
                 profiles: loaded.profiles.iter().map(|p| p.as_str()).collect(),
@@ -352,18 +350,6 @@ pub fn cmd_addon_info(name: &str, format: OutputFormat) -> Result<()> {
             }
             if !loaded.requires.is_empty() {
                 println!("Requires:     {}", loaded.requires.join(", "));
-            }
-            if !loaded.groups.is_empty() {
-                let mut groups: Vec<_> = loaded.groups.iter().collect();
-                groups.sort_by_key(|(name, _)| *name);
-                println!(
-                    "Groups:       {}",
-                    groups
-                        .into_iter()
-                        .map(|(name, target)| format!("{name} -> {target}"))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
             }
             println!();
 
@@ -475,7 +461,7 @@ name = "test"
 
 [addons.python.tools]
 python = { version = "3.14" }
-	uv = { version = "0.12.5" }
+	uv = { version = "0.12.0" }
 "#,
         )
         .unwrap();

@@ -1,0 +1,404 @@
+// aibox v1 example: standard Dev Container JSON with Comments (JSONC).
+// Uncomment only settings needed by this project; add a comma before the next active key.
+// image, build and dockerComposeFile are alternative native definitions.
+// aibox does not parse or transform native build/up fields; devcontainer.cli owns them.
+// Native options below are limited to aibox journeys; upstream documents all others.
+// Optional aibox keys come from spec/v1/customization.schema.json, not a parallel build schema.
+// For unconstrained strings, comments state schema-valid types; check runtime support before activation.
+// Feature-specific options come from each selected Feature manifest, not this file.
+{
+
+  // --- Definition and identity ---
+  // Give the Dev Container a human-readable display name. Valid: JSON string; use a value supported by the owning runtime.
+  "name": "Native Dev Container",
+  // Select a base image instead of build or dockerComposeFile; pin a release by digest. Valid: JSON string; use a value supported by the owning runtime.
+  // "image": "example",
+  // Build from a project Dockerfile instead of image; choose exactly one source. Valid: object.
+  "build": {
+    // Select the project Dockerfile path relative to this JSONC file. Valid: JSON string; use a value supported by the owning runtime.
+    "dockerfile": "Dockerfile",
+    // Select the native Docker build-context directory. Valid: JSON string; use a value supported by the owning runtime.
+    "context": "."
+  },
+  // Select ordered native Compose files instead of a single-image definition. Valid: relative path or ordered array of relative paths.
+  // "dockerComposeFile": ["compose.yaml"],
+  // Name the primary service when using dockerComposeFile. Valid: JSON string; use a value supported by the owning runtime.
+  // "service": "workspace",
+  // Choose Compose services started with the primary service. Valid: array of string.
+  // "runServices": ["workspace"],
+
+  // --- Users, workspace and retained data ---
+  // Choose the user for all container processes; align its home and mounts. Valid: JSON string; use a value supported by the owning runtime.
+  "containerUser": "dev",
+  // Choose the user for terminals and supporting tools. Valid: JSON string; use a value supported by the owning runtime.
+  "remoteUser": "dev",
+  // Choose the project path opened inside the container. Valid: JSON string; use a value supported by the owning runtime.
+  // "workspaceFolder": "/workspaces/project",
+  // Override the project mount; coordinate with workspaceFolder. Valid: JSON string; use a value supported by the owning runtime.
+  // "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/project,type=bind",
+  // Persist the aibox user home with a named volume, or use a reviewed native bind. Valid: array of native mount strings or mount objects.
+  "mounts": ["source=aibox-home-${devcontainerId},target=/home/dev,type=volume"]
+
+  // --- Tools, environment and connectivity ---
+  // Install selected, pinned Features; their own manifests define valid option keys. Valid: map of selected Feature IDs to their declared option objects.
+  // "features": {},
+  // Set non-secret variables for all container processes; rebuild after changes. Valid: object with named entries.
+  // "containerEnv": {"EXAMPLE":"value"},
+  // Set non-secret variables for connected tools and their child processes. Valid: object with named entries.
+  // "remoteEnv": {"EXAMPLE":"value"},
+  // Forward selected development ports to the client without publishing them. Valid: array of port numbers or "host:port" strings.
+  // "forwardPorts": [3000],
+
+  // --- Lifecycle and shutdown ---
+  // Run a host-side initialization command; requires explicit operator review. Valid: string, argument array or named-command object.
+  // "initializeCommand": "echo reviewed-host-command",
+  // Run a command inside the newly created container. Valid: string, argument array or named-command object.
+  // "postCreateCommand": "echo created",
+  // Run a command inside the container after each start. Valid: string, argument array or named-command object.
+  // "postStartCommand": "echo started",
+  // Choose what supporting clients stop when they disconnect. Valid: "none" | "stopContainer" | "stopCompose".
+  // "shutdownAction": "none",
+
+  // --- Optional aibox workspace preferences ---
+  // Product-specific metadata; optional for aibox UX. Valid: object.
+  // "customizations": {
+    // aibox-owned UX preferences; inert without its runtime Feature. Valid: object.
+    // "aibox": {
+      // Select the closed aibox customization schema. Valid: "1".
+      // "schemaVersion": "1",
+
+      // Group optional aibox workspace presentation settings. Valid: object.
+      // "workspace": {
+        // Choose how strongly semantic UI colors are emphasized. Valid: "auto" | "full" | "standard" | "minimal" | "none".
+        // "emphasis": "auto",
+        // Override semantic emphasis by named UI element. Valid: object with named entries.
+        // Override one named semantic element. Valid: string emphasis choice supported by the renderer.
+        // "emphasis_overrides": {"selected_element":"standard"},
+        // Choose the initial workspace pane layout. Valid: "dev" | "focus" | "cowork" | "ai".
+        // "layout": "dev",
+        // Choose light, dark or automatic color mode. Valid: "auto" | "light" | "dark".
+        // "mode": "auto",
+        // Choose the shipped Starship prompt preset. Valid: "default" | "plain" | "minimal" | "nerd-font" | "pastel" | "powerline-pastel" | "bracketed" | "arrow".
+        // "prompt": "default",
+        // Choose the shipped theme family. Valid: "andromeeda" | "aurora-x" | "ayu" | "borland" | "catppuccin" | "dracula" | "everforest" | "github" | "gruvbox" | "houston" | "kanagawa" | "laserwave" | "material" | "min" | "monokai" | "mono" | "moonlight" | "night-owl" | "nord" | "norton" | "one-dark" | "plastic" | "poimandres" | "phosphor" | "projectious" | "contrast" | "contrast-mono" | "red" | "rose-pine" | "slack" | "snazzy" | "solarized" | "synthwave84" | "tokyo-night" | "vesper" | "vitesse" | "vs-code".
+        // "theme": "andromeeda",
+
+        // Group tmux session, status, notification and title settings. Valid: object.
+        // "tmux": {
+          // Choose the tmux pane layout. Valid: "dev" | "focus" | "cowork" | "ai".
+          // "layout": "dev",
+
+          // Configure the interactive layout switcher. Valid: object.
+          // "layout_switch": {
+            // Require confirmation before changing layout. Valid: true | false.
+            // "confirm": false,
+            // Enable the interactive layout switcher. Valid: true | false.
+            // "enabled": false,
+            // Bind the layout switcher key after the tmux prefix. Valid: JSON string; use a value supported by the owning runtime.
+            // "prefix-key": "example",
+            // Choose the layout switcher display style. Valid: "menu" | "table".
+            // "style": "menu",
+          // },
+
+          // Configure agent-attention notifications. Valid: object.
+          // "notifications": {
+            // Enable agent-attention notifications. Valid: true | false.
+            // "enabled": false,
+            // Include the bounded agent message in notifications. Valid: true | false.
+            // "include-message": false,
+            // Choose notification delivery protocol supported by the runtime. Valid: "osc-9" | "bell".
+            // "protocol": "osc-9",
+            // Select agent states that trigger a notification. Valid: array of string.
+            // "states": ["question","error"],
+          // },
+
+          // Choose the tmux prefix key. Valid: JSON string; use a value supported by the owning runtime.
+          // "prefix": "example",
+          // Name the managed tmux session. Valid: JSON string; use a value supported by the owning runtime.
+          // "session_name": "example",
+
+          // Configure the managed tmux status line. Valid: object.
+          // "status": {
+            // Select which tmux status segments appear. Valid: object.
+            // "elements": {
+              // Show this tmux status segment. Valid: true | false.
+              // "aibox": false,
+
+              // Select individual aibox diagnostic segments. Valid: object.
+              // "aibox-metrics": {
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "ai": false,
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "log": false,
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "mcp": false,
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "mig": false,
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "oom": false,
+                // Show this aibox diagnostic metric in tmux status. Valid: true | false.
+                // "proc": false,
+              // },
+
+              // Show this tmux status segment. Valid: true | false.
+              // "cloud": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "cloudstatus": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "cpu": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "datetime": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "disk": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "external-ip": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "forge": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "git": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "github": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "gpu": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "hostname": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "kubernetes": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "loadavg": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "mem": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "netspeed": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "ping": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "ssh": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "swap": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "terraform": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "uptime": false,
+              // Show this tmux status segment. Valid: true | false.
+              // "weather": false,
+            // },
+
+            // Configure forge status sources. Valid: object.
+            // "forge": {
+              // Select GitHub hosts queried by the forge status segment. Valid: array of string.
+              // "github-hosts": ["github.com"],
+            // },
+
+            // Override labels shown in tmux status. Valid: object.
+            // Set the label of one documented status segment. Valid: JSON string.
+            // "labels": {
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-ai": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-log": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-mcp": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-mig": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-oom": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "aibox-proc": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "cloud": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "cloud-aws": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "cloud-azure": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "cloud-gcp": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "cloud-multi": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "kubernetes": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "netspeed": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "netspeed-download": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "netspeed-upload": "example",
+              // Set the visible label for this status segment. Valid: JSON string; use a value supported by the owning runtime.
+              // "uptime": "example",
+            // },
+
+            // Place selected segments in the two status lines. Valid: object.
+            // "layout": {
+              // List segment IDs at this position in tmux status. Valid: array of string.
+              // "line1-left": [],
+              // List segment IDs at this position in tmux status. Valid: array of string.
+              // "line1-right": [],
+              // List segment IDs at this position in tmux status. Valid: array of string.
+              // "line2-left": [],
+              // List segment IDs at this position in tmux status. Valid: array of string.
+              // "line2-right": [],
+            // },
+
+            // Choose extended, plain or disabled tmux status. Valid: "extended" | "plain" | "disabled".
+            // "mode": "extended",
+
+            // Configure supported model-provider status probes. Valid: object.
+            // "model_providers": {
+              // Control this model-provider status probe. Valid: true | false.
+              // "admin-usage-enabled": false,
+              // Control this model-provider status probe. Valid: integer >= 0.
+              // "cache-ttl-seconds": 0,
+              // Control this model-provider status probe. Valid: true | false.
+              // "enabled": false,
+              // Select model providers shown in status. Valid: array of object.
+              // "providers": ["openai"],
+              // Control this model-provider status probe. Valid: true | false.
+              // "show-glyph-when-ok": false,
+              // Control this model-provider status probe. Valid: true | false.
+              // "show-ok": false,
+              // Control this model-provider status probe. Valid: integer >= 0.
+              // "timeout-seconds": 0,
+            // },
+
+            // Configure status refresh and cache durations. Valid: object.
+            // "refresh": {
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "aibox-metrics-cache-ttl-seconds": 0,
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "cloud-cache-ttl-seconds": 0,
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "github-cache-ttl-seconds": 0,
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "interval-seconds": 0,
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "kubernetes-cache-ttl-seconds": 0,
+              // Set this refresh or cache duration. Valid: integer >= 0.
+              // "netspeed-cache-ttl-seconds": 0,
+            // },
+
+            // Configure visual separators between status segments. Valid: object.
+            // "separators": {
+              // Choose this visual separator setting. Valid: "normal" | "rounded" | "slant" | "slantup" | "trapezoid" | "flame" | "pixel" | "honeycomb" | "none".
+              // "edge-style": "normal",
+              // Choose this visual separator setting. Valid: "false" | "true" | "both" | "windows" | "plugins".
+              // "elements-spacing": "false",
+              // Choose this visual separator setting. Valid: "normal" | "rounded" | "slant" | "slantup" | "trapezoid" | "flame" | "pixel" | "honeycomb" | "none".
+              // "style": "normal",
+            // },
+          // },
+
+          // Configure interactive theme switching. Valid: object.
+          // "theme_switch": {
+            // Control this interactive theme-switcher setting. Valid: true | false.
+            // "confirm-restart-tuis": false,
+            // Control this interactive theme-switcher setting. Valid: true | false.
+            // "enabled": false,
+            // Control this interactive theme-switcher setting. Valid: true | false.
+            // "include-mode-toggle": false,
+            // Control this interactive theme-switcher setting. Valid: JSON string; use a value supported by the owning runtime.
+            // "prefix-key": "example",
+            // Control this interactive theme-switcher setting. Valid: array of string.
+            // "themes": [],
+          // },
+
+          // Configure tmux-owned terminal titles. Valid: object.
+          // "title": {
+            // Control this tmux-owned title setting. Valid: JSON string; use a value supported by the owning runtime.
+            // "agent-style": "example",
+            // Control this tmux-owned title setting. Valid: JSON string; use a value supported by the owning runtime.
+            // "directory-style": "example",
+            // Control this tmux-owned title setting. Valid: integer >= 0.
+            // "done-ttl-seconds": 0,
+            // Control this tmux-owned title setting. Valid: true | false.
+            // "enabled": false,
+            // Control this tmux-owned title setting. Valid: JSON string; use a value supported by the owning runtime.
+            // "format": "example",
+            // Control this tmux-owned title setting. Valid: integer >= 0.
+            // "max-length": 0,
+            // Control this tmux-owned title setting. Valid: integer >= 0.
+            // "message-max-length": 0,
+            // Control this tmux-owned title setting. Valid: JSON string; use a value supported by the owning runtime.
+            // "repository-style": "example",
+
+            // Configure text shown for each agent state. Valid: object.
+            // "states": {
+              // Set terminal title text for this agent state. Valid: JSON string; use a value supported by the owning runtime.
+              // "done": "example",
+              // Set terminal title text for this agent state. Valid: JSON string; use a value supported by the owning runtime.
+              // "error": "example",
+              // Set terminal title text for this agent state. Valid: JSON string; use a value supported by the owning runtime.
+              // "idle": "example",
+              // Set terminal title text for this agent state. Valid: JSON string; use a value supported by the owning runtime.
+              // "question": "example",
+              // Set terminal title text for this agent state. Valid: JSON string; use a value supported by the owning runtime.
+              // "working": "example",
+            // },
+          // },
+        // },
+
+        // Choose a variant offered by the selected theme. Valid: JSON string; use a value supported by the owning runtime.
+        // "variant": "example",
+
+        // Configure the optional read-only harness sidebar. Valid: object.
+        // "sidebar": {
+          // Show the optional harness sidebar. Valid: true | false.
+          // "enabled": false,
+          // Set sidebar width in terminal columns. Valid: integer >= 20.
+          // "width": 20,
+          // Show explicitly unavailable metrics in the sidebar. Valid: true | false.
+          // "showUnknown": false,
+        // },
+
+        // Configure the optional local diff and PR-review workflow. Valid: object.
+        // "review": {
+          // Enable local review shortcuts. Valid: true | false.
+          // "enabled": false,
+          // Choose the optional GitHub PR viewer or web fallback. Valid: "gh-dash" | "web".
+          // "githubTui": "gh-dash",
+        // },
+      // },
+
+      // Group selected agent-harness launch preferences. Valid: object.
+      // "harnesses": {
+        // Order selected harness panes at session launch. Valid: array of string.
+        // "order": ["codex"],
+        // Enable or disable launch for named installed harnesses. Valid: object with named entries.
+        // Start an installed harness in its pane. Valid: true | false.
+        // "launch": {"codex":{"enabled":true}},
+      // },
+
+      // Group local LaTeX build and preview preferences. Valid: object.
+      // "latex": {
+        // Choose the project-local LaTeX cache directory. Valid: JSON string; use a value supported by the owning runtime.
+        // "cache_dir": "example",
+        // List named LaTeX source and output paths. Valid: array of object.
+        // Name one document for build and preview selection. Valid: JSON string.
+        // Select its TeX source relative to the project. Valid: JSON string path.
+        // Select its separate output directory. Valid: JSON string path.
+        // "documents": [{"name":"main","source":"docs/main.tex","output_dir":".latex-cache/main"}],
+        // Choose the LaTeX engine. Valid: "lualatex" | "pdflatex" | "xelatex" | "tectonic".
+        // "engine": "lualatex",
+        // Pass explicit arguments to the selected LaTeX engine. Valid: array of string.
+        // "options": [],
+
+        // Configure local PDF preview selection. Valid: object.
+        // "preview": {
+          // Select the default document for preview. Valid: JSON string; use a value supported by the owning runtime.
+          // "document": "example",
+        // },
+      // },
+
+      // Group thresholds for read-only workspace diagnostics. Valid: object.
+      // "diagnostics": {
+        // Warn above this cgroup memory usage in MiB. Valid: integer >= 0.
+        // "memory_mib_warn": 0,
+        // Warn above this observed OOM-kill count. Valid: integer >= 0.
+        // "oom_kill_warn": 0,
+        // Warn above this live process count. Valid: integer >= 0.
+        // "process_count_warn": 0,
+        // Warn above this ProcessKit MCP Python process count. Valid: integer >= 0.
+        // "processkit_mcp_python_warn": 0,
+      // },
+    // }
+  // }
+}

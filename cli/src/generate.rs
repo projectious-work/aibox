@@ -181,7 +181,10 @@ pub fn generate_all(config: &AiboxConfig) -> Result<()> {
 }
 
 pub(crate) fn image_version_for_generation(published_latest: Version) -> String {
-    published_latest.to_string()
+    format!(
+        "{}.{}.{}",
+        published_latest.major, published_latest.minor, published_latest.patch
+    )
 }
 
 /// Generate the Dockerfile. Returns true if file was written.
@@ -342,8 +345,11 @@ fn generate_docker_compose(
 
     // Write .aibox-local.env even when empty so docker-compose env_file
     // references are stable while secrets remain outside committed files.
-    let env_content = local_env_content(config);
-    let local_env_hash = local_env_hash(config);
+    let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
+    let env_content: String = local_env_sorted
+        .iter()
+        .map(|(k, v)| format!("{}={}\n", k, v))
+        .collect();
     let local_env_path = project_path(&config.container.paths.local_env);
     if let Some(parent) = local_env_path.parent()
         && !parent.as_os_str().is_empty()
@@ -446,7 +452,6 @@ fn generate_docker_compose(
                 relative_path(compose_dir, &dockerfile_path)
             },
             local_env_file => local_env_file,
-            local_env_hash => local_env_hash,
             runtime_home_mounts => runtime_home_mounts,
             codex_sandbox_seccomp => codex_sandbox_seccomp,
             env_keys => env_keys,
@@ -460,31 +465,6 @@ fn generate_docker_compose(
         .context("Failed to render docker-compose template")?;
 
     write_if_changed(&compose_path, &content)
-}
-
-/// Container label recording which `.aibox-local.env` a container was created
-/// with. Compose applies `env_file` only at container creation, so `aibox up`
-/// compares this label to detect credentials that changed after creation.
-pub const LOCAL_ENV_HASH_LABEL: &str = "aibox.local-env-hash";
-
-/// Render the `.aibox-local.env` content for the local overlay variables.
-fn local_env_content(config: &AiboxConfig) -> String {
-    let local_env_sorted: BTreeMap<&String, &String> = config.local_env.iter().collect();
-    local_env_sorted
-        .iter()
-        .map(|(k, v)| format!("{}={}\n", k, v))
-        .collect()
-}
-
-/// Short SHA-256 fingerprint of the generated `.aibox-local.env` content.
-/// Only the digest is written to the compose file, never the values.
-pub fn local_env_hash(config: &AiboxConfig) -> String {
-    use sha2::{Digest, Sha256};
-    Sha256::digest(local_env_content(config).as_bytes())
-        .iter()
-        .take(8)
-        .map(|byte| format!("{byte:02x}"))
-        .collect()
 }
 
 /// Generate devcontainer.json. Returns true if file was written.
@@ -842,7 +822,6 @@ mod tests {
                 name.to_string(),
                 AddonToolsSection {
                     tools: HashMap::new(),
-                    ..Default::default()
                 },
             );
         }
@@ -905,16 +884,6 @@ mod tests {
         assert_eq!(
             selected, "0.24.3",
             "image generation must not couple a newer CLI version to an unpublished base image tag"
-        );
-    }
-
-    #[test]
-    fn image_version_for_generation_preserves_prerelease_tag() {
-        let published = semver::Version::parse("1.0.0-alpha.1").unwrap();
-        let selected = image_version_for_generation(published);
-        assert_eq!(
-            selected, "1.0.0-alpha.1",
-            "image generation must preserve the exact published GHCR tag"
         );
     }
 
@@ -1057,11 +1026,15 @@ mod tests {
                 name: "overview".into(),
                 source: "docs/overview.tex".into(),
                 output_dir: ".latex-cache/overview".into(),
+                options: Vec::new(),
+                extra_dirs: Vec::new(),
             },
             crate::config::LatexDocument {
                 name: "appendix".into(),
                 source: "docs/appendix.tex".into(),
                 output_dir: ".latex-cache/appendix".into(),
+                options: Vec::new(),
+                extra_dirs: Vec::new(),
             },
         ];
         config.latex.preview.document = Some("appendix".into());
@@ -1093,6 +1066,8 @@ mod tests {
             name: "overview".into(),
             source: "docs/overview.tex".into(),
             output_dir: ".latex-cache/overview".into(),
+            options: Vec::new(),
+            extra_dirs: Vec::new(),
         });
 
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
@@ -1113,6 +1088,8 @@ mod tests {
             name: "overview".into(),
             source: "docs/overview.tex".into(),
             output_dir: ".latex-cache/overview".into(),
+            options: Vec::new(),
+            extra_dirs: Vec::new(),
         });
 
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
@@ -1374,7 +1351,7 @@ mod tests {
         config.security.acknowledge_seccomp_unconfined = true;
         fs::write(
             dir.path().join("docker-compose.override.yml"),
-            "services:\n  unrelated-sidecar:\n    security_opt:\n      - seccomp=unconfined\n",
+            "services:\n  aibox-e2e-testrunner:\n    security_opt:\n      - seccomp=unconfined\n",
         )
         .unwrap();
         generate_docker_compose(&config, dir.path(), &test_env()).unwrap();
@@ -1477,33 +1454,6 @@ mod tests {
             assert!(content.contains("env_file:"));
             assert!(content.contains("- ../.aibox-local.env"));
             assert_eq!(fs::read_to_string(".aibox-local.env").unwrap(), "");
-        });
-    }
-
-    #[test]
-    fn compose_labels_container_with_local_env_hash_without_values() {
-        in_temp_dir(|| {
-            let devcontainer = std::path::Path::new(".devcontainer");
-            fs::create_dir_all(devcontainer).unwrap();
-            let mut config = make_config(&[], false);
-            let empty_hash = local_env_hash(&config);
-            config
-                .local_env
-                .insert("GH_TOKEN".to_string(), "secret-old".to_string());
-            let old_hash = local_env_hash(&config);
-            config
-                .local_env
-                .insert("GH_TOKEN".to_string(), "secret-new".to_string());
-            let new_hash = local_env_hash(&config);
-
-            generate_docker_compose(&config, devcontainer, &test_env()).unwrap();
-
-            let content = fs::read_to_string(devcontainer.join("docker-compose.yml")).unwrap();
-            assert!(content.contains(&format!("aibox.local-env-hash: \"{new_hash}\"")));
-            assert!(!content.contains("secret-new"));
-            assert_ne!(empty_hash, old_hash);
-            assert_ne!(old_hash, new_hash);
-            assert_eq!(new_hash.len(), 16);
         });
     }
 
@@ -1927,24 +1877,6 @@ mod tests {
     }
 
     #[test]
-    fn dockerfile_installs_tau_in_shared_uv_tool_directory() {
-        let dir = tempfile::tempdir().unwrap();
-        let mut config = make_config(&[], false);
-        config.ai.harnesses = vec![crate::config::AiProvider::Tau];
-        config.resolve_ai_provider_addons();
-        generate_dockerfile(&config, dir.path(), &test_env()).unwrap();
-        let content = fs::read_to_string(dir.path().join("Dockerfile")).unwrap();
-        assert!(
-            content.contains("UV_TOOL_DIR=/opt/aibox/uv-tools uv tool install tau-ai==0.4.8"),
-            "Tau should be installed from its pinned PyPI package: {content}"
-        );
-        assert!(
-            content.contains("chmod -R a+rX /opt/aibox/uv-tools"),
-            "Tau tool environment must be traversable by the runtime user: {content}"
-        );
-    }
-
-    #[test]
     fn dockerfile_claude_installed_via_addon() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = make_config(&[], false);
@@ -2052,6 +1984,15 @@ mod tests {
             content.contains("mkdir -p /tmp/aibox/uv-cache")
                 && content.contains("chown -R \"$TARGET_UID:$TARGET_GID\" /tmp/aibox"),
             "entrypoint must re-own /tmp/aibox after UID/GID remap so uv caches stay writable:\n{content}"
+        );
+    }
+
+    #[test]
+    fn e2e_companion_image_installs_yazi_companion_entrypoint() {
+        let content = include_str!("../../.devcontainer/Dockerfile.e2e");
+        assert!(
+            content.contains("ln -sf /usr/local/bin/yazi /usr/local/bin/ya"),
+            "E2E companion image should expose yazi's companion entrypoint"
         );
     }
 

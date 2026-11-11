@@ -1,0 +1,23 @@
+{
+  "id": "minimal",
+  "version": "1.0.0",
+  "name": "aibox minimal native workspace",
+  "description": "Debian, bash, tmux, Yazi and optional Codex with a persistent non-root home.",
+  "documentationURL": "https://github.com/projectious-work/aibox/tree/v1.x-dev/templates",
+  "licenseURL": "https://github.com/projectious-work/aibox/blob/v1.x-dev/LICENSE",
+  "publisher": "projectious-work",
+  "platforms": [
+    "Any"
+  ],
+  "options": {
+    "harness": {
+      "type": "string",
+      "description": "Install a pinned Codex CLI, or choose none. Authentication is performed explicitly inside the container.",
+      "enum": [
+        "codex",
+        "none"
+      ],
+      "default": "codex"
+    }
+  }
+}

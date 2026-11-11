@@ -1,0 +1,729 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/operation-request.schema.json",
+  "title": "Closed per-operation aibox requests",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "build_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "frozenLockfile": {
+          "type": "boolean"
+        },
+        "noCache": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "runtimeContext"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "start_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "frozenLockfile": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "runtimeContext"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "stop_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "runtimeContext",
+        "resourceId"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "remove_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "acknowledgeDisruption": {
+          "const": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "runtimeContext",
+        "resourceId",
+        "acknowledgeDisruption"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "rebuild_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "acknowledgeDisruption": {
+          "const": true
+        },
+        "frozenLockfile": {
+          "type": "boolean"
+        },
+        "noCache": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "runtimeContext",
+        "resourceId",
+        "acknowledgeDisruption"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "inspect_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "effectiveConfig": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "runtimeContext"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "check_environment"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "offline": {
+          "type": "boolean"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "inspect_workspace"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "effectiveConfig": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "check_workspace"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "offline": {
+          "type": "boolean"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "refresh_workspace"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "scope": {
+          "enum": [
+            "all",
+            "theme",
+            "tmux"
+          ]
+        },
+        "theme": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "mode": {
+          "enum": [
+            "auto",
+            "dark",
+            "light"
+          ]
+        },
+        "layout": {
+          "enum": [
+            "ai",
+            "dev",
+            "focus",
+            "cowork"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "expectedInputDigest",
+        "scope"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "read_logs"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "configPath": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtimeContext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "source": {
+          "enum": [
+            "aibox",
+            "runtime",
+            "session"
+          ]
+        },
+        "tailLines": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "source",
+        "tailLines"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "const": "runtime"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "runtimeContext",
+              "resourceId"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "inspect_operation"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "operationId"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "migrate_preview"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "sourceRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "destinationRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "sourceRoot",
+        "destinationRoot"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "migrate_apply"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "planId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "planId",
+        "expectedInputDigest"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": "aibox.operation-request/v1"
+        },
+        "operation": {
+          "const": "migrate_rollback"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "projectRoot": {
+          "type": "string",
+          "pattern": "^/",
+          "maxLength": 4096
+        },
+        "planId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "expectedInputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "requestId",
+        "projectRoot",
+        "planId",
+        "expectedInputDigest"
+      ]
+    }
+  ]
+}

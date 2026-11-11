@@ -1,7 +1,7 @@
 """Load primitive schemas and validate entity ``spec`` blocks.
 
-Schemas live in ``src/context/schemas/<kind-lowercase>.yaml`` and are
-themselves processkit entities (``kind: Schema``). Each schema's
+Generated schemas live in ``context/schemas/_generated/`` with flat
+schemas retained as an alpha compatibility fallback. Each schema's
 ``spec.spec_schema`` is a JSON Schema (draft 2020-12) for the target
 primitive's ``spec`` block.
 
@@ -35,17 +35,18 @@ def load_schema(kind: str, schemas_dir: Path | None = None) -> dict[str, Any]:
     schemas_dir = schemas_dir or paths.primitive_schemas_dir()
     if schemas_dir is None:
         raise SchemaError("no schemas directory found")
-    candidate = schemas_dir / f"{kind.lower()}.yaml"
-    if not candidate.is_file():
-        # Fallback: try kebab-cased filename for camel/pascal kinds
-        # (e.g. "TeamMember" -> "team-member.yaml").
-        import re as _re
-        kebab = _re.sub(r"(?<!^)(?=[A-Z])", "-", kind).lower()
-        alt = schemas_dir / f"{kebab}.yaml"
-        if alt.is_file():
-            candidate = alt
-        else:
-            raise SchemaError(f"no schema for kind={kind!r} at {candidate}")
+    import re as _re
+    names = [f"{kind.lower()}.yaml"]
+    kebab = _re.sub(r"(?<!^)(?=[A-Z])", "-", kind).lower()
+    if f"{kebab}.yaml" not in names:
+        names.append(f"{kebab}.yaml")
+    candidates = [schemas_dir / "_generated" / name for name in names]
+    candidates.extend(schemas_dir / name for name in names)
+    candidate = next((path for path in candidates if path.is_file()), None)
+    if candidate is None:
+        raise SchemaError(
+            f"no schema for kind={kind!r} under {schemas_dir}"
+        )
     text = candidate.read_text()
     try:
         data = yaml.safe_load(text)
@@ -142,7 +143,14 @@ def list_known_kinds(schemas_dir: Path | None = None) -> list[str]:
     if schemas_dir is None:
         return []
     out: list[str] = []
-    for f in sorted(schemas_dir.glob("*.yaml")):
+    files = list((schemas_dir / "_generated").glob("*.yaml"))
+    generated_names = {path.name for path in files}
+    files.extend(
+        path
+        for path in schemas_dir.glob("*.yaml")
+        if path.name not in generated_names
+    )
+    for f in sorted(files):
         try:
             text = f.read_text()
             data = yaml.safe_load(text)

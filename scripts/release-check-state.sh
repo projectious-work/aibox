@@ -551,14 +551,13 @@ check_addon_version "Kustomize" "$(addon_tool_default "${PROJECT_ROOT}/addons/to
 check_addon_tool_github "k9s" "${PROJECT_ROOT}/addons/tools/kubernetes.yaml" "k9s" "derailed/k9s"
 check_addon_tool_github "OpenCode" "${PROJECT_ROOT}/addons/ai/ai-opencode.yaml" "opencode" "opencode-ai/opencode"
 check_addon_tool_pypi "Hermes Agent" "${PROJECT_ROOT}/addons/ai/ai-hermes.yaml" "hermes" "hermes-agent"
-check_addon_tool_pypi "Tau" "${PROJECT_ROOT}/addons/ai/ai-tau.yaml" "tau" "tau-ai"
 line ""
 line "Python defaults are curated in the addon catalog and installed through uv when they differ from the Debian base interpreter."
 
 section "LaTeX And Apt-Managed Addon Inputs"
 line "| Tool/Input | Package | Candidate | Status |"
 line "|---|---|---:|---|"
-line "| TeX Live mirror | \`ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final\` | \`2025 final\` | pinned immutable TeX Live archive; update requires a deliberate TeX Live year bump and rebuild |"
+line "| TeX Live mirror | \`texlive.info/historic/systems/texlive/2025/tlnet-final\` | \`2025 final\` | pinned immutable TeX Live archive; update requires a deliberate TeX Live year bump and rebuild |"
 check_apt_managed "LaTeX runtime Perl" "perl"
 check_apt_managed "LaTeX fontconfig" "fontconfig"
 check_apt_managed "Emoji fonts" "fonts-noto-color-emoji"
@@ -631,12 +630,7 @@ line "- Confirm \`cargo audit\` is clean. The release script also enforces this 
 
 section "Version-Line Port Gate"
 release_major="$(sed -nE 's/^version = "([0-9]+)\..*/\1/p' "${CLI_DIR}/Cargo.toml" | head -n 1)"
-if [[ "${release_major}" == "0" ]]; then
-  # v0 maintenance is independent of the v1 redevelopment. A v1-only Go or
-  # specification commit must not hold a v0 patch release hostage. The
-  # cross-line audit remains available as an explicit maintenance check.
-  line "Status: not applicable to the independent v0 maintenance line."
-elif "${SCRIPT_DIR}/check-version-line-ports.sh" check "v${release_major}" >> "${REPORT}" 2>&1; then
+if "${SCRIPT_DIR}/check-version-line-ports.sh" check "v${release_major}" >> "${REPORT}" 2>&1; then
   line ""
   line "Status: no open cross-line port obligations target this release line."
 else

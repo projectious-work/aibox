@@ -1,0 +1,20 @@
+{
+  "id": "continue",
+  "version": "1.0.0",
+  "name": "cn",
+  "description": "Installs cn (aibox catalog ID ai/continue).",
+  "documentationURL": "https://docs.continue.dev/cli/install",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.5.47"
+      ],
+      "default": "1.5.47",
+      "description": "Version of cn to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/node/node"
+  ]
+}

@@ -4,8 +4,9 @@
 //! Yazi-to-Vim handoff, Vim leader mappings, tmux pane/window controls, and
 //! tmux buffer/yank behavior. All interaction is driven through tmux itself.
 
-use super::local_runner::LocalProject as E2eRunner;
 use serial_test::serial;
+
+use super::runner::E2eRunner;
 
 fn extract_cast_output(cast_content: &str) -> String {
     cast_content
@@ -46,12 +47,12 @@ fn init_managed_project(runner: &E2eRunner, test_name: &str) {
 }
 
 fn assert_tmux_only_runtime(runner: &E2eRunner, test_name: &str) {
-    let workspace = runner.root().display().to_string();
+    let workspace = format!("/workspaces/{test_name}");
     let probe = runner.exec(&format!(
         r#"cd {workspace}
 test -f .aibox-home/.tmux.conf -o -f .aibox-home/.config/tmux/tmux.conf
 ! find .aibox-home -path '*zellij*' -print -quit | grep -q .
-! grep -Rli --exclude-dir=.git --exclude=claude 'zellij' .aibox-home .devcontainer aibox.toml >/tmp/{test_name}-legacy-zellij.txt 2>/dev/null
+! grep -Rli --exclude-dir=.git 'zellij' .aibox-home .devcontainer aibox.toml >/tmp/{test_name}-legacy-zellij.txt 2>/dev/null
 "#
     ));
     assert!(
@@ -63,7 +64,10 @@ test -f .aibox-home/.tmux.conf -o -f .aibox-home/.config/tmux/tmux.conf
 }
 
 fn record(runner: &E2eRunner, test_name: &str, driver: &str) -> String {
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
+    runner.exec(
+        "tmux kill-server >/dev/null 2>&1 || true; rm -rf /tmp/tmux-* >/dev/null 2>&1 || true",
+    );
     runner.write_file(test_name, "driver.sh", driver);
     runner.exec(&format!("chmod +x {ws}/driver.sh"));
     runner.exec(&format!(
@@ -81,11 +85,6 @@ export TERM=xterm-256color
 export COLORTERM=truecolor
 export HOME="{ws}/.aibox-home"
 export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
-tmux_socket="${{AIBOX_TMUX_SOCKET:?isolated tmux socket is required}}"
-mkdir -p "$(dirname "$tmux_socket")"
-tmux() {{
-  command tmux -S "$tmux_socket" "$@"
-}}
 tmux_conf="$HOME/.tmux.conf"
 [ -f "$tmux_conf" ] || tmux_conf="$HOME/.config/tmux/tmux.conf"
 if [ ! -f "$tmux_conf" ]; then
@@ -104,12 +103,7 @@ tmux kill-session -t "{session}" >/dev/null 2>&1 || true
     for _ in $(seq 1 50); do
       current="$(tmux display-message -p -t "$target" '#{{pane_current_command}}' 2>/dev/null || true)"
       for expected in "$@"; do
-        if [ "$current" = "$expected" ]; then
-          # pane_current_command changes before full-screen programs finish
-          # loading their configuration and becoming ready for input.
-          sleep 0.3
-          return 0
-        fi
+        [ "$current" = "$expected" ] && return 0
       done
       sleep 0.1
     done
@@ -144,7 +138,7 @@ fn quoted_shell(command: &str) -> String {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(120_000)]
 fn visual_kb_yazi_e_opens_file_in_vim_pane() {
     // Per DEC-20260508_1604-LuckySeal (v0.25.6): yazi `e` opens the marked
@@ -170,7 +164,7 @@ fn visual_kb_yazi_e_opens_file_in_vim_pane() {
         "src/hello.rs",
         &format!("fn main() {{\n    // {marker_text}\n}}\n"),
     );
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let src = format!("{ws}/src");
     runner.write_file(
         test_name,
@@ -234,7 +228,7 @@ fn visual_kb_yazi_e_opens_file_in_vim_pane() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_yazi_enter_opens_vim_inplace_and_returns() {
     let runner = E2eRunner::new();
@@ -249,7 +243,7 @@ fn visual_kb_yazi_enter_opens_vim_inplace_and_returns() {
     runner.write_file(test_name, "src/alpha.rs", "fn alpha() {}\n");
     runner.write_file(test_name, "src/beta.rs", &format!("// {marker}\n"));
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  tmux send-keys -t "{test_name}:1.1" "cd {ws}/src && EDITOR=vim exec yazi ." C-m
   wait_for_pane_text "{test_name}:1.1" "alpha.rs" "{ws}/yazi-ready-screen.txt"
@@ -284,7 +278,7 @@ fn visual_kb_yazi_enter_opens_vim_inplace_and_returns() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(180_000)]
 fn visual_kb_yazi_git_summary_and_changes_show_status() {
     let runner = E2eRunner::new();
@@ -295,7 +289,7 @@ fn visual_kb_yazi_git_summary_and_changes_show_status() {
     init_managed_project(&runner, test_name);
     assert_tmux_only_runtime(&runner, test_name);
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     runner.exec(&format!(
         "cd {ws} && git -c user.email=test@test.com -c user.name=test init && \
          echo old > changed.txt && git -c user.email=test@test.com -c user.name=test add changed.txt && \
@@ -333,7 +327,7 @@ fn visual_kb_yazi_git_summary_and_changes_show_status() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_yazi_pane_toggles_keep_file_list_alive() {
     let runner = E2eRunner::new();
@@ -345,7 +339,7 @@ fn visual_kb_yazi_pane_toggles_keep_file_list_alive() {
     assert_tmux_only_runtime(&runner, test_name);
     runner.write_file(test_name, "visible.txt", "still here\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  tmux send-keys -t "{test_name}:1.1" "cd {ws} && exec yazi ." C-m
   wait_for_pane_text "{test_name}:1.1" "visible.txt" "{ws}/yazi-ready-screen.txt"
@@ -381,7 +375,7 @@ fn visual_kb_yazi_pane_toggles_keep_file_list_alive() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_tmux_prefix_splits_windows_and_status_render() {
     let runner = E2eRunner::new();
@@ -392,7 +386,7 @@ fn visual_kb_tmux_prefix_splits_windows_and_status_render() {
     init_managed_project(&runner, test_name);
     assert_tmux_only_runtime(&runner, test_name);
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  tmux set-option -t "{test_name}" -g status-left " AIBOX-TMUX-KEYS #S:#I.#P "
   tmux set-option -t "{test_name}" -g status-right " prefix C-g | panes r d | windows c n p "
@@ -433,16 +427,12 @@ fn visual_kb_tmux_prefix_splits_windows_and_status_render() {
 }
 
 fn vim_driver(ws: &str, session: &str, vim_args: &str, actions: &str) -> String {
-    let runtime_vimrc = format!(
-        "{}/../images/base-debian/config/vimrc",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let startup = quoted_shell(&format!("exec vim -u {runtime_vimrc} {vim_args}"));
+    let startup = quoted_shell(&format!("exec vim -u /opt/aibox/vimrc {vim_args}"));
     tmux_driver(ws, session, &startup, actions)
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_vim_leader_e_opens_netrw() {
     let runner = E2eRunner::new();
@@ -454,7 +444,7 @@ fn visual_kb_vim_leader_e_opens_netrw() {
     assert_tmux_only_runtime(&runner, test_name);
     runner.write_file(test_name, "project.toml", "[package]\nname = \"test\"\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  wait_for_pane_command "{test_name}:1.1" vim nvim
   tmux send-keys -t "{test_name}:1.1" " l"
@@ -481,7 +471,7 @@ fn visual_kb_vim_leader_e_opens_netrw() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_vim_leader_l_shows_buffer_list() {
     let runner = E2eRunner::new();
@@ -494,7 +484,7 @@ fn visual_kb_vim_leader_l_shows_buffer_list() {
     runner.write_file(test_name, "alpha.rs", "fn alpha() {}\n");
     runner.write_file(test_name, "beta.rs", "fn beta() {}\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  wait_for_pane_command "{test_name}:1.1" vim nvim
   tmux send-keys -t "{test_name}:1.1" " l"
@@ -521,7 +511,7 @@ fn visual_kb_vim_leader_l_shows_buffer_list() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_vim_leader_w_saves_file() {
     let runner = E2eRunner::new();
@@ -533,7 +523,7 @@ fn visual_kb_vim_leader_w_saves_file() {
     assert_tmux_only_runtime(&runner, test_name);
     runner.write_file(test_name, "save_me.rs", "fn main() {}\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  wait_for_pane_command "{test_name}:1.1" vim nvim
   tmux send-keys -t "{test_name}:1.1" "A edited" Escape " w"
@@ -559,7 +549,7 @@ fn visual_kb_vim_leader_w_saves_file() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_vim_leader_x_writes_and_quits_vim() {
     let runner = E2eRunner::new();
@@ -571,7 +561,7 @@ fn visual_kb_vim_leader_x_writes_and_quits_vim() {
     assert_tmux_only_runtime(&runner, test_name);
     runner.write_file(test_name, "writequit.rs", "fn main() {}\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  wait_for_pane_command "{test_name}:1.1" vim nvim
   tmux send-keys -t "{test_name}:1.1" "A // saved" Escape " x"
@@ -600,7 +590,7 @@ fn visual_kb_vim_leader_x_writes_and_quits_vim() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(90_000)]
 fn visual_kb_vim_leader_n_p_cycles_buffers() {
     let runner = E2eRunner::new();
@@ -613,7 +603,7 @@ fn visual_kb_vim_leader_n_p_cycles_buffers() {
     runner.write_file(test_name, "alpha.rs", "AIBOX_ALPHA_BUFFER\n");
     runner.write_file(test_name, "beta.rs", "AIBOX_BETA_BUFFER\n");
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let actions = format!(
         r#"  wait_for_pane_command "{test_name}:1.1" vim nvim
   tmux send-keys -t "{test_name}:1.1" " n"
@@ -645,7 +635,7 @@ fn visual_kb_vim_leader_n_p_cycles_buffers() {
 }
 
 #[test]
-#[serial(local_visual)]
+#[serial(companion_visual)]
 #[ntest::timeout(60_000)]
 fn visual_kb_tmux_buffer_yank_round_trip() {
     let runner = E2eRunner::new();
@@ -656,7 +646,7 @@ fn visual_kb_tmux_buffer_yank_round_trip() {
     init_managed_project(&runner, test_name);
     assert_tmux_only_runtime(&runner, test_name);
 
-    let ws = runner.root().display().to_string();
+    let ws = format!("/workspaces/{test_name}");
     let marker = "AIBOX_TMUX_YANK_BUFFER";
     let actions = format!(
         r#"  tmux set-buffer -b aibox-yank "{marker}"
@@ -685,55 +675,6 @@ fn visual_kb_tmux_buffer_yank_round_trip() {
             .read_file(test_name, "tmux-yank-config.txt")
             .contains("tmux-yank"),
         "expected generated tmux config to include tmux-yank plugin"
-    );
-    runner.cleanup(test_name);
-}
-
-#[test]
-#[serial(local_visual)]
-#[ntest::timeout(90_000)]
-fn visual_kb_yazi_copy_path_reaches_tmux_buffer() {
-    let runner = E2eRunner::new();
-    runner.ensure_deployed();
-
-    let test_name = "visual-kb-yazi-copy-path";
-    runner.cleanup(test_name);
-    init_managed_project(&runner, test_name);
-    assert_tmux_only_runtime(&runner, test_name);
-    runner.write_file(
-        test_name,
-        "copy-fixture/copied-path.txt",
-        "clipboard fixture\n",
-    );
-
-    let ws = runner.root().display().to_string();
-    let fixture = format!("{ws}/copy-fixture");
-    let actions = format!(
-        r#"  tmux send-keys -t "{test_name}:1.1" "cd {fixture} && exec yazi ." C-m
-  wait_for_pane_text "{test_name}:1.1" "copied-path.txt" "{ws}/yazi-copy-ready.txt" || true
-  tmux send-keys -t "{test_name}:1.1" "c" "p"
-  for _ in $(seq 1 40); do
-    tmux save-buffer "{ws}/yazi-path-buffer.txt" 2>/dev/null || true
-    grep -qF "{fixture}/copied-path.txt" "{ws}/yazi-path-buffer.txt" 2>/dev/null && break
-    sleep 0.25
-  done
-"#
-    );
-    let _cast = record(
-        &runner,
-        test_name,
-        &tmux_driver(
-            &ws,
-            test_name,
-            &quoted_shell("printf 'files pane'; exec bash"),
-            &actions,
-        ),
-    );
-    let copied = runner.read_file(test_name, "yazi-path-buffer.txt");
-    assert_eq!(
-        copied.trim(),
-        format!("{fixture}/copied-path.txt"),
-        "Yazi c p should copy the hovered absolute path into the tmux/host clipboard bridge"
     );
     runner.cleanup(test_name);
 }

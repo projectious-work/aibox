@@ -1,14 +1,30 @@
 ---
 title: Documentation
-description: "Configure, operate, extend, and contribute to aibox."
+description: "v1 implementation status and the planned documentation surface."
 weight: 10
 ---
 
-# aibox Documentation
+# v1 documentation
 
-Start with [Installation](<getting-started/installation.md>) for a new setup or
-[Existing Project](<getting-started/existing-project.md>) when adopting aibox.
+The v1 lifecycle and MCP interfaces are not implemented yet. The former
+v1-alpha how-to pages are withheld from the public site because they describe
+an earlier design and contain instructions that do not work against the
+current specification.
 
-The reference section documents the complete configuration and CLI surfaces.
-Container, addon, provider, customization, and migration guides explain the
-corresponding workflows in depth.
+The source-built Go preview can already inspect a native project without a
+container runtime; it is not yet an installable release. See the
+[runnable preview and current limits](core-status.md) for the exact command.
+
+The [tool catalog](tool-catalog.md) lists the optional tool Features, their
+versions, removals and v0 compatibility notes.
+
+Maintainers can read the [architecture](architecture/_index.md) of the v1
+implementation: context, building blocks, crosscutting concepts, decisions
+and risks.
+
+As each implementation phase is completed, publish its reviewed user and
+maintainer documentation here. Planned material remains separate from
+instructions for released software. The phase graph is in the [canonical v1
+roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml).
+
+For the current released aibox product, see the [v0.x documentation](https://projectious-work.github.io/aibox/).

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "CMDTYPE:OutputFormat",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L24",
+    "declaration": "pub enum OutputFormat {\n    /// Human-readable table (default)\n    #[default]\n    Table,\n    /// JSON array\n    Json,\n    /// YAML sequence\n    Yaml,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:Layout",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L36",
+    "declaration": "pub enum Layout {\n    /// Work window with yazi, first harness, shell; optional AI/lazygit/shell windows\n    Dev,\n    /// One fullscreen window for files and each harness\n    Focus,\n    /// Work window with yazi and shell; AI harnesses in a separate window\n    Cowork,\n    /// Work window with yazi and first harness; secondary harnesses in AI window\n    Ai,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:Cli",
+    "kind": "struct",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L87",
+    "declaration": "pub struct Cli {\n    /// Path to aibox.toml (default: ./aibox.toml)\n    #[arg(long, global = true)]\n    pub config: Option<String>,\n\n    /// Log level (trace, debug, info, warn, error)\n    #[arg(long, global = true, env = \"AIBOX_LOG_LEVEL\", default_value = \"info\")]\n    pub log_level: String,\n\n    /// Skip all confirmation prompts (like apt-get -y)\n    #[arg(short = 'y', long, global = true)]\n    pub yes: bool,\n\n    #[command(subcommand)]\n    pub command: Commands,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:Commands",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L105",
+    "declaration": "pub enum Commands {\n    /// Initialize a new project with aibox.toml and generated files\n    ///\n    /// Creates aibox.toml, generates .devcontainer/ files, scaffolds\n    /// context directory, seeds .aibox-home/ with default configs, and\n    /// sets up .gitignore.\n    ///\n    /// Without flags, runs interactively. With all flags, runs non-interactively.\n    Init {\n        /// Project name (default: current directory name)\n        name: Option<String>,\n\n        /// Base image (default: debian)\n        #[arg(long, value_enum)]\n        base: Option<BaseImage>,\n\n        /// Usage profile (default: human-dev)\n        #[arg(long, value_enum)]\n        profile: Option<AiboxProfile>,\n\n        /// Deprecated: processkit package tier. New scaffolds use explicit standard skills.\n        #[arg(long = \"context\", visible_alias = \"package\", num_args = 1.., hide = true)]\n        process: Option<Vec<String>>,\n\n        /// Project context mode (default: processkit)\n        #[arg(long = \"context-mode\", value_enum)]\n        context_mode: Option<ContextMode>,\n\n        /// AI harnesses to configure (default: claude)\n        #[arg(long = \"harness\", value_enum, num_args = 1..)]\n        ai: Option<Vec<AiProvider>>,\n\n        /// Container user (default: aibox)\n        #[arg(long)]\n        user: Option<String>,\n\n        /// Theme family for all tools (default: gruvbox)\n        #[arg(long, value_enum)]\n        theme: Option<ThemeFamily>,\n\n        /// Starship prompt preset (default: default)\n        #[arg(long, value_enum)]\n        prompt: Option<StarshipPreset>,\n\n        /// tmux status presentation (default: extended)\n        #[arg(long = \"tmux-status\", value_enum)]\n        tmux_status: Option<TmuxStatusMode>,\n\n        /// Addon names to enable (e.g., python, infrastructure, kubernetes).\n        /// Each selected addon's `requires` are auto-added transitively\n        /// (e.g. selecting `docs-docusaurus` also pulls in `node`).\n        #[arg(long = \"addon\", num_args = 1..)]\n        addons: Option<Vec<String>>,\n\n        /// Pin a specific tool version inside an addon. Repeatable.\n        /// Format: `addon:tool=version`. Examples:\n        ///\n        ///   --addon-tool python:python=3.14 --addon-tool node:pnpm=10\n        ///\n        /// Overrides the addon's default version and skips the\n        /// interactive version picker for that tool.\n        #[arg(long = \"addon-tool\")]\n        addon_tool: Vec<String>,\n\n        /// processkit source URL (default: projectious-work/processkit upstream).\n        /// Use this to point at a fork or a compatible alternative repo.\n        #[arg(long)]\n        processkit_source: Option<String>,\n\n        /// processkit version tag to pin. If omitted, aibox lists the\n        /// available versions at the source and (interactively) lets you\n        /// pick one or (non-interactively) defaults to the latest.\n        #[arg(long)]\n        processkit_version: Option<String>,\n\n        /// Include prerelease processkit tags in automatic and interactive\n        /// version selection. Explicit --processkit-version prerelease pins\n        /// always work without this flag.\n        #[arg(long)]\n        include_prerelease: bool,\n\n        /// processkit branch override. Tracks the moving HEAD of a branch\n        /// instead of a pinned tag — discouraged for production use, fine\n        /// for testing pre-release work. Mutually informative with\n        /// `--processkit-version`: when both are set the branch wins at\n        /// fetch time but the version is still recorded in aibox.toml.\n        #[arg(long)]\n        processkit_branch: Option<String>,\n\n        /// Skip all container-runtime interaction (runtime probe + image\n        /// build). Primarily useful for CI and nested devcontainer tests.\n        /// Also settable via `AIBOX_NO_CONTAINER=1`.\n        #[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]\n        no_container: bool,\n    },\n    /// Reconcile project state with aibox.toml desired state\n    ///\n    /// Seeds config files, regenerates .devcontainer/ files, runs the\n    /// processkit content diff, and builds the container image. The\n    /// primary command for applying any config change.\n    Apply {\n        /// Optional resource to apply instead of the whole project\n        #[arg(value_enum)]\n        resource: Option<ApplyResource>,\n\n        /// Resource name, currently used by `apply migration <id>`\n        name: Option<String>,\n\n        /// Force a full image rebuild without using cached layers\n        #[arg(long = \"no-cache\", visible_alias = \"rebuild\")]\n        no_cache: bool,\n\n        /// Skip the container image build step (config-only apply)\n        #[arg(long)]\n        config_only: bool,\n\n        /// Force a canonical rewrite of aibox.toml after compatibility\n        /// migrations. Recognized settings are preserved through the current\n        /// schema; unknown keys still block so they are not silently dropped.\n        #[arg(long)]\n        standardize_config: bool,\n\n        /// PulseAudio TCP port for `apply audio`\n        #[arg(long, default_value = \"4714\")]\n        port: Option<u16>,\n\n        /// Rewrite the compliance-contract block in AGENTS.md from the\n        /// canonical source at\n        /// `context/skills/processkit/skill-gate/assets/compliance-contract.md`.\n        /// Used to silence the \"compliance contract in AGENTS.md differs\n        /// from the canonical source\" warning emitted by apply. If the block\n        /// uses `pk-compliance-contract v1` markers but the canonical\n        /// source is v2, markers are migrated to v2 as part of the fix.\n        #[arg(long)]\n        fix_compliance_contract: bool,\n\n        /// Skip all container-runtime interaction (runtime probe + image\n        /// build). All file scaffolding still runs — useful inside dev\n        /// containers where building sub-containers is wasteful (E2E\n        /// tests, CI). Distinct from `--config-only`, which still probes the\n        /// runtime. Also settable via `AIBOX_NO_CONTAINER=1`.\n        #[arg(\n            long,\n            env = \"AIBOX_NO_CONTAINER\",\n            value_parser = parse_truthy_flag,\n            num_args = 0..=1,\n            default_missing_value = \"true\",\n            default_value = \"false\",\n        )]\n        no_container: bool,\n    },\n    /// Start container and attach via tmux\n    ///\n    /// Seeds .aibox-home/ if needed, generates devcontainer files,\n    /// creates/starts the container, then attaches via tmux.\n    /// If already running, just attaches.\n    ///\n    /// Available layouts: dev (default), focus, cowork, ai.\n    Up {\n        /// tmux layout to use (dev, focus, cowork, ai)\n        #[arg(long, value_enum)]\n        layout: Option<Layout>,\n\n        /// Reconcile desired state before starting\n        #[arg(long)]\n        apply: bool,\n\n        /// Discard saved tmux session state and recreate the configured layout\n        #[arg(long)]\n        forget_tmux_state: bool,\n    },\n    /// Recover into the workspace without tmux, Yazi, or status tooling\n    Emergency {\n        /// AI harness to launch after printing the emergency briefing\n        #[arg(value_enum)]\n        harness: AiHarness,\n    },\n    /// Reclaim aibox-managed disk usage\n    ///\n    /// Reports reclaimable build caches, runtime-home caches, and provider\n    /// worktrees by default. Pass `--yes` to apply the selected cleanup scope.\n    Prune {\n        /// Cleanup scope to inspect or apply\n        #[arg(value_enum)]\n        scope: Option<PruneScope>,\n\n        /// Additional cleanup scope to inspect or apply; repeat for multiple scopes\n        #[arg(long = \"scope\", value_enum)]\n        scopes: Vec<PruneScope>,\n\n        /// Preview only, even when --yes is supplied\n        #[arg(long)]\n        dry_run: bool,\n\n        /// Emit structured JSON for automation\n        #[arg(long)]\n        json: bool,\n\n        /// Apply the selected cleanup\n        #[arg(long)]\n        yes: bool,\n    },\n    /// Stop the running workspace\n    Down,\n    /// List compact state for a resource\n    Get {\n        /// Resource to list\n        #[arg(value_enum)]\n        resource: GetResource,\n\n        /// For `get runtime`: include cgroup/procfs memory and process pressure\n        #[arg(long)]\n        resources: bool,\n\n        /// Show all available items when supported\n        #[arg(long)]\n        all: bool,\n\n        /// Filter skill listings by category\n        #[arg(long)]\n        category: Option<String>,\n\n        /// Output format\n        #[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]\n        format: OutputFormat,\n    },\n    /// Show detailed state for a resource\n    Describe {\n        /// Resource to inspect\n        #[arg(value_enum)]\n        resource: DescribeResource,\n\n        /// Resource name when required\n        name: Option<String>,\n\n        /// Output format\n        #[arg(\n            long,\n            short = 'o',\n            visible_alias = \"output\",\n            value_enum,\n            default_value = \"table\"\n        )]\n        format: OutputFormat,\n    },\n    /// Change a project setting or enable a configurable resource\n    ///\n    /// Examples:\n    ///   aibox set theme.mode dark --apply\n    ///   aibox set theme.name tokyo-night --apply\n    ///   aibox set addon python enabled --apply\n    ///   aibox set skill model-recommender-route enabled\n    Set {\n        /// Setting path or resource name\n        target: String,\n\n        /// First value or resource instance name\n        value: Option<String>,\n\n        /// Additional values for resource-shaped settings\n        extra: Vec<String>,\n\n        /// Reconcile desired state after changing config\n        #[arg(long)]\n        apply: bool,\n\n        /// Restart and attach only the project tmux session for theme changes\n        #[arg(long)]\n        restart_session: bool,\n    },\n    /// Open an editable project resource\n    Edit {\n        /// Resource to edit\n        #[arg(value_enum)]\n        resource: EditResource,\n    },\n    /// Reset an explicit resource to a clean state\n    Reset {\n        /// Resource to reset\n        #[arg(value_enum)]\n        resource: ResetResource,\n\n        /// processkit version to use as the target for context reset planning\n        #[arg(long)]\n        from_processkit: Option<String>,\n        /// Skip backup — permanently delete without saving\n        #[arg(long)]\n        no_backup: bool,\n        /// Preview what would happen without modifying anything\n        #[arg(long)]\n        dry_run: bool,\n        /// Skip the confirmation prompt\n        #[arg(long)]\n        yes: bool,\n    },\n    /// Delete an explicit resource\n    Delete {\n        /// Resource to delete\n        #[arg(value_enum)]\n        resource: DeleteResource,\n\n        /// Resource name when required\n        name: Option<String>,\n\n        /// Reason for rejecting a migration\n        #[arg(long)]\n        reason: Option<String>,\n\n        /// Skip confirmation prompt\n        #[arg(long)]\n        yes: bool,\n\n        /// Reconcile desired state after changing config\n        #[arg(long)]\n        apply: bool,\n    },\n    /// Validate context structure and produce migration artifacts\n    ///\n    /// Checks: config validity, container runtime, .aibox-home/ directories,\n    /// .devcontainer/ files, context structure, .gitignore entries, and\n    /// schema version. Generates migration artifacts when versions differ.\n    ///\n    /// With `--integrity`: skip the legacy doctor and run only the\n    /// install-integrity check (cheap, scriptable). Exits non-zero on\n    /// any non-Healthy / non-NotInstalled outcome.\n    Doctor {\n        /// Optional diagnostic target\n        #[arg(value_enum)]\n        target: Option<DoctorTarget>,\n\n        /// Run only the install-integrity check. Cheap, scriptable.\n        #[arg(long)]\n        integrity: bool,\n        /// Emit JSON instead of human output. Implies --integrity-only\n        /// behaviour for now (the legacy doctor doesn't yet support JSON).\n        #[arg(long, short = 'o', visible_alias = \"output\", value_enum)]\n        format: Option<OutputFormat>,\n    },\n    /// Create a resource snapshot or saved environment\n    Create {\n        #[command(subcommand)]\n        action: CreateAction,\n    },\n    /// Manage the aibox binary and shell integration\n    #[command(name = \"self\")]\n    SelfCmd {\n        #[command(subcommand)]\n        action: SelfAction,\n    },\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:ApplyResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L470",
+    "declaration": "pub enum ApplyResource {\n    /// Configure host audio support\n    Audio,\n    /// Refresh only git-tracked generated runtime surfaces\n    GeneratedRuntime,\n    /// Apply a specific processkit migration\n    Migration,\n    /// Switch to a saved environment\n    Env,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:GetResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L482",
+    "declaration": "pub enum GetResource {\n    Runtime,\n    Addon,\n    Env,\n    Kit,\n    Skill,\n    SkillCategory,\n    Process,\n    Migration,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:DescribeResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L494",
+    "declaration": "pub enum DescribeResource {\n    Runtime,\n    Addon,\n    AddonCatalog,\n    ImageProvenancePolicy,\n    ProviderBackends,\n    WorkspaceManifest,\n    Env,\n    Kit,\n    Skill,\n    Process,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:EditResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L508",
+    "declaration": "pub enum EditResource {\n    Config,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:ResetResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L513",
+    "declaration": "pub enum ResetResource {\n    Project,\n    Context,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:DeleteResource",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L519",
+    "declaration": "pub enum DeleteResource {\n    Runtime,\n    Addon,\n    Skill,\n    Env,\n    Migration,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:DoctorTarget",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L528",
+    "declaration": "pub enum DoctorTarget {\n    Project,\n    Audio,\n    Security,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:PruneScope",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L535",
+    "declaration": "pub enum PruneScope {\n    /// Conservative local cleanup: Rust incremental cache and managed runtime caches\n    Safe,\n    /// Rust debug incremental cache\n    BuildCache,\n    /// Managed runtime-home caches\n    RuntimeHome,\n    /// Provider-created Git worktrees under .claude/worktrees\n    AgentWorktrees,\n    /// Local aibox-owned container cleanup when available\n    Containers,\n    /// All known cleanup scopes, including provider worktrees\n    All,\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:CreateAction",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L565",
+    "declaration": "pub enum CreateAction {\n    /// Save current project state as a named environment\n    Env {\n        /// Environment name\n        name: String,\n    },\n    /// Back up aibox files to a timestamped directory\n    Backup {\n        /// Output directory for backup (default: .aibox/backup/)\n        #[arg(long)]\n        output_dir: Option<String>,\n        /// Preview what would be backed up without copying\n        #[arg(long)]\n        dry_run: bool,\n    },\n}",
+    "acceptance": "AC-CLI"
+  },
+  {
+    "id": "CMDTYPE:SelfAction",
+    "kind": "enum",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/cli.rs#L583",
+    "declaration": "pub enum SelfAction {\n    /// Check for or apply version updates\n    Update {\n        /// Only check versions, don't apply any changes\n        #[arg(long)]\n        check: bool,\n        /// Preview what would change without writing files\n        #[arg(long)]\n        dry_run: bool,\n    },\n    /// Generate shell completion script\n    Completion {\n        /// Shell to generate completions for\n        #[arg(value_enum)]\n        shell: clap_complete::Shell,\n    },\n    /// Uninstall the aibox CLI binary\n    Uninstall {\n        /// Preview what would be removed without deleting anything\n        #[arg(long)]\n        dry_run: bool,\n        /// Also remove global config and cache (~/.aibox/)\n        #[arg(long)]\n        purge: bool,\n    },\n}",
+    "acceptance": "AC-CLI"
+  }
+]

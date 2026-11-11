@@ -233,15 +233,17 @@ def storage_location_for_path(
 def primitive_schemas_dir(root: Path | str | None = None) -> Path | None:
     """Where the JSON-Schema YAML files live.
 
-    Tries the consumer's installed location (``context/schemas/``)
-    first, then the processkit checkout (``src/context/schemas/``).
-    Returns None if neither exists.
+    A processkit checkout with committed generated schemas uses its shipped
+    ``src/`` tree. Derived projects use the installed ``context/`` tree.
+    Flat consumer schemas remain the fallback during the v1 alpha cutover.
     """
     root = Path(root) if root else find_project_root()
     consumer = root / "context" / "schemas"
+    processkit = root / "src" / "context" / "schemas"
+    if (processkit / "_generated").is_dir():
+        return processkit
     if consumer.is_dir():
         return consumer
-    processkit = root / "src" / "context" / "schemas"
     if processkit.is_dir():
         return processkit
     return None

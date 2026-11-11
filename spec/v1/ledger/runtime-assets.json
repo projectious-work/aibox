@@ -1,0 +1,737 @@
+[
+  {
+    "id": "ASSET:addons/ai/ai-aider.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-aider.yaml",
+    "sha256": "fd2091328e8087024343f37b45f8868476d78de12d49ee54682ab8c56a336001",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-claude.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-claude.yaml",
+    "sha256": "21030059a4653ccbbe5c5cadad402c470b06be93a7080f5e04275058811c46a7",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-codex.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-codex.yaml",
+    "sha256": "dfcf5f472631b3217506c167cfe1c02c6848851564188a0349848938c6efdd54",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-continue.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-continue.yaml",
+    "sha256": "f42704ddc0853dab8f59bdf026fe9fec962f872914f34832d95df0cb8277bab5",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-copilot.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-copilot.yaml",
+    "sha256": "ff7513907a73700d5ccbcbd13b571e98daea4de91efd94f741075bfa57670174",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-gemini.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-gemini.yaml",
+    "sha256": "94d958ae9bb0d7b6bd43cf760180c487445a1bc56cc93095283c32433c2cac92",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-hermes.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-hermes.yaml",
+    "sha256": "2fdbbab3fd2442a040029f29d8b5285808b7ac06a8db0c22d07649d70183edc1",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-mistral.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-mistral.yaml",
+    "sha256": "1919f096b3a1294555174b8394df4576cebd10907cced4681a0f28f3b6f3e689",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-opencode.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-opencode.yaml",
+    "sha256": "cab13c3ae08d71ada3e18530786dd4cd5fc68db7eeb3d8c1f579d062ac568aee",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/ai/ai-tau.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-tau.yaml",
+    "sha256": "e5624ac2adc076dcf13bd6158d8ac81198c6ac5b08f0c8b975cef64fb4039f8e",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-docusaurus.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-docusaurus.yaml",
+    "sha256": "9af0383d3efe52301b80fe847e39b924d314775e9a20d8ca2539e3eb16000d73",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-hugo.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-hugo.yaml",
+    "sha256": "669811cf5b949cab942be7b7ea4a3640efdbeae62df6b4328dd6167210bcfab0",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-mdbook.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mdbook.yaml",
+    "sha256": "6eeb22b438c10f9fa6907a30206b4ef0b1ff18a3a6592eca58faa945488a266c",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-mkdocs.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mkdocs.yaml",
+    "sha256": "44be9cf2585d5980ba18ce0d60585226c8b7d00fd017e2938b27129902803369",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-starlight.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-starlight.yaml",
+    "sha256": "2bc1b2d3be7f8fe6d8a78b899bd08b2c05039813bb01268467d1f379a32a69a1",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/docs/docs-zensical.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-zensical.yaml",
+    "sha256": "87dc18c6ec4d6c410f56b1cd3b1752ec1a1de5711cc75185e686060dcec4b333",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/go-quality.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+    "sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/go.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go.yaml",
+    "sha256": "09ff56046c57f89b85a3ebb79e2533bf20d1eeead7b1541f5356f7a71cb56a63",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/latex.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+    "sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:addons/languages/node.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+    "sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/python.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+    "sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/rust.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+    "sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/languages/typst.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/typst.yaml",
+    "sha256": "3002f096636fae12385780af07ef6f2f10afd7463b806194e2427ddf1a84e579",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/audio-voice.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+    "sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/browser-testing.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+    "sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/cloud-aws.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-aws.yaml",
+    "sha256": "7e45e4a5796235c24ce26956edf84cd0fa0ad8fd7106a4893c1758ea9b89e2d3",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/cloud-azure.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-azure.yaml",
+    "sha256": "ac025ae5b7b22e26d6394be0459f558ab356606d8ae752691aed98c2212255ff",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/cloud-gcp.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-gcp.yaml",
+    "sha256": "5b43e10b06ad8f829a30e61d790ae7412324ebc29f9f907791fca59386a8deb1",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/cloudflare.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloudflare.yaml",
+    "sha256": "eebfab7cab1dca19b18f5fb68016b432c3113f9379879efe57383e68376a5845",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/data-preview.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-preview.yaml",
+    "sha256": "aee18fc3d26b615bbe4e427b9ebdc498b6f63c73bb7cbf8cd812a0d8a9e933e8",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:addons/tools/data-visualization.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-visualization.yaml",
+    "sha256": "d9e6a6bbbebac2b162ff23fb86befc54526991f32adc70df6c0beae502b633d4",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/diagramming.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/diagramming.yaml",
+    "sha256": "bb93c024cf58df5b832ae89eb248572fd8764e3fc9cd1fa947d0ffeda9b0d536",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/git-ui.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/git-ui.yaml",
+    "sha256": "7aab7e1585e5144e4c065d0256c9e323f3bf8e8cb13acc08ec6e7fd9af4eca5c",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/go-release.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/go-release.yaml",
+    "sha256": "9466c02ffd9248f10c83dad5a86381838d63b1a9bc456b91e3feaafa01a7d62b",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/infrastructure.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+    "sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/kubernetes.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+    "sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/mermaid.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/mermaid.yaml",
+    "sha256": "6649f18cfccc577eb10eba2233e93fd606a2809bd41e847a43fb68b75c0c0d4e",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/preview-archive.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+    "sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:addons/tools/preview-enhanced.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-enhanced.yaml",
+    "sha256": "8e0aa8a30571f3f54d07104180bf515cc084620fb5781454b7ca34404d5f848a",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:addons/tools/release.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/release.yaml",
+    "sha256": "f66f5a3e2e9f3d3cb38139a3c49ec77ba9da6c94385691ab361a429ef01614c5",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:addons/tools/supply-chain.yaml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+    "sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:cli/assets/aibox-theme-corrections.toml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/assets/aibox-theme-corrections.toml",
+    "sha256": "790f3833063332dc8d9bf161d2d41f67b44f97084fb964ed0d8af202ba2caf60",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:cli/src/templates/Dockerfile.j2",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/Dockerfile.j2",
+    "sha256": "585c08d9dcd37f86b38bbdc20da7f1df8584294e565e15ba273c852e6bfc7449",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-agent-signal.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-agent-signal.sh",
+    "sha256": "0902610c48afcf647151d5692080c3988cd30fb027b59383dd840c13f5c84f21",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-codex-notify.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-codex-notify.sh",
+    "sha256": "184ea90ef2670ef589feccc19466a2c9caf5aaa78a48815b1ae86844881af874",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-tmux-cheatsheet.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-tmux-cheatsheet.sh",
+    "sha256": "2e3f8745cbb2039c521354f8bf48fa4059600f0c8b7bb462a8a8ed086d0473d9",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-tmux-confirm-and-switch.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-tmux-confirm-and-switch.sh",
+    "sha256": "a8771bb55db28dc35a7c1cfb742ec60299784b96cd8550e45aaac1cae19446f2",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-tmux-refresh-theme.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-tmux-refresh-theme.sh",
+    "sha256": "66aa1a9c859790be8664a6bbe94de5f0ebaf6919e3e91e3287ebac8a014aae84",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:cli/src/templates/aibox-tmux-switch-layout.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/aibox-tmux-switch-layout.sh",
+    "sha256": "0bd371bed88078b2a0b40ab5a46039c2638ab667b976fe9570074da800364689",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:cli/src/templates/docker-compose.yml.j2",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/templates/docker-compose.yml.j2",
+    "sha256": "5ed7801cf7d294bbbc220b54588857e2ecdbdc9fee0fa5dc2b610b30c8fb8908",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/.dockerignore",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/.dockerignore",
+    "sha256": "cdb021eec5fe63308b1fc207edd1f8f89312e693c48f848570d8e66d916b8086",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/Dockerfile",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/Dockerfile",
+    "sha256": "9c362236d4c07bc0d6a95aa09713e007ea71edad290e53ac3a17377c04ef75fe",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/asoundrc",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/asoundrc",
+    "sha256": "8f7a8e416ac5009511da900cb73099facadc09b80f61b4f1081aede3b4061ce6",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bashrc",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bashrc",
+    "sha256": "8976fb1e1917017ac6d0f3735f947e9a937d1faaeeafbcc25109ee8568e4685f",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-diagnostics.rs",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-diagnostics.rs",
+    "sha256": "0d3cf03733ce0c4e9bb2c876ad4ba8044eb4d379c55f7a0e34b7fb877030c72a",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-latex-preview.py",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-latex-preview.py",
+    "sha256": "81b30609be29bcf31c9857d04758ddf5d7c444060fe7bda73c351e3c01978e11",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-log-viewer-vim.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-log-viewer-vim.sh",
+    "sha256": "5d4bc634eaa8009a0a9a640ad9ee336a252a8385689383475eeb0f3c077862d7",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-log-viewer.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-log-viewer.sh",
+    "sha256": "f96698dad9e1c64a573bb8bc997e136e139d69216eb2dfa8f01bffe382c20656",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-preview.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-preview.sh",
+    "sha256": "23dd64645a9c95aa944e4af20091349fd22e3214e48ef15f5757646b5bc375f6",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-size-tree.py",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-size-tree.py",
+    "sha256": "f048c6c32f436d36c3b45f964542c08499fdeca7fcba4f0123a8296900561d71",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-status-toggle.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-status-toggle.sh",
+    "sha256": "026c6a1dc7f1bcf650aa0bd4f587adfb5de6744df66fc138bef9b435bad1049a",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-status.rs",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-status.rs",
+    "sha256": "296ec669e358079023d03523363620fee0ba866179f898855e2cad62b22ea59e",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox-tmux-session.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox-tmux-session.sh",
+    "sha256": "44b695a042930de228763700b7412521e2cbd84b04d79aec9519e5bcbbf202f5",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/aibox_status_core.rs",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/aibox_status_core.rs",
+    "sha256": "544f3e997df1fb18df1059de6432d1ac51ca973f7c24258e7fb11728d8c4978e",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/open-in-editor.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/open-in-editor.sh",
+    "sha256": "ec4c0ecf1c4c01582c8b16a1bb2a06f364f3a9a9bab14976c5da17573b047145",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/pdf-watch.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/pdf-watch.sh",
+    "sha256": "b6becd1df4a32ff27f5c93e514e6d31e5743f9282f40ce7290b8432207d85934",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/vim-loop.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/vim-loop.sh",
+    "sha256": "83325abf87a7c19b175c64c789b34778eacaf9bde0a7e69b3049b944df0ed2d5",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/bin/xdg-open.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/bin/xdg-open.sh",
+    "sha256": "9a9104b51012f7077d7e095fbc3082662c0e6a1799ba1cccf770c96285cd727d",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/cheatsheet.txt",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/cheatsheet.txt",
+    "sha256": "96dc3b12a90db437abc2310ac276b43c6974ce22a0c945a9079cb2fc67a72415",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/entrypoint.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/entrypoint.sh",
+    "sha256": "202f2c63d01930ff07d4e05955bf9cb2cf73fab6ebaf11b2ca9dedc5fe7123a4",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/gitconfig",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/gitconfig",
+    "sha256": "514d01dcb8e5ecafc53fabe60a4f1ed73bc78e14817bf8e6300ee6bcb8fe0937",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/inputrc",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/inputrc",
+    "sha256": "3763b3a9d37f05ca7c035579bc5419b664c3b33c5ce9a0c4ce5d00fbe75ec237",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/lnav/aibox.json",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/lnav/aibox.json",
+    "sha256": "10e1af791380119ecd6860f8d31becb183a26b01868d9b20b2e277177e17c660",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/patch-powerkit-plugin-spacing.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/patch-powerkit-plugin-spacing.sh",
+    "sha256": "e3d82bcb706a6ce162754e9d0779f84c81cf2dfb2aa2af8ad3810d8715bdd9c9",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/patch-powerkit-window-separators.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/patch-powerkit-window-separators.sh",
+    "sha256": "20e7bfe2a0effa95d6cbcd54e8fa770d7edbfed92366155c95c6778075464575",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox.sh",
+    "sha256": "39c1524ac277e8c51bcb89f7ce17217858614bc200e5d60cf9cc9c9fecb4f871",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_ai.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_ai.sh",
+    "sha256": "7f16cc845285b02b7e68037142b2c25ce89d9010273b69d5feb943126e2cbf86",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_log.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_log.sh",
+    "sha256": "19ce0c5fdf292396089373940b84a4623c8b724b43a13685158dfbf4280dd680",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_mcp.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_mcp.sh",
+    "sha256": "8a1252b9f7f286ae3ab3795dcffc785bd210a33b4ff4745344b9cb5eca32c217",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_mig.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_mig.sh",
+    "sha256": "f7f238aff2180ebafaabbb0801c197a262cff5a0ef5e20338d3d1946bbd40c22",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_oom.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_oom.sh",
+    "sha256": "e94a0908e0c8fe57660257838b2e31cdc7e25835a47d770e9093894d4056e53b",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/aibox_proc.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/aibox_proc.sh",
+    "sha256": "1cfeecf1770fbefed5c0d1981c44eec62de42f223d810403bca93c0c88109e43",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/cloud.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/cloud.sh",
+    "sha256": "1f74edbed84911f25670c4b0bbb711bd2e401b6983fed8223b2cbc87b86887cf",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/forge.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/forge.sh",
+    "sha256": "572339eb2e944a1e1f45b5a95eafaf89ad79f9c60376ece9f3b0768e05257b87",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/github.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/github.sh",
+    "sha256": "5dedf97c04548288d436d5871314cf3569dbc14186c6fcbb347906e640d4b54d",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/kubernetes.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/kubernetes.sh",
+    "sha256": "71cac1f6f366d0b3061353f733b2cc5c9ad698f346b237329044f52178dcfabc",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/modelstatus_provider.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/modelstatus_provider.sh",
+    "sha256": "80df3f5cd4be5bac03ffdb50615f683e7bc2e2b8ec482879f14a5589bf0ebd48",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/netspeed.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/netspeed.sh",
+    "sha256": "024761cb64a5cf9ec806bada489feab1d421c3e0aafbd11b40940226ccd47a37",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/powerkit-plugins/uptime.sh",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/powerkit-plugins/uptime.sh",
+    "sha256": "cfe9c7dd4a2975efb13e3dc12050a86610adaaf8eae6f7e8a158b06d87fb392d",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/tmux/tmux.conf",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/tmux/tmux.conf",
+    "sha256": "fb7c34762cbecfe90404716e66d63e7ab499482c09ef9785e406d6852e40ffc6",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/vimrc",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/vimrc",
+    "sha256": "e1fe1481804f73f0f81fcc32ec6bb414fe48213399db5f958c78312ab65b0244",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-TOOLS"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/init.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/init.lua",
+    "sha256": "eae04462c0b3bcbb486ee59aa9c2c9e9595680a0626997c942e5abb2ae5a48d7",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/keymap.toml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/keymap.toml",
+    "sha256": "5095667dd7ea0ff55f56e6ae91b570fde1f70d3fae3afcf6b10e334ec0b23db4",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/eps.yazi/init.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/eps.yazi/init.lua",
+    "sha256": "edeaadeff1411fc9749eeae43c77754fd749db74790591ba75e9286ff36e94c5",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/git.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/git.yazi/main.lua",
+    "sha256": "855f6bdf0ee33f503f575c2d75795c98ab1a9893c655940caf333d8fc87dc477",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/git.yazi/types.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/git.yazi/types.lua",
+    "sha256": "16c54022dd327c35f533534f0b6995d800965e96d76f2e610b8b2fca0e5b4549",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/preview-options.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/preview-options.yazi/main.lua",
+    "sha256": "fca622821517d6a80d9acad4749065d42b2dae112ab34afd8fb1683e34a25df4",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/rich-preview.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/rich-preview.yazi/main.lua",
+    "sha256": "46e690205e80a5b2045115564f6b96060e228acc94b80552009fdd0b6e66b95e",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/sqlite-preview.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/sqlite-preview.yazi/main.lua",
+    "sha256": "3620852be7836c43d7c4d04aa6215c9c07273dc58503edbb95a3d772cbf8d886",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/status-git.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/status-git.yazi/main.lua",
+    "sha256": "bedc0ba5bf4ea01605b1b7cb444ee3a09b0a4ba35ce99306d974d5977a4d32d2",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/svg.yazi/init.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/svg.yazi/init.lua",
+    "sha256": "ba5e7ebbb9870eda80d7be179010494cac3896b4b29fb8f1011809e217ecc278",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/tabular-preview.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/tabular-preview.yazi/main.lua",
+    "sha256": "25269cb1b1ab4cd8be150b752e8c45b12231f770cdfaf8e47c38994be91f9abf",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/plugins/toggle-pane.yazi/main.lua",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/plugins/toggle-pane.yazi/main.lua",
+    "sha256": "a3a1e685d65f304e12be75c6874141f9a8c786a00460ab9e7fff575a12f1c6e6",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/theme.toml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/theme.toml",
+    "sha256": "b5f36991548a09a394ac48dd2f308edce0761020d3bfc7d95b4797ba33ae323f",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-UX"
+  },
+  {
+    "id": "ASSET:images/base-debian/config/yazi/yazi.toml",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/images/base-debian/config/yazi/yazi.toml",
+    "sha256": "3e0b875b97cdf712bbba74c36dcab7f4ba54f98615c2dde1daf500857493f4e9",
+    "disposition": "retain behavior; reuse native tool; asset-by-asset equivalence before replacement",
+    "acceptance": "AC-PREVIEW"
+  }
+]

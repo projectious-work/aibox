@@ -175,7 +175,7 @@ pub const TIER_SPECIFIC_MCP_SKILLS: &[&str] = &[
 /// constant serves as the canonical reference for tests and documentation.
 // Used in #[cfg(test)] blocks across multiple modules and in documentation.
 #[allow(dead_code)]
-pub const PROCESSKIT_DEFAULT_VERSION: &str = "v0.28.8";
+pub const PROCESSKIT_DEFAULT_VERSION: &str = "v0.28.5";
 
 // ---------------------------------------------------------------------------
 // v0.26.0 — RoleSlot MCP tools (team-manager skill)
@@ -515,11 +515,6 @@ pub struct SkillCommand {
 }
 
 #[derive(Debug, Clone, Deserialize, Default)]
-pub struct SkillUse {
-    pub skill: String,
-}
-
-#[derive(Debug, Clone, Deserialize, Default)]
 pub struct SkillProcesskitMeta {
     #[serde(default)]
     pub category: String,
@@ -537,10 +532,6 @@ pub struct SkillProcesskitMeta {
     /// Introduced in processkit v0.7.0; see projectious-work/aibox#37 and #53.
     #[serde(default)]
     pub commands: Vec<SkillCommand>,
-    /// Skills required by this skill. Package selection expands this graph so
-    /// a filtered installation cannot leave dangling processkit DAG edges.
-    #[serde(default)]
-    pub uses: Vec<SkillUse>,
 }
 
 // ---------------------------------------------------------------------------

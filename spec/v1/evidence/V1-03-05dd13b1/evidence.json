@@ -1,0 +1,55 @@
+{
+  "phase": "V1-03",
+  "sourceCommit": "05dd13b1556ff300cac77f08fbd628f966e807bc",
+  "actor": "local-verifier",
+  "startedAt": "2026-09-30T18:11:42Z",
+  "finishedAt": "2026-09-30T18:11:55Z",
+  "fixture": "spec/v1/examples/minimal",
+  "demo": {
+    "command": "aibox inspect --context local --project spec/v1/examples/minimal --format json",
+    "operation": "inspect_workspace",
+    "outcome": "succeeded",
+    "state": "unknown",
+    "transcript": "inspect.json",
+    "transcriptDigest": "sha256:fc0518180e1c2974f8fd0db83ffaaa7552807d73c288a9f9e3c6f36df496e7a9"
+  },
+  "mcp": {
+    "command": "aibox mcp serve --context local",
+    "tool": "inspect_workspace",
+    "transcript": "mcp-parity.txt",
+    "transcriptDigest": "sha256:206fa4bb41bdf276e816343711c2d4e1229a9efedff025ceb1812bb615c87f55"
+  },
+  "binaries": [
+    {
+      "target": "linux/arm64",
+      "path": "aibox",
+      "digest": "sha256:d5b69b94b8a315d308bb4a6daf13f596cfddf2e185c8fa1980eb1b5578c308ba"
+    },
+    {
+      "target": "darwin/arm64",
+      "path": "aibox-darwin-arm64",
+      "digest": "sha256:b40b78e57e5eefa0242e7874b54b2ea3bb75dd151d00bb58a68237ac5d7beb1a"
+    }
+  ],
+  "documentation": {
+    "source": "docs-site/content/docs/core-status.md",
+    "build": "hugo",
+    "output": "hugo"
+  },
+  "checks": [
+    "go test ./...",
+    "go test -race ./...",
+    "go vet ./...",
+    "go mod verify",
+    "binary stdio MCP client parity and refusal",
+    "binary success and invalid-input journeys",
+    "Draft 2020-12 result validation",
+    "inventory",
+    "specification",
+    "contract fixtures",
+    "v1 Hugo build",
+    "git diff --check"
+  ],
+  "failed": [],
+  "skipped": []
+}

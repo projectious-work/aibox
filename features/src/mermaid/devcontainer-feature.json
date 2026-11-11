@@ -1,0 +1,14 @@
+{
+  "id": "mermaid",
+  "version": "1.0.0",
+  "name": "mermaid-cli, puppeteer",
+  "description": "Installs mermaid-cli, puppeteer (aibox catalog ID mermaid).",
+  "documentationURL": "https://github.com/mermaid-js/mermaid-cli#install-locally",
+  "options": {},
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/node/node"
+  ],
+  "containerEnv": {
+    "PUPPETEER_CACHE_DIR": "/opt/aibox/puppeteer"
+  }
+}

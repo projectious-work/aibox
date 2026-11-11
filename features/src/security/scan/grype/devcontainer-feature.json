@@ -1,0 +1,17 @@
+{
+  "id": "grype",
+  "version": "1.0.0",
+  "name": "grype",
+  "description": "Installs grype (aibox catalog ID security/scan/grype).",
+  "documentationURL": "https://github.com/anchore/grype#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.116.1"
+      ],
+      "default": "0.116.1",
+      "description": "Version of grype to install."
+    }
+  }
+}

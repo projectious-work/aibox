@@ -628,10 +628,7 @@ fn populate_addon_tools(
     let Some(loaded) = crate::addon_loader::get_addon(addon_name) else {
         // Unknown addon — caller will surface this elsewhere; we just
         // return an empty section so the rest of init can proceed.
-        return Ok(AddonToolsSection {
-            tools,
-            ..Default::default()
-        });
+        return Ok(AddonToolsSection { tools });
     };
 
     for tool in &loaded.tools {
@@ -699,10 +696,7 @@ fn populate_addon_tools(
         );
     }
 
-    Ok(AddonToolsSection {
-        tools,
-        ..Default::default()
-    })
+    Ok(AddonToolsSection { tools })
 }
 
 /// Determine the default project name from the current directory.
@@ -905,19 +899,8 @@ pub fn cmd_start(
         }
     }
 
-    let local_env_changed =
-        state != ContainerState::Missing && local_env_changed_since_create(&runtime, &config);
-    if local_env_changed {
-        output::warn(
-            "Environment from .aibox-local.toml changed since the container was created; \
-             recreating the container to apply it. Processes and tmux sessions inside the \
-             container restart; files under /workspace are kept.",
-        );
-    }
-
     let session_name = config.tmux_session_name();
-    let should_recreate_tmux_session =
-        forget_tmux_state || local_env_changed || state != ContainerState::Running;
+    let should_recreate_tmux_session = forget_tmux_state || state != ContainerState::Running;
     let refreshed_runtime_files = crate::seed::sync_theme_files(&config)?;
     if !refreshed_runtime_files.is_empty() {
         output::ok(&format!(
@@ -945,12 +928,6 @@ pub fn cmd_start(
     }
 
     match state {
-        ContainerState::Running if local_env_changed => {
-            output::info("Recreating container...");
-            runtime.compose_up(crate::config::COMPOSE_FILE, name)?;
-            runtime.wait_for_running(name, 7500)?;
-            output::ok("Container recreated");
-        }
         ContainerState::Running => {
             output::info("Container already running");
         }
@@ -1562,10 +1539,6 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str(
         "# Addon catalog — uncomment/comment one block header to enable or remove an addon.\n",
     );
-    out.push_str(&format!(
-        "# Addon catalog fingerprint: {}\n",
-        crate::addon_loader::catalog_fingerprint()
-    ));
     out.push_str(
         "# Inside an enabled addon, omitted default-enabled tools stay enabled. Uncomment\n",
     );
@@ -1638,7 +1611,6 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("# GitHub Copilot              copilot        (uses GITHUB_TOKEN)\n");
     out.push_str("# OpenCode                    opencode       any (multi-provider)\n");
     out.push_str("# Hermes                      hermes         any (multi-provider)\n");
-    out.push_str("# Tau                         tau            any (multi-provider)\n");
     out.push_str("#\n");
     out.push_str("# Harnesses are configured by the ordered `harnesses` list below.\n");
     out.push_str("# The list order is the tmux/layout order: 1st, 2nd, 3rd harness.\n");
@@ -1733,15 +1705,12 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str("# [customization] — color theme, shell prompt, and tmux layout\n");
     out.push_str(sep);
     out.push_str("# Theme is applied consistently across tmux, Vim, Yazi, lazygit, and bat.\n");
-    out.push_str("# Theme families (37 total):\n");
-    out.push_str(
-        "#   Multi-variant: ayu, borland, catppuccin, dracula, everforest, github, gruvbox,\n",
-    );
-    out.push_str("#     kanagawa, material, min, mono, night-owl, one-dark, projectious,\n");
-    out.push_str("#     rose-pine, slack, solarized, tokyo-night, vitesse, vscode, contrast,\n");
-    out.push_str("#     contrast-mono, norton, phosphor\n");
-    out.push_str("#   Single-mode: andromeeda, aurora-x, houston, laserwave,\n");
-    out.push_str("#     monokai, moonlight, nord, plastic, poimandres, red,\n");
+    out.push_str("# Theme families (31 total):\n");
+    out.push_str("#   Multi-variant: ayu, catppuccin, dracula, everforest, github, gruvbox,\n");
+    out.push_str("#     kanagawa, material, min, night-owl, one-dark, rose-pine, slack,\n");
+    out.push_str("#     solarized, tokyo-night, vitesse, vscode\n");
+    out.push_str("#   Solo (mode ignored): andromeeda, aurora-x, houston, laserwave,\n");
+    out.push_str("#     monokai, moonlight, nord, plastic, poimandres, projectious, red,\n");
     out.push_str("#     snazzy, synthwave-84, vesper\n");
     out.push_str("[customization]\n");
     // Always emit the family form. If the user had a legacy concrete name and
@@ -1749,7 +1718,7 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     // correct (the deserializer derived it). The legacy lock is runtime-only.
     out.push_str(&format!("theme  = \"{}\"\n", config.customization.theme));
     out.push_str("# Light/dark variant. `auto` follows host OS appearance when detectable.\n");
-    out.push_str("# Single-mode families reject an incompatible explicit mode.\n");
+    out.push_str("# Solo families (see list above) ignore mode.\n");
     out.push_str("# Options: auto | light | dark\n");
     out.push_str(&format!("mode   = \"{}\"\n", config.customization.mode));
     out.push_str("# Optional alternate variant override (per family). Default = unset.\n");
@@ -1762,20 +1731,11 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     );
     out.push_str("#   rose-pine: \"moon\"       slack: \"ochin\"\n");
     out.push_str("#   tokyo-night: \"storm\"    vitesse: \"black\"\n");
-    out.push_str("#   projectious: \"deep\" | \"high-contrast-dark\" | \"high-contrast-light\"\n");
-    out.push_str("#   contrast, contrast-mono: \"max\"\n");
-    out.push_str("#   borland, norton, phosphor: \"classic\" | \"optimized\"\n");
     if let Some(ref v) = config.customization.variant {
         out.push_str(&format!("variant = \"{v}\"\n"));
     } else {
         out.push_str("# variant = \"<name>\"\n");
     }
-    out.push_str("# Font-decoration channel: auto | full | standard | minimal | none.\n");
-    out.push_str("# Mono/high-contrast themes require standard or stronger; max requires full.\n");
-    out.push_str(&format!(
-        "emphasis = \"{}\"\n",
-        config.customization.emphasis
-    ));
     out.push_str("# Starship prompt preset.\n");
     out.push_str("# Options: default | plain | minimal | nerd-font | pastel | powerline-pastel | bracketed | arrow\n");
     out.push_str("# ASCII sketches:\n");
@@ -1806,18 +1766,6 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     );
     out.push_str(&format!("layout = \"{}\"\n", config.customization.layout));
     out.push('\n');
-    out.push_str("# Optional semantic role overrides. Attribute values are space-separated.\n");
-    out.push_str("# Roles include code_comment, code_invalid, status_error, search_current,\n");
-    out.push_str("# active_foreground, git_untracked, and the other documented semantic roles.\n");
-    out.push_str("[customization.emphasis_overrides]\n");
-    for (role, attributes) in &config.customization.emphasis_overrides {
-        out.push_str(&format!("{} = {}\n", role, toml_string_value(attributes)));
-    }
-    if config.customization.emphasis_overrides.is_empty() {
-        out.push_str("# code_comment = \"italic dim\"\n");
-        out.push_str("# status_error = \"bold underline\"\n");
-    }
-    out.push('\n');
     out.push_str(
         "# tmux runtime options. `layout` may override [customization].layout for tmux only.\n",
     );
@@ -1829,84 +1777,6 @@ pub(crate) fn serialize_config_with_comments(config: &AiboxConfig) -> String {
     out.push_str(&format!(
         "session_name = \"{}\"\n",
         config.tmux_session_name()
-    ));
-    out.push('\n');
-    out.push_str("# tmux terminal/tab title. The runtime attention helper updates the\n");
-    out.push_str("# @aibox_attention_* tmux options used by this format.\n");
-    out.push_str("# Placeholders: {state_symbol}, {state}, {project}, {session}, {window},\n");
-    out.push_str("# {window_index}, {pane}, {directory}, {directory_path}, {repository},\n");
-    out.push_str("# {branch}, {harness}, {agent}, {agent_suffix}, {task}, {message}, {elapsed}.\n");
-    out.push_str("[customization.tmux.title]\n");
-    out.push_str(&format!(
-        "enabled = {}\n",
-        config.customization.tmux.title.enabled
-    ));
-    out.push_str(&format!(
-        "format = {}\n",
-        toml_string_value(&config.customization.tmux.title.format)
-    ));
-    out.push_str(&format!(
-        "max-length = {}\n",
-        config.customization.tmux.title.max_length
-    ));
-    out.push_str(&format!(
-        "directory-style = {}  # basename | abbreviated | full\n",
-        toml_string_value(&config.customization.tmux.title.directory_style)
-    ));
-    out.push_str(&format!(
-        "repository-style = {}  # basename | full (owner/repository)\n",
-        toml_string_value(&config.customization.tmux.title.repository_style)
-    ));
-    out.push_str(&format!(
-        "agent-style = {}  # basename (model) | full (model + reasoning effort)\n",
-        toml_string_value(&config.customization.tmux.title.agent_style)
-    ));
-    out.push_str(&format!(
-        "done-ttl-seconds = {}\n",
-        config.customization.tmux.title.done_ttl_seconds
-    ));
-    out.push_str(&format!(
-        "message-max-length = {}\n",
-        config.customization.tmux.title.message_max_length
-    ));
-    out.push_str("\n[customization.tmux.title.states]\n");
-    let title_states = &config.customization.tmux.title.states;
-    out.push_str(&format!(
-        "working = {}\n",
-        toml_string_value(&title_states.working)
-    ));
-    out.push_str(&format!(
-        "question = {}\n",
-        toml_string_value(&title_states.question)
-    ));
-    out.push_str(&format!(
-        "done = {}\n",
-        toml_string_value(&title_states.done)
-    ));
-    out.push_str(&format!(
-        "error = {}\n",
-        toml_string_value(&title_states.error)
-    ));
-    out.push_str(&format!(
-        "idle = {}\n",
-        toml_string_value(&title_states.idle)
-    ));
-    out.push_str("\n[customization.tmux.notifications]\n");
-    out.push_str(&format!(
-        "enabled = {}  # terminal attention notifications; opt-in\n",
-        config.customization.tmux.notifications.enabled
-    ));
-    out.push_str(&format!(
-        "protocol = {}  # osc-9 | bell\n",
-        toml_string_value(&config.customization.tmux.notifications.protocol)
-    ));
-    out.push_str(&format!(
-        "states = {}\n",
-        toml_string_array(&config.customization.tmux.notifications.states)
-    ));
-    out.push_str(&format!(
-        "include-message = {}\n",
-        config.customization.tmux.notifications.include_message
     ));
     out.push('\n');
     out.push_str("# tmux status presentation.\n");
@@ -2494,9 +2364,7 @@ fn render_ai_model_provider_catalog(out: &mut String, selected: &[crate::config:
 
 fn render_ai_harness_detail_catalog(out: &mut String, config: &AiboxConfig) {
     out.push_str("\n# Ordered harness list. Supported harness values:\n");
-    out.push_str(
-        "# claude, codex, gemini, aider, continue, cursor, copilot, opencode, hermes, tau.\n",
-    );
+    out.push_str("# claude, codex, gemini, aider, continue, cursor, copilot, opencode, hermes.\n");
     out.push_str(
         "# Each one-line entry is directly uncommentable; list order is tmux/layout order.\n",
     );
@@ -3184,8 +3052,6 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
             theme: params.theme.unwrap_or_default(),
             mode: ThemeMode::Auto,
             variant: None,
-            emphasis: crate::config::ThemeEmphasis::Auto,
-            emphasis_overrides: std::collections::BTreeMap::new(),
             prompt: params.prompt.unwrap_or_default(),
             layout: crate::config::ConfigLayout::default(),
             tmux: crate::config::TmuxSection {
@@ -3206,6 +3072,7 @@ pub fn cmd_init(config_path: &Option<String>, params: InitParams) -> Result<()> 
         // S5 — BR-SEC-HARDEN: Codex consent is plumbed in after struct init
         // (ai_providers has been moved into config.ai.harnesses by this point).
         security: crate::config::SecuritySection::default(),
+        orchestration: crate::config::OrchestrationSection::default(),
         local_env: std::collections::HashMap::new(),
         local_mcp_servers: vec![],
     };
@@ -3730,7 +3597,55 @@ pub fn cmd_sync(
         ));
     }
 
-    resolve_latest_addon_tool_versions(&mut config, Path::new("."));
+    // Resolve "latest" addon tool versions to concrete versions.
+    // The resolved versions are used in Dockerfile generation and recorded
+    // in aibox.lock so builds are reproducible.
+    let mut resolved_tools = std::collections::BTreeMap::new();
+    for (addon_name, addon_tools) in &mut config.addons.addons {
+        for (tool_name, tool_entry) in &mut addon_tools.tools {
+            if tool_entry.version.as_deref() == Some("latest") {
+                // Try upstream resolution for key tools
+                if let Some(resolved) = crate::version_resolve::resolve_latest(tool_name) {
+                    tool_entry.version = Some(resolved.clone());
+                    resolved_tools.insert(tool_name.clone(), resolved);
+                } else if let Some(addon) = crate::addon_loader::get_addon(addon_name)
+                    && let Some(tool_def) = addon.tools.iter().find(|t| &t.name == tool_name)
+                    && !tool_def.default_version.is_empty()
+                {
+                    // Fall back to addon's default_version
+                    let ver = tool_def.default_version.clone();
+                    tool_entry.version = Some(ver.clone());
+                    resolved_tools.insert(tool_name.clone(), ver);
+                }
+            }
+        }
+    }
+    if !resolved_tools.is_empty() {
+        output::info(&format!(
+            "Resolved {} 'latest' tool version(s) to concrete values",
+            resolved_tools.len()
+        ));
+        // Write resolved versions to aibox.lock
+        let project_root = std::env::current_dir().unwrap_or_default();
+        if let Ok(Some(mut lock)) = crate::lock::read_lock(&project_root) {
+            let preserved_previous_selection = lock
+                .addons
+                .as_ref()
+                .map(|a| a.previous_selection.clone())
+                .unwrap_or_default();
+            lock.addons = Some(crate::lock::AddonsLockSection {
+                resolved_at: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+                tools: resolved_tools,
+                previous_selection: preserved_previous_selection,
+            });
+            if let Err(e) = crate::lock::write_lock(&project_root, &lock) {
+                output::warn(&format!(
+                    "Failed to update aibox.lock with resolved tool versions: {}",
+                    e
+                ));
+            }
+        }
+    }
 
     // v0.25.6 BR-CLEANUP-ARCH item 1 (DEC-20260508_1515-SilentAsh):
     // Backfill addon/harness `previous_selection` on the lock so future
@@ -4134,7 +4049,6 @@ pub fn cmd_apply_generated_runtime(config_path: &Option<String>) -> Result<()> {
 
     let mut config = AiboxConfig::from_cli_option(config_path)?;
     resolve_aibox_image_version_for_generation(&mut config, &project_root);
-    resolve_latest_addon_tool_versions(&mut config, &project_root);
 
     let added_required_addons = complete_missing_required_addons(&mut config);
     if !added_required_addons.is_empty() {
@@ -4171,56 +4085,6 @@ pub fn cmd_apply_generated_runtime(config_path: &Option<String>) -> Result<()> {
     );
 
     Ok(())
-}
-
-/// Resolve addon `version = "latest"` sentinels before rendering so the
-/// generated Dockerfile changes when upstream latest changes instead of
-/// silently reusing a stale Docker build layer.
-fn resolve_latest_addon_tool_versions(config: &mut AiboxConfig, project_root: &Path) {
-    let mut resolved_tools = std::collections::BTreeMap::new();
-    for (addon_name, addon_tools) in &mut config.addons.addons {
-        for (tool_name, tool_entry) in &mut addon_tools.tools {
-            if tool_entry.version.as_deref() == Some("latest") {
-                if let Some(resolved) = crate::version_resolve::resolve_latest(tool_name) {
-                    tool_entry.version = Some(resolved.clone());
-                    resolved_tools.insert(tool_name.clone(), resolved);
-                } else if let Some(addon) = crate::addon_loader::get_addon(addon_name)
-                    && let Some(tool_def) = addon.tools.iter().find(|t| &t.name == tool_name)
-                    && !tool_def.default_version.is_empty()
-                {
-                    let version = tool_def.default_version.clone();
-                    tool_entry.version = Some(version.clone());
-                    resolved_tools.insert(tool_name.clone(), version);
-                }
-            }
-        }
-    }
-    if resolved_tools.is_empty() {
-        return;
-    }
-
-    output::info(&format!(
-        "Resolved {} 'latest' tool version(s) to concrete values",
-        resolved_tools.len()
-    ));
-    if let Ok(Some(mut lock)) = crate::lock::read_lock(project_root) {
-        let preserved_previous_selection = lock
-            .addons
-            .as_ref()
-            .map(|addons| addons.previous_selection.clone())
-            .unwrap_or_default();
-        lock.addons = Some(crate::lock::AddonsLockSection {
-            resolved_at: chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string(),
-            tools: resolved_tools,
-            previous_selection: preserved_previous_selection,
-        });
-        if let Err(error) = crate::lock::write_lock(project_root, &lock) {
-            output::warn(&format!(
-                "Failed to update aibox.lock with resolved tool versions: {}",
-                error
-            ));
-        }
-    }
 }
 
 fn resolve_aibox_image_version_for_generation(config: &mut AiboxConfig, project_root: &Path) {
@@ -4318,15 +4182,6 @@ fn perform_container_build(no_cache: bool, config: &AiboxConfig) -> Result<()> {
             )?;
             output::ok("Sync complete — image built");
             warn_if_container_lags_image(&runtime, config);
-            if runtime.container_status(&config.container.name).ok()
-                == Some(ContainerState::Running)
-                && local_env_changed_since_create(&runtime, config)
-            {
-                output::info(
-                    "Environment from .aibox-local.toml changed; the next `aibox up` recreates \
-                     the container to apply it.",
-                );
-            }
         }
         Err(_) => {
             output::warn("No container runtime found — skipping image build");
@@ -4334,21 +4189,6 @@ fn perform_container_build(no_cache: bool, config: &AiboxConfig) -> Result<()> {
         }
     }
     Ok(())
-}
-
-/// True when an existing container was created with a different
-/// `.aibox-local.env` than the one just generated. Containers created before
-/// the label existed count as changed only when local variables are set.
-fn local_env_changed_since_create(runtime: &Runtime, config: &AiboxConfig) -> bool {
-    let expected = crate::generate::local_env_hash(config);
-    match runtime.get_container_label(
-        &config.container.name,
-        crate::generate::LOCAL_ENV_HASH_LABEL,
-    ) {
-        Ok(Some(actual)) => actual != expected,
-        Ok(None) => !config.local_env.is_empty(),
-        Err(_) => false,
-    }
 }
 
 /// Warn the user if a container exists for this project AND its image
@@ -4570,10 +4410,6 @@ mod tests {
         let config = crate::config::test_config();
         let body = serialize_config_with_comments(&config);
 
-        assert!(body.contains("# Addon catalog fingerprint: "));
-        assert!(body.contains("# [addons.browser-testing.tools]"));
-        assert!(body.contains("# playwright = {}"));
-        assert!(body.contains("\"1.63.0\" (default)"));
         assert!(body.contains("Terminal image renderer used by Yazi image and SVG previews"));
         assert!(
             body.contains("Markdown, JSON, RST, and notebook terminal rendering for Yazi previews")
@@ -4627,7 +4463,6 @@ mod tests {
                 )]
                 .into_iter()
                 .collect(),
-                ..Default::default()
             },
         );
 

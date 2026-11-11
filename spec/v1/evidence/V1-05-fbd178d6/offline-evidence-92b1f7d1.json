@@ -1,0 +1,89 @@
+{
+  "phase": "V1-05",
+  "verification": "offline",
+  "sourceCommit": "92b1f7d13400140945528e971ec891163f711897",
+  "startedAt": "2026-11-05T16:38:10Z",
+  "finishedAt": "2026-11-05T16:38:51Z",
+  "actor": "claude-opus-5-5 (agent, integration owner) for owner projectious",
+  "host": {
+    "platform": "linux",
+    "arch": "arm64",
+    "kernel": "7.2.12-orbstack-00394-gbecdd6130068"
+  },
+  "go": {
+    "nativeTarget": "linux/arm64",
+    "binary": "aibox",
+    "binaryDigest": "sha256:8064f51bfb1a1bb3d7de3332e832f00c3863ac9403ad22255b8805c2723942c2",
+    "darwinArm64Binary": "aibox-darwin-arm64",
+    "darwinArm64Digest": "sha256:de40ddf6d2cde1e0817e446e6da325c59e9e6cb05ccc753d1b04694d20a7467f"
+  },
+  "demo": {
+    "command": "aibox inspect --context local --project spec/v1/examples/customized --format json",
+    "result": "inspect-customized.json",
+    "resultDigest": "sha256:33175c776f23fbcd320de241fc6934fb93b307c0a1eb37d7f0d3bc18961fe576",
+    "mcp": {
+      "tool": "inspect_workspace",
+      "test": "TestV104StarterCLIMCPParity",
+      "transcript": "mcp-parity.txt",
+      "transcriptDigest": "sha256:4d828f1611349f43e2be4557715c44d50cd6f45b0c04546a95f2fe8b6c0f845c"
+    }
+  },
+  "featureComponentTests": {
+    "tests": 1576,
+    "failed": 0,
+    "skipped": 0
+  },
+  "documentation": {
+    "command": "./scripts/build-docs.sh",
+    "pages": 51,
+    "result": "passed",
+    "paths": [
+      "docs-site/content/docs/tool-catalog.md",
+      "docs-site/content/docs/architecture/"
+    ],
+    "audiences": {
+      "tool-catalog.md": "users",
+      "architecture/": "maintainers"
+    }
+  },
+  "v0": {
+    "current": true,
+    "check": "no change under cli/ or images/ since 9cdcbcbe33f35e61325d084ee75ee828155c7a50"
+  },
+  "checks": [
+    "gofmt -l",
+    "go vet ./...",
+    "go test ./...",
+    "go test -race ./...",
+    "go mod verify",
+    "CLI/MCP parity on the native starter examples",
+    "Linux native and macOS arm64 cross build",
+    "specification",
+    "rendered examples",
+    "Draft 2020-12 fixtures",
+    "V1-05 catalog",
+    "generated example freshness",
+    "generated Features match the catalog",
+    "Feature component tests",
+    "AC-TOOLS harness unit tests",
+    "v1 Hugo build",
+    "git diff --check",
+    "no v0 source change"
+  ],
+  "containerAcceptance": {
+    "status": "separate",
+    "runner": "tests/acceptance/v1-05/run-host.sh"
+  },
+  "artifacts": [
+    "acceptance-unit-tests.txt",
+    "aibox",
+    "aibox-darwin-arm64",
+    "feature-component-tests.txt",
+    "hugo-build.txt",
+    "inspect-customized.json",
+    "inspect-minimal.json",
+    "mcp-parity.txt"
+  ],
+  "failed": [],
+  "skipped": []
+}

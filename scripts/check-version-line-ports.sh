@@ -43,8 +43,8 @@ target_ref_for() {
   local target="$1" current
   current="$(git -C "${PROJECT_ROOT}" branch --show-current)"
   case "${target}:${current}" in
-    v0:v0.x-*|v0:codex/v0.*) printf 'HEAD\n' ;;
-    v1:v1.x-*|v1:codex/v1.*) printf 'HEAD\n' ;;
+    v0:v0.x-*|v0:codex/v0*) printf 'HEAD\n' ;;
+    v1:v1.x-*|v1:codex/v1*) printf 'HEAD\n' ;;
     *) branch_for_line "${target}" ;;
   esac
 }
@@ -78,14 +78,12 @@ check_target() {
   while IFS= read -r sha; do
     [[ -n "${sha}" ]] || continue
     parents="$(git -C "${PROJECT_ROOT}" rev-list --parents -n 1 "${sha}")"
-    # Merge commits carry individual commits; they are not separate obligations.
     [[ "$(wc -w <<<"${parents}")" -le 2 ]] || continue
     message="$(git -C "${PROJECT_ROOT}" show -s --format=%B "${sha}")"
     subject="${message%%$'\n'*}"
     if has_trailer "${message}" 'not-applicable'; then
       continue
     fi
-    # A port commit settles an obligation; it does not create the reverse one.
     if has_trailer "${message}" 'ported-from=[0-9a-fA-F]+'; then
       continue
     fi

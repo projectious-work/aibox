@@ -1,11 +1,14 @@
 {
   "name": "aibox-docs",
   "private": true,
-  "description": "Build dependency for the projectious.work Hugo brand theme",
+  "description": "Build dependencies for the projectious.work Hugo brand theme",
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "@tabler/icons": "3.31.0",
     "@tailwindcss/cli": "^4.1.0",
-    "playwright": "^1.63.0",
+    "playwright": "^1.62.1",
     "smol-toml": "^1.8.0"
   }
 }

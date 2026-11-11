@@ -131,7 +131,7 @@ Since v0.16.0 it has a strict two-part scope:
 permission files for all MCP servers. Configure `[mcp.permissions]` in `aibox.toml`
 to eliminate repetitive permission prompts. Glob patterns expand into concrete
 server names; deny patterns take precedence over allow for security. See
-[Configuration / MCP Permissions](./docs-site/content/docs/reference/configuration.md#permission-configuration-mcppermissions).
+[Configuration / MCP Permissions](./docs-site/docs/reference/configuration.md#permission-configuration-mcppermissions).
 
 Target users: solo developers, small teams, and consultants who want
 reproducible AI-ready dev environments without manual Docker/devcontainer setup.
@@ -146,6 +146,12 @@ Always check `context/notes/` and `context/work-instructions/` for canonical doc
 procedures before acting. These take precedence over general knowledge or tool defaults.
 
 ## Setup
+
+For the v1 Go line, use `go test ./...`, `go test -race ./...`, `go vet ./...`,
+`go build ./cmd/aibox`, the relevant `spec/v1` validators, and the v1 docs
+build. `./scripts/verify-v1-03.sh` runs the exact V1-03 candidate gate.
+The Rust and Cargo commands below describe retained v0 work only; they are
+not v1 acceptance, commit, or release requirements.
 
 ```sh
 # build the CLI binary
@@ -232,9 +238,36 @@ typecheck: ""
   `cli/src/processkit_vocab.rs` instead.
 - **No trailing summaries** in agent responses — the user can read the diff.
 
+### v1 engineering practice
+
+v1 work on `v1.x-dev` follows
+[`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md)
+from V1-05: development cycle and independent review per phase, a frozen
+test-ready phase contract with separate acceptance-test and implementation
+tracks,
+*Hexagonal Architecture* with a *Clean Architecture* core, *TDD, Chicago
+School* tests, refactoring by named smells, Conventional Commits, and a green
+`v1.x-dev` after every merge.
+
+AI agents implementing v1 also follow these execution and communication
+rules (not part of the product specification):
+
+- Run at most 3 sub-agents at once and work in waves beyond that. The primary
+  agent keeps concept, core implementation, integration, and review of
+  delegated results.
+- Give a red check at most 1 rerun. Report an infrastructure-only failure once
+  with evidence. Push fixes in batches. Do not spend turns polling; wait for
+  completion notifications.
+- Reply answer-first: result or next action first, numbered steps, one
+  closing next action, no preamble or recap. Personal output styles are opt-in
+  through the person's user-level agent instructions.
+
 ### Pull requests
 
-- **Direct commits to `main`** — no PR ceremony on this repo.
+- **Version-line integration** — long-lived branches (`main`, `v0.x-dev`,
+  `v0.x-release`, `v1.x-dev`, `v1.x-pre-release`) are PR-only. Tag releases
+  only on their designated release branch; merge the tagged branch into `main`
+  as published history. Do not use GitHub Actions or workflow files.
 - **"Ship it" means the full release ritual** end-to-end: build, test, commit, tag,
   push, GitHub release, deploy docs. Do not ask permission at each step.
 - **Phase 0 runs three steps before any version bump:** (1) `./scripts/maintain.sh release-check-state`
@@ -244,8 +277,8 @@ typecheck: ""
   three automatically.
 - **Phase 2 is always the user's job** — macOS host builds and GHCR image pushes
   run via `./scripts/maintain.sh release-host X.Y.Z` on the host, never from the container.
-  Before Phase 2, sync the host checkout to the matching version-line release branch
-  (for example, `git fetch origin v0.x-release && git switch v0.x-release && git reset --keep origin/v0.x-release`).
+  Before Phase 2, sync the host checkout to the just-pushed container-side release
+  commits with `git fetch origin main && git reset --keep origin/main`.
 - **Detailed release procedures:** See [`context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
 - **One big change preferred over many small PRs** for breaking releases. The user
   explicitly said: "make one big change, I'll handle derived project dependencies."
@@ -333,7 +366,7 @@ output.
 
 **We are in a dev-container building dev-containers.** Never confuse:
 
-- **`.devcontainer/`** — THIS project's own dev environment (Rust + Python/uv + Hugo and its module toolchain).
+- **`.devcontainer/`** — THIS project's own dev environment (Rust + Python/uv + Hugo/Docsy).
 - **`images/`** — Published images for OTHER projects (pushed to GHCR). They do NOT include Rust toolchain or MkDocs.
 
 Changes to `.devcontainer/` affect our development. Changes to `images/` affect downstream projects.
@@ -345,7 +378,7 @@ Changes to `.devcontainer/` affect our development. Changes to `images/` affect 
 | `cli/` | The Rust CLI (`aibox` binary) — the only shipped artifact besides addon YAMLs |
 | `addons/` | YAML addon definitions (python, rust, node, latex, …) |
 | `images/` | Container image build recipes published to GHCR |
-| `docs-site/` | Hugo documentation using the projectious.work brand theme |
+| `docs-site/` | Hugo/Docsy documentation site |
 | `context/` | This project's context (backlog, decisions, research, …) |
 | `scripts/` | Release and maintenance tooling (`maintain.sh`, `record-asciinema.sh`, …) |
 

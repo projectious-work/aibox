@@ -1,0 +1,3057 @@
+[
+  {
+    "name": "ExtraVolume",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 44,
+    "fields": [
+      {
+        "name": "source",
+        "key": "source",
+        "type": "String",
+        "annotations": "    /// Host-side path. Supports `~` expansion by Docker Compose. No `..` allowed.",
+        "line": 46,
+        "aliases": []
+      },
+      {
+        "name": "target",
+        "key": "target",
+        "type": "String",
+        "annotations": "    /// Container-side absolute path. Must start with `/`. No `..` allowed.",
+        "line": 48,
+        "aliases": []
+      },
+      {
+        "name": "read_only",
+        "key": "read_only",
+        "type": "bool",
+        "annotations": "    /// Mount read-only. Defaults to false.\n    #[serde(default)]",
+        "line": 51,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// A user-defined bind mount entry, from `[[container.extra_volumes]]` in\n/// `aibox.toml` or `.aibox-local.toml`.\n///\n/// In TOML:\n/// ```toml\n/// [[container.extra_volumes]]\n/// source = \"~/.config/gh\"\n/// target = \"/home/aibox/.config/gh\"\n///\n/// [[container.extra_volumes]]\n/// source = \"~/.aws\"\n/// target = \"/home/aibox/.aws\"\n/// read_only = true\n/// ```\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct ExtraVolume {\n    /// Host-side path. Supports `~` expansion by Docker Compose. No `..` allowed.\n    pub source: String,\n    /// Container-side absolute path. Must start with `/`. No `..` allowed.\n    pub target: String,\n    /// Mount read-only. Defaults to false.\n    #[serde(default)]\n    pub read_only: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L44"
+  },
+  {
+    "name": "BaseImage",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 77,
+    "fields": [],
+    "source": "\n/// Base image for the aibox container. Currently only Debian is supported;\n/// Alpine is planned for later.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum BaseImage {\n    #[default]\n    Debian,\n    // Alpine, // planned\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L77"
+  },
+  {
+    "name": "AiboxProfile",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 101,
+    "fields": [],
+    "source": "\n/// Container usage profile. `human-dev` remains the default; `headless-runner`\n/// is a warning-mode contract used to classify automation-safe addons before\n/// a dedicated runner image exists.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum AiboxProfile {\n    #[default]\n    HumanDev,\n    HeadlessRunner,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L101"
+  },
+  {
+    "name": "MetadataSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 144,
+    "fields": [
+      {
+        "name": "name",
+        "key": "name",
+        "type": "String",
+        "annotations": "    #[serde(default, alias = \"project_name\")]",
+        "line": 146,
+        "aliases": [
+          "project_name"
+        ]
+      }
+    ],
+    "source": "\n/// Root metadata for the workspace object.\n#[derive(Debug, Clone, Default, Serialize, Deserialize)]\npub struct MetadataSection {\n    #[serde(default, alias = \"project_name\")]\n    pub name: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L144"
+  },
+  {
+    "name": "ImageSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 151,
+    "fields": [
+      {
+        "name": "version",
+        "key": "version",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_image_version\", alias = \"release_version\")]",
+        "line": 153,
+        "aliases": [
+          "release_version"
+        ]
+      },
+      {
+        "name": "base",
+        "key": "base",
+        "type": "BaseImage",
+        "annotations": "    #[serde(default)]",
+        "line": 155,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Published base image selector.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct ImageSection {\n    #[serde(default = \"default_image_version\", alias = \"release_version\")]\n    pub version: String,\n    #[serde(default)]\n    pub base: BaseImage,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L151"
+  },
+  {
+    "name": "AiboxSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 169,
+    "fields": [
+      {
+        "name": "config_schema",
+        "key": "config_schema",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_config_schema\")]",
+        "line": 171,
+        "aliases": []
+      },
+      {
+        "name": "project_name",
+        "key": "project_name",
+        "type": "String",
+        "annotations": "    #[serde(default, alias = \"name\")]",
+        "line": 173,
+        "aliases": [
+          "name"
+        ]
+      },
+      {
+        "name": "version",
+        "key": "version",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_image_version\")]",
+        "line": 175,
+        "aliases": []
+      },
+      {
+        "name": "base",
+        "key": "base",
+        "type": "BaseImage",
+        "annotations": "    #[serde(default)]",
+        "line": 177,
+        "aliases": []
+      },
+      {
+        "name": "profile",
+        "key": "profile",
+        "type": "AiboxProfile",
+        "annotations": "    #[serde(default)]",
+        "line": 179,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Top-level [aibox] section.\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct AiboxSection {\n    #[serde(default = \"default_config_schema\")]\n    pub config_schema: String,\n    #[serde(default, alias = \"name\")]\n    pub project_name: String,\n    #[serde(default = \"default_image_version\")]\n    pub version: String,\n    #[serde(default)]\n    pub base: BaseImage,\n    #[serde(default)]\n    pub profile: AiboxProfile,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L169"
+  },
+  {
+    "name": "ContainerSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 200,
+    "fields": [
+      {
+        "name": "name",
+        "key": "name",
+        "type": "String",
+        "annotations": "",
+        "line": 201,
+        "aliases": []
+      },
+      {
+        "name": "hostname",
+        "key": "hostname",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_hostname\")]",
+        "line": 203,
+        "aliases": []
+      },
+      {
+        "name": "user",
+        "key": "user",
+        "type": "String",
+        "annotations": "    /// Container user (default: \"aibox\"). Determines mount paths inside container.\n    #[serde(default = \"default_user\")]",
+        "line": 206,
+        "aliases": []
+      },
+      {
+        "name": "post_create_command",
+        "key": "post_create_command",
+        "type": "Option<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 208,
+        "aliases": []
+      },
+      {
+        "name": "keepalive",
+        "key": "keepalive",
+        "type": "bool",
+        "annotations": "    /// Network keepalive — prevents OrbStack/VM NAT from dropping idle connections.\n    #[serde(default)]",
+        "line": 211,
+        "aliases": []
+      },
+      {
+        "name": "lifecycle",
+        "key": "lifecycle",
+        "type": "ContainerLifecycleSection",
+        "annotations": "    /// Lifecycle commands. New configs use `[container.lifecycle]`; legacy\n    /// root-level `post_create_command` and `keepalive` are migrated in.\n    #[serde(default)]",
+        "line": 215,
+        "aliases": []
+      },
+      {
+        "name": "environment",
+        "key": "environment",
+        "type": "HashMap<String, String>",
+        "annotations": "    /// Extra environment variables injected into the container.\n    /// Committed entries go in `aibox.toml`; secrets go in `.aibox-local.toml`.\n    ///\n    /// ```toml\n    /// [container.environment]\n    /// AWS_DEFAULT_REGION = \"eu-west-1\"\n    /// ```\n    #[serde(default)]",
+        "line": 224,
+        "aliases": []
+      },
+      {
+        "name": "extra_volumes",
+        "key": "extra_volumes",
+        "type": "Vec<ExtraVolume>",
+        "annotations": "    /// Additional bind mounts beyond the aibox defaults.\n    /// Committed entries (shared caches) go in `aibox.toml`; personal credential\n    /// directories go in `.aibox-local.toml` (gitignored).\n    ///\n    /// ```toml\n    /// [[container.extra_volumes]]\n    /// source = \"~/.config/gh\"\n    /// target = \"/home/aibox/.config/gh\"\n    /// ```\n    #[serde(default)]",
+        "line": 235,
+        "aliases": []
+      },
+      {
+        "name": "resource_thresholds",
+        "key": "resource_thresholds",
+        "type": "ResourceThresholdsSection",
+        "annotations": "    /// Runtime resource warning thresholds used by `aibox doctor`.\n    #[serde(default)]",
+        "line": 238,
+        "aliases": []
+      },
+      {
+        "name": "image",
+        "key": "image",
+        "type": "ImageSection",
+        "annotations": "    /// Published image selector. New configs use `[container.image]`; legacy\n    /// `[image]` and `[aibox].version/base` are migrated into this section.\n    #[serde(default)]",
+        "line": 242,
+        "aliases": []
+      },
+      {
+        "name": "paths",
+        "key": "paths",
+        "type": "ContainerPathsSection",
+        "annotations": "    /// Generated/input file paths used by the devcontainer generator.\n    #[serde(default)]",
+        "line": 245,
+        "aliases": []
+      },
+      {
+        "name": "audio",
+        "key": "audio",
+        "type": "AudioSection",
+        "annotations": "    /// Legacy audio bridge settings. New configs use top-level `[audio]`.\n    #[serde(default)]",
+        "line": 248,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [container] section.\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct ContainerSection {\n    pub name: String,\n    #[serde(default = \"default_hostname\")]\n    pub hostname: String,\n    /// Container user (default: \"aibox\"). Determines mount paths inside container.\n    #[serde(default = \"default_user\")]\n    pub user: String,\n    #[serde(default)]\n    pub post_create_command: Option<String>,\n    /// Network keepalive — prevents OrbStack/VM NAT from dropping idle connections.\n    #[serde(default)]\n    pub keepalive: bool,\n    /// Lifecycle commands. New configs use `[container.lifecycle]`; legacy\n    /// root-level `post_create_command` and `keepalive` are migrated in.\n    #[serde(default)]\n    pub lifecycle: ContainerLifecycleSection,\n    /// Extra environment variables injected into the container.\n    /// Committed entries go in `aibox.toml`; secrets go in `.aibox-local.toml`.\n    ///\n    /// ```toml\n    /// [container.environment]\n    /// AWS_DEFAULT_REGION = \"eu-west-1\"\n    /// ```\n    #[serde(default)]\n    pub environment: HashMap<String, String>,\n    /// Additional bind mounts beyond the aibox defaults.\n    /// Committed entries (shared caches) go in `aibox.toml`; personal credential\n    /// directories go in `.aibox-local.toml` (gitignored).\n    ///\n    /// ```toml\n    /// [[container.extra_volumes]]\n    /// source = \"~/.config/gh\"\n    /// target = \"/home/aibox/.config/gh\"\n    /// ```\n    #[serde(default)]\n    pub extra_volumes: Vec<ExtraVolume>,\n    /// Runtime resource warning thresholds used by `aibox doctor`.\n    #[serde(default)]\n    pub resource_thresholds: ResourceThresholdsSection,\n    /// Published image selector. New configs use `[container.image]`; legacy\n    /// `[image]` and `[aibox].version/base` are migrated into this section.\n    #[serde(default)]\n    pub image: ImageSection,\n    /// Generated/input file paths used by the devcontainer generator.\n    #[serde(default)]\n    pub paths: ContainerPathsSection,\n    /// Legacy audio bridge settings. New configs use top-level `[audio]`.\n    #[serde(default)]\n    pub audio: AudioSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L200"
+  },
+  {
+    "name": "ContainerLifecycleSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 260,
+    "fields": [
+      {
+        "name": "post_create_command",
+        "key": "post_create_command",
+        "type": "Option<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 262,
+        "aliases": []
+      },
+      {
+        "name": "keepalive",
+        "key": "keepalive",
+        "type": "bool",
+        "annotations": "    #[serde(default)]",
+        "line": 264,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]\npub struct ContainerLifecycleSection {\n    #[serde(default)]\n    pub post_create_command: Option<String>,\n    #[serde(default)]\n    pub keepalive: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L260"
+  },
+  {
+    "name": "ContainerPathsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 268,
+    "fields": [
+      {
+        "name": "devcontainer_json",
+        "key": "devcontainer_json",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_devcontainer_json_path\")]",
+        "line": 270,
+        "aliases": []
+      },
+      {
+        "name": "docker_compose",
+        "key": "docker_compose",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_docker_compose_path\")]",
+        "line": 272,
+        "aliases": []
+      },
+      {
+        "name": "docker_compose_override",
+        "key": "docker_compose_override",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_docker_compose_override_path\")]",
+        "line": 274,
+        "aliases": []
+      },
+      {
+        "name": "dockerfile",
+        "key": "dockerfile",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_dockerfile_path\")]",
+        "line": 276,
+        "aliases": []
+      },
+      {
+        "name": "dockerfile_local",
+        "key": "dockerfile_local",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_dockerfile_local_path\")]",
+        "line": 278,
+        "aliases": []
+      },
+      {
+        "name": "local_env",
+        "key": "local_env",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_local_env_path\")]",
+        "line": 280,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ContainerPathsSection {\n    #[serde(default = \"default_devcontainer_json_path\")]\n    pub devcontainer_json: String,\n    #[serde(default = \"default_docker_compose_path\")]\n    pub docker_compose: String,\n    #[serde(default = \"default_docker_compose_override_path\")]\n    pub docker_compose_override: String,\n    #[serde(default = \"default_dockerfile_path\")]\n    pub dockerfile: String,\n    #[serde(default = \"default_dockerfile_local_path\")]\n    pub dockerfile_local: String,\n    #[serde(default = \"default_local_env_path\")]\n    pub local_env: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L268"
+  },
+  {
+    "name": "ResourceThresholdsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 325,
+    "fields": [
+      {
+        "name": "memory_mib_warn",
+        "key": "memory_mib_warn",
+        "type": "Option<u64>",
+        "annotations": "    /// Warn when current cgroup memory usage exceeds this many MiB.\n    #[serde(default)]",
+        "line": 328,
+        "aliases": []
+      },
+      {
+        "name": "process_count_warn",
+        "key": "process_count_warn",
+        "type": "Option<usize>",
+        "annotations": "    /// Warn when total process count exceeds this number.\n    #[serde(default = \"default_process_count_warn\")]",
+        "line": 331,
+        "aliases": []
+      },
+      {
+        "name": "processkit_mcp_python_warn",
+        "key": "processkit_mcp_python_warn",
+        "type": "Option<usize>",
+        "annotations": "    /// Warn when processkit MCP Python process count exceeds this number.\n    #[serde(default = \"default_processkit_mcp_python_warn\")]",
+        "line": 334,
+        "aliases": []
+      },
+      {
+        "name": "oom_kill_warn",
+        "key": "oom_kill_warn",
+        "type": "Option<u64>",
+        "annotations": "    /// Warn when cgroup `oom_kill` exceeds this count.\n    #[serde(default = \"default_oom_kill_warn\")]",
+        "line": 337,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Runtime resource pressure warning thresholds.\n///\n/// These are intentionally warnings only. They help surface pressure before the\n/// operating system kills processes, but they must not block normal workflows.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ResourceThresholdsSection {\n    /// Warn when current cgroup memory usage exceeds this many MiB.\n    #[serde(default)]\n    pub memory_mib_warn: Option<u64>,\n    /// Warn when total process count exceeds this number.\n    #[serde(default = \"default_process_count_warn\")]\n    pub process_count_warn: Option<usize>,\n    /// Warn when processkit MCP Python process count exceeds this number.\n    #[serde(default = \"default_processkit_mcp_python_warn\")]\n    pub processkit_mcp_python_warn: Option<usize>,\n    /// Warn when cgroup `oom_kill` exceeds this count.\n    #[serde(default = \"default_oom_kill_warn\")]\n    pub oom_kill_warn: Option<u64>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L325"
+  },
+  {
+    "name": "ContextMode",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 371,
+    "fields": [],
+    "source": "\n/// Context content mode.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum ContextMode {\n    #[default]\n    Processkit,\n    HarnessOnly,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L371"
+  },
+  {
+    "name": "ContextSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 388,
+    "fields": [
+      {
+        "name": "mode",
+        "key": "mode",
+        "type": "ContextMode",
+        "annotations": "    #[serde(default)]",
+        "line": 390,
+        "aliases": []
+      },
+      {
+        "name": "schema_version",
+        "key": "schema_version",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_schema_version\")]",
+        "line": 392,
+        "aliases": []
+      },
+      {
+        "name": "packages",
+        "key": "packages",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default = \"default_context_packages\")]",
+        "line": 394,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [context] section — context system versioning and package selection.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ContextSection {\n    #[serde(default)]\n    pub mode: ContextMode,\n    #[serde(default = \"default_schema_version\")]\n    pub schema_version: String,\n    #[serde(default = \"default_context_packages\")]\n    pub packages: Vec<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L388"
+  },
+  {
+    "name": "LegacyProcessSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 418,
+    "fields": [
+      {
+        "name": "packages",
+        "key": "packages",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 420,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Legacy [process] section for backward compatibility.\n/// If present, packages are merged into [context].packages during load.\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct LegacyProcessSection {\n    #[serde(default)]\n    pub packages: Vec<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L418"
+  },
+  {
+    "name": "AiHarness",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 461,
+    "fields": [],
+    "source": "\n/// AI tool providers supported in aibox containers.\n///\n/// MCP-capable providers (have a built-in MCP client and a project-level\n/// config file aibox can write to):\n/// - `Claude` — `.mcp.json` at project root\n/// - `Cursor` — `.cursor/mcp.json` at project root (host-side IDE only)\n/// - `Gemini` — `.gemini/settings.json` (Gemini CLI)\n/// - `OpenAI` — `.codex/config.toml` (OpenAI Codex CLI, binary: `codex`)\n/// - `Continue` — `.continue/mcpServers/<name>.json` (Continue CLI, binary: `cn`)\n/// - `Copilot` — `.mcp.json` at project root (GitHub Copilot CLI, binary: `copilot`)\n///\n/// Special MCP routing:\n/// - `Mistral` — has MCP client capability via Python SDK and Le Chat,\n///   but no local file-based config. aibox writes `.mcp.json` (the\n///   Claude shape) when Mistral is selected so a custom Mistral\n///   SDK-based CLI tool can read MCP server registrations from there.\n///\n/// Non-MCP providers (no built-in MCP client; aibox cannot register\n/// processkit MCP servers; sync emits a warning):\n/// - `Aider` — no native MCP client. Third-party experimental bridges\n///   exist but are not yet stable.\n///\n/// Note: `Cursor` is a host-side IDE extension only — it has no container\n/// An AI agent harness — the CLI tool installed in the container.\n///\n/// Cursor is a host-side IDE extension with MCP registration but no container\n/// CLI binary and no in-container persistence directory. All other harnesses\n/// have a corresponding `ai-<name>` addon that installs their CLI in the image.\n///\n/// The deserializer still accepts a few older config spellings so existing\n/// aibox.toml files can be read and normalized by `aibox apply`.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum AiHarness {\n    Claude,\n    Aider,\n    Gemini,\n    Cursor,\n    Continue,\n    Copilot,\n    /// OpenAI Codex CLI.\n    #[serde(rename = \"codex\", alias = \"openai\")]\n    #[clap(name = \"codex\", alias = \"openai\")]\n    Codex,\n    /// Open-source multi-provider harness (Go-based).\n    #[serde(rename = \"opencode\")]\n    #[clap(name = \"opencode\")]\n    OpenCode,\n    /// Nous Research autonomous agent.\n    Hermes,\n    /// Tau educational multi-provider coding agent.\n    Tau,\n    /// Mistral has no CLI harness; retained only so old config can be parsed.\n    #[serde(rename = \"mistral\")]\n    #[clap(skip)]\n    Mistral,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L461"
+  },
+  {
+    "name": "AiModelProvider",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 606,
+    "fields": [],
+    "source": "\n/// An AI model provider — the organization whose API credentials may be needed.\n/// Declaring a provider is optional; it hints which API key/base URL env vars are available.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum AiModelProvider {\n    Anthropic,\n    #[serde(rename = \"openai\")]\n    #[clap(name = \"openai\")]\n    OpenAI,\n    Google,\n    Mistral,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L606"
+  },
+  {
+    "name": "AiExecutionFilesystem",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 675,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum AiExecutionFilesystem {\n    ReadOnly,\n    #[default]\n    WorkspaceWrite,\n    ContainerFull,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L675"
+  },
+  {
+    "name": "AiExecutionApproval",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 700,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum AiExecutionApproval {\n    Ask,\n    #[default]\n    OnRequest,\n    Never,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L700"
+  },
+  {
+    "name": "AiExecutionNetwork",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 725,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum AiExecutionNetwork {\n    Deny,\n    #[default]\n    Ask,\n    Allow,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L725"
+  },
+  {
+    "name": "AiExecutionPolicy",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 750,
+    "fields": [
+      {
+        "name": "filesystem",
+        "key": "filesystem",
+        "type": "AiExecutionFilesystem",
+        "annotations": "    #[serde(default)]",
+        "line": 752,
+        "aliases": []
+      },
+      {
+        "name": "approval",
+        "key": "approval",
+        "type": "AiExecutionApproval",
+        "annotations": "    #[serde(default)]",
+        "line": 754,
+        "aliases": []
+      },
+      {
+        "name": "network",
+        "key": "network",
+        "type": "AiExecutionNetwork",
+        "annotations": "    #[serde(default)]",
+        "line": 756,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Global AI execution policy under `[ai.execution]`.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\npub struct AiExecutionPolicy {\n    #[serde(default)]\n    pub filesystem: AiExecutionFilesystem,\n    #[serde(default)]\n    pub approval: AiExecutionApproval,\n    #[serde(default)]\n    pub network: AiExecutionNetwork,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L750"
+  },
+  {
+    "name": "AiHarnessExecutionOverride",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 762,
+    "fields": [
+      {
+        "name": "filesystem",
+        "key": "filesystem",
+        "type": "Option<AiExecutionFilesystem>",
+        "annotations": "    #[serde(default, skip_serializing_if = \"Option::is_none\")]",
+        "line": 764,
+        "aliases": []
+      },
+      {
+        "name": "approval",
+        "key": "approval",
+        "type": "Option<AiExecutionApproval>",
+        "annotations": "    #[serde(default, skip_serializing_if = \"Option::is_none\")]",
+        "line": 766,
+        "aliases": []
+      },
+      {
+        "name": "network",
+        "key": "network",
+        "type": "Option<AiExecutionNetwork>",
+        "annotations": "    #[serde(default, skip_serializing_if = \"Option::is_none\")]",
+        "line": 768,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Optional per-harness execution policy overrides under\n/// `[ai.execution.<name>]` or the legacy `[ai.harness.<name>.execution]`.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\npub struct AiHarnessExecutionOverride {\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub filesystem: Option<AiExecutionFilesystem>,\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub approval: Option<AiExecutionApproval>,\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub network: Option<AiExecutionNetwork>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L762"
+  },
+  {
+    "name": "AiHarnessConfig",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 787,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "Option<bool>",
+        "annotations": "    #[serde(default)]",
+        "line": 789,
+        "aliases": []
+      },
+      {
+        "name": "install",
+        "key": "install",
+        "type": "Option<bool>",
+        "annotations": "    #[serde(default)]",
+        "line": 791,
+        "aliases": []
+      },
+      {
+        "name": "version",
+        "key": "version",
+        "type": "Option<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 793,
+        "aliases": []
+      },
+      {
+        "name": "execution",
+        "key": "execution",
+        "type": "Option<AiHarnessExecutionOverride>",
+        "annotations": "    #[serde(default, skip_serializing_if = \"Option::is_none\")]",
+        "line": 795,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Per-harness install controls under `[ai.harness.<name>]`.\n///\n/// `enabled` controls whether the harness participates in generated config.\n/// `install` controls whether the corresponding in-container CLI addon is\n/// selected. Host-only harnesses such as Cursor can be enabled without install.\n#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]\npub struct AiHarnessConfig {\n    #[serde(default)]\n    pub enabled: Option<bool>,\n    #[serde(default)]\n    pub install: Option<bool>,\n    #[serde(default)]\n    pub version: Option<String>,\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub execution: Option<AiHarnessExecutionOverride>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L787"
+  },
+  {
+    "name": "AiHarnessListEntry",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 807,
+    "fields": [],
+    "source": "\n/// [ai] section — AI harness and model provider configuration.\n///\n/// New configs select AI harnesses via `[ai.harness.<name>]` tables. The\n/// `harnesses` list remains accepted as a legacy/internal effective selector.\n/// `model_providers` is optional — declares which model-provider credentials\n/// are available (API keys and optional base URLs).\n/// Legacy `providers` field is accepted for backward compatibility.\n#[derive(Debug, Clone, Serialize, Deserialize)]\n#[serde(untagged)]\nenum AiHarnessListEntry {\n    Legacy(AiHarness),\n    Detailed {\n        harness: AiHarness,\n        #[serde(default, alias = \"enable\")]\n        enabled: Option<bool>,\n        #[serde(default)]\n        install: Option<bool>,\n        #[serde(default)]\n        version: Option<String>,\n    },\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L807"
+  },
+  {
+    "name": "RawAiExecutionSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 824,
+    "fields": [
+      {
+        "name": "filesystem",
+        "key": "filesystem",
+        "type": "AiExecutionFilesystem",
+        "annotations": "    #[serde(default)]",
+        "line": 826,
+        "aliases": []
+      },
+      {
+        "name": "approval",
+        "key": "approval",
+        "type": "AiExecutionApproval",
+        "annotations": "    #[serde(default)]",
+        "line": 828,
+        "aliases": []
+      },
+      {
+        "name": "network",
+        "key": "network",
+        "type": "AiExecutionNetwork",
+        "annotations": "    #[serde(default)]",
+        "line": 830,
+        "aliases": []
+      },
+      {
+        "name": "harness",
+        "key": "harness",
+        "type": "HashMap<AiHarness, AiHarnessExecutionOverride>",
+        "annotations": "    #[serde(default, flatten)]",
+        "line": 832,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Raw serde shape for `[ai.execution]`. The scalar fields are the global\n/// defaults; nested `[ai.execution.<harness>]` tables are per-harness\n/// overrides.\n#[derive(Debug, Clone, Deserialize, Default)]\nstruct RawAiExecutionSection {\n    #[serde(default)]\n    filesystem: AiExecutionFilesystem,\n    #[serde(default)]\n    approval: AiExecutionApproval,\n    #[serde(default)]\n    network: AiExecutionNetwork,\n    #[serde(default, flatten)]\n    harness: HashMap<AiHarness, AiHarnessExecutionOverride>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L824"
+  },
+  {
+    "name": "RawAiSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 848,
+    "fields": [
+      {
+        "name": "harnesses",
+        "key": "harnesses",
+        "type": "Vec<AiHarnessListEntry>",
+        "annotations": "    #[serde(default)]",
+        "line": 850,
+        "aliases": []
+      },
+      {
+        "name": "harness_order",
+        "key": "harness_order",
+        "type": "Vec<AiHarness>",
+        "annotations": "    #[serde(default)]",
+        "line": 852,
+        "aliases": []
+      },
+      {
+        "name": "model_providers",
+        "key": "model_providers",
+        "type": "Vec<AiModelProvider>",
+        "annotations": "    #[serde(default)]",
+        "line": 854,
+        "aliases": []
+      },
+      {
+        "name": "execution",
+        "key": "execution",
+        "type": "RawAiExecutionSection",
+        "annotations": "    #[serde(default)]",
+        "line": 856,
+        "aliases": []
+      },
+      {
+        "name": "harness",
+        "key": "harness",
+        "type": "HashMap<AiHarness, AiHarnessConfig>",
+        "annotations": "    #[serde(default)]",
+        "line": 858,
+        "aliases": []
+      },
+      {
+        "name": "providers",
+        "key": "providers",
+        "type": "Vec<AiHarness>",
+        "annotations": "    #[serde(default)]",
+        "line": 860,
+        "aliases": []
+      },
+      {
+        "name": "agents",
+        "key": "agents",
+        "type": "AgentsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 862,
+        "aliases": []
+      },
+      {
+        "name": "mcp",
+        "key": "mcp",
+        "type": "McpSection",
+        "annotations": "    #[serde(default)]",
+        "line": 864,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Raw serde shape for `[ai]`. `harnesses` accepts both the legacy\n/// `[\"codex\"]` list and the canonical ordered list of dictionaries.\n#[derive(Debug, Clone, Deserialize, Default)]\nstruct RawAiSection {\n    #[serde(default)]\n    harnesses: Vec<AiHarnessListEntry>,\n    #[serde(default)]\n    harness_order: Vec<AiHarness>,\n    #[serde(default)]\n    model_providers: Vec<AiModelProvider>,\n    #[serde(default)]\n    execution: RawAiExecutionSection,\n    #[serde(default)]\n    harness: HashMap<AiHarness, AiHarnessConfig>,\n    #[serde(default)]\n    providers: Vec<AiHarness>,\n    #[serde(default)]\n    agents: AgentsSection,\n    #[serde(default)]\n    mcp: McpSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L848"
+  },
+  {
+    "name": "AiSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 868,
+    "fields": [
+      {
+        "name": "harnesses",
+        "key": "harnesses",
+        "type": "Vec<AiHarness>",
+        "annotations": "    /// Which AI coding tools to install (determines addons, volumes, MCP config).\n    /// Serde default is empty; `migrate_legacy()` applies the real default\n    /// ([Claude]) when neither harnesses nor providers was explicitly set.\n    #[serde(default)]",
+        "line": 873,
+        "aliases": []
+      },
+      {
+        "name": "harness_order",
+        "key": "harness_order",
+        "type": "Vec<AiHarness>",
+        "annotations": "\n    /// Explicit tmux/layout order for enabled harnesses. The 1st, 2nd, 3rd\n    /// harness in layout semantics are resolved from this list; enabled\n    /// harnesses omitted here are appended in canonical order.\n    #[serde(default)]",
+        "line": 879,
+        "aliases": []
+      },
+      {
+        "name": "model_providers",
+        "key": "model_providers",
+        "type": "Vec<AiModelProvider>",
+        "annotations": "\n    /// Which model provider API key/base URL env vars are available (optional hint).\n    #[serde(default)]",
+        "line": 883,
+        "aliases": []
+      },
+      {
+        "name": "execution",
+        "key": "execution",
+        "type": "AiExecutionPolicy",
+        "annotations": "\n    /// Global AI execution policy. Per-harness tables may override individual\n    /// axes through `[ai.execution.<name>]`; the legacy\n    /// `[ai.harness.<name>.execution]` form remains accepted.\n    #[serde(default)]",
+        "line": 889,
+        "aliases": []
+      },
+      {
+        "name": "harness",
+        "key": "harness",
+        "type": "HashMap<AiHarness, AiHarnessConfig>",
+        "annotations": "\n    /// Per-harness enable/install/version controls. New configs should prefer\n    /// this as the user-facing selector.\n    #[serde(default)]",
+        "line": 894,
+        "aliases": []
+      },
+      {
+        "name": "providers",
+        "key": "providers",
+        "type": "Vec<AiHarness>",
+        "annotations": "\n    /// Legacy field — accepted for backward compatibility during migration.\n    /// When present and `harnesses` is empty, auto-migrated to `harnesses`.\n    #[serde(default, skip_serializing_if = \"Vec::is_empty\")]",
+        "line": 899,
+        "aliases": []
+      },
+      {
+        "name": "agents",
+        "key": "agents",
+        "type": "AgentsSection",
+        "annotations": "\n    /// Canonical AGENTS.md and provider-specific pointer behavior. New configs\n    /// write this as `[ai.agents]`; legacy top-level `[agents]` is migrated in.\n    #[serde(default)]",
+        "line": 904,
+        "aliases": []
+      },
+      {
+        "name": "mcp",
+        "key": "mcp",
+        "type": "McpSection",
+        "annotations": "\n    /// MCP gateway, permissions, and team-shared servers. New configs write\n    /// this as `[ai.mcp]`; legacy top-level `[mcp]` is migrated in.\n    #[serde(default)]",
+        "line": 909,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize)]\npub struct AiSection {\n    /// Which AI coding tools to install (determines addons, volumes, MCP config).\n    /// Serde default is empty; `migrate_legacy()` applies the real default\n    /// ([Claude]) when neither harnesses nor providers was explicitly set.\n    #[serde(default)]\n    pub harnesses: Vec<AiHarness>,\n\n    /// Explicit tmux/layout order for enabled harnesses. The 1st, 2nd, 3rd\n    /// harness in layout semantics are resolved from this list; enabled\n    /// harnesses omitted here are appended in canonical order.\n    #[serde(default)]\n    pub harness_order: Vec<AiHarness>,\n\n    /// Which model provider API key/base URL env vars are available (optional hint).\n    #[serde(default)]\n    pub model_providers: Vec<AiModelProvider>,\n\n    /// Global AI execution policy. Per-harness tables may override individual\n    /// axes through `[ai.execution.<name>]`; the legacy\n    /// `[ai.harness.<name>.execution]` form remains accepted.\n    #[serde(default)]\n    pub execution: AiExecutionPolicy,\n\n    /// Per-harness enable/install/version controls. New configs should prefer\n    /// this as the user-facing selector.\n    #[serde(default)]\n    pub harness: HashMap<AiHarness, AiHarnessConfig>,\n\n    /// Legacy field — accepted for backward compatibility during migration.\n    /// When present and `harnesses` is empty, auto-migrated to `harnesses`.\n    #[serde(default, skip_serializing_if = \"Vec::is_empty\")]\n    pub providers: Vec<AiHarness>,\n\n    /// Canonical AGENTS.md and provider-specific pointer behavior. New configs\n    /// write this as `[ai.agents]`; legacy top-level `[agents]` is migrated in.\n    #[serde(default)]\n    pub agents: AgentsSection,\n\n    /// MCP gateway, permissions, and team-shared servers. New configs write\n    /// this as `[ai.mcp]`; legacy top-level `[mcp]` is migrated in.\n    #[serde(default)]\n    pub mcp: McpSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L868"
+  },
+  {
+    "name": "ToolEntry",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 1088,
+    "fields": [
+      {
+        "name": "version",
+        "key": "version",
+        "type": "Option<String>",
+        "annotations": "    /// Tool version. `None` when no version is specified (e.g. `clippy = {}`).",
+        "line": 1090,
+        "aliases": []
+      },
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "Option<bool>",
+        "annotations": "    /// Explicitly disable a default-enabled tool while keeping the addon.\n    #[serde(default)]",
+        "line": 1093,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Configuration for a single tool within an addon.\n///\n/// In TOML this appears as e.g. `python = { version = \"3.14\" }`,\n/// `clippy = {}`, or `lazygit = { enabled = false }`.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct ToolEntry {\n    /// Tool version. `None` when no version is specified (e.g. `clippy = {}`).\n    pub version: Option<String>,\n    /// Explicitly disable a default-enabled tool while keeping the addon.\n    #[serde(default)]\n    pub enabled: Option<bool>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1088"
+  },
+  {
+    "name": "AddonToolsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 1098,
+    "fields": [
+      {
+        "name": "tools",
+        "key": "tools",
+        "type": "HashMap<String, ToolEntry>",
+        "annotations": "    #[serde(default)]",
+        "line": 1100,
+        "aliases": []
+      },
+      {
+        "name": "groups",
+        "key": "groups",
+        "type": "HashMap<String, AddonToolsSection>",
+        "annotations": "    /// Language-scoped group selections such as `[addons.go.supply-chain]`.\n    #[serde(flatten)]",
+        "line": 1103,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// The `tools` sub-table of an addon, e.g. `[addons.python.tools]`.\n#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]\npub struct AddonToolsSection {\n    #[serde(default)]\n    pub tools: HashMap<String, ToolEntry>,\n    /// Language-scoped group selections such as `[addons.go.supply-chain]`.\n    #[serde(flatten)]\n    pub groups: HashMap<String, AddonToolsSection>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1098"
+  },
+  {
+    "name": "AddonsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 1118,
+    "fields": [
+      {
+        "name": "addons",
+        "key": "addons",
+        "type": "HashMap<String, AddonToolsSection>",
+        "annotations": "",
+        "line": 1119,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [addons] section — each key is an addon name mapping to its tools table.\n///\n/// In TOML:\n/// ```toml\n/// [addons.python.tools]\n/// python = { version = \"3.14\" }\n/// uv = { version = \"0.12.5\" }\n/// ```\n///\n/// Deserialized as `HashMap<String, AddonToolsSection>` where the outer key\n/// is the addon name (e.g. \"python\") and the inner map contains tool entries.\n#[derive(Debug, Clone, Serialize, Default, PartialEq)]\npub struct AddonsSection {\n    pub addons: HashMap<String, AddonToolsSection>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1118"
+  },
+  {
+    "name": "SkillsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 1197,
+    "fields": [
+      {
+        "name": "include",
+        "key": "include",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default, alias = \"enabled\")]",
+        "line": 1199,
+        "aliases": [
+          "enabled"
+        ]
+      },
+      {
+        "name": "exclude",
+        "key": "exclude",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default, alias = \"disabled\")]",
+        "line": 1201,
+        "aliases": [
+          "disabled"
+        ]
+      }
+    ],
+    "source": "\n/// [skills] section — include/exclude overrides for skill deployment.\n#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]\npub struct SkillsSection {\n    #[serde(default, alias = \"enabled\")]\n    pub include: Vec<String>,\n    #[serde(default, alias = \"disabled\")]\n    pub exclude: Vec<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1197"
+  },
+  {
+    "name": "Theme",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 1212,
+    "fields": [],
+    "source": "\n/// Color themes available across all tools (tmux, Vim, Yazi, lazygit).\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum Theme {\n    #[default]\n    GruvboxDark,\n    GruvboxLight,\n    CatppuccinMocha,\n    CatppuccinMacchiato,\n    CatppuccinFrappe,\n    CatppuccinLatte,\n    Dracula,\n    DraculaSoft,\n    TokyoNight,\n    TokyoNightStorm,\n    TokyoNightDay,\n    Nord,\n    RosePine,\n    RosePineMoon,\n    RosePineDawn,\n    Material,\n    MaterialOcean,\n    MaterialPalenight,\n    MaterialLighter,\n    MaterialDarker,\n    SolarizedDark,\n    SolarizedLight,\n    GithubDark,\n    GithubLight,\n    GithubDarkDimmed,\n    GithubDarkHighContrast,\n    GithubLightHighContrast,\n    AyuDark,\n    AyuMirage,\n    AyuLight,\n    NightOwl,\n    NightOwlLight,\n    Moonlight,\n    Projectious,\n    // NEW families\n    Andromeeda,\n    AuroraX,\n    EverforestDark,\n    EverforestLight,\n    Houston,\n    KanagawaWave,\n    KanagawaDragon,\n    KanagawaLotus,\n    Laserwave,\n    MinDark,\n    MinLight,\n    Monokai,\n    OneDarkPro,\n    OneLight,\n    Plastic,\n    Poimandres,\n    Red,\n    SlackDark,\n    SlackOchin,\n    SnazzyLight,\n    Synthwave84,\n    Vesper,\n    VitesseDark,\n    VitesseLight,\n    VitesseBlack,\n    VsCodeDarkPlus,\n    VsCodeLightPlus,\n    ProjectiousNavy,\n    ProjectiousDeep,\n    ProjectiousLight,\n    ProjectiousHCDark,\n    ProjectiousHCLight,\n    MonoDark,\n    MonoLight,\n    ContrastDark,\n    ContrastDarkMax,\n    ContrastLight,\n    ContrastLightMax,\n    ContrastMonoDark,\n    ContrastMonoDarkMax,\n    ContrastMonoLight,\n    ContrastMonoLightMax,\n    BorlandClassic,\n    BorlandOptimized,\n    NortonClassic,\n    NortonOptimized,\n    PhosphorClassic,\n    PhosphorOptimized,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1212"
+  },
+  {
+    "name": "ThemeFamily",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 1305,
+    "fields": [],
+    "source": "\n/// User-facing theme family selector. Pairs with `ThemeMode` (and optional\n/// `variant`) to resolve to a concrete `Theme`. Families without a light/dark\n/// partner reject an incompatible explicit mode during config validation.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum ThemeFamily {\n    Andromeeda,\n    AuroraX,\n    Ayu,\n    Borland,\n    Catppuccin,\n    Dracula,\n    Everforest,\n    Github,\n    #[default]\n    Gruvbox,\n    Houston,\n    Kanagawa,\n    Laserwave,\n    Material,\n    Min,\n    Monokai,\n    Mono,\n    Moonlight,\n    NightOwl,\n    Nord,\n    Norton,\n    OneDark,\n    Plastic,\n    Poimandres,\n    Phosphor,\n    Projectious,\n    Contrast,\n    ContrastMono,\n    Red,\n    RosePine,\n    Slack,\n    Snazzy,\n    Solarized,\n    Synthwave84,\n    TokyoNight,\n    Vesper,\n    Vitesse,\n    #[clap(alias = \"vscode\")]\n    #[serde(alias = \"vscode\")]\n    VsCode,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1305"
+  },
+  {
+    "name": "ThemeMode",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 1686,
+    "fields": [],
+    "source": "\n/// Global light/dark preference applied on top of the selected theme.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum ThemeMode {\n    /// Follow the host OS appearance when detectable; otherwise preserve the\n    /// selected concrete theme.\n    #[default]\n    Auto,\n    /// Prefer a light concrete palette when the selected theme family provides\n    /// a light variant.\n    Light,\n    /// Prefer a dark concrete palette. Keeps dark themes unchanged and maps\n    /// known light variants to their dark counterpart.\n    Dark,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1686"
+  },
+  {
+    "name": "ThemeEmphasis",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 1703,
+    "fields": [],
+    "source": "\n/// Font-decoration policy used as a second semantic channel alongside color.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum ThemeEmphasis {\n    /// Detect terminal capabilities; defaults to standard when detection is inconclusive.\n    #[default]\n    Auto,\n    /// Bold, italic, dim, underline, and strikethrough where supported.\n    Full,\n    /// Bold, italic, and dim.\n    Standard,\n    /// Bold and dim; suitable for fonts without a true italic face.\n    Minimal,\n    /// Color only.\n    None,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1703"
+  },
+  {
+    "name": "StarshipPreset",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 1987,
+    "fields": [],
+    "source": "\n/// Starship prompt presets.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum StarshipPreset {\n    #[default]\n    Default, // Clean, informative — dir, git, language, duration\n    Plain,    // ASCII only — no Nerd Font needed\n    Minimal,  // Just directory + git branch\n    NerdFont, // Full Nerd Font symbols\n    Pastel,   // Soft powerline segments\n    #[serde(rename = \"powerline-pastel\", alias = \"pastel-powerline\")]\n    #[value(name = \"powerline-pastel\", alias = \"pastel-powerline\")]\n    PastelPowerline, // One-line pastel powerline preset\n    Bracketed, // [segments] in brackets\n    Arrow,    // Powerline-style chevron/arrow segments (airline-style)\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L1987"
+  },
+  {
+    "name": "ConfigLayout",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 2024,
+    "fields": [],
+    "source": "\n/// Default tmux workspace layout for `aibox up`.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum ConfigLayout {\n    /// Work window with yazi, first harness, shell; optional AI/lazygit/shell windows\n    #[default]\n    Dev,\n    /// One fullscreen window for files and each harness\n    Focus,\n    /// Work window with yazi and shell; AI harnesses in a separate window\n    Cowork,\n    /// Work window with yazi and first harness; secondary harnesses in AI window\n    Ai,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2024"
+  },
+  {
+    "name": "TmuxStatusMode",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 2055,
+    "fields": [],
+    "source": "\n/// tmux status-line presentation.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, clap::ValueEnum)]\n#[serde(rename_all = \"kebab-case\")]\n#[clap(rename_all = \"kebab-case\")]\npub enum TmuxStatusMode {\n    /// aibox themed status line with tmux plugin hooks.\n    #[default]\n    #[serde(\n        alias = \"powerline\",\n        alias = \"enabled\",\n        alias = \"shell\",\n        alias = \"sidecar\",\n        alias = \"native\"\n    )]\n    #[value(\n        alias = \"powerline\",\n        alias = \"enabled\",\n        alias = \"shell\",\n        alias = \"sidecar\",\n        alias = \"native\"\n    )]\n    Extended,\n    /// Minimal tmux-native status text.\n    Plain,\n    /// Disable the tmux status line.\n    #[serde(alias = \"hidden\")]\n    #[value(alias = \"hidden\")]\n    Disabled,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2055"
+  },
+  {
+    "name": "TmuxTitleStatesSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2151,
+    "fields": [
+      {
+        "name": "working",
+        "key": "working",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_working_symbol\")]",
+        "line": 2153,
+        "aliases": []
+      },
+      {
+        "name": "question",
+        "key": "question",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_question_symbol\")]",
+        "line": 2155,
+        "aliases": []
+      },
+      {
+        "name": "done",
+        "key": "done",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_done_symbol\")]",
+        "line": 2157,
+        "aliases": []
+      },
+      {
+        "name": "error",
+        "key": "error",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_error_symbol\")]",
+        "line": 2159,
+        "aliases": []
+      },
+      {
+        "name": "idle",
+        "key": "idle",
+        "type": "String",
+        "annotations": "    #[serde(default)]",
+        "line": 2161,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Per-attention-state symbols. Fields use serde defaults independently so a\n/// TOML override such as `question = \"? \"` does not discard other defaults.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxTitleStatesSection {\n    #[serde(default = \"default_tmux_title_working_symbol\")]\n    pub working: String,\n    #[serde(default = \"default_tmux_title_question_symbol\")]\n    pub question: String,\n    #[serde(default = \"default_tmux_title_done_symbol\")]\n    pub done: String,\n    #[serde(default = \"default_tmux_title_error_symbol\")]\n    pub error: String,\n    #[serde(default)]\n    pub idle: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2151"
+  },
+  {
+    "name": "TmuxTitleSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2181,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2183,
+        "aliases": []
+      },
+      {
+        "name": "format",
+        "key": "format",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_format\")]",
+        "line": 2185,
+        "aliases": []
+      },
+      {
+        "name": "max_length",
+        "key": "max-length",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_title_max_length\")]",
+        "line": 2187,
+        "aliases": []
+      },
+      {
+        "name": "directory_style",
+        "key": "directory-style",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_directory_style\")]",
+        "line": 2189,
+        "aliases": []
+      },
+      {
+        "name": "repository_style",
+        "key": "repository-style",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_repository_style\")]",
+        "line": 2191,
+        "aliases": []
+      },
+      {
+        "name": "agent_style",
+        "key": "agent-style",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_title_agent_style\")]",
+        "line": 2193,
+        "aliases": []
+      },
+      {
+        "name": "done_ttl_seconds",
+        "key": "done-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_title_done_ttl_seconds\")]",
+        "line": 2195,
+        "aliases": []
+      },
+      {
+        "name": "message_max_length",
+        "key": "message-max-length",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_title_message_max_length\")]",
+        "line": 2197,
+        "aliases": []
+      },
+      {
+        "name": "states",
+        "key": "states",
+        "type": "TmuxTitleStatesSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2199,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Configurable tmux tab-title presentation. Runtime helpers publish the\n/// current attention state through tmux user options; the title format only\n/// controls how that state and workspace metadata are presented.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxTitleSection {\n    #[serde(default = \"bool_true\")]\n    pub enabled: bool,\n    #[serde(default = \"default_tmux_title_format\")]\n    pub format: String,\n    #[serde(default = \"default_tmux_title_max_length\")]\n    pub max_length: u32,\n    #[serde(default = \"default_tmux_title_directory_style\")]\n    pub directory_style: String,\n    #[serde(default = \"default_tmux_title_repository_style\")]\n    pub repository_style: String,\n    #[serde(default = \"default_tmux_title_agent_style\")]\n    pub agent_style: String,\n    #[serde(default = \"default_tmux_title_done_ttl_seconds\")]\n    pub done_ttl_seconds: u32,\n    #[serde(default = \"default_tmux_title_message_max_length\")]\n    pub message_max_length: u32,\n    #[serde(default)]\n    pub states: TmuxTitleStatesSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2181"
+  },
+  {
+    "name": "TmuxNotificationsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2229,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_false\")]",
+        "line": 2231,
+        "aliases": []
+      },
+      {
+        "name": "protocol",
+        "key": "protocol",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_notification_protocol\")]",
+        "line": 2233,
+        "aliases": []
+      },
+      {
+        "name": "states",
+        "key": "states",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default = \"default_tmux_notification_states\")]",
+        "line": 2235,
+        "aliases": []
+      },
+      {
+        "name": "include_message",
+        "key": "include-message",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2237,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Optional terminal attention notifications emitted by the runtime helper.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxNotificationsSection {\n    #[serde(default = \"bool_false\")]\n    pub enabled: bool,\n    #[serde(default = \"default_tmux_notification_protocol\")]\n    pub protocol: String,\n    #[serde(default = \"default_tmux_notification_states\")]\n    pub states: Vec<String>,\n    #[serde(default = \"bool_true\")]\n    pub include_message: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2229"
+  },
+  {
+    "name": "TmuxStatusAiboxMetricsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2253,
+    "fields": [
+      {
+        "name": "log",
+        "key": "log",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2255,
+        "aliases": []
+      },
+      {
+        "name": "oom",
+        "key": "oom",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2257,
+        "aliases": []
+      },
+      {
+        "name": "proc",
+        "key": "proc",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2259,
+        "aliases": []
+      },
+      {
+        "name": "ai",
+        "key": "ai",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2261,
+        "aliases": []
+      },
+      {
+        "name": "mcp",
+        "key": "mcp",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2263,
+        "aliases": []
+      },
+      {
+        "name": "mig",
+        "key": "mig",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2265,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusAiboxMetricsSection {\n    #[serde(default = \"bool_true\")]\n    pub log: bool,\n    #[serde(default = \"bool_true\")]\n    pub oom: bool,\n    #[serde(default = \"bool_true\")]\n    pub proc: bool,\n    #[serde(default = \"bool_true\")]\n    pub ai: bool,\n    #[serde(default = \"bool_true\")]\n    pub mcp: bool,\n    #[serde(default = \"bool_true\")]\n    pub mig: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2253"
+  },
+  {
+    "name": "TmuxStatusElementsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2283,
+    "fields": [
+      {
+        "name": "hostname",
+        "key": "hostname",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2285,
+        "aliases": []
+      },
+      {
+        "name": "external_ip",
+        "key": "external-ip",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2287,
+        "aliases": []
+      },
+      {
+        "name": "ssh",
+        "key": "ssh",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2289,
+        "aliases": []
+      },
+      {
+        "name": "uptime",
+        "key": "uptime",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2291,
+        "aliases": []
+      },
+      {
+        "name": "weather",
+        "key": "weather",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2293,
+        "aliases": []
+      },
+      {
+        "name": "datetime",
+        "key": "datetime",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2295,
+        "aliases": []
+      },
+      {
+        "name": "forge",
+        "key": "forge",
+        "type": "bool",
+        "annotations": "    // forge is the default git-aware segment; it auto-detects provider and\n    // supersedes the upstream `git` + `github` plugins for default aibox\n    // installs.  Users who want to pin to the upstream behaviour can disable\n    // forge and enable git/github explicitly in their aibox.toml.\n    #[serde(default = \"bool_true\")]",
+        "line": 2301,
+        "aliases": []
+      },
+      {
+        "name": "git",
+        "key": "git",
+        "type": "bool",
+        "annotations": "    // git and github are kept in the schema for opt-in / legacy configs.\n    // They default to false because forge covers their combined functionality.\n    // Migration note: if your aibox.toml has git=true or github=true alongside\n    // forge=true you will see doubled branch info; set forge=false to opt out.\n    #[serde(default = \"bool_false\")]",
+        "line": 2307,
+        "aliases": []
+      },
+      {
+        "name": "github",
+        "key": "github",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_false\")]",
+        "line": 2309,
+        "aliases": []
+      },
+      {
+        "name": "kubernetes",
+        "key": "kubernetes",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2311,
+        "aliases": []
+      },
+      {
+        "name": "terraform",
+        "key": "terraform",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2313,
+        "aliases": []
+      },
+      {
+        "name": "cloud",
+        "key": "cloud",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2315,
+        "aliases": []
+      },
+      {
+        "name": "cloudstatus",
+        "key": "cloudstatus",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_false\")]",
+        "line": 2317,
+        "aliases": []
+      },
+      {
+        "name": "cpu",
+        "key": "cpu",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2319,
+        "aliases": []
+      },
+      {
+        "name": "loadavg",
+        "key": "loadavg",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2321,
+        "aliases": []
+      },
+      {
+        "name": "mem",
+        "key": "mem",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2323,
+        "aliases": []
+      },
+      {
+        "name": "swap",
+        "key": "swap",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2325,
+        "aliases": []
+      },
+      {
+        "name": "disk",
+        "key": "disk",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2327,
+        "aliases": []
+      },
+      {
+        "name": "gpu",
+        "key": "gpu",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2329,
+        "aliases": []
+      },
+      {
+        "name": "netspeed",
+        "key": "netspeed",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2331,
+        "aliases": []
+      },
+      {
+        "name": "ping",
+        "key": "ping",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2333,
+        "aliases": []
+      },
+      {
+        "name": "aibox",
+        "key": "aibox",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 2335,
+        "aliases": []
+      },
+      {
+        "name": "aibox_metrics",
+        "key": "aibox-metrics",
+        "type": "TmuxStatusAiboxMetricsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2337,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusElementsSection {\n    #[serde(default = \"bool_true\")]\n    pub hostname: bool,\n    #[serde(default = \"bool_true\")]\n    pub external_ip: bool,\n    #[serde(default = \"bool_true\")]\n    pub ssh: bool,\n    #[serde(default = \"bool_true\")]\n    pub uptime: bool,\n    #[serde(default = \"bool_true\")]\n    pub weather: bool,\n    #[serde(default = \"bool_true\")]\n    pub datetime: bool,\n    // forge is the default git-aware segment; it auto-detects provider and\n    // supersedes the upstream `git` + `github` plugins for default aibox\n    // installs.  Users who want to pin to the upstream behaviour can disable\n    // forge and enable git/github explicitly in their aibox.toml.\n    #[serde(default = \"bool_true\")]\n    pub forge: bool,\n    // git and github are kept in the schema for opt-in / legacy configs.\n    // They default to false because forge covers their combined functionality.\n    // Migration note: if your aibox.toml has git=true or github=true alongside\n    // forge=true you will see doubled branch info; set forge=false to opt out.\n    #[serde(default = \"bool_false\")]\n    pub git: bool,\n    #[serde(default = \"bool_false\")]\n    pub github: bool,\n    #[serde(default = \"bool_true\")]\n    pub kubernetes: bool,\n    #[serde(default = \"bool_true\")]\n    pub terraform: bool,\n    #[serde(default = \"bool_true\")]\n    pub cloud: bool,\n    #[serde(default = \"bool_false\")]\n    pub cloudstatus: bool,\n    #[serde(default = \"bool_true\")]\n    pub cpu: bool,\n    #[serde(default = \"bool_true\")]\n    pub loadavg: bool,\n    #[serde(default = \"bool_true\")]\n    pub mem: bool,\n    #[serde(default = \"bool_true\")]\n    pub swap: bool,\n    #[serde(default = \"bool_true\")]\n    pub disk: bool,\n    #[serde(default = \"bool_true\")]\n    pub gpu: bool,\n    #[serde(default = \"bool_true\")]\n    pub netspeed: bool,\n    #[serde(default = \"bool_true\")]\n    pub ping: bool,\n    #[serde(default = \"bool_true\")]\n    pub aibox: bool,\n    #[serde(default)]\n    pub aibox_metrics: TmuxStatusAiboxMetricsSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2283"
+  },
+  {
+    "name": "TmuxStatusLayoutSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2372,
+    "fields": [
+      {
+        "name": "line1_left",
+        "key": "line1-left",
+        "type": "Option<Vec<String>>",
+        "annotations": "    #[serde(default)]",
+        "line": 2374,
+        "aliases": []
+      },
+      {
+        "name": "line1_right",
+        "key": "line1-right",
+        "type": "Option<Vec<String>>",
+        "annotations": "    #[serde(default)]",
+        "line": 2376,
+        "aliases": []
+      },
+      {
+        "name": "line2_left",
+        "key": "line2-left",
+        "type": "Option<Vec<String>>",
+        "annotations": "    #[serde(default)]",
+        "line": 2378,
+        "aliases": []
+      },
+      {
+        "name": "line2_right",
+        "key": "line2-right",
+        "type": "Option<Vec<String>>",
+        "annotations": "    #[serde(default)]",
+        "line": 2380,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusLayoutSection {\n    #[serde(default)]\n    pub line1_left: Option<Vec<String>>,\n    #[serde(default)]\n    pub line1_right: Option<Vec<String>>,\n    #[serde(default)]\n    pub line2_left: Option<Vec<String>>,\n    #[serde(default)]\n    pub line2_right: Option<Vec<String>>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2372"
+  },
+  {
+    "name": "TmuxStatusLabelsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2385,
+    "fields": [
+      {
+        "name": "aibox_log",
+        "key": "aibox-log",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_log\")]",
+        "line": 2387,
+        "aliases": []
+      },
+      {
+        "name": "aibox_oom",
+        "key": "aibox-oom",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_oom\")]",
+        "line": 2389,
+        "aliases": []
+      },
+      {
+        "name": "aibox_proc",
+        "key": "aibox-proc",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_proc\")]",
+        "line": 2391,
+        "aliases": []
+      },
+      {
+        "name": "aibox_ai",
+        "key": "aibox-ai",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_ai\")]",
+        "line": 2393,
+        "aliases": []
+      },
+      {
+        "name": "aibox_mcp",
+        "key": "aibox-mcp",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_mcp\")]",
+        "line": 2395,
+        "aliases": []
+      },
+      {
+        "name": "aibox_mig",
+        "key": "aibox-mig",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_aibox_mig\")]",
+        "line": 2397,
+        "aliases": []
+      },
+      {
+        "name": "kubernetes",
+        "key": "kubernetes",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_kubernetes\")]",
+        "line": 2399,
+        "aliases": []
+      },
+      {
+        "name": "cloud",
+        "key": "cloud",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_cloud\")]",
+        "line": 2401,
+        "aliases": []
+      },
+      {
+        "name": "cloud_aws",
+        "key": "cloud-aws",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_cloud_aws\")]",
+        "line": 2403,
+        "aliases": []
+      },
+      {
+        "name": "cloud_gcp",
+        "key": "cloud-gcp",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_cloud_gcp\")]",
+        "line": 2405,
+        "aliases": []
+      },
+      {
+        "name": "cloud_azure",
+        "key": "cloud-azure",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_cloud_azure\")]",
+        "line": 2407,
+        "aliases": []
+      },
+      {
+        "name": "cloud_multi",
+        "key": "cloud-multi",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_cloud_multi\")]",
+        "line": 2409,
+        "aliases": []
+      },
+      {
+        "name": "uptime",
+        "key": "uptime",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_uptime\")]",
+        "line": 2411,
+        "aliases": []
+      },
+      {
+        "name": "netspeed",
+        "key": "netspeed",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_netspeed\")]",
+        "line": 2413,
+        "aliases": []
+      },
+      {
+        "name": "netspeed_download",
+        "key": "netspeed-download",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_netspeed_download\")]",
+        "line": 2415,
+        "aliases": []
+      },
+      {
+        "name": "netspeed_upload",
+        "key": "netspeed-upload",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_status_label_netspeed_upload\")]",
+        "line": 2417,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusLabelsSection {\n    #[serde(default = \"default_status_label_aibox_log\")]\n    pub aibox_log: String,\n    #[serde(default = \"default_status_label_aibox_oom\")]\n    pub aibox_oom: String,\n    #[serde(default = \"default_status_label_aibox_proc\")]\n    pub aibox_proc: String,\n    #[serde(default = \"default_status_label_aibox_ai\")]\n    pub aibox_ai: String,\n    #[serde(default = \"default_status_label_aibox_mcp\")]\n    pub aibox_mcp: String,\n    #[serde(default = \"default_status_label_aibox_mig\")]\n    pub aibox_mig: String,\n    #[serde(default = \"default_status_label_kubernetes\")]\n    pub kubernetes: String,\n    #[serde(default = \"default_status_label_cloud\")]\n    pub cloud: String,\n    #[serde(default = \"default_status_label_cloud_aws\")]\n    pub cloud_aws: String,\n    #[serde(default = \"default_status_label_cloud_gcp\")]\n    pub cloud_gcp: String,\n    #[serde(default = \"default_status_label_cloud_azure\")]\n    pub cloud_azure: String,\n    #[serde(default = \"default_status_label_cloud_multi\")]\n    pub cloud_multi: String,\n    #[serde(default = \"default_status_label_uptime\")]\n    pub uptime: String,\n    #[serde(default = \"default_status_label_netspeed\")]\n    pub netspeed: String,\n    #[serde(default = \"default_status_label_netspeed_download\")]\n    pub netspeed_download: String,\n    #[serde(default = \"default_status_label_netspeed_upload\")]\n    pub netspeed_upload: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2385"
+  },
+  {
+    "name": "TmuxStatusSeparatorStyle",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 2509,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum TmuxStatusSeparatorStyle {\n    Normal,\n    Rounded,\n    Slant,\n    Slantup,\n    Trapezoid,\n    Flame,\n    Pixel,\n    Honeycomb,\n    None,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2509"
+  },
+  {
+    "name": "TmuxStatusElementsSpacing",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 2543,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum TmuxStatusElementsSpacing {\n    False,\n    True,\n    Both,\n    Windows,\n    Plugins,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2543"
+  },
+  {
+    "name": "TmuxStatusSeparatorsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2569,
+    "fields": [
+      {
+        "name": "style",
+        "key": "style",
+        "type": "TmuxStatusSeparatorStyle",
+        "annotations": "    #[serde(default = \"default_tmux_status_separator_style\")]",
+        "line": 2571,
+        "aliases": []
+      },
+      {
+        "name": "edge_style",
+        "key": "edge-style",
+        "type": "TmuxStatusSeparatorStyle",
+        "annotations": "    #[serde(default = \"default_tmux_status_separator_style\")]",
+        "line": 2573,
+        "aliases": []
+      },
+      {
+        "name": "elements_spacing",
+        "key": "elements-spacing",
+        "type": "TmuxStatusElementsSpacing",
+        "annotations": "    #[serde(default = \"default_tmux_status_elements_spacing\")]",
+        "line": 2575,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusSeparatorsSection {\n    #[serde(default = \"default_tmux_status_separator_style\")]\n    pub style: TmuxStatusSeparatorStyle,\n    #[serde(default = \"default_tmux_status_separator_style\")]\n    pub edge_style: TmuxStatusSeparatorStyle,\n    #[serde(default = \"default_tmux_status_elements_spacing\")]\n    pub elements_spacing: TmuxStatusElementsSpacing,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2569"
+  },
+  {
+    "name": "TmuxStatusRefreshSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2614,
+    "fields": [
+      {
+        "name": "interval_seconds",
+        "key": "interval-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_refresh_interval_seconds\")]",
+        "line": 2616,
+        "aliases": []
+      },
+      {
+        "name": "aibox_metrics_cache_ttl_seconds",
+        "key": "aibox-metrics-cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_aibox_metrics_cache_ttl_seconds\")]",
+        "line": 2618,
+        "aliases": []
+      },
+      {
+        "name": "netspeed_cache_ttl_seconds",
+        "key": "netspeed-cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_netspeed_cache_ttl_seconds\")]",
+        "line": 2620,
+        "aliases": []
+      },
+      {
+        "name": "kubernetes_cache_ttl_seconds",
+        "key": "kubernetes-cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_kubernetes_cache_ttl_seconds\")]",
+        "line": 2622,
+        "aliases": []
+      },
+      {
+        "name": "cloud_cache_ttl_seconds",
+        "key": "cloud-cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_cloud_cache_ttl_seconds\")]",
+        "line": 2624,
+        "aliases": []
+      },
+      {
+        "name": "github_cache_ttl_seconds",
+        "key": "github-cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_tmux_status_github_cache_ttl_seconds\")]",
+        "line": 2626,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusRefreshSection {\n    #[serde(default = \"default_tmux_status_refresh_interval_seconds\")]\n    pub interval_seconds: u32,\n    #[serde(default = \"default_tmux_status_aibox_metrics_cache_ttl_seconds\")]\n    pub aibox_metrics_cache_ttl_seconds: u32,\n    #[serde(default = \"default_tmux_status_netspeed_cache_ttl_seconds\")]\n    pub netspeed_cache_ttl_seconds: u32,\n    #[serde(default = \"default_tmux_status_kubernetes_cache_ttl_seconds\")]\n    pub kubernetes_cache_ttl_seconds: u32,\n    #[serde(default = \"default_tmux_status_cloud_cache_ttl_seconds\")]\n    pub cloud_cache_ttl_seconds: u32,\n    #[serde(default = \"default_tmux_status_github_cache_ttl_seconds\")]\n    pub github_cache_ttl_seconds: u32,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2614"
+  },
+  {
+    "name": "TmuxStatusForgeSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2648,
+    "fields": [
+      {
+        "name": "github_hosts",
+        "key": "github-hosts",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default = \"default_tmux_status_forge_github_hosts\")]",
+        "line": 2650,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusForgeSection {\n    #[serde(default = \"default_tmux_status_forge_github_hosts\")]\n    pub github_hosts: Vec<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2648"
+  },
+  {
+    "name": "TmuxStatusModelProviderStatusProvider",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2701,
+    "fields": [
+      {
+        "name": "provider",
+        "key": "provider",
+        "type": "String",
+        "annotations": "",
+        "line": 2702,
+        "aliases": []
+      },
+      {
+        "name": "label",
+        "key": "label",
+        "type": "String",
+        "annotations": "",
+        "line": 2703,
+        "aliases": []
+      },
+      {
+        "name": "checks",
+        "key": "checks",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default = \"default_model_provider_status_checks\")]",
+        "line": 2705,
+        "aliases": []
+      },
+      {
+        "name": "status_url",
+        "key": "status-url",
+        "type": "Option<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 2707,
+        "aliases": []
+      },
+      {
+        "name": "overall_components",
+        "key": "overall-components",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 2709,
+        "aliases": []
+      },
+      {
+        "name": "model_components",
+        "key": "model-components",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 2711,
+        "aliases": []
+      },
+      {
+        "name": "harness_components",
+        "key": "harness-components",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 2713,
+        "aliases": []
+      },
+      {
+        "name": "show_agent_count",
+        "key": "show-agent-count",
+        "type": "bool",
+        "annotations": "\n    // ── Phase 1: local agent count ────────────────────────────────────────\n    /// Show local agent count (`× N`) read from\n    /// `aibox-status --plugin-json`'s `ai_agents_breakdown`. Free + always-on\n    /// by default; set false to suppress.\n    #[serde(default = \"bool_true\")]",
+        "line": 2720,
+        "aliases": []
+      },
+      {
+        "name": "agent_binaries",
+        "key": "agent-binaries",
+        "type": "Vec<String>",
+        "annotations": "\n    /// CLI binary names whose running processes count as an agent for this\n    /// provider. If left empty, defaults are populated by\n    /// `default_agent_binaries_for(provider)`.\n    #[serde(default)]",
+        "line": 2726,
+        "aliases": []
+      },
+      {
+        "name": "show_quota",
+        "key": "show-quota",
+        "type": "bool",
+        "annotations": "\n    // ── Phase 2: rate-limit quota polling (opt-in) ────────────────────────\n    /// Poll the provider's API to show rate-limit % remaining. Opt-in\n    /// because it sends a billable 1-token request every cache_ttl seconds\n    /// (≈ $0.03/day per provider at default 300 s polling).\n    #[serde(default = \"bool_false\")]",
+        "line": 2733,
+        "aliases": []
+      },
+      {
+        "name": "quota_window",
+        "key": "quota-window",
+        "type": "String",
+        "annotations": "\n    /// Which rate-limit dimension to show: \"tokens\" or \"requests\". Tokens\n    /// is the more useful signal for most providers.\n    #[serde(default = \"default_quota_window\")]",
+        "line": 2738,
+        "aliases": []
+      },
+      {
+        "name": "quota_api_key_env",
+        "key": "quota-api-key-env",
+        "type": "Option<String>",
+        "annotations": "\n    /// Env var holding the API key for quota polling. When unset, falls\n    /// back to the provider's standard key env (`ANTHROPIC_API_KEY` etc.).\n    #[serde(default)]",
+        "line": 2743,
+        "aliases": []
+      },
+      {
+        "name": "show_admin_usage",
+        "key": "show-admin-usage",
+        "type": "bool",
+        "annotations": "\n    // ── Phase 3: admin usage rollup (deep opt-in) ─────────────────────────\n    /// Show this month's usage / soft cap drawn from the provider's admin\n    /// API (Anthropic `/v1/organizations/usage_report/messages`, OpenAI\n    /// `/v1/organization/usage/completions`). Requires an admin key with\n    /// usage-read scope and the section-level\n    /// `admin_usage_enabled = true` ack.\n    #[serde(default = \"bool_false\")]",
+        "line": 2752,
+        "aliases": []
+      },
+      {
+        "name": "admin_api_key_env",
+        "key": "admin-api-key-env",
+        "type": "Option<String>",
+        "annotations": "\n    /// Env var holding the admin API key. Required when `show_admin_usage`\n    /// is true. Defaults to `<PROVIDER>_ADMIN_KEY` if unset.\n    #[serde(default)]",
+        "line": 2757,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusModelProviderStatusProvider {\n    pub provider: String,\n    pub label: String,\n    #[serde(default = \"default_model_provider_status_checks\")]\n    pub checks: Vec<String>,\n    #[serde(default)]\n    pub status_url: Option<String>,\n    #[serde(default)]\n    pub overall_components: Vec<String>,\n    #[serde(default)]\n    pub model_components: Vec<String>,\n    #[serde(default)]\n    pub harness_components: Vec<String>,\n\n    // ── Phase 1: local agent count ────────────────────────────────────────\n    /// Show local agent count (`× N`) read from\n    /// `aibox-status --plugin-json`'s `ai_agents_breakdown`. Free + always-on\n    /// by default; set false to suppress.\n    #[serde(default = \"bool_true\")]\n    pub show_agent_count: bool,\n\n    /// CLI binary names whose running processes count as an agent for this\n    /// provider. If left empty, defaults are populated by\n    /// `default_agent_binaries_for(provider)`.\n    #[serde(default)]\n    pub agent_binaries: Vec<String>,\n\n    // ── Phase 2: rate-limit quota polling (opt-in) ────────────────────────\n    /// Poll the provider's API to show rate-limit % remaining. Opt-in\n    /// because it sends a billable 1-token request every cache_ttl seconds\n    /// (≈ $0.03/day per provider at default 300 s polling).\n    #[serde(default = \"bool_false\")]\n    pub show_quota: bool,\n\n    /// Which rate-limit dimension to show: \"tokens\" or \"requests\". Tokens\n    /// is the more useful signal for most providers.\n    #[serde(default = \"default_quota_window\")]\n    pub quota_window: String,\n\n    /// Env var holding the API key for quota polling. When unset, falls\n    /// back to the provider's standard key env (`ANTHROPIC_API_KEY` etc.).\n    #[serde(default)]\n    pub quota_api_key_env: Option<String>,\n\n    // ── Phase 3: admin usage rollup (deep opt-in) ─────────────────────────\n    /// Show this month's usage / soft cap drawn from the provider's admin\n    /// API (Anthropic `/v1/organizations/usage_report/messages`, OpenAI\n    /// `/v1/organization/usage/completions`). Requires an admin key with\n    /// usage-read scope and the section-level\n    /// `admin_usage_enabled = true` ack.\n    #[serde(default = \"bool_false\")]\n    pub show_admin_usage: bool,\n\n    /// Env var holding the admin API key. Required when `show_admin_usage`\n    /// is true. Defaults to `<PROVIDER>_ADMIN_KEY` if unset.\n    #[serde(default)]\n    pub admin_api_key_env: Option<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2701"
+  },
+  {
+    "name": "TmuxStatusModelProviderStatusSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2762,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_false\")]",
+        "line": 2764,
+        "aliases": []
+      },
+      {
+        "name": "cache_ttl_seconds",
+        "key": "cache-ttl-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_model_provider_status_cache_ttl_seconds\")]",
+        "line": 2766,
+        "aliases": []
+      },
+      {
+        "name": "timeout_seconds",
+        "key": "timeout-seconds",
+        "type": "u32",
+        "annotations": "    #[serde(default = \"default_model_provider_status_timeout_seconds\")]",
+        "line": 2768,
+        "aliases": []
+      },
+      {
+        "name": "show_glyph_when_ok",
+        "key": "show-glyph-when-ok",
+        "type": "bool",
+        "annotations": "    /// Legacy: emit a ✓ glyph next to healthy providers. Defaults to false\n    /// now that the custom PowerKit theme encodes ok/warning/error via the\n    /// chevron color. Flip on if you prefer the redundant glyph.\n    #[serde(default = \"bool_false\")]",
+        "line": 2773,
+        "aliases": []
+      },
+      {
+        "name": "show_ok",
+        "key": "show-ok",
+        "type": "bool",
+        "annotations": "    /// Preserved for backward compatibility — older configs read `show_ok`.\n    /// Treated as equivalent to `show_glyph_when_ok` when present.\n    #[serde(default = \"bool_false\", alias = \"show-ok\")]",
+        "line": 2777,
+        "aliases": [
+          "show-ok"
+        ]
+      },
+      {
+        "name": "admin_usage_enabled",
+        "key": "admin-usage-enabled",
+        "type": "bool",
+        "annotations": "    /// Section-level ack required before any provider's\n    /// `show_admin_usage = true` takes effect. Acts as a guard against\n    /// accidentally enabling admin-key polling for a billing surface.\n    #[serde(default = \"bool_false\")]",
+        "line": 2782,
+        "aliases": []
+      },
+      {
+        "name": "providers",
+        "key": "providers",
+        "type": "Vec<TmuxStatusModelProviderStatusProvider>",
+        "annotations": "    #[serde(default = \"default_model_provider_status_providers\")]",
+        "line": 2784,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxStatusModelProviderStatusSection {\n    #[serde(default = \"bool_false\")]\n    pub enabled: bool,\n    #[serde(default = \"default_model_provider_status_cache_ttl_seconds\")]\n    pub cache_ttl_seconds: u32,\n    #[serde(default = \"default_model_provider_status_timeout_seconds\")]\n    pub timeout_seconds: u32,\n    /// Legacy: emit a ✓ glyph next to healthy providers. Defaults to false\n    /// now that the custom PowerKit theme encodes ok/warning/error via the\n    /// chevron color. Flip on if you prefer the redundant glyph.\n    #[serde(default = \"bool_false\")]\n    pub show_glyph_when_ok: bool,\n    /// Preserved for backward compatibility — older configs read `show_ok`.\n    /// Treated as equivalent to `show_glyph_when_ok` when present.\n    #[serde(default = \"bool_false\", alias = \"show-ok\")]\n    pub show_ok: bool,\n    /// Section-level ack required before any provider's\n    /// `show_admin_usage = true` takes effect. Acts as a guard against\n    /// accidentally enabling admin-key polling for a billing surface.\n    #[serde(default = \"bool_false\")]\n    pub admin_usage_enabled: bool,\n    #[serde(default = \"default_model_provider_status_providers\")]\n    pub providers: Vec<TmuxStatusModelProviderStatusProvider>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2762"
+  },
+  {
+    "name": "TmuxStatusSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 2901,
+    "fields": [
+      {
+        "name": "mode",
+        "key": "mode",
+        "type": "TmuxStatusMode",
+        "annotations": "    #[serde(default = \"default_tmux_status_mode\")]",
+        "line": 2903,
+        "aliases": []
+      },
+      {
+        "name": "elements",
+        "key": "elements",
+        "type": "TmuxStatusElementsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2905,
+        "aliases": []
+      },
+      {
+        "name": "layout",
+        "key": "layout",
+        "type": "TmuxStatusLayoutSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2907,
+        "aliases": []
+      },
+      {
+        "name": "labels",
+        "key": "labels",
+        "type": "TmuxStatusLabelsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2909,
+        "aliases": []
+      },
+      {
+        "name": "separators",
+        "key": "separators",
+        "type": "TmuxStatusSeparatorsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2911,
+        "aliases": []
+      },
+      {
+        "name": "refresh",
+        "key": "refresh",
+        "type": "TmuxStatusRefreshSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2913,
+        "aliases": []
+      },
+      {
+        "name": "forge",
+        "key": "forge",
+        "type": "TmuxStatusForgeSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2915,
+        "aliases": []
+      },
+      {
+        "name": "model_providers",
+        "key": "model_providers",
+        "type": "TmuxStatusModelProviderStatusSection",
+        "annotations": "    #[serde(default)]",
+        "line": 2917,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [customization.tmux.status] section.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct TmuxStatusSection {\n    #[serde(default = \"default_tmux_status_mode\")]\n    pub mode: TmuxStatusMode,\n    #[serde(default)]\n    pub elements: TmuxStatusElementsSection,\n    #[serde(default)]\n    pub layout: TmuxStatusLayoutSection,\n    #[serde(default)]\n    pub labels: TmuxStatusLabelsSection,\n    #[serde(default)]\n    pub separators: TmuxStatusSeparatorsSection,\n    #[serde(default)]\n    pub refresh: TmuxStatusRefreshSection,\n    #[serde(default)]\n    pub forge: TmuxStatusForgeSection,\n    #[serde(default)]\n    pub model_providers: TmuxStatusModelProviderStatusSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L2901"
+  },
+  {
+    "name": "TmuxSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3008,
+    "fields": [
+      {
+        "name": "layout",
+        "key": "layout",
+        "type": "Option<ConfigLayout>",
+        "annotations": "    /// Optional tmux-specific layout override. When absent, `[customization].layout`\n    /// remains the source of truth for the default workspace layout.\n    #[serde(default)]",
+        "line": 3012,
+        "aliases": []
+      },
+      {
+        "name": "prefix",
+        "key": "prefix",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_tmux_prefix\")]",
+        "line": 3014,
+        "aliases": []
+      },
+      {
+        "name": "session_name",
+        "key": "session_name",
+        "type": "String",
+        "annotations": "    /// Tmux session name. Empty string means \"derive from project name at load time\".\n    /// After `AiboxConfig::migrate_legacy_sections()` this is always non-empty.\n    #[serde(default = \"default_tmux_session_name\")]",
+        "line": 3018,
+        "aliases": []
+      },
+      {
+        "name": "status",
+        "key": "status",
+        "type": "TmuxStatusSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3020,
+        "aliases": []
+      },
+      {
+        "name": "title",
+        "key": "title",
+        "type": "TmuxTitleSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3022,
+        "aliases": []
+      },
+      {
+        "name": "notifications",
+        "key": "notifications",
+        "type": "TmuxNotificationsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3024,
+        "aliases": []
+      },
+      {
+        "name": "layout_switch",
+        "key": "layout_switch",
+        "type": "TmuxLayoutSwitchSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3026,
+        "aliases": []
+      },
+      {
+        "name": "theme_switch",
+        "key": "theme_switch",
+        "type": "TmuxThemeSwitchSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3028,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [customization.tmux] section — tmux runtime presentation and startup.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct TmuxSection {\n    /// Optional tmux-specific layout override. When absent, `[customization].layout`\n    /// remains the source of truth for the default workspace layout.\n    #[serde(default)]\n    pub layout: Option<ConfigLayout>,\n    #[serde(default = \"default_tmux_prefix\")]\n    pub prefix: String,\n    /// Tmux session name. Empty string means \"derive from project name at load time\".\n    /// After `AiboxConfig::migrate_legacy_sections()` this is always non-empty.\n    #[serde(default = \"default_tmux_session_name\")]\n    pub session_name: String,\n    #[serde(default)]\n    pub status: TmuxStatusSection,\n    #[serde(default)]\n    pub title: TmuxTitleSection,\n    #[serde(default)]\n    pub notifications: TmuxNotificationsSection,\n    #[serde(default)]\n    pub layout_switch: TmuxLayoutSwitchSection,\n    #[serde(default)]\n    pub theme_switch: TmuxThemeSwitchSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3008"
+  },
+  {
+    "name": "TmuxLayoutSwitchSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3075,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 3077,
+        "aliases": []
+      },
+      {
+        "name": "prefix_key",
+        "key": "prefix-key",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_layout_switch_prefix_key\")]",
+        "line": 3079,
+        "aliases": []
+      },
+      {
+        "name": "style",
+        "key": "style",
+        "type": "String",
+        "annotations": "    /// `menu` (display-menu, more discoverable) or `table`\n    /// (switch-client -T layouts; two-key chord, less screen real estate).\n    #[serde(default = \"default_layout_switch_style\")]",
+        "line": 3083,
+        "aliases": []
+      },
+      {
+        "name": "confirm",
+        "key": "confirm",
+        "type": "bool",
+        "annotations": "    /// Show a \"this will kill <apps>\" confirmation menu before rebuilding.\n    /// Default on; layout swap is always destructive.\n    #[serde(default = \"bool_true\")]",
+        "line": 3087,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `customization.tmux.layout_switch` — live layout chooser keybinding.\n///\n/// Always destructive (kills panes when rebuilding windows). The `confirm`\n/// dialog is the default safety net. Set `enabled = false` to omit the\n/// binding entirely.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxLayoutSwitchSection {\n    #[serde(default = \"bool_true\")]\n    pub enabled: bool,\n    #[serde(default = \"default_layout_switch_prefix_key\")]\n    pub prefix_key: String,\n    /// `menu` (display-menu, more discoverable) or `table`\n    /// (switch-client -T layouts; two-key chord, less screen real estate).\n    #[serde(default = \"default_layout_switch_style\")]\n    pub style: String,\n    /// Show a \"this will kill <apps>\" confirmation menu before rebuilding.\n    /// Default on; layout swap is always destructive.\n    #[serde(default = \"bool_true\")]\n    pub confirm: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3075"
+  },
+  {
+    "name": "TmuxThemeSwitchSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3107,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"bool_true\")]",
+        "line": 3109,
+        "aliases": []
+      },
+      {
+        "name": "prefix_key",
+        "key": "prefix-key",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_theme_switch_prefix_key\")]",
+        "line": 3111,
+        "aliases": []
+      },
+      {
+        "name": "themes",
+        "key": "themes",
+        "type": "Vec<String>",
+        "annotations": "    /// Themes presented in the chooser menu. Defaults to a curated short\n    /// list; users can override with the full 29-theme roster if desired.\n    #[serde(default = \"default_theme_switch_themes\")]",
+        "line": 3115,
+        "aliases": []
+      },
+      {
+        "name": "include_mode_toggle",
+        "key": "include-mode-toggle",
+        "type": "bool",
+        "annotations": "    /// Include a \"Toggle light/dark\" entry that flips `customization.mode`\n    /// without changing the theme family.\n    #[serde(default = \"bool_true\")]",
+        "line": 3119,
+        "aliases": []
+      },
+      {
+        "name": "confirm_restart_tuis",
+        "key": "confirm-restart-tuis",
+        "type": "bool",
+        "annotations": "    /// Show a \"restart these TUIs\" confirmation menu before tier 2 swap.\n    #[serde(default = \"bool_true\")]",
+        "line": 3122,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `customization.tmux.theme_switch` — live theme chooser keybinding.\n///\n/// Tier 1 (light) is non-destructive; tier 2 (`Heavy: restart TUIs`) is\n/// gated by `confirm_restart_tuis`.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub struct TmuxThemeSwitchSection {\n    #[serde(default = \"bool_true\")]\n    pub enabled: bool,\n    #[serde(default = \"default_theme_switch_prefix_key\")]\n    pub prefix_key: String,\n    /// Themes presented in the chooser menu. Defaults to a curated short\n    /// list; users can override with the full 29-theme roster if desired.\n    #[serde(default = \"default_theme_switch_themes\")]\n    pub themes: Vec<String>,\n    /// Include a \"Toggle light/dark\" entry that flips `customization.mode`\n    /// without changing the theme family.\n    #[serde(default = \"bool_true\")]\n    pub include_mode_toggle: bool,\n    /// Show a \"restart these TUIs\" confirmation menu before tier 2 swap.\n    #[serde(default = \"bool_true\")]\n    pub confirm_restart_tuis: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3107"
+  },
+  {
+    "name": "CustomizationSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3145,
+    "fields": [
+      {
+        "name": "theme",
+        "key": "theme",
+        "type": "ThemeFamily",
+        "annotations": "    /// Theme family. Set via custom deserializer (see below).",
+        "line": 3147,
+        "aliases": []
+      },
+      {
+        "name": "mode",
+        "key": "mode",
+        "type": "ThemeMode",
+        "annotations": "",
+        "line": 3148,
+        "aliases": []
+      },
+      {
+        "name": "variant",
+        "key": "variant",
+        "type": "Option<String>",
+        "annotations": "    /// Optional alternate variant override (per-family). Validated at resolve\n    /// time; unknown values fall through to the family default.",
+        "line": 3151,
+        "aliases": []
+      },
+      {
+        "name": "emphasis",
+        "key": "emphasis",
+        "type": "ThemeEmphasis",
+        "annotations": "",
+        "line": 3152,
+        "aliases": []
+      },
+      {
+        "name": "emphasis_overrides",
+        "key": "emphasis_overrides",
+        "type": "std::collections::BTreeMap<String, String>",
+        "annotations": "    /// Optional semantic-role decoration overrides. Keys use the generated\n    /// role spelling (`code_comment`, `status_error`, ...); values are a\n    /// whitespace-separated attribute list.",
+        "line": 3156,
+        "aliases": []
+      },
+      {
+        "name": "prompt",
+        "key": "prompt",
+        "type": "StarshipPreset",
+        "annotations": "",
+        "line": 3157,
+        "aliases": []
+      },
+      {
+        "name": "layout",
+        "key": "layout",
+        "type": "ConfigLayout",
+        "annotations": "",
+        "line": 3158,
+        "aliases": []
+      },
+      {
+        "name": "tmux",
+        "key": "tmux",
+        "type": "TmuxSection",
+        "annotations": "",
+        "line": 3159,
+        "aliases": []
+      },
+      {
+        "name": "legacy_theme",
+        "key": "legacy_theme",
+        "type": "Option<Theme>",
+        "annotations": "    /// Populated by the deserializer when the user supplied a legacy concrete\n    /// theme name (e.g. `\"ayu-dark\"`). Forces `resolved_theme()` to return this\n    /// locked concrete theme rather than running family/mode/variant resolution.\n    /// Skipped during serialization — callers that emit TOML (container.rs)\n    /// always use the family form.",
+        "line": 3165,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [customization] section — color theme, shell prompt, and tmux layout.\n///\n/// Deserialization is implemented manually (see `impl<'de> Deserialize`) to\n/// support both the new family-form (`theme = \"ayu\"`) and legacy concrete names\n/// (`theme = \"ayu-dark\"`). When a legacy concrete name is detected the\n/// `legacy_theme` sidecar is populated and `resolved_theme()` returns it\n/// directly (locked, no auto-flipping).\n#[derive(Debug, Clone)]\npub struct CustomizationSection {\n    /// Theme family. Set via custom deserializer (see below).\n    pub theme: ThemeFamily,\n    pub mode: ThemeMode,\n    /// Optional alternate variant override (per-family). Validated at resolve\n    /// time; unknown values fall through to the family default.\n    pub variant: Option<String>,\n    pub emphasis: ThemeEmphasis,\n    /// Optional semantic-role decoration overrides. Keys use the generated\n    /// role spelling (`code_comment`, `status_error`, ...); values are a\n    /// whitespace-separated attribute list.\n    pub emphasis_overrides: std::collections::BTreeMap<String, String>,\n    pub prompt: StarshipPreset,\n    pub layout: ConfigLayout,\n    pub tmux: TmuxSection,\n    /// Populated by the deserializer when the user supplied a legacy concrete\n    /// theme name (e.g. `\"ayu-dark\"`). Forces `resolved_theme()` to return this\n    /// locked concrete theme rather than running family/mode/variant resolution.\n    /// Skipped during serialization — callers that emit TOML (container.rs)\n    /// always use the family form.\n    pub legacy_theme: Option<Theme>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3145"
+  },
+  {
+    "name": "ProcessKitSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3557,
+    "fields": [
+      {
+        "name": "source",
+        "key": "source",
+        "type": "String",
+        "annotations": "    /// Git URL of the processkit-compatible source.\n    #[serde(default = \"default_processkit_source\")]",
+        "line": 3560,
+        "aliases": []
+      },
+      {
+        "name": "version",
+        "key": "version",
+        "type": "String",
+        "annotations": "    /// Semver tag of the processkit source to consume. The sentinel value\n    /// `\"unset\"` means \"no version pinned yet\" — downstream code can detect\n    /// this and skip processkit fetching until a real version is set.\n    #[serde(default = \"default_processkit_version\")]",
+        "line": 3565,
+        "aliases": []
+      },
+      {
+        "name": "src_path",
+        "key": "src_path",
+        "type": "String",
+        "annotations": "    /// Subdirectory within the source repo containing the processkit content.\n    #[serde(default = \"default_processkit_src_path\")]",
+        "line": 3568,
+        "aliases": []
+      },
+      {
+        "name": "branch",
+        "key": "branch",
+        "type": "Option<String>",
+        "annotations": "    /// Optional branch name. If set, tracks a moving branch instead of a\n    /// pinned tag (discouraged but supported).\n    #[serde(default)]",
+        "line": 3572,
+        "aliases": []
+      },
+      {
+        "name": "release_asset_url_template",
+        "key": "release_asset_url_template",
+        "type": "Option<String>",
+        "annotations": "    /// URL template for the release-asset tarball, with `{source}`,\n    /// `{version}`, `{org}`, and `{name}` placeholders. When unset, the\n    /// fetcher uses the GitHub-style default\n    /// `{source}/releases/download/{version}/{name}-{version}.tar.gz`.\n    /// Set this to point at non-GitHub hosts (Gitea, GitLab, self-hosted)\n    /// that serve release assets at a different URL shape.\n    #[serde(default)]",
+        "line": 3580,
+        "aliases": []
+      },
+      {
+        "name": "context",
+        "key": "context",
+        "type": "ContextSection",
+        "annotations": "    /// Context schema metadata. New configs write `[processkit.context]`;\n    /// legacy top-level `[context]` is migrated in.\n    #[serde(default)]",
+        "line": 3584,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [processkit] section — configures the processkit-compatible source\n/// the project consumes content from.\n///\n/// processkit ships skills and primitives that aibox installs into the\n/// project. The default upstream is the canonical projectious-work/processkit\n/// repo. Companies can fork processkit and have projects consume the fork by\n/// changing `source` to point at their fork.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]\npub struct ProcessKitSection {\n    /// Git URL of the processkit-compatible source.\n    #[serde(default = \"default_processkit_source\")]\n    pub source: String,\n    /// Semver tag of the processkit source to consume. The sentinel value\n    /// `\"unset\"` means \"no version pinned yet\" — downstream code can detect\n    /// this and skip processkit fetching until a real version is set.\n    #[serde(default = \"default_processkit_version\")]\n    pub version: String,\n    /// Subdirectory within the source repo containing the processkit content.\n    #[serde(default = \"default_processkit_src_path\")]\n    pub src_path: String,\n    /// Optional branch name. If set, tracks a moving branch instead of a\n    /// pinned tag (discouraged but supported).\n    #[serde(default)]\n    pub branch: Option<String>,\n    /// URL template for the release-asset tarball, with `{source}`,\n    /// `{version}`, `{org}`, and `{name}` placeholders. When unset, the\n    /// fetcher uses the GitHub-style default\n    /// `{source}/releases/download/{version}/{name}-{version}.tar.gz`.\n    /// Set this to point at non-GitHub hosts (Gitea, GitLab, self-hosted)\n    /// that serve release assets at a different URL shape.\n    #[serde(default)]\n    pub release_asset_url_template: Option<String>,\n    /// Context schema metadata. New configs write `[processkit.context]`;\n    /// legacy top-level `[context]` is migrated in.\n    #[serde(default)]\n    pub context: ContextSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3557"
+  },
+  {
+    "name": "AiboxLocalConfig",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3632,
+    "fields": [
+      {
+        "name": "container",
+        "key": "container",
+        "type": "LocalContainerSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3634,
+        "aliases": []
+      },
+      {
+        "name": "mcp",
+        "key": "mcp",
+        "type": "McpSection",
+        "annotations": "    /// Personal MCP servers — never committed to git.\n    #[serde(default)]",
+        "line": 3637,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Personal, gitignored overlay that merges on top of `aibox.toml`.\n///\n/// Only a subset of the config is overridable locally — specifically the fields\n/// that vary per developer (credentials, personal mount paths). Shared settings\n/// like container name, aibox version, and addon list stay in `aibox.toml`.\n///\n/// Location: `.aibox-local.toml` in the project root (same dir as `aibox.toml`).\n/// This file is added to `.gitignore` by `aibox init` / `aibox apply`.\n///\n/// Example `.aibox-local.toml`:\n/// ```toml\n/// [container.environment]\n/// GH_TOKEN            = \"ghp_...\"\n/// ANTHROPIC_API_KEY   = \"sk-ant-...\"\n///\n/// [[container.extra_volumes]]\n/// source = \"~/.config/gh\"\n/// target = \"/home/aibox/.config/gh\"\n///\n/// [[container.extra_volumes]]\n/// source = \"~/.aws\"\n/// target = \"/home/aibox/.aws\"\n/// ```\n#[derive(Debug, Clone, Deserialize, Default)]\npub struct AiboxLocalConfig {\n    #[serde(default)]\n    pub container: LocalContainerSection,\n    /// Personal MCP servers — never committed to git.\n    #[serde(default)]\n    pub mcp: McpSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3632"
+  },
+  {
+    "name": "LocalContainerSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3642,
+    "fields": [
+      {
+        "name": "environment",
+        "key": "environment",
+        "type": "HashMap<String, String>",
+        "annotations": "    /// Environment variables to inject — merged with (and override) `aibox.toml` entries.\n    #[serde(default)]",
+        "line": 3645,
+        "aliases": []
+      },
+      {
+        "name": "extra_volumes",
+        "key": "extra_volumes",
+        "type": "Vec<ExtraVolume>",
+        "annotations": "    /// Additional bind mounts — appended after `aibox.toml` extra_volumes.\n    #[serde(default)]",
+        "line": 3648,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// The `[container]` sub-section of `.aibox-local.toml`.\n#[derive(Debug, Clone, Deserialize, Default)]\npub struct LocalContainerSection {\n    /// Environment variables to inject — merged with (and override) `aibox.toml` entries.\n    #[serde(default)]\n    pub environment: HashMap<String, String>,\n    /// Additional bind mounts — appended after `aibox.toml` extra_volumes.\n    #[serde(default)]\n    pub extra_volumes: Vec<ExtraVolume>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3642"
+  },
+  {
+    "name": "ExtraMcpServer",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3655,
+    "fields": [
+      {
+        "name": "name",
+        "key": "name",
+        "type": "String",
+        "annotations": "    /// Server name — used as the key in the `mcpServers` JSON object.",
+        "line": 3657,
+        "aliases": []
+      },
+      {
+        "name": "command",
+        "key": "command",
+        "type": "String",
+        "annotations": "    /// Executable to spawn (e.g. `uv`, `npx`, `python3`).",
+        "line": 3659,
+        "aliases": []
+      },
+      {
+        "name": "args",
+        "key": "args",
+        "type": "Vec<String>",
+        "annotations": "    /// Arguments passed to `command`.\n    #[serde(default)]",
+        "line": 3662,
+        "aliases": []
+      },
+      {
+        "name": "env",
+        "key": "env",
+        "type": "std::collections::BTreeMap<String, String>",
+        "annotations": "    /// Optional environment variables injected into the server process.\n    #[serde(default)]",
+        "line": 3665,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// One extra MCP server entry defined in `aibox.toml` (team-shared) or\n/// `.aibox-local.toml` (personal). Supplements the processkit-managed\n/// servers that aibox discovers from the installed skills.\n#[derive(Debug, Clone, Serialize, Deserialize, Default)]\npub struct ExtraMcpServer {\n    /// Server name — used as the key in the `mcpServers` JSON object.\n    pub name: String,\n    /// Executable to spawn (e.g. `uv`, `npx`, `python3`).\n    pub command: String,\n    /// Arguments passed to `command`.\n    #[serde(default)]\n    pub args: Vec<String>,\n    /// Optional environment variables injected into the server process.\n    #[serde(default)]\n    pub env: std::collections::BTreeMap<String, String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3655"
+  },
+  {
+    "name": "McpSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3671,
+    "fields": [
+      {
+        "name": "servers",
+        "key": "servers",
+        "type": "Vec<ExtraMcpServer>",
+        "annotations": "    /// Extra MCP servers to register alongside processkit-managed ones.\n    #[serde(default)]",
+        "line": 3674,
+        "aliases": []
+      },
+      {
+        "name": "gateway",
+        "key": "gateway",
+        "type": "McpGatewaySection",
+        "annotations": "\n    /// processkit MCP serving selection. `auto` uses the gateway daemon when\n    /// the installed processkit release ships it and falls back to separate\n    /// per-skill MCP servers otherwise.\n    #[serde(default)]",
+        "line": 3680,
+        "aliases": []
+      },
+      {
+        "name": "permissions",
+        "key": "permissions",
+        "type": "crate::mcp_registration::McpConfig",
+        "annotations": "\n    /// MCP permissions configuration: global allow/deny patterns and per-harness overrides.\n    /// Controls which MCP tools are available to each harness via allow/deny lists.\n    #[serde(default)]",
+        "line": 3685,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `[mcp]` section shared by `aibox.toml` (team-shared servers) and\n/// `.aibox-local.toml` (personal servers). Same shape, different semantics.\n#[derive(Debug, Clone, Serialize, Deserialize, Default)]\npub struct McpSection {\n    /// Extra MCP servers to register alongside processkit-managed ones.\n    #[serde(default)]\n    pub servers: Vec<ExtraMcpServer>,\n\n    /// processkit MCP serving selection. `auto` uses the gateway daemon when\n    /// the installed processkit release ships it and falls back to separate\n    /// per-skill MCP servers otherwise.\n    #[serde(default)]\n    pub gateway: McpGatewaySection,\n\n    /// MCP permissions configuration: global allow/deny patterns and per-harness overrides.\n    /// Controls which MCP tools are available to each harness via allow/deny lists.\n    #[serde(default)]\n    pub permissions: crate::mcp_registration::McpConfig,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3671"
+  },
+  {
+    "name": "McpGatewayMode",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 3691,
+    "fields": [],
+    "source": "\n/// Serving mode for processkit-managed MCP servers.\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum McpGatewayMode {\n    /// Prefer the processkit-gateway daemon when available, otherwise use the\n    /// internal single-process fallback when installed, otherwise use separate\n    /// servers.\n    #[default]\n    Auto,\n    /// Always write one server per processkit skill.\n    #[serde(rename = \"separate\", alias = \"granular\")]\n    Granular,\n    /// Spawn processkit-gateway directly as a stdio MCP server per harness.\n    Stdio,\n    /// Use a managed local HTTP daemon plus one stdio proxy per harness.\n    #[serde(rename = \"daemon\", alias = \"daemon-proxy\")]\n    DaemonProxy,\n    /// Use the processkit-aggregate-mcp server — a single stdio process that imports\n    /// all per-skill MCP servers in-process.  Eliminates the N-process startup cost\n    /// that Codex CLI incurs when it eagerly spawns every configured stdio MCP server.\n    /// Requires the `aggregate-mcp` processkit skill to be enabled.\n    Aggregate,\n    /// Like `Aggregate`, but defers per-skill module imports until the first tool call\n    /// for each skill, reducing cold-start latency by ~1.58× on typical installations.\n    /// Sets `PROCESSKIT_MCP_MODE=lazy_catalog` on the aggregate-mcp server.\n    ///\n    /// Requires processkit ≥ v0.26.0 and the `aggregate-mcp` processkit skill.\n    /// `Auto` does **not** promote to this variant; opt in explicitly via\n    /// `[mcp.gateway] mode = \"lazy-aggregate\"` in `aibox.toml`.\n    LazyAggregate,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3691"
+  },
+  {
+    "name": "McpGatewaySection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3724,
+    "fields": [
+      {
+        "name": "mode",
+        "key": "mode",
+        "type": "McpGatewayMode",
+        "annotations": "    #[serde(default)]",
+        "line": 3726,
+        "aliases": []
+      },
+      {
+        "name": "lazy_catalog",
+        "key": "lazy_catalog",
+        "type": "bool",
+        "annotations": "    #[serde(default)]",
+        "line": 3728,
+        "aliases": []
+      },
+      {
+        "name": "host",
+        "key": "host",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_mcp_gateway_host\")]",
+        "line": 3730,
+        "aliases": []
+      },
+      {
+        "name": "port",
+        "key": "port",
+        "type": "u16",
+        "annotations": "    #[serde(default = \"default_mcp_gateway_port\")]",
+        "line": 3732,
+        "aliases": []
+      },
+      {
+        "name": "path",
+        "key": "path",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_mcp_gateway_path\")]",
+        "line": 3734,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `[mcp.gateway]` controls how aibox exposes processkit MCP tools to\n/// harnesses. It applies only to processkit-managed servers; team and local\n/// MCP servers remain independent entries.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct McpGatewaySection {\n    #[serde(default)]\n    pub mode: McpGatewayMode,\n    #[serde(default)]\n    pub lazy_catalog: bool,\n    #[serde(default = \"default_mcp_gateway_host\")]\n    pub host: String,\n    #[serde(default = \"default_mcp_gateway_port\")]\n    pub port: u16,\n    #[serde(default = \"default_mcp_gateway_path\")]\n    pub path: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3724"
+  },
+  {
+    "name": "AgentsProviderMode",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 3796,
+    "fields": [],
+    "source": "\n/// How aibox scaffolds provider-specific agent entry files (e.g.\n/// `CLAUDE.md`) when both `AGENTS.md` and a provider file exist.\n///\n/// - `Pointer` (default): provider files are thin pointers that say\n///   \"see `AGENTS.md`\". Canonical instructions live exclusively in\n///   `AGENTS.md`. This is the recommended mode and matches the\n///   `agents.md` ecosystem convention.\n/// - `Full`: provider files contain the rich, provider-flavoured\n///   content. Use only when a project genuinely needs different\n///   instructions per harness.\n#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum AgentsProviderMode {\n    #[default]\n    Pointer,\n    Full,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3796"
+  },
+  {
+    "name": "AgentsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3812,
+    "fields": [
+      {
+        "name": "canonical",
+        "key": "canonical",
+        "type": "String",
+        "annotations": "    /// Filename of the canonical agent entry document. Almost no one\n    /// should override this — the default `AGENTS.md` matches the\n    /// growing ecosystem convention at <https://agents.md/>.\n    #[serde(default = \"default_agents_canonical\")]",
+        "line": 3817,
+        "aliases": []
+      },
+      {
+        "name": "provider_mode",
+        "key": "provider_mode",
+        "type": "AgentsProviderMode",
+        "annotations": "\n    /// How provider-specific files are scaffolded. See [`AgentsProviderMode`].\n    #[serde(default)]",
+        "line": 3821,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `[agents]` section — controls how aibox scaffolds the canonical\n/// agent entry file (`AGENTS.md`) and the provider-specific pointer\n/// files (`CLAUDE.md`, future `CODEX.md`, …).\n///\n/// The principle is provider neutrality: every agent harness reads the\n/// same `AGENTS.md` so projects don't have to keep N versions of the\n/// same instructions in sync. Provider files exist only to satisfy the\n/// auto-load convention of specific harnesses (Claude Code auto-loads\n/// `CLAUDE.md` at startup, etc.).\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct AgentsSection {\n    /// Filename of the canonical agent entry document. Almost no one\n    /// should override this — the default `AGENTS.md` matches the\n    /// growing ecosystem convention at <https://agents.md/>.\n    #[serde(default = \"default_agents_canonical\")]\n    pub canonical: String,\n\n    /// How provider-specific files are scaffolded. See [`AgentsProviderMode`].\n    #[serde(default)]\n    pub provider_mode: AgentsProviderMode,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3812"
+  },
+  {
+    "name": "AudioBackend",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 3843,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum AudioBackend {\n    #[default]\n    Pulseaudio,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3843"
+  },
+  {
+    "name": "AudioSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3858,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default)]",
+        "line": 3860,
+        "aliases": []
+      },
+      {
+        "name": "backend",
+        "key": "backend",
+        "type": "AudioBackend",
+        "annotations": "    #[serde(default)]",
+        "line": 3862,
+        "aliases": []
+      },
+      {
+        "name": "install",
+        "key": "install",
+        "type": "bool",
+        "annotations": "    #[serde(default = \"default_audio_install\")]",
+        "line": 3864,
+        "aliases": []
+      },
+      {
+        "name": "pulse_server",
+        "key": "pulse_server",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_pulse_server\")]",
+        "line": 3866,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// [audio] section.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct AudioSection {\n    #[serde(default)]\n    pub enabled: bool,\n    #[serde(default)]\n    pub backend: AudioBackend,\n    #[serde(default = \"default_audio_install\")]\n    pub install: bool,\n    #[serde(default = \"default_pulse_server\")]\n    pub pulse_server: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3858"
+  },
+  {
+    "name": "LatexEngine",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 3898,
+    "fields": [],
+    "source": "\n#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(rename_all = \"kebab-case\")]\npub enum LatexEngine {\n    #[default]\n    Lualatex,\n    Pdflatex,\n    Xelatex,\n    Tectonic,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3898"
+  },
+  {
+    "name": "LatexDocument",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3918,
+    "fields": [
+      {
+        "name": "name",
+        "key": "name",
+        "type": "String",
+        "annotations": "",
+        "line": 3919,
+        "aliases": []
+      },
+      {
+        "name": "source",
+        "key": "source",
+        "type": "String",
+        "annotations": "",
+        "line": 3920,
+        "aliases": []
+      },
+      {
+        "name": "output_dir",
+        "key": "output_dir",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_latex_output_dir\")]",
+        "line": 3922,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct LatexDocument {\n    pub name: String,\n    pub source: String,\n    #[serde(default = \"default_latex_output_dir\")]\n    pub output_dir: String,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3918"
+  },
+  {
+    "name": "LatexPreviewSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3930,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    #[serde(default)]",
+        "line": 3932,
+        "aliases": []
+      },
+      {
+        "name": "engine",
+        "key": "engine",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_latex_preview_engine\")]",
+        "line": 3934,
+        "aliases": []
+      },
+      {
+        "name": "bind",
+        "key": "bind",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_latex_preview_bind\")]",
+        "line": 3936,
+        "aliases": []
+      },
+      {
+        "name": "port",
+        "key": "port",
+        "type": "u16",
+        "annotations": "    #[serde(default = \"default_latex_preview_port\")]",
+        "line": 3938,
+        "aliases": []
+      },
+      {
+        "name": "document",
+        "key": "document",
+        "type": "Option<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 3940,
+        "aliases": []
+      },
+      {
+        "name": "allow_public",
+        "key": "allow_public",
+        "type": "bool",
+        "annotations": "    #[serde(default)]",
+        "line": 3942,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct LatexPreviewSection {\n    #[serde(default)]\n    pub enabled: bool,\n    #[serde(default = \"default_latex_preview_engine\")]\n    pub engine: String,\n    #[serde(default = \"default_latex_preview_bind\")]\n    pub bind: String,\n    #[serde(default = \"default_latex_preview_port\")]\n    pub port: u16,\n    #[serde(default)]\n    pub document: Option<String>,\n    #[serde(default)]\n    pub allow_public: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3930"
+  },
+  {
+    "name": "LatexSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 3971,
+    "fields": [
+      {
+        "name": "engine",
+        "key": "engine",
+        "type": "LatexEngine",
+        "annotations": "    #[serde(default)]",
+        "line": 3973,
+        "aliases": []
+      },
+      {
+        "name": "cache_dir",
+        "key": "cache_dir",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_latex_cache_dir\")]",
+        "line": 3975,
+        "aliases": []
+      },
+      {
+        "name": "options",
+        "key": "options",
+        "type": "Vec<String>",
+        "annotations": "    #[serde(default)]",
+        "line": 3977,
+        "aliases": []
+      },
+      {
+        "name": "documents",
+        "key": "documents",
+        "type": "Vec<LatexDocument>",
+        "annotations": "    #[serde(default)]",
+        "line": 3979,
+        "aliases": []
+      },
+      {
+        "name": "preview",
+        "key": "preview",
+        "type": "LatexPreviewSection",
+        "annotations": "    #[serde(default)]",
+        "line": 3981,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct LatexSection {\n    #[serde(default)]\n    pub engine: LatexEngine,\n    #[serde(default = \"default_latex_cache_dir\")]\n    pub cache_dir: String,\n    #[serde(default)]\n    pub options: Vec<String>,\n    #[serde(default)]\n    pub documents: Vec<LatexDocument>,\n    #[serde(default)]\n    pub preview: LatexPreviewSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L3971"
+  },
+  {
+    "name": "GithubCredentialHelper",
+    "kind": "enum",
+    "file": "cli/src/config.rs",
+    "line": 4007,
+    "fields": [],
+    "source": "\n/// GitHub HTTPS credential helper mode.\n#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]\n#[serde(rename_all = \"kebab-case\")]\npub enum GithubCredentialHelper {\n    /// Configure the helper when the GitHub CLI is part of the generated toolset.\n    #[default]\n    Auto,\n    /// Always configure Git to ask `gh auth git-credential` for GitHub HTTPS remotes.\n    Gh,\n    /// Do not configure the managed GitHub credential helper.\n    None,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4007"
+  },
+  {
+    "name": "GithubIntegrationSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 4028,
+    "fields": [
+      {
+        "name": "credential_helper",
+        "key": "credential_helper",
+        "type": "GithubCredentialHelper",
+        "annotations": "    #[serde(default)]",
+        "line": 4030,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]\npub struct GithubIntegrationSection {\n    #[serde(default)]\n    pub credential_helper: GithubCredentialHelper,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4028"
+  },
+  {
+    "name": "IntegrationsSection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 4034,
+    "fields": [
+      {
+        "name": "github",
+        "key": "github",
+        "type": "GithubIntegrationSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4036,
+        "aliases": []
+      }
+    ],
+    "source": "\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]\npub struct IntegrationsSection {\n    #[serde(default)]\n    pub github: GithubIntegrationSection,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4034"
+  },
+  {
+    "name": "ApplySection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 4052,
+    "fields": [
+      {
+        "name": "purge_disabled_harness_state",
+        "key": "purge_disabled_harness_state",
+        "type": "bool",
+        "annotations": "    /// When true, `aibox apply` hard-deletes per-harness state directories\n    /// and MCP registration files for any harness that is no longer listed\n    /// in `[ai].harnesses`. Defaults to false.\n    #[serde(default)]",
+        "line": 4057,
+        "aliases": []
+      },
+      {
+        "name": "preserve_disabled_harness_state",
+        "key": "preserve_disabled_harness_state",
+        "type": "bool",
+        "annotations": "    /// Persist the owner's decision to retain state for disabled AI harnesses.\n    /// Defaults to false, which keeps the state and emits a one-time\n    /// disposition reminder without creating a Migration entity.\n    #[serde(default)]",
+        "line": 4062,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `[apply]` section. Controls how aggressive `aibox apply` is when it\n/// detects state on the host that no longer matches the config (e.g. an AI\n/// harness that was previously enabled and is now disabled).\n///\n/// Defaults are conservative — when a harness is removed, aibox retains its\n/// state and reports the available preserve-or-purge disposition. Set\n/// `preserve_disabled_harness_state = true` to record the preserve decision,\n/// or `purge_disabled_harness_state = true` to remove the state explicitly.\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]\npub struct ApplySection {\n    /// When true, `aibox apply` hard-deletes per-harness state directories\n    /// and MCP registration files for any harness that is no longer listed\n    /// in `[ai].harnesses`. Defaults to false.\n    #[serde(default)]\n    pub purge_disabled_harness_state: bool,\n    /// Persist the owner's decision to retain state for disabled AI harnesses.\n    /// Defaults to false, which keeps the state and emits a one-time\n    /// disposition reminder without creating a Migration entity.\n    #[serde(default)]\n    pub preserve_disabled_harness_state: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4052"
+  },
+  {
+    "name": "SecuritySection",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 4078,
+    "fields": [
+      {
+        "name": "acknowledge_seccomp_unconfined",
+        "key": "acknowledge_seccomp_unconfined",
+        "type": "bool",
+        "annotations": "    /// Set to `true` to acknowledge that `seccomp=unconfined` is intentionally\n    /// in use for Codex bubblewrap sandboxing.  Defaults to `false`.\n    ///\n    /// When `false` and the generated `docker-compose.yml` would emit\n    /// `seccomp=unconfined`, `aibox apply` errors with a remediation pointer.\n    #[serde(default)]",
+        "line": 4085,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// `[security]` section of `aibox.toml`.\n///\n/// Controls explicit consent for security-sensitive runtime options.\n///\n/// ```toml\n/// [security]\n/// acknowledge_seccomp_unconfined = true\n/// ```\n#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]\npub struct SecuritySection {\n    /// Set to `true` to acknowledge that `seccomp=unconfined` is intentionally\n    /// in use for Codex bubblewrap sandboxing.  Defaults to `false`.\n    ///\n    /// When `false` and the generated `docker-compose.yml` would emit\n    /// `seccomp=unconfined`, `aibox apply` errors with a remediation pointer.\n    #[serde(default)]\n    pub acknowledge_seccomp_unconfined: bool,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4078"
+  },
+  {
+    "name": "AiboxConfig",
+    "kind": "struct",
+    "file": "cli/src/config.rs",
+    "line": 4150,
+    "fields": [
+      {
+        "name": "api_version",
+        "key": "apiVersion",
+        "type": "String",
+        "annotations": "    #[serde(rename = \"apiVersion\", default = \"default_api_version\")]",
+        "line": 4152,
+        "aliases": []
+      },
+      {
+        "name": "kind",
+        "key": "kind",
+        "type": "String",
+        "annotations": "    #[serde(default = \"default_kind\")]",
+        "line": 4154,
+        "aliases": []
+      },
+      {
+        "name": "metadata",
+        "key": "metadata",
+        "type": "MetadataSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4156,
+        "aliases": []
+      },
+      {
+        "name": "aibox",
+        "key": "aibox",
+        "type": "AiboxSection",
+        "annotations": "    #[serde(default, rename = \"aibox\")]",
+        "line": 4158,
+        "aliases": []
+      },
+      {
+        "name": "image",
+        "key": "image",
+        "type": "ImageSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4160,
+        "aliases": []
+      },
+      {
+        "name": "container",
+        "key": "container",
+        "type": "ContainerSection",
+        "annotations": "",
+        "line": 4161,
+        "aliases": []
+      },
+      {
+        "name": "context",
+        "key": "context",
+        "type": "ContextSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4163,
+        "aliases": []
+      },
+      {
+        "name": "ai",
+        "key": "ai",
+        "type": "AiSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4165,
+        "aliases": []
+      },
+      {
+        "name": "addons",
+        "key": "addons",
+        "type": "AddonsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4167,
+        "aliases": []
+      },
+      {
+        "name": "skills",
+        "key": "skills",
+        "type": "SkillsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4169,
+        "aliases": []
+      },
+      {
+        "name": "processkit",
+        "key": "processkit",
+        "type": "ProcessKitSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4171,
+        "aliases": []
+      },
+      {
+        "name": "agents",
+        "key": "agents",
+        "type": "AgentsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4173,
+        "aliases": []
+      },
+      {
+        "name": "customization",
+        "key": "customization",
+        "type": "CustomizationSection",
+        "annotations": "    #[serde(default, alias = \"appearance\")]",
+        "line": 4175,
+        "aliases": [
+          "appearance"
+        ]
+      },
+      {
+        "name": "audio",
+        "key": "audio",
+        "type": "AudioSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4177,
+        "aliases": []
+      },
+      {
+        "name": "latex",
+        "key": "latex",
+        "type": "LatexSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4179,
+        "aliases": []
+      },
+      {
+        "name": "integrations",
+        "key": "integrations",
+        "type": "IntegrationsSection",
+        "annotations": "    #[serde(default)]",
+        "line": 4181,
+        "aliases": []
+      },
+      {
+        "name": "apply",
+        "key": "apply",
+        "type": "ApplySection",
+        "annotations": "    #[serde(default)]",
+        "line": 4183,
+        "aliases": []
+      },
+      {
+        "name": "security",
+        "key": "security",
+        "type": "SecuritySection",
+        "annotations": "\n    #[serde(default)]",
+        "line": 4186,
+        "aliases": []
+      },
+      {
+        "name": "process",
+        "key": "process",
+        "type": "Option<LegacyProcessSection>",
+        "annotations": "\n    /// Legacy [process] section — if present, packages are merged into [context].\n    #[serde(default, skip_serializing)]",
+        "line": 4190,
+        "aliases": []
+      },
+      {
+        "name": "mcp",
+        "key": "mcp",
+        "type": "McpSection",
+        "annotations": "\n    /// Team-shared custom MCP servers from `aibox.toml [mcp.servers]`.\n    #[serde(default)]",
+        "line": 4194,
+        "aliases": []
+      },
+      {
+        "name": "local_env",
+        "key": "local_env",
+        "type": "HashMap<String, String>",
+        "annotations": "\n    /// Environment variables from `.aibox-local.toml` only — tracked separately\n    /// so `generate.rs` can write them to `.aibox-local.env` rather than\n    /// embedding literal credential values in `docker-compose.yml`.\n    /// Not part of the TOML schema; populated programmatically at load time.\n    #[serde(skip)]",
+        "line": 4201,
+        "aliases": []
+      },
+      {
+        "name": "local_mcp_servers",
+        "key": "local_mcp_servers",
+        "type": "Vec<ExtraMcpServer>",
+        "annotations": "\n    /// Personal MCP servers from `.aibox-local.toml [mcp.servers]` — tracked\n    /// separately so they are never committed to git (same principle as\n    /// `local_env` / `.aibox-local.env`). Not part of the TOML schema;\n    /// populated programmatically at load time.\n    #[serde(skip)]",
+        "line": 4208,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Root config structure mapping aibox.toml.\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct AiboxConfig {\n    #[serde(rename = \"apiVersion\", default = \"default_api_version\")]\n    pub api_version: String,\n    #[serde(default = \"default_kind\")]\n    pub kind: String,\n    #[serde(default)]\n    pub metadata: MetadataSection,\n    #[serde(default, rename = \"aibox\")]\n    pub aibox: AiboxSection,\n    #[serde(default)]\n    pub image: ImageSection,\n    pub container: ContainerSection,\n    #[serde(default)]\n    pub context: ContextSection,\n    #[serde(default)]\n    pub ai: AiSection,\n    #[serde(default)]\n    pub addons: AddonsSection,\n    #[serde(default)]\n    pub skills: SkillsSection,\n    #[serde(default)]\n    pub processkit: ProcessKitSection,\n    #[serde(default)]\n    pub agents: AgentsSection,\n    #[serde(default, alias = \"appearance\")]\n    pub customization: CustomizationSection,\n    #[serde(default)]\n    pub audio: AudioSection,\n    #[serde(default)]\n    pub latex: LatexSection,\n    #[serde(default)]\n    pub integrations: IntegrationsSection,\n    #[serde(default)]\n    pub apply: ApplySection,\n\n    #[serde(default)]\n    pub security: SecuritySection,\n\n    /// Legacy [process] section — if present, packages are merged into [context].\n    #[serde(default, skip_serializing)]\n    pub(crate) process: Option<LegacyProcessSection>,\n\n    /// Team-shared custom MCP servers from `aibox.toml [mcp.servers]`.\n    #[serde(default)]\n    pub mcp: McpSection,\n\n    /// Environment variables from `.aibox-local.toml` only — tracked separately\n    /// so `generate.rs` can write them to `.aibox-local.env` rather than\n    /// embedding literal credential values in `docker-compose.yml`.\n    /// Not part of the TOML schema; populated programmatically at load time.\n    #[serde(skip)]\n    pub local_env: HashMap<String, String>,\n\n    /// Personal MCP servers from `.aibox-local.toml [mcp.servers]` — tracked\n    /// separately so they are never committed to git (same principle as\n    /// `local_env` / `.aibox-local.env`). Not part of the TOML schema;\n    /// populated programmatically at load time.\n    #[serde(skip)]\n    pub local_mcp_servers: Vec<ExtraMcpServer>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/config.rs#L4150"
+  },
+  {
+    "name": "McpConfig",
+    "kind": "struct",
+    "file": "cli/src/mcp_registration.rs",
+    "line": 112,
+    "fields": [
+      {
+        "name": "default_mode",
+        "key": "default_mode",
+        "type": "String",
+        "annotations": "    /// Default permission mode: \"allow\", \"ask\", or \"deny\".\n    /// Used when no pattern matches a tool name.\n    #[serde(default = \"default_mode\")]",
+        "line": 116,
+        "aliases": []
+      },
+      {
+        "name": "allow_patterns",
+        "key": "allow_patterns",
+        "type": "Vec<String>",
+        "annotations": "\n    /// Allow-list patterns (glob-style, e.g., \"mcp__processkit-*\", \"bash\").\n    /// Matched against tool names; first match wins.\n    #[serde(default)]",
+        "line": 121,
+        "aliases": []
+      },
+      {
+        "name": "deny_patterns",
+        "key": "deny_patterns",
+        "type": "Vec<String>",
+        "annotations": "\n    /// Deny-list patterns (glob-style, e.g., \"mcp__private-*\").\n    /// Matched against tool names; first match wins.\n    /// Deny patterns override allow patterns if both match.\n    #[serde(default)]",
+        "line": 127,
+        "aliases": []
+      },
+      {
+        "name": "harness",
+        "key": "harness",
+        "type": "BTreeMap<String, HarnessOverride>",
+        "annotations": "\n    /// Per-harness overrides. Key is harness name (e.g., \"claude-code\").\n    #[serde(default)]",
+        "line": 131,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Configuration for global MCP permission management across all harnesses.\n/// Parsed from the `[mcp]` section of aibox.toml.\n#[derive(Debug, Clone, Serialize, Deserialize)]\n#[allow(dead_code)]\npub struct McpConfig {\n    /// Default permission mode: \"allow\", \"ask\", or \"deny\".\n    /// Used when no pattern matches a tool name.\n    #[serde(default = \"default_mode\")]\n    pub default_mode: String,\n\n    /// Allow-list patterns (glob-style, e.g., \"mcp__processkit-*\", \"bash\").\n    /// Matched against tool names; first match wins.\n    #[serde(default)]\n    pub allow_patterns: Vec<String>,\n\n    /// Deny-list patterns (glob-style, e.g., \"mcp__private-*\").\n    /// Matched against tool names; first match wins.\n    /// Deny patterns override allow patterns if both match.\n    #[serde(default)]\n    pub deny_patterns: Vec<String>,\n\n    /// Per-harness overrides. Key is harness name (e.g., \"claude-code\").\n    #[serde(default)]\n    pub harness: BTreeMap<String, HarnessOverride>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L112"
+  },
+  {
+    "name": "HarnessOverride",
+    "kind": "struct",
+    "file": "cli/src/mcp_registration.rs",
+    "line": 153,
+    "fields": [
+      {
+        "name": "enabled",
+        "key": "enabled",
+        "type": "bool",
+        "annotations": "    /// Whether this harness is enabled. Default: true.\n    #[serde(default = \"default_true\")]",
+        "line": 156,
+        "aliases": []
+      },
+      {
+        "name": "default_mode",
+        "key": "default_mode",
+        "type": "Option<String>",
+        "annotations": "\n    /// Override global default mode for this harness.\n    #[serde(default, alias = \"mode\")]",
+        "line": 160,
+        "aliases": [
+          "mode"
+        ]
+      },
+      {
+        "name": "allow_patterns",
+        "key": "allow_patterns",
+        "type": "Vec<String>",
+        "annotations": "\n    /// Additional allow patterns for this harness only.\n    #[serde(default, alias = \"extra_patterns\")]",
+        "line": 164,
+        "aliases": [
+          "extra_patterns"
+        ]
+      },
+      {
+        "name": "deny_patterns",
+        "key": "deny_patterns",
+        "type": "Vec<String>",
+        "annotations": "\n    /// Patterns to deny for this harness (override global allow).\n    #[serde(default)]",
+        "line": 168,
+        "aliases": []
+      }
+    ],
+    "source": "\n/// Per-harness override configuration.\n#[derive(Debug, Clone, Serialize, Deserialize)]\n#[allow(dead_code)]\npub struct HarnessOverride {\n    /// Whether this harness is enabled. Default: true.\n    #[serde(default = \"default_true\")]\n    pub enabled: bool,\n\n    /// Override global default mode for this harness.\n    #[serde(default, alias = \"mode\")]\n    pub default_mode: Option<String>,\n\n    /// Additional allow patterns for this harness only.\n    #[serde(default, alias = \"extra_patterns\")]\n    pub allow_patterns: Vec<String>,\n\n    /// Patterns to deny for this harness (override global allow).\n    #[serde(default)]\n    pub deny_patterns: Vec<String>,\n}",
+    "url": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/cli/src/mcp_registration.rs#L153"
+  }
+]

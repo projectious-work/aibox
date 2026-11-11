@@ -1,0 +1,7 @@
+{
+  "name": "V1-05 reference base",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "containerUser": "aibox",
+  "remoteUser": "aibox",
+  "features": {}
+}

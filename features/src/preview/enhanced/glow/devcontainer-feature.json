@@ -1,0 +1,17 @@
+{
+  "id": "glow",
+  "version": "1.0.0",
+  "name": "glow",
+  "description": "Installs glow (aibox catalog ID preview/enhanced/glow).",
+  "documentationURL": "https://github.com/charmbracelet/glow#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "3.0.0"
+      ],
+      "default": "3.0.0",
+      "description": "Version of glow to install."
+    }
+  }
+}

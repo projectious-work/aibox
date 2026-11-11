@@ -41,7 +41,8 @@ fi
 
 page_ansi() {
     local pager="${PAGER:-less}"
-    # Mouse/color flags are less-specific; other pagers may reject them.
+    # Mouse/color flags are less-specific. A caller may set PAGER=cat or
+    # another pager that does not accept them.
     if [ "${pager##*/}" = "less" ]; then
         "$pager" "${pager_flags[@]}"
     else
@@ -53,8 +54,8 @@ page_plain() {
     page_ansi < "$file"
 }
 
-# python3-rich is installed for Debian's system interpreter. Prefer it to
-# a separately installed Python that may shadow it on PATH.
+# The addon installs python3-rich for Debian's system Python. Prefer that
+# interpreter over a separately installed Python shadowing it on PATH.
 rich_python=""
 _aibox_preview_have_rich() {
     local candidate

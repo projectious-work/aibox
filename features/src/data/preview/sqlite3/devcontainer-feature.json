@@ -1,0 +1,8 @@
+{
+  "id": "sqlite3",
+  "version": "1.0.0",
+  "name": "sqlite3",
+  "description": "Installs sqlite3 (aibox catalog ID data/preview/sqlite3).",
+  "documentationURL": "https://packages.debian.org/trixie/sqlite3",
+  "options": {}
+}

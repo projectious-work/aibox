@@ -1,0 +1,918 @@
+[
+  {
+    "id": "ADDON:ai-aider",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-aider.yaml",
+    "sha256": "fd2091328e8087024343f37b45f8868476d78de12d49ee54682ab8c56a336001",
+    "metadata": "name: ai-aider\nversion: \"1.0.0\"\ndescription: \"Aider – AI pair programming via CLI\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: aider\n    description: \"Aider AI pair-programming CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "aider",
+        "declaration": "  - name: aider\n    description: \"Aider AI pair-programming CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-claude",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-claude.yaml",
+    "sha256": "21030059a4653ccbbe5c5cadad402c470b06be93a7080f5e04275058811c46a7",
+    "metadata": "name: ai-claude\nversion: \"1.0.0\"\ndescription: \"Claude Code CLI (Anthropic)\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: claude\n    description: \"Anthropic Claude Code CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "claude",
+        "declaration": "  - name: claude\n    description: \"Anthropic Claude Code CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-codex",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-codex.yaml",
+    "sha256": "dfcf5f472631b3217506c167cfe1c02c6848851564188a0349848938c6efdd54",
+    "metadata": "name: ai-codex\nversion: \"1.1.0\"\ndescription: \"OpenAI Codex CLI\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\nrequires:\n  - node\n\ntools:\n  - name: codex\n    description: \"OpenAI Codex CLI harness\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "codex",
+        "declaration": "  - name: codex\n    description: \"OpenAI Codex CLI harness\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-continue",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-continue.yaml",
+    "sha256": "f42704ddc0853dab8f59bdf026fe9fec962f872914f34832d95df0cb8277bab5",
+    "metadata": "name: ai-continue\nversion: \"1.0.0\"\ndescription: \"Continue CLI – provider-agnostic coding agent\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: cn\n    description: \"Continue CLI for provider-agnostic coding-agent workflows\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "cn",
+        "declaration": "  - name: cn\n    description: \"Continue CLI for provider-agnostic coding-agent workflows\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-copilot",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-copilot.yaml",
+    "sha256": "ff7513907a73700d5ccbcbd13b571e98daea4de91efd94f741075bfa57670174",
+    "metadata": "name: ai-copilot\nversion: \"1.0.0\"\ndescription: \"GitHub Copilot CLI\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: copilot\n    description: \"GitHub Copilot CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "copilot",
+        "declaration": "  - name: copilot\n    description: \"GitHub Copilot CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-gemini",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-gemini.yaml",
+    "sha256": "94d958ae9bb0d7b6bd43cf760180c487445a1bc56cc93095283c32433c2cac92",
+    "metadata": "name: ai-gemini\nversion: \"1.0.0\"\ndescription: \"Google Gemini CLI\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: gemini\n    description: \"Google Gemini CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "gemini",
+        "declaration": "  - name: gemini\n    description: \"Google Gemini CLI\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-hermes",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-hermes.yaml",
+    "sha256": "2fdbbab3fd2442a040029f29d8b5285808b7ac06a8db0c22d07649d70183edc1",
+    "metadata": "name: ai-hermes\nversion: \"1.0.0\"\ndescription: \"Hermes autonomous AI agent (Nous Research, multi-provider)\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: hermes\n    description: \"Nous Hermes autonomous AI agent CLI\"\n    default_enabled: true\n    default_version: \"0.19.0\"\n    supported_versions: [\"0.16.0\", \"0.18.0\", \"0.19.0\"]",
+    "tools": [
+      {
+        "name": "hermes",
+        "declaration": "  - name: hermes\n    description: \"Nous Hermes autonomous AI agent CLI\"\n    default_enabled: true\n    default_version: \"0.19.0\"\n    supported_versions: [\"0.16.0\", \"0.18.0\", \"0.19.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-mistral",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-mistral.yaml",
+    "sha256": "1919f096b3a1294555174b8394df4576cebd10907cced4681a0f28f3b6f3e689",
+    "metadata": "name: ai-mistral\nversion: \"1.0.0\"\ndescription: \"Mistral AI Python SDK (programmatic use)\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"language-runtime\", \"cli-binary\"]\nbuilder_weight: null\n\ntools:\n  - name: mistral\n    description: \"Mistral AI Python SDK for programmatic use\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "mistral",
+        "declaration": "  - name: mistral\n    description: \"Mistral AI Python SDK for programmatic use\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-opencode",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-opencode.yaml",
+    "sha256": "cab13c3ae08d71ada3e18530786dd4cd5fc68db7eeb3d8c1f579d062ac568aee",
+    "metadata": "name: ai-opencode\nversion: \"1.0.0\"\ndescription: \"OpenCode AI coding agent (open-source, multi-provider)\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: opencode\n    description: \"OpenCode open-source coding-agent CLI\"\n    default_enabled: true\n    default_version: \"0.0.55\"\n    supported_versions: [\"0.0.55\"]",
+    "tools": [
+      {
+        "name": "opencode",
+        "declaration": "  - name: opencode\n    description: \"OpenCode open-source coding-agent CLI\"\n    default_enabled: true\n    default_version: \"0.0.55\"\n    supported_versions: [\"0.0.55\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:ai-tau",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/ai/ai-tau.yaml",
+    "sha256": "e5624ac2adc076dcf13bd6158d8ac81198c6ac5b08f0c8b975cef64fb4039f8e",
+    "metadata": "name: ai-tau\nversion: \"1.0.0\"\ndescription: \"Tau educational coding agent (multi-provider)\"\nprofile_intent: provider-cli\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: tau\n    description: \"Tau terminal coding agent\"\n    default_enabled: true\n    default_version: \"0.3.13\"\n    supported_versions: [\"0.3.5\", \"0.3.7\", \"0.3.10\", \"0.3.11\", \"0.3.13\"]",
+    "tools": [
+      {
+        "name": "tau",
+        "declaration": "  - name: tau\n    description: \"Tau terminal coding agent\"\n    default_enabled: true\n    default_version: \"0.3.13\"\n    supported_versions: [\"0.3.5\", \"0.3.7\", \"0.3.10\", \"0.3.11\", \"0.3.13\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-docusaurus",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-docusaurus.yaml",
+    "sha256": "9af0383d3efe52301b80fe847e39b924d314775e9a20d8ca2539e3eb16000d73",
+    "metadata": "name: docs-docusaurus\nversion: \"1.1.0\"\ndescription: \"Docusaurus static docs site (React/MDX)\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nrequires:\n  - node\n\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: docusaurus\n    description: \"React and MDX documentation site generator\"\n    default_enabled: true\n    default_version: \"3.10.1\"\n    supported_versions: [\"3.7.0\", \"3.8\", \"3.9.2\", \"3.10.1\"]",
+    "tools": [
+      {
+        "name": "docusaurus",
+        "declaration": "  - name: docusaurus\n    description: \"React and MDX documentation site generator\"\n    default_enabled: true\n    default_version: \"3.10.1\"\n    supported_versions: [\"3.7.0\", \"3.8\", \"3.9.2\", \"3.10.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-hugo",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-hugo.yaml",
+    "sha256": "669811cf5b949cab942be7b7ea4a3640efdbeae62df6b4328dd6167210bcfab0",
+    "metadata": "name: docs-hugo\nversion: \"1.0.0\"\ndescription: \"Hugo static site generator (Go)\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: hugo\n    description: \"Fast Go-based static site generator\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "hugo",
+        "declaration": "  - name: hugo\n    description: \"Fast Go-based static site generator\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-mdbook",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mdbook.yaml",
+    "sha256": "6eeb22b438c10f9fa6907a30206b4ef0b1ff18a3a6592eca58faa945488a266c",
+    "metadata": "name: docs-mdbook\nversion: \"1.0.0\"\ndescription: \"mdBook – Rust-powered book builder\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: mdbook\n    description: \"Rust-powered book and documentation builder\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "mdbook",
+        "declaration": "  - name: mdbook\n    description: \"Rust-powered book and documentation builder\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-mkdocs",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-mkdocs.yaml",
+    "sha256": "44be9cf2585d5980ba18ce0d60585226c8b7d00fd017e2938b27129902803369",
+    "metadata": "name: docs-mkdocs\nversion: \"1.0.0\"\ndescription: \"MkDocs – Python Markdown docs site\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nrequires:\n  - python\n\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: mkdocs\n    description: \"Python Markdown documentation site generator\"\n    default_enabled: true\n    default_version: \"1.6.1\"\n    supported_versions: [\"1.6.1\"]",
+    "tools": [
+      {
+        "name": "mkdocs",
+        "declaration": "  - name: mkdocs\n    description: \"Python Markdown documentation site generator\"\n    default_enabled: true\n    default_version: \"1.6.1\"\n    supported_versions: [\"1.6.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-starlight",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-starlight.yaml",
+    "sha256": "2bc1b2d3be7f8fe6d8a78b899bd08b2c05039813bb01268467d1f379a32a69a1",
+    "metadata": "name: docs-starlight\nversion: \"1.0.0\"\ndescription: \"Starlight – Astro-based docs site\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nrequires:\n  - node\n\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: starlight\n    description: \"Astro-based documentation site framework\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "starlight",
+        "declaration": "  - name: starlight\n    description: \"Astro-based documentation site framework\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:docs-zensical",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/docs/docs-zensical.yaml",
+    "sha256": "87dc18c6ec4d6c410f56b1cd3b1752ec1a1de5711cc75185e686060dcec4b333",
+    "metadata": "name: docs-zensical\nversion: \"1.0.0\"\ndescription: \"Zensical – Python docs site\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nrequires:\n  - python\n\nskills:\n  - documentation\n\nbuilder_weight: null\n\ntools:\n  - name: zensical\n    description: \"Python documentation site generator\"\n    default_enabled: true\n    default_version: \"0.0.57\"\n    supported_versions: [\"0.0.43\", \"0.0.44\", \"0.0.47\", \"0.0.51\", \"0.0.52\", \"0.0.53\", \"0.0.55\", \"0.0.56\", \"0.0.57\"]",
+    "tools": [
+      {
+        "name": "zensical",
+        "declaration": "  - name: zensical\n    description: \"Python documentation site generator\"\n    default_enabled: true\n    default_version: \"0.0.57\"\n    supported_versions: [\"0.0.43\", \"0.0.44\", \"0.0.47\", \"0.0.51\", \"0.0.52\", \"0.0.53\", \"0.0.55\", \"0.0.56\", \"0.0.57\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:go-quality",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go-quality.yaml",
+    "sha256": "71ead57a19e2fe1ab290ef60c8344537be2d54ba791e03943fd89b287d264a29",
+    "metadata": "name: go-quality\nversion: \"1.0.0\"\ndescription: \"Production Go formatting, linting, vulnerability, and security tools\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: null\nrequires: [\"go\"]\n\ntools:\n  - name: goimports\n    description: \"Go import organizer and formatter\"\n    default_enabled: true\n    default_version: \"v0.48.0\"\n    supported_versions: [\"v0.48.0\"]\n  - name: staticcheck\n    description: \"Advanced Go static analysis suite\"\n    default_enabled: true\n    default_version: \"v0.7.0\"\n    supported_versions: [\"v0.7.0\"]\n  - name: golangci-lint\n    description: \"Fast aggregate Go linter runner\"\n    default_enabled: true\n    default_version: \"v2.12.2\"\n    supported_versions: [\"v2.12.2\"]\n  - name: govulncheck\n    description: \"Official Go vulnerability analyzer\"\n    default_enabled: true\n    default_version: \"v1.6.0\"\n    supported_versions: [\"v1.6.0\"]\n  - name: gosec\n    description: \"Go source security analyzer\"\n    default_enabled: true\n    default_version: \"v2.28.0\"\n    supported_versions: [\"v2.28.0\"]",
+    "tools": [
+      {
+        "name": "goimports",
+        "declaration": "  - name: goimports\n    description: \"Go import organizer and formatter\"\n    default_enabled: true\n    default_version: \"v0.48.0\"\n    supported_versions: [\"v0.48.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "staticcheck",
+        "declaration": "  - name: staticcheck\n    description: \"Advanced Go static analysis suite\"\n    default_enabled: true\n    default_version: \"v0.7.0\"\n    supported_versions: [\"v0.7.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "golangci-lint",
+        "declaration": "  - name: golangci-lint\n    description: \"Fast aggregate Go linter runner\"\n    default_enabled: true\n    default_version: \"v2.12.2\"\n    supported_versions: [\"v2.12.2\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "govulncheck",
+        "declaration": "  - name: govulncheck\n    description: \"Official Go vulnerability analyzer\"\n    default_enabled: true\n    default_version: \"v1.6.0\"\n    supported_versions: [\"v1.6.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "gosec",
+        "declaration": "  - name: gosec\n    description: \"Go source security analyzer\"\n    default_enabled: true\n    default_version: \"v2.28.0\"\n    supported_versions: [\"v2.28.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:go",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/go.yaml",
+    "sha256": "09ff56046c57f89b85a3ebb79e2533bf20d1eeead7b1541f5356f7a71cb56a63",
+    "metadata": "name: go\nversion: \"1.0.0\"\ndescription: \"Go programming language toolchain\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"language-runtime\", \"build-toolchain\", \"cli-binary\"]\nbuilder_weight: null\n\ngroups:\n  infrastructure: infrastructure\n  quality: go-quality\n  lint: go-quality\n  security: supply-chain\n  supply-chain: supply-chain\n  release: go-release\n\nskills:\n  - go-conventions\n  - concurrency-patterns\n\ntools:\n  - name: go\n    description: \"Go compiler, tooling, and module workflow\"\n    default_enabled: true\n    default_version: \"1.27.0\"\n    supported_versions: [\"1.25.12\", \"1.26.3\", \"1.26.4\", \"1.26.5\", \"1.26.6\", \"1.27.0\"]",
+    "tools": [
+      {
+        "name": "go",
+        "declaration": "  - name: go\n    description: \"Go compiler, tooling, and module workflow\"\n    default_enabled: true\n    default_version: \"1.27.0\"\n    supported_versions: [\"1.25.12\", \"1.26.3\", \"1.26.4\", \"1.26.5\", \"1.26.6\", \"1.27.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:latex",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/latex.yaml",
+    "sha256": "793ead6033aed08d0842095eaa8a81fa2fce5e788458800438d4328d932661e2",
+    "metadata": "name: latex\nversion: \"1.0.0\"\ndescription: \"TeX Live LaTeX typesetting system\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: \"heavy\"\n\ngroups:\n  infrastructure: infrastructure\n  security: supply-chain\n  supply-chain: supply-chain\n  release: release\n\nskills:\n  - latex-authoring\n  - documentation\n\ntools:\n  - name: texlive-core\n    description: \"Core LaTeX engines and basic TeX Live packages\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-recommended\n    description: \"Commonly used LaTeX packages and utilities\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-fonts\n    description: \"Extra fonts for LaTeX documents\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-biber\n    description: \"BibLaTeX bibliography backend\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-code\n    description: \"LaTeX packages for code listings and syntax highlighting\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-diagrams\n    description: \"LaTeX packages for diagrams, pictures, and graphics\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-math\n    description: \"LaTeX packages for math-heavy documents\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-music\n    description: \"LaTeX packages for music notation\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-chemistry\n    description: \"LaTeX packages for chemistry notation and diagrams\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []\n  - name: texlive-linguistics\n    description: \"LaTeX packages for linguistics examples and notation\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []\n  - name: svg-inkscape\n    description: \"Inkscape support for SVG inclusion in LaTeX builds\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "texlive-core",
+        "declaration": "  - name: texlive-core\n    description: \"Core LaTeX engines and basic TeX Live packages\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-recommended",
+        "declaration": "  - name: texlive-recommended\n    description: \"Commonly used LaTeX packages and utilities\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-fonts",
+        "declaration": "  - name: texlive-fonts\n    description: \"Extra fonts for LaTeX documents\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-biber",
+        "declaration": "  - name: texlive-biber\n    description: \"BibLaTeX bibliography backend\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-code",
+        "declaration": "  - name: texlive-code\n    description: \"LaTeX packages for code listings and syntax highlighting\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-diagrams",
+        "declaration": "  - name: texlive-diagrams\n    description: \"LaTeX packages for diagrams, pictures, and graphics\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-math",
+        "declaration": "  - name: texlive-math\n    description: \"LaTeX packages for math-heavy documents\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-music",
+        "declaration": "  - name: texlive-music\n    description: \"LaTeX packages for music notation\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-chemistry",
+        "declaration": "  - name: texlive-chemistry\n    description: \"LaTeX packages for chemistry notation and diagrams\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "texlive-linguistics",
+        "declaration": "  - name: texlive-linguistics\n    description: \"LaTeX packages for linguistics examples and notation\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "svg-inkscape",
+        "declaration": "  - name: svg-inkscape\n    description: \"Inkscape support for SVG inclusion in LaTeX builds\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:node",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/node.yaml",
+    "sha256": "9e11eee9772f30b5b1d4de9f9b3a8278458589eb7c4c83e2ec034bf2c849f6b3",
+    "metadata": "name: node\nversion: \"1.0.0\"\ndescription: \"Node.js runtime with pnpm, yarn, or bun\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"language-runtime\", \"build-toolchain\", \"cli-binary\"]\nbuilder_weight: null\n\ngroups:\n  infrastructure: infrastructure\n  security: supply-chain\n  supply-chain: supply-chain\n  release: release\n\nskills:\n  - typescript-patterns\n  - tailwind\n\ntools:\n  - name: node\n    description: \"Node.js JavaScript and TypeScript runtime\"\n    default_enabled: true\n    default_version: \"26\"\n    supported_versions: [\"20\", \"22\", \"24\", \"26\"]\n  - name: pnpm\n    description: \"Fast disk-efficient Node package manager\"\n    default_enabled: true\n    default_version: \"11.22.0\"\n    supported_versions: [\"9\", \"10\", \"11.1.3\", \"11.5.2\", \"11.10.0\", \"11.18.0\", \"11.20.0\", \"11.21.0\", \"11.22.0\"]\n  - name: yarn\n    description: \"Yarn Node package manager\"\n    default_enabled: false\n    default_version: \"4.17.0\"\n    supported_versions: [\"4\", \"4.16.0\", \"4.17.0\"]\n  - name: bun\n    description: \"Bun JavaScript runtime, package manager, and test runner\"\n    default_enabled: false\n    default_version: \"1.4.0\"\n    supported_versions: [\"1.2\", \"1.3.14\", \"1.4.0\"]",
+    "tools": [
+      {
+        "name": "node",
+        "declaration": "  - name: node\n    description: \"Node.js JavaScript and TypeScript runtime\"\n    default_enabled: true\n    default_version: \"26\"\n    supported_versions: [\"20\", \"22\", \"24\", \"26\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "pnpm",
+        "declaration": "  - name: pnpm\n    description: \"Fast disk-efficient Node package manager\"\n    default_enabled: true\n    default_version: \"11.22.0\"\n    supported_versions: [\"9\", \"10\", \"11.1.3\", \"11.5.2\", \"11.10.0\", \"11.18.0\", \"11.20.0\", \"11.21.0\", \"11.22.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "yarn",
+        "declaration": "  - name: yarn\n    description: \"Yarn Node package manager\"\n    default_enabled: false\n    default_version: \"4.17.0\"\n    supported_versions: [\"4\", \"4.16.0\", \"4.17.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "bun",
+        "declaration": "  - name: bun\n    description: \"Bun JavaScript runtime, package manager, and test runner\"\n    default_enabled: false\n    default_version: \"1.4.0\"\n    supported_versions: [\"1.2\", \"1.3.14\", \"1.4.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:python",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/python.yaml",
+    "sha256": "75adc1a5424eb419603e9c7bbc8f43f290f16875d77b7ffd8300395c35df91ad",
+    "metadata": "name: python\nversion: \"1.0.0\"\ndescription: \"Python runtime with uv, poetry, or pdm\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"language-runtime\", \"build-toolchain\", \"cli-binary\"]\nbuilder_weight: null\n\ngroups:\n  infrastructure: infrastructure\n  security: supply-chain\n  supply-chain: supply-chain\n  release: release\n\n# As of aibox v0.16.5 (DEC-036), python3 (Debian Trixie default, 3.13.x)\n# and uv (0.12.5 from ghcr.io/astral-sh/uv) are unconditionally present\n# in the base-debian image. This addon now provides ADDITIONAL Python\n# tooling beyond that minimum: alternative Python versions (3.12, 3.14),\n# poetry, pdm, and the recommended skills below.\n\nskills:\n  - python-best-practices\n  - fastapi-patterns\n  - pandas-polars\n\ntools:\n  - name: python\n    description: \"Python interpreter runtime for applications and scripts\"\n    default_enabled: true\n    default_version: \"3.14\"\n    supported_versions: [\"3.12\", \"3.13\", \"3.14\"]\n  - name: uv\n    description: \"Fast Python package manager and virtual environment tool\"\n    default_enabled: true\n    default_version: \"0.12.5\"\n    supported_versions: [\"0.7\", \"0.11.10\", \"0.11.11\", \"0.11.15\", \"0.11.19\", \"0.11.26\", \"0.12.0\", \"0.12.5\"]\n  - name: pip\n    description: \"Python package installer for pip-based projects\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []\n  - name: poetry\n    description: \"Python dependency and packaging workflow manager\"\n    default_enabled: false\n    default_version: \"2.4.1\"\n    supported_versions: [\"1.8\", \"2.0\", \"2.4.1\"]\n  - name: pdm\n    description: \"Python project and dependency manager using PEP standards\"\n    default_enabled: false\n    default_version: \"2.28.2\"\n    supported_versions: [\"2.22\", \"2.26.9\", \"2.27.0\", \"2.28.0\", \"2.28.1\", \"2.28.2\"]",
+    "tools": [
+      {
+        "name": "python",
+        "declaration": "  - name: python\n    description: \"Python interpreter runtime for applications and scripts\"\n    default_enabled: true\n    default_version: \"3.14\"\n    supported_versions: [\"3.12\", \"3.13\", \"3.14\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "uv",
+        "declaration": "  - name: uv\n    description: \"Fast Python package manager and virtual environment tool\"\n    default_enabled: true\n    default_version: \"0.12.5\"\n    supported_versions: [\"0.7\", \"0.11.10\", \"0.11.11\", \"0.11.15\", \"0.11.19\", \"0.11.26\", \"0.12.0\", \"0.12.5\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "pip",
+        "declaration": "  - name: pip\n    description: \"Python package installer for pip-based projects\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "poetry",
+        "declaration": "  - name: poetry\n    description: \"Python dependency and packaging workflow manager\"\n    default_enabled: false\n    default_version: \"2.4.1\"\n    supported_versions: [\"1.8\", \"2.0\", \"2.4.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "pdm",
+        "declaration": "  - name: pdm\n    description: \"Python project and dependency manager using PEP standards\"\n    default_enabled: false\n    default_version: \"2.28.2\"\n    supported_versions: [\"2.22\", \"2.26.9\", \"2.27.0\", \"2.28.0\", \"2.28.1\", \"2.28.2\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:rust",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/rust.yaml",
+    "sha256": "c204e3ddcf0512e19e9909e1007ec28d99227880fd6d12f0de01bd991fd78790",
+    "metadata": "name: rust\nversion: \"1.1.0\"\ndescription: \"Rust toolchain via rustup\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"language-runtime\", \"build-toolchain\", \"cli-binary\"]\nbuilder_weight: \"medium\"\n\ngroups:\n  infrastructure: infrastructure\n  security: supply-chain\n  supply-chain: supply-chain\n  release: release\n\nskills:\n  - rust-conventions\n  - concurrency-patterns\n\ntools:\n  - name: rustc\n    description: \"Rust compiler toolchain installed via rustup\"\n    default_enabled: true\n    default_version: \"1.98.0\"\n    supported_versions: [\"1.90\", \"1.91\", \"1.92\", \"1.93\", \"1.94\", \"1.94.1\", \"1.96.0\", \"1.96.1\", \"1.97.1\", \"1.98.0\"]\n  - name: clippy\n    description: \"Rust linter for catching common mistakes and style issues\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: rustfmt\n    description: \"Rust code formatter\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: cargo-audit\n    description: \"Rust dependency vulnerability scanner\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: x86_64-cross\n    description: \"Cross-compilation target support for x86_64 Linux\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "rustc",
+        "declaration": "  - name: rustc\n    description: \"Rust compiler toolchain installed via rustup\"\n    default_enabled: true\n    default_version: \"1.98.0\"\n    supported_versions: [\"1.90\", \"1.91\", \"1.92\", \"1.93\", \"1.94\", \"1.94.1\", \"1.96.0\", \"1.96.1\", \"1.97.1\", \"1.98.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "clippy",
+        "declaration": "  - name: clippy\n    description: \"Rust linter for catching common mistakes and style issues\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "rustfmt",
+        "declaration": "  - name: rustfmt\n    description: \"Rust code formatter\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "cargo-audit",
+        "declaration": "  - name: cargo-audit\n    description: \"Rust dependency vulnerability scanner\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "x86_64-cross",
+        "declaration": "  - name: x86_64-cross\n    description: \"Cross-compilation target support for x86_64 Linux\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:typst",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/languages/typst.yaml",
+    "sha256": "3002f096636fae12385780af07ef6f2f10afd7463b806194e2427ddf1a84e579",
+    "metadata": "name: typst\nversion: \"1.0.0\"\ndescription: \"Typst – modern typesetting system\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: null\n\ngroups:\n  infrastructure: infrastructure\n  security: supply-chain\n  supply-chain: supply-chain\n  release: release\n\nskills:\n  - documentation\n\ntools:\n  - name: typst\n    description: \"Typst compiler for modern document typesetting\"\n    default_enabled: true\n    default_version: \"0.15.0\"\n    supported_versions: [\"0.13.1\", \"0.14.2\", \"0.15.0\"]",
+    "tools": [
+      {
+        "name": "typst",
+        "declaration": "  - name: typst\n    description: \"Typst compiler for modern document typesetting\"\n    default_enabled: true\n    default_version: \"0.15.0\"\n    supported_versions: [\"0.13.1\", \"0.14.2\", \"0.15.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:audio-voice",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/audio-voice.yaml",
+    "sha256": "7b39db5a6ba67fa88375445be1b6d18f709e46edba95b78369a21f7282e68479",
+    "metadata": "name: audio-voice\nversion: \"1.0.0\"\ndescription: \"PulseAudio and Sox tools for interactive voice workflows\"\nprofile_intent: interactive\nusage_class: automated\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"runtime-service\", \"cli-binary\", \"config-files\"]\nbuilder_weight: \"light\"\n\ntools:\n  - name: sox\n    description: \"Command-line audio recording, playback, and conversion tools\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: sox-pulse\n    description: \"PulseAudio support module for SoX\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: pulseaudio-utils\n    description: \"PulseAudio command-line tools for routing and diagnostics\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: alsa-pulse\n    description: \"ALSA-to-PulseAudio compatibility layer\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "sox",
+        "declaration": "  - name: sox\n    description: \"Command-line audio recording, playback, and conversion tools\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "sox-pulse",
+        "declaration": "  - name: sox-pulse\n    description: \"PulseAudio support module for SoX\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "pulseaudio-utils",
+        "declaration": "  - name: pulseaudio-utils\n    description: \"PulseAudio command-line tools for routing and diagnostics\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "alsa-pulse",
+        "declaration": "  - name: alsa-pulse\n    description: \"ALSA-to-PulseAudio compatibility layer\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:browser-testing",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/browser-testing.yaml",
+    "sha256": "5478a564594b663d61ae3b365e49e47858c139e37eace260f129ccea41461126",
+    "metadata": "name: browser-testing\nversion: \"1.0.0\"\ndescription: \"Playwright visual and accessibility testing with Chromium by default\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: \"heavy\"\nrequires:\n  - node\n\ntools:\n  - name: playwright\n    description: \"Pinned Playwright Test runner and browser automation library\"\n    default_enabled: true\n    default_version: \"1.62.1\"\n    supported_versions: [\"1.62.1\"]\n  - name: axe-playwright\n    description: \"Pinned axe-core accessibility checks for Playwright pages\"\n    default_enabled: true\n    default_version: \"4.13.0\"\n    supported_versions: [\"4.13.0\"]\n  - name: chromium\n    description: \"Playwright-managed full Chromium browser (enabled by default)\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: firefox\n    description: \"Optional Playwright-managed Firefox browser\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []\n  - name: webkit\n    description: \"Optional Playwright-managed WebKit browser\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "playwright",
+        "declaration": "  - name: playwright\n    description: \"Pinned Playwright Test runner and browser automation library\"\n    default_enabled: true\n    default_version: \"1.62.1\"\n    supported_versions: [\"1.62.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "axe-playwright",
+        "declaration": "  - name: axe-playwright\n    description: \"Pinned axe-core accessibility checks for Playwright pages\"\n    default_enabled: true\n    default_version: \"4.13.0\"\n    supported_versions: [\"4.13.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "chromium",
+        "declaration": "  - name: chromium\n    description: \"Playwright-managed full Chromium browser (enabled by default)\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "firefox",
+        "declaration": "  - name: firefox\n    description: \"Optional Playwright-managed Firefox browser\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "webkit",
+        "declaration": "  - name: webkit\n    description: \"Optional Playwright-managed WebKit browser\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:cloud-aws",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-aws.yaml",
+    "sha256": "7e45e4a5796235c24ce26956edf84cd0fa0ad8fd7106a4893c1758ea9b89e2d3",
+    "metadata": "name: cloud-aws\nversion: \"1.0.0\"\ndescription: \"AWS CLI v2\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: aws-cli\n    description: \"AWS command-line client for cloud resources\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "aws-cli",
+        "declaration": "  - name: aws-cli\n    description: \"AWS command-line client for cloud resources\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:cloud-azure",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-azure.yaml",
+    "sha256": "ac025ae5b7b22e26d6394be0459f558ab356606d8ae752691aed98c2212255ff",
+    "metadata": "name: cloud-azure\nversion: \"1.0.0\"\ndescription: \"Azure CLI\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: azure-cli\n    description: \"Azure command-line client for cloud resources\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "azure-cli",
+        "declaration": "  - name: azure-cli\n    description: \"Azure command-line client for cloud resources\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:cloud-gcp",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloud-gcp.yaml",
+    "sha256": "5b43e10b06ad8f829a30e61d790ae7412324ebc29f9f907791fca59386a8deb1",
+    "metadata": "name: cloud-gcp\nversion: \"1.0.0\"\ndescription: \"Google Cloud SDK (gcloud)\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: gcloud-cli\n    description: \"Google Cloud command-line client and SDK\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "gcloud-cli",
+        "declaration": "  - name: gcloud-cli\n    description: \"Google Cloud command-line client and SDK\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:cloudflare",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/cloudflare.yaml",
+    "sha256": "eebfab7cab1dca19b18f5fb68016b432c3113f9379879efe57383e68376a5845",
+    "metadata": "name: cloudflare\nversion: \"1.0.0\"\ndescription: \"Cloudflare Tunnel connector (cloudflared)\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: null\n\ntools:\n  - name: cloudflared\n    description: \"Cloudflare Tunnel connector and command-line client\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "cloudflared",
+        "declaration": "  - name: cloudflared\n    description: \"Cloudflare Tunnel connector and command-line client\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:data-preview",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-preview.yaml",
+    "sha256": "aee18fc3d26b615bbe4e427b9ebdc498b6f63c73bb7cbf8cd812a0d8a9e933e8",
+    "metadata": "name: data-preview\nversion: \"1.0.0\"\ndescription: \"SQLite and tabular data preview tools for Yazi\"\nprofile_intent: preview-media\nusage_class: automated\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"previewer\", \"cli-binary\", \"config-files\"]\nbuilder_weight: \"light\"\n\ntools:\n  - name: sqlite3\n    description: \"SQLite shell used to preview database schemas and tables\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: csvkit\n    description: \"CSV and TSV inspection utilities for tabular previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "sqlite3",
+        "declaration": "  - name: sqlite3\n    description: \"SQLite shell used to preview database schemas and tables\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "csvkit",
+        "declaration": "  - name: csvkit\n    description: \"CSV and TSV inspection utilities for tabular previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:data-visualization",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/data-visualization.yaml",
+    "sha256": "d9e6a6bbbebac2b162ff23fb86befc54526991f32adc70df6c0beae502b633d4",
+    "metadata": "name: data-visualization\nversion: \"1.0.0\"\ndescription: \"Build-time Vega and Vega-Lite visualization rendering\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: \"medium\"\nrequires: [\"node\"]\n\nskills:\n  - documentation\n\ntools:\n  - name: vega-cli\n    description: \"Vega SVG, PNG, and PDF command-line renderers\"\n    default_enabled: true\n    default_version: \"6.4.0\"\n    supported_versions: [\"6.4.0\"]\n  - name: vega-lite\n    description: \"Vega-Lite compiler and SVG, PNG, and PDF command-line renderers\"\n    default_enabled: true\n    default_version: \"6.4.3\"\n    supported_versions: [\"6.4.3\"]",
+    "tools": [
+      {
+        "name": "vega-cli",
+        "declaration": "  - name: vega-cli\n    description: \"Vega SVG, PNG, and PDF command-line renderers\"\n    default_enabled: true\n    default_version: \"6.4.0\"\n    supported_versions: [\"6.4.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "vega-lite",
+        "declaration": "  - name: vega-lite\n    description: \"Vega-Lite compiler and SVG, PNG, and PDF command-line renderers\"\n    default_enabled: true\n    default_version: \"6.4.3\"\n    supported_versions: [\"6.4.3\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:diagramming",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/diagramming.yaml",
+    "sha256": "bb93c024cf58df5b832ae89eb248572fd8764e3fc9cd1fa947d0ffeda9b0d536",
+    "metadata": "name: diagramming\nversion: \"1.0.0\"\ndescription: \"Build-time diagram rendering with D2 and Graphviz\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: \"light\"\n\nskills:\n  - documentation\n\ntools:\n  - name: d2\n    description: \"D2 declarative diagram renderer\"\n    default_enabled: true\n    default_version: \"0.7.1\"\n    supported_versions: [\"0.7.1\"]\n  - name: graphviz\n    description: \"Graphviz graph layout and rendering commands\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "d2",
+        "declaration": "  - name: d2\n    description: \"D2 declarative diagram renderer\"\n    default_enabled: true\n    default_version: \"0.7.1\"\n    supported_versions: [\"0.7.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "graphviz",
+        "declaration": "  - name: graphviz\n    description: \"Graphviz graph layout and rendering commands\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:git-ui",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/git-ui.yaml",
+    "sha256": "7aab7e1585e5144e4c065d0256c9e323f3bf8e8cb13acc08ec6e7fd9af4eca5c",
+    "metadata": "name: git-ui\nversion: \"1.0.0\"\ndescription: \"GitHub CLI and lazygit interactive Git UI\"\nprofile_intent: interactive\nusage_class: manual-escalation-only\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: \"light\"\n\ntools:\n  - name: gh\n    description: \"GitHub CLI for issues, PRs, releases, and auth\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: lazygit\n    description: \"Interactive terminal UI for Git status, commits, and branches\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "gh",
+        "declaration": "  - name: gh\n    description: \"GitHub CLI for issues, PRs, releases, and auth\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "lazygit",
+        "declaration": "  - name: lazygit\n    description: \"Interactive terminal UI for Git status, commits, and branches\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:go-release",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/go-release.yaml",
+    "sha256": "9466c02ffd9248f10c83dad5a86381838d63b1a9bc456b91e3feaafa01a7d62b",
+    "metadata": "name: go-release\nversion: \"1.0.0\"\ndescription: \"GoReleaser plus language-neutral release validation\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"build-toolchain\"]\nbuilder_weight: \"light\"\nrequires: [\"go\", \"release\"]\n\ntools:\n  - { name: goreleaser, description: \"Multi-platform Go release packager\", default_enabled: true, default_version: \"2.17.1\", supported_versions: [\"2.17.1\"] }",
+    "tools": [
+      {
+        "name": "goreleaser",
+        "declaration": "  - { name: goreleaser, description: \"Multi-platform Go release packager\", default_enabled: true, default_version: \"2.17.1\", supported_versions: [\"2.17.1\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:infrastructure",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/infrastructure.yaml",
+    "sha256": "89b9801f1c1401ee381614aa786cbe13a5a1a04b61c05104e5631955feaa1bfc",
+    "metadata": "name: infrastructure\nversion: \"1.0.0\"\ndescription: \"OpenTofu, Ansible, Packer, and optional rootless Podman\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: \"medium\"\n\nskills:\n  - terraform-basics\n\ntools:\n  - name: opentofu\n    description: \"Open-source Terraform-compatible infrastructure as code CLI\"\n    default_enabled: true\n    default_version: \"1.12.6\"\n    supported_versions: [\"1.9.0\", \"1.12.0\", \"1.12.1\", \"1.12.3\", \"1.12.5\", \"1.12.6\"]\n  - name: ansible\n    description: \"Configuration management and automation engine\"\n    default_enabled: true\n    default_version: \"14.3.1\"\n    supported_versions: [\"13.7.0\", \"14.0.0\", \"14.1.0\", \"14.2.0\", \"14.3.1\"]\n  - name: packer\n    description: \"Machine image build automation tool\"\n    default_enabled: true\n    default_version: \"1.16.0\"\n    supported_versions: [\"1.11.2\", \"1.15.3\", \"1.15.4\", \"1.16.0\"]\n  - name: podman\n    description: \"Rootless container engine with Compose support\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "opentofu",
+        "declaration": "  - name: opentofu\n    description: \"Open-source Terraform-compatible infrastructure as code CLI\"\n    default_enabled: true\n    default_version: \"1.12.6\"\n    supported_versions: [\"1.9.0\", \"1.12.0\", \"1.12.1\", \"1.12.3\", \"1.12.5\", \"1.12.6\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "ansible",
+        "declaration": "  - name: ansible\n    description: \"Configuration management and automation engine\"\n    default_enabled: true\n    default_version: \"14.3.1\"\n    supported_versions: [\"13.7.0\", \"14.0.0\", \"14.1.0\", \"14.2.0\", \"14.3.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "packer",
+        "declaration": "  - name: packer\n    description: \"Machine image build automation tool\"\n    default_enabled: true\n    default_version: \"1.16.0\"\n    supported_versions: [\"1.11.2\", \"1.15.3\", \"1.15.4\", \"1.16.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "podman",
+        "declaration": "  - name: podman\n    description: \"Rootless container engine with Compose support\"\n    default_enabled: false\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:kubernetes",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/kubernetes.yaml",
+    "sha256": "66f92056d3b66fe6d38cf72012d4f60b6dd7dd863eabe57b8d9ac671d723f24b",
+    "metadata": "name: kubernetes\nversion: \"1.0.0\"\ndescription: \"kubectl, Helm, Kustomize, k9s\"\nprofile_intent: runtime\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"config-files\"]\nbuilder_weight: \"medium\"\n\nskills:\n  - kubernetes-basics\n  - container-orchestration\n\ntools:\n  - name: kubectl\n    description: \"Kubernetes command-line client\"\n    default_enabled: true\n    default_version: \"1.36.4\"\n    supported_versions: [\"1.36.1\", \"1.36.2\", \"1.36.3\", \"1.36.4\"]\n  - name: helm\n    description: \"Kubernetes package manager for charts\"\n    default_enabled: true\n    default_version: \"4.2.4\"\n    supported_versions: [\"3.17.2\", \"4.2.0\", \"4.2.2\", \"4.2.3\", \"4.2.4\"]\n  - name: kustomize\n    description: \"Kubernetes manifest overlay and patching tool\"\n    default_enabled: true\n    default_version: \"5.8.1\"\n    supported_versions: [\"5.6.0\", \"5.8.1\"]\n  - name: k9s\n    description: \"Interactive terminal UI for Kubernetes clusters\"\n    default_enabled: false\n    default_version: \"0.51.0\"\n    supported_versions: [\"0.50.18\", \"0.51.0\"]",
+    "tools": [
+      {
+        "name": "kubectl",
+        "declaration": "  - name: kubectl\n    description: \"Kubernetes command-line client\"\n    default_enabled: true\n    default_version: \"1.36.4\"\n    supported_versions: [\"1.36.1\", \"1.36.2\", \"1.36.3\", \"1.36.4\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "helm",
+        "declaration": "  - name: helm\n    description: \"Kubernetes package manager for charts\"\n    default_enabled: true\n    default_version: \"4.2.4\"\n    supported_versions: [\"3.17.2\", \"4.2.0\", \"4.2.2\", \"4.2.3\", \"4.2.4\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "kustomize",
+        "declaration": "  - name: kustomize\n    description: \"Kubernetes manifest overlay and patching tool\"\n    default_enabled: true\n    default_version: \"5.8.1\"\n    supported_versions: [\"5.6.0\", \"5.8.1\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "k9s",
+        "declaration": "  - name: k9s\n    description: \"Interactive terminal UI for Kubernetes clusters\"\n    default_enabled: false\n    default_version: \"0.51.0\"\n    supported_versions: [\"0.50.18\", \"0.51.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:mermaid",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/mermaid.yaml",
+    "sha256": "6649f18cfccc577eb10eba2233e93fd606a2809bd41e847a43fb68b75c0c0d4e",
+    "metadata": "name: mermaid\nversion: \"1.0.0\"\ndescription: \"Build-time Mermaid rendering with a pinned headless browser\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"build-toolchain\", \"cli-binary\"]\nbuilder_weight: \"heavy\"\nrequires: [\"node\"]\n\nskills:\n  - documentation\n\ntools:\n  - name: mermaid-cli\n    description: \"Mermaid CLI (mmdc) for static SVG, PNG, and PDF rendering\"\n    default_enabled: true\n    default_version: \"11.16.0\"\n    supported_versions: [\"11.16.0\"]\n  - name: puppeteer\n    description: \"Pinned Puppeteer and compatible Chrome headless shell runtime\"\n    default_enabled: true\n    default_version: \"25.9.0\"\n    supported_versions: [\"25.9.0\"]",
+    "tools": [
+      {
+        "name": "mermaid-cli",
+        "declaration": "  - name: mermaid-cli\n    description: \"Mermaid CLI (mmdc) for static SVG, PNG, and PDF rendering\"\n    default_enabled: true\n    default_version: \"11.16.0\"\n    supported_versions: [\"11.16.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "puppeteer",
+        "declaration": "  - name: puppeteer\n    description: \"Pinned Puppeteer and compatible Chrome headless shell runtime\"\n    default_enabled: true\n    default_version: \"25.9.0\"\n    supported_versions: [\"25.9.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:preview-archive",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-archive.yaml",
+    "sha256": "f8580e6534bb2bac82412fed56cff75b8d2cdd20c1ddea4233c78b161deef7f9",
+    "metadata": "name: preview-archive\nversion: \"1.0.0\"\ndescription: \"Yazi image/PDF/SVG preview helpers plus archive preview/extraction tools\"\nprofile_intent: preview-media\nusage_class: automated\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"previewer\", \"cli-binary\", \"config-files\"]\nbuilder_weight: \"light\"\n\ntools:\n  - name: chafa\n    description: \"Terminal image renderer used by Yazi image and SVG previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: librsvg\n    description: \"SVG conversion fallback via rsvg-convert\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: poppler\n    description: \"PDF text and image utilities for preview extraction\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: timg\n    description: \"Terminal image and PDF thumbnail viewer\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: mupdf\n    description: \"Lightweight PDF utilities for document previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: entr\n    description: \"File watcher used by live preview helpers\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: p7zip\n    description: \"Archive listing and extraction support for previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: resvg\n    description: \"High-quality SVG rasterizer for Yazi previews\"\n    default_enabled: true\n    default_version: \"0.47.0\"\n    supported_versions: [\"0.47.0\"]",
+    "tools": [
+      {
+        "name": "chafa",
+        "declaration": "  - name: chafa\n    description: \"Terminal image renderer used by Yazi image and SVG previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "librsvg",
+        "declaration": "  - name: librsvg\n    description: \"SVG conversion fallback via rsvg-convert\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "poppler",
+        "declaration": "  - name: poppler\n    description: \"PDF text and image utilities for preview extraction\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "timg",
+        "declaration": "  - name: timg\n    description: \"Terminal image and PDF thumbnail viewer\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "mupdf",
+        "declaration": "  - name: mupdf\n    description: \"Lightweight PDF utilities for document previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "entr",
+        "declaration": "  - name: entr\n    description: \"File watcher used by live preview helpers\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "p7zip",
+        "declaration": "  - name: p7zip\n    description: \"Archive listing and extraction support for previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "resvg",
+        "declaration": "  - name: resvg\n    description: \"High-quality SVG rasterizer for Yazi previews\"\n    default_enabled: true\n    default_version: \"0.47.0\"\n    supported_versions: [\"0.47.0\"]",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:preview-enhanced",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/preview-enhanced.yaml",
+    "sha256": "8e0aa8a30571f3f54d07104180bf515cc084620fb5781454b7ca34404d5f848a",
+    "metadata": "name: preview-enhanced\nversion: \"1.0.0\"\ndescription: \"Rich Markdown rendering, ffmpeg, and Ghostscript\"\nprofile_intent: preview-media\nusage_class: automated\nprofiles: [\"human-dev\"]\nexported_surfaces: [\"previewer\", \"cli-binary\", \"config-files\"]\nbuilder_weight: \"light\"\nrequires: [\"preview-archive\"]\n\ntools:\n  - name: ffmpeg\n    description: \"Video and audio metadata plus thumbnail support for previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: ghostscript\n    description: \"PostScript and EPS rendering support for document previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []\n  - name: rich\n    description: \"Markdown, JSON, RST, and notebook terminal rendering for Yazi previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+    "tools": [
+      {
+        "name": "ffmpeg",
+        "declaration": "  - name: ffmpeg\n    description: \"Video and audio metadata plus thumbnail support for previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "ghostscript",
+        "declaration": "  - name: ghostscript\n    description: \"PostScript and EPS rendering support for document previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "rich",
+        "declaration": "  - name: rich\n    description: \"Markdown, JSON, RST, and notebook terminal rendering for Yazi previews\"\n    default_enabled: true\n    default_version: \"\"\n    supported_versions: []",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:release",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/release.yaml",
+    "sha256": "f66f5a3e2e9f3d3cb38139a3c49ec77ba9da6c94385691ab361a429ef01614c5",
+    "metadata": "name: release\nversion: \"1.0.0\"\ndescription: \"Language-neutral shell and container release validation\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"build-toolchain\"]\nbuilder_weight: \"light\"\n\ntools:\n  - { name: shellcheck, description: \"Shell script static analyzer\", default_enabled: true, default_version: \"0.11.0\", supported_versions: [\"0.11.0\"] }\n  - { name: hadolint, description: \"Dockerfile linter\", default_enabled: true, default_version: \"2.15.1\", supported_versions: [\"2.15.1\"] }",
+    "tools": [
+      {
+        "name": "shellcheck",
+        "declaration": "  - { name: shellcheck, description: \"Shell script static analyzer\", default_enabled: true, default_version: \"0.11.0\", supported_versions: [\"0.11.0\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "hadolint",
+        "declaration": "  - { name: hadolint, description: \"Dockerfile linter\", default_enabled: true, default_version: \"2.15.1\", supported_versions: [\"2.15.1\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  },
+  {
+    "id": "ADDON:supply-chain",
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons/tools/supply-chain.yaml",
+    "sha256": "1c1095217751bcca0ac98e4dc8ea576e57d81e1c3315959f7bd8e550683bf511",
+    "metadata": "name: supply-chain\nversion: \"1.0.0\"\ndescription: \"Secret scanning, vulnerability analysis, SBOM generation, and signing\"\nprofile_intent: build\nusage_class: automated\nprofiles: [\"human-dev\", \"headless-runner\"]\nexported_surfaces: [\"cli-binary\", \"build-toolchain\"]\nbuilder_weight: \"medium\"\n\ntools:\n  - { name: gitleaks, description: \"Repository secret scanner\", default_enabled: true, default_version: \"8.30.1\", supported_versions: [\"8.30.1\"] }\n  - { name: osv-scanner, description: \"OSV dependency vulnerability scanner\", default_enabled: true, default_version: \"2.4.0\", supported_versions: [\"2.4.0\"] }\n  - { name: syft, description: \"Software bill of materials generator\", default_enabled: true, default_version: \"1.50.0\", supported_versions: [\"1.50.0\"] }\n  - { name: grype, description: \"Artifact and container vulnerability scanner\", default_enabled: true, default_version: \"0.116.1\", supported_versions: [\"0.116.1\"] }\n  - { name: cosign, description: \"Sigstore artifact signing and verification CLI\", default_enabled: true, default_version: \"3.1.2\", supported_versions: [\"3.1.2\"] }",
+    "tools": [
+      {
+        "name": "gitleaks",
+        "declaration": "  - { name: gitleaks, description: \"Repository secret scanner\", default_enabled: true, default_version: \"8.30.1\", supported_versions: [\"8.30.1\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "osv-scanner",
+        "declaration": "  - { name: osv-scanner, description: \"OSV dependency vulnerability scanner\", default_enabled: true, default_version: \"2.4.0\", supported_versions: [\"2.4.0\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "syft",
+        "declaration": "  - { name: syft, description: \"Software bill of materials generator\", default_enabled: true, default_version: \"1.50.0\", supported_versions: [\"1.50.0\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "grype",
+        "declaration": "  - { name: grype, description: \"Artifact and container vulnerability scanner\", default_enabled: true, default_version: \"0.116.1\", supported_versions: [\"0.116.1\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      },
+      {
+        "name": "cosign",
+        "declaration": "  - { name: cosign, description: \"Sigstore artifact signing and verification CLI\", default_enabled: true, default_version: \"3.1.2\", supported_versions: [\"3.1.2\"] }",
+        "acceptance": "AC-TOOLS",
+        "target": "Upstream Feature/package where suitable; otherwise bounded aibox Feature; preserve enabled/version options"
+      }
+    ]
+  }
+]

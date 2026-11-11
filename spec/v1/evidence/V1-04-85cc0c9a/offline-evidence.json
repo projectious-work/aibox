@@ -1,0 +1,80 @@
+{
+  "phase": "V1-04",
+  "verification": "offline",
+  "sourceCommit": "85cc0c9af67e74175b0efc1499d48193bb73a629",
+  "actor": "local-verifier",
+  "startedAt": "2026-10-01T17:23:38Z",
+  "finishedAt": "2026-10-01T17:23:51Z",
+  "templates": [
+    "minimal",
+    "curated"
+  ],
+  "examples": [
+    "minimal",
+    "customized",
+    "custom-user",
+    "bind-home"
+  ],
+  "go": {
+    "nativeTarget": "linux/arm64",
+    "binary": "aibox",
+    "binaryDigest": "sha256:7c28966ea4eec289ea3ef3c8da12fab628ad35c914ca97fb6cfb8aee0753c149",
+    "darwinArm64Binary": "aibox-darwin-arm64",
+    "darwinArm64Digest": "sha256:591bd3461670ba7e8edb0591bbb20ce9d7fe753751ef0f58d63a54e570ef082b"
+  },
+  "mcpParity": {
+    "test": "TestV104StarterCLIMCPParity",
+    "transcript": "mcp-parity.txt",
+    "transcriptDigest": "sha256:0a47af0fbd278d81138acc351174f16eadf1a996d46c80a4cc9002037c503955"
+  },
+  "upstreamDevcontainerCli": {
+    "version": "0.89.0",
+    "vendoredArchive": "tools/vendor/devcontainer-cli-0.89.0.tgz",
+    "preflightEvidence": "upstream-preflight/evidence.json",
+    "templateMetadataCheck": "upstream CLI generated both Template README files in isolated staging"
+  },
+  "checks": [
+    "go test ./...",
+    "go test -race ./...",
+    "go vet ./...",
+    "go mod verify",
+    "CLI/MCP parity on all four native starter examples",
+    "Linux native and macOS arm64 cross build",
+    "inventory",
+    "specification",
+    "Template metadata/content contract",
+    "Draft 2020-12 fixtures",
+    "verified no-npm upstream CLI bootstrap and Template docs generation",
+    "Template render option fixtures for codex and none",
+    "generated example freshness",
+    "v1 Hugo build",
+    "git diff --check"
+  ],
+  "lifecycle": {
+    "status": "not_run",
+    "reason": "The pinned CLI read-configuration and lifecycle commands require the host container engine; verify-v1-04-host.sh runs them."
+  },
+  "artifacts": [
+    "aibox",
+    "aibox-darwin-arm64",
+    "hugo",
+    "inspect-bind-home.json",
+    "inspect-custom-user.json",
+    "inspect-customized.json",
+    "inspect-minimal.json",
+    "mcp-parity.txt",
+    "render-curated-codex.txt",
+    "render-curated-none.txt",
+    "render-minimal-codex.txt",
+    "render-minimal-none.txt",
+    "rendered-curated-codex",
+    "rendered-curated-none",
+    "rendered-minimal-codex",
+    "rendered-minimal-none",
+    "upstream-preflight"
+  ],
+  "failed": [],
+  "skipped": [
+    "devcontainer build/up/exec pending host-run verification"
+  ]
+}

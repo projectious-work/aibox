@@ -29,6 +29,8 @@
   function item(label, base, active) {
     var li = document.createElement("li");
     var link = document.createElement("a");
+    // Release and line links always open that version's landing page. Page
+    // equivalence is not assumed across independently maintained docs lines.
     link.href = new URL(base, window.location.href).href;
     link.textContent = label;
     if (active) link.setAttribute("aria-current", "page");
@@ -45,8 +47,11 @@
     heading.textContent = line.line;
     headingItem.appendChild(heading);
     fragment.appendChild(headingItem);
+
+    var currentUrl = line.current.url;
     var currentLabel = line.line === "v1.x" ? "v1.x preview" : "Current: v0.x";
-    fragment.appendChild(item(currentLabel, line.current.url, isActive(line.current.url, active)));
+    fragment.appendChild(item(currentLabel, currentUrl, isActive(currentUrl, active)));
+
     line.releases.forEach(function (release) {
       if (!release || typeof release.url !== "string" || typeof release.version !== "string") {
         throw new Error("invalid release entry");
@@ -61,10 +66,13 @@
       return response.json();
     })
     .then(function (manifest) {
-      if (!manifest || !Array.isArray(manifest.lines)) throw new Error("invalid release manifest");
+      if (!manifest || !Array.isArray(manifest.lines)) {
+        throw new Error("invalid release manifest");
+      }
       var fragment = document.createDocumentFragment();
       var active = activeBase(manifest);
       manifest.lines.forEach(function (line) { appendLine(fragment, line, active); });
+
       menu.replaceChildren(fragment);
     })
     .catch(function () {

@@ -1,0 +1,6 @@
+{
+  "name": "V1-05 unsupported target bookworm",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "remoteUser": "root",
+  "features": {}
+}

@@ -1,0 +1,11 @@
+{
+  "id": "code",
+  "version": "1.0.0",
+  "name": "texlive-code",
+  "description": "Installs texlive-code (aibox catalog ID latex/code).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

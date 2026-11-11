@@ -1,55 +1,71 @@
-# aibox Documentation Site
+# aibox documentation site
 
-This directory contains the public aibox documentation site. It uses
-[Hugo](https://gohugo.io/) with the
-[projectious.work brand theme](https://github.com/projectious-work/brand-theme-hugo-vanilla)
-at v0.3.4.
+The v1 preview is built with Hugo Extended and the pinned
+[`brand-theme-hugo-vanilla`](https://github.com/projectious-work/brand-theme-hugo-vanilla)
+Hugo module (`v0.3.4`), matching the v0.x documentation line. Its Node assets
+are locked in `package-lock.json`; do not install a floating theme checkout or
+reintroduce Docsy, Bootstrap, or Font Awesome.
 
-## Installation
+## Prerequisites
 
-The site requires Hugo Extended, Go for Hugo Modules, and Node.js for the
-theme's Tailwind build.
+- Hugo Extended `0.157.0` or newer
+- Go (the Hugo module declares Go `1.22`)
+- Node.js `18` or newer and npm
 
-```bash
-npm --prefix docs-site ci
-hugo mod get github.com/projectious-work/brand-theme-hugo-vanilla@v0.3.4
-hugo mod tidy
-```
+## Local preview and build
 
-## Local Development
+From the repository root, start the live v1 preview at
+`http://localhost:1316/aibox/v1.x/`:
 
-```bash
+```sh
 ./scripts/maintain.sh docs-serve
 ```
 
-This command starts a local development server on port 1316. Most changes are reflected live without having to restart the server.
+To make the production build, including the repository base path and `.nojekyll`:
 
-## Build
-
-```bash
+```sh
 ./scripts/build-docs.sh
 ```
 
-This command refreshes `data/theme_catalog.json` from the CLI's audited theme
-source, then generates static content into `docs-site/public/`.
+When `DOCS_RELEASES_MANIFEST` points to the validated shared `releases.json`,
+the build loads it as Hugo data and renders the current v0.x root, v0.x
+archives, v1.x preview root, and published v1.x archives directly into the
+release menu. Without that variable, the menu uses the local `versions`
+configuration above as a standalone preview fallback.
 
-The releases menu always links to the current v0.x root and the v1.x preview.
-When `DOCS_RELEASES_MANIFEST` points to a valid shared `releases.json`, the
-build renders both release lines and their archives directly in the menu.
-Without it, the menu uses the standalone release list in `hugo.yaml`.
-The manifest build keeps the generated theme catalog available to Hugo.
+The build script installs locked Node dependencies with `npm ci` when the
+required theme assets are missing. Hugo resolves the pinned theme module from
+`docs-site/go.mod` and `go.sum`. To build into a scratch directory, pass Hugo
+arguments through the script, for example:
 
-## Deployment
-
-The repository release script deploys docs as part of the release flow. For a
-manual deployment:
-
-```bash
-cd ..
-./scripts/maintain.sh docs-deploy --dry-run
-./scripts/maintain.sh docs-deploy
+```sh
+./scripts/build-docs.sh --destination /tmp/aibox-v1-docs
 ```
 
-The maintenance command builds locally and pushes the static output to the
-`gh-pages` branch. The project does not use GitHub Actions for documentation
-deployment. Do not use the generic `npm run deploy` path for this repository.
+The v1 source sets its preview base path to `/aibox/v1.x/`. Public publication
+is a separate operation: do not push generated files or deploy docs as part
+of ordinary content edits. Release workflows validate and publish the
+candidate snapshot while preserving the v0.x root and other archives.
+
+## Content workflow
+
+1. Confirm the feature contract and its roadmap phase in `spec/v1/` before
+   writing product instructions. The specification is the design source until
+   an implementation phase proves the behavior.
+2. Add or update audience-specific pages in `docs-site/content/` with the
+   implementation. Label planned examples clearly; do not present them as
+   runnable until checked against the candidate implementation.
+3. Preview with `./scripts/maintain.sh docs-serve`, then run
+   `./scripts/build-docs.sh` after the final content change.
+4. Check page links, navigation, code examples, and the generated v1 preview
+   labels. For documentation foundation changes, also build the v0 current
+   site from its release-line checkout and confirm its root/current label.
+5. Include changed paths, intended audience, the phase's docs deliverable,
+   and build/check results in phase evidence. Publication remains part of the
+   reviewed release workflow.
+
+The stable site root remains the current v0.x documentation. The `/v1.x/`
+tree is visibly a preview until a separately approved stable-v1 promotion.
+Current content that describes the earlier alpha design is withheld from the
+public v1 build; it is retained only as migration source while phase-specific
+replacement docs are written.

@@ -185,8 +185,8 @@ function M:peek(job)
 		return require("code"):peek(job)
 	end
 
-	-- python3-rich is installed for Debian's system interpreter. The
-	-- separately installed /usr/local/bin/python3 can shadow it on PATH.
+	-- The Rich addon is installed for Debian's system Python. A separately
+	-- installed /usr/local/bin/python3 may shadow it on PATH.
 	local python = os.getenv("AIBOX_PREVIEW_PYTHON")
 	if not python or python == "" then
 		python = "/usr/bin/python3"

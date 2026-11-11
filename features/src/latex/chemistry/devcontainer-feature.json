@@ -1,0 +1,11 @@
+{
+  "id": "chemistry",
+  "version": "1.0.0",
+  "name": "texlive-chemistry",
+  "description": "Installs texlive-chemistry (aibox catalog ID latex/chemistry).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

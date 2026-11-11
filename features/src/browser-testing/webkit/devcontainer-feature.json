@@ -1,0 +1,11 @@
+{
+  "id": "webkit",
+  "version": "1.0.0",
+  "name": "webkit",
+  "description": "Installs webkit (aibox catalog ID browser-testing/webkit).",
+  "documentationURL": "https://playwright.dev/docs/browsers#install-browsers",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/browser-testing/playwright:1": {}
+  }
+}

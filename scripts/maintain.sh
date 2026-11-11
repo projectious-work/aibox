@@ -10,12 +10,13 @@
 #
 # Commands:
 #   test              Run cargo fmt, clippy, and tests
-#   test-e2e          Run local E2E contracts
-#   test-e2e-visual   Run all opt-in isolated tmux/asciinema visual E2E tiers
+#   test-e2e          Run SSH companion E2E tests
+#                     including the release-gated disposable kind cluster
+#   test-e2e-visual   Run all opt-in SSH/asciinema visual E2E tiers
 #   build-images      Build published foundation/runtime images locally
 #   release-runtime-smoke <version> Run generated runtime smoke against a release
-#   docs-serve        Serve Hugo/projectious.work locally for preview
-#   docs-deploy       Build Hugo/projectious.work and push HTML to gh-pages
+#   docs-serve        Serve Hugo with the pinned brand theme for preview
+#   docs-deploy       Build Hugo and push versioned HTML to gh-pages
 #   release <version> Tag, build, compile CLI, generate release prompt
 #   start             Start this project's dev-container
 #   stop              Stop this project's dev-container
@@ -38,6 +39,73 @@ CLI_DIR="${PROJECT_ROOT}/cli"
 DIST_DIR="${PROJECT_ROOT}/dist"
 IMAGE_REGISTRY="ghcr.io/projectious-work/aibox"
 GITHUB_REPO="${AIBOX_GITHUB_REPO:-projectious-work/aibox}"
+
+# Releases are tagged only from their protected integration branches. This is a
+# local maintainer workflow; no GitHub Actions participate in it.
+release_branch_for_version() {
+  local version="$1"
+  case "${version}" in
+    0.*) printf '%s\n' 'v0.x-release' ;;
+    1.*-*) printf '%s\n' 'v1.x-pre-release' ;;
+    1.*) printf '%s\n' 'v1.x-release' ;;
+    *) die "Unsupported release line for ${version}; add a branch mapping first." ;;
+  esac
+}
+
+release_github_classification_args() {
+  local version="$1"
+  if [[ "${version}" == *-* ]]; then
+    printf '%s\n' '--prerelease'
+  fi
+}
+
+ensure_release_branch() {
+  local version="$1" expected actual remote
+  expected="$(release_branch_for_version "${version}")"
+  actual="$(git branch --show-current)"
+  [[ "${actual}" == "${expected}" ]] \
+    || die "Release ${version} must run on ${expected}, not ${actual}."
+  git fetch origin "${expected}" >/dev/null
+  remote="$(git rev-parse "origin/${expected}")"
+  [[ "$(git rev-parse HEAD)" == "${remote}" ]] \
+    || die "${expected} is behind origin; update it before tagging."
+}
+
+publish_release_candidate() {
+  local version="$1" release_branch="$2"
+  local candidate_branch="chore/release-v${version}" pr_url
+
+  [[ "$(git branch --show-current)" == "${release_branch}" ]] \
+    || die "Release ${version} must be published from ${release_branch}."
+
+  git fetch origin "${release_branch}"
+  git merge-base --is-ancestor "origin/${release_branch}" HEAD \
+    || die "Local ${release_branch} does not descend from origin/${release_branch}; reconcile it before publishing."
+
+  if [[ "$(git rev-parse HEAD)" == "$(git rev-parse "origin/${release_branch}")" ]]; then
+    ok "${release_branch} is already current on origin"
+    return
+  fi
+
+  if git ls-remote --exit-code --heads origin "${candidate_branch}" >/dev/null 2>&1; then
+    die "Remote branch ${candidate_branch} already exists; inspect or merge it before publishing."
+  fi
+
+  info "Promoting the release candidate to protected branch ${release_branch}..."
+  git switch -c "${candidate_branch}"
+  git push -u origin "${candidate_branch}"
+  pr_url="$(gh pr create \
+    --base "${release_branch}" \
+    --head "${candidate_branch}" \
+    --title "chore: release v${version}" \
+    --body "Promotes the validated v${version} release candidate to ${release_branch}.")" \
+    || die "Could not create release-candidate PR."
+  gh pr merge "${pr_url}" --merge --delete-branch \
+    || die "Could not merge release-candidate PR ${pr_url}."
+  git switch "${release_branch}"
+  git pull --ff-only origin "${release_branch}"
+  ok "Release candidate merged into ${release_branch}"
+}
 
 # ── Read container name from docker-compose.yml ─────────────────────────────
 _init_names() {
@@ -100,18 +168,18 @@ ${bold}Usage:${reset}
 
 ${bold}Development:${reset}
   test                     Run cargo fmt check, clippy, and tests
-  test-e2e                 Run local E2E contracts in temporary workspaces
+  test-e2e                 Run Tier 2 SSH companion E2E tests and disposable kind gate
   test-e2e-visual-status   Run opt-in visual matrix for layouts/themes/status rows
   test-e2e-visual-tabs     Run opt-in tab traversal for tools and harnesses
   test-e2e-visual-yazi     Run opt-in Yazi previews/git/plugin visual checks
   test-e2e-visual          Run all opt-in visual E2E tiers
   test-e2e-render-starship Run Tier 3 vt100 cell-color tests for Starship (local, ~6s)
-  test-e2e-render-tmux     Removed legacy command; points to local visual coverage
+  test-e2e-render-tmux     Run Tier 3 vt100 cell-color tests for tmux (companion)
   test-e2e-render-layout-switch
-                           Removed legacy command pending local asciinema rewrite
+                           Run Tier 3 rendered test: live layout switch (companion)
   test-e2e-render-theme-switch
-                           Removed legacy command pending local asciinema rewrite
-  test-e2e-render-yazi     Removed legacy command; points to local visual coverage
+                           Run Tier 3 rendered test: live theme switch (companion)
+  test-e2e-render-yazi     Run Tier 3 vt100 cell-color tests for Yazi (companion)
   test-e2e-render          Run all Tier 3 vt100 rendered-color tests
   test-e2e-doc-captures    Run visual E2E and write docs-ready cast/screen artifacts
                            Set AIBOX_E2E_VISUAL_FULL_MATRIX=1 for exhaustive layout/theme coverage
@@ -123,9 +191,9 @@ ${bold}Development:${reset}
                            Plan or delete GHCR BuildKit cache package versions
   release-runtime-smoke <version>
                            Run host-side generated-runtime smoke and write logs
-  docs-serve               Serve Hugo/projectious.work locally (http://localhost:1316/aibox/)
+  docs-serve               Serve the v1 preview with Hugo (http://localhost:1316/aibox/v1.x/)
   docs-deploy --line <v0.x|v1.x> [--version vX.Y.Z] [--dry-run]
-                           Build Hugo/projectious.work, retain release snapshots, and push gh-pages
+                           Build Hugo, retain release snapshots, and push gh-pages
   test-visual              Run screencast smoke tests (~40s)
   record-docs              Regenerate all docs screencasts + README GIF
 
@@ -142,10 +210,8 @@ ${bold}Release:${reset}
                            Add --skip list to exclude long or already-run steps.
   release <version> --list-steps
                            Print release step aliases and concrete step names
-  release-host-prepare <version>
-                           Prepare immutable checksummed host-gate inputs
-  release-host <run-dir> [--dry-run] [--cold-cache] [--retry-from=<failed-run-dir>]
-                           Run macOS validation; --dry-run stops before publication
+  release-host <version>   Build/upload macOS binaries, push GHCR images,
+                           run runtime smoke, then refresh + commit generated runtime surfaces
   release-finalize-runtime <version>
                            Refresh and commit repo-owned generated runtime files
 
@@ -228,45 +294,148 @@ cmd_test() {
   ok "Clippy OK"
 
   info "Running tests..."
-  # Process-level visual contracts use isolated tmux sockets but still share
-  # host CPU/PTY scheduling. Keep the canonical release invocation
-  # deterministic; callers do not need to remember a contention override.
-  (cd "${CLI_DIR}" && cargo test -- --test-threads=1) || die "Tests failed"
+  (cd "${CLI_DIR}" && cargo test) || die "Tests failed"
   ok "All tests passed"
 }
 
+ensure_e2e_companion() {
+  local key="${PROJECT_ROOT}/.aibox-e2e-runner-home/.ssh/id_ed25519"
+  local host="${AIBOX_E2E_HOST:-aibox-e2e-testrunner}"
+  info "Checking SSH companion E2E container..."
+  local ssh_output="" rebuilt=0 attempt
+  if [[ -f "${key}" ]] && ssh_output=$(ssh -i "${key}" \
+      -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o ConnectTimeout=5 \
+      -o LogLevel=ERROR \
+      "testuser@${host}" 'echo ok' 2>&1); then
+    if grep -qx ok <<<"${ssh_output}"; then
+      if e2e_companion_preflight "${key}" "${host}"; then
+        ok "SSH companion E2E container is reachable and kind-ready"
+        return
+      fi
+      warn "SSH companion is reachable but does not satisfy the systemd/kind contract"
+      rebuilt=1
+    fi
+  fi
+
+  if grep -Eiq 'could not resolve|temporary failure|name or service not known|no such host' <<<"${ssh_output}"; then
+    warn "SSH companion host '${host}' did not resolve. In restricted Codex sandboxes, Docker DNS for the companion is often unavailable."
+    warn "For partial release validation, use --skip e2e,visual or select steps that do not need the companion."
+  fi
+  if [[ "${rebuilt}" -eq 1 ]]; then
+    die "E2E companion is stale. Rebuild it on the Docker host: docker compose -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.override.yml up -d --build --force-recreate aibox-e2e-testrunner"
+  fi
+  _require_runtime
+  info "SSH companion not reachable; starting aibox-e2e-testrunner via Compose..."
+  compose up -d --build --force-recreate aibox-e2e-testrunner \
+    || die "Failed to start aibox-e2e-testrunner"
+
+  for attempt in $(seq 1 30); do
+    if [[ -f "${key}" ]] && ssh -i "${key}" \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o ConnectTimeout=5 \
+        -o LogLevel=ERROR \
+        "testuser@${host}" 'echo ok' >/dev/null 2>&1 \
+        && e2e_companion_preflight "${key}" "${host}"; then
+      ok "SSH companion E2E container is kind-ready"
+      return
+    fi
+    sleep 2
+  done
+  die "E2E companion did not become kind-ready after rebuild. On the host run: docker compose -f .devcontainer/docker-compose.yml -f .devcontainer/docker-compose.override.yml up -d --build --force-recreate aibox-e2e-testrunner"
+}
+
+# The release-gated kind suite needs more than an SSH daemon.  In particular,
+# a service created before the systemd companion migration remains reachable
+# but has sshd as PID 1 and cannot delegate cgroup v2 controllers to rootless
+# Podman.  Keep this probe shell-only so it runs before Cargo deploys any test
+# payload to the companion.
+e2e_companion_preflight() {
+  local key="$1" host="$2"
+  ssh -i "${key}" \
+    -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -o ConnectTimeout=5 \
+    -o LogLevel=ERROR \
+    "testuser@${host}" \
+    'set -eu
+     command -v kind >/dev/null
+     command -v kubectl >/dev/null
+     test "$(ps -p 1 -o comm= | tr -d " ")" = systemd
+     test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs
+     test -d /lib/modules
+     test "$(podman info --format "{{.Host.CgroupManager}}")" = systemd
+     systemd-run --user --scope --quiet -p Delegate=yes \
+       /bin/sh -ec '\''scope=$(awk -F: "\$1 == 0 { print \$3 }" /proc/self/cgroup); base=/sys/fs/cgroup${scope}; test -r "${base}/cgroup.controllers"; for controller in cpu cpuset io memory pids; do grep -qw "${controller}" "${base}/cgroup.controllers"; done'\'''
+}
+
+prune_e2e_companion_storage() {
+  local key="${PROJECT_ROOT}/.aibox-e2e-runner-home/.ssh/id_ed25519"
+  local host="${AIBOX_E2E_HOST:-aibox-e2e-testrunner}"
+  ensure_e2e_companion
+  info "Pruning SSH companion nested runtime state..."
+  ssh -i "${key}" \
+      -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o ConnectTimeout=5 \
+      -o LogLevel=ERROR \
+      "testuser@${host}" \
+      'runtime=""; if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then runtime=docker; elif command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then runtime=podman; fi; test -n "$runtime" || exit 0; for workspace in /workspaces/*; do [ -d "$workspace" ] || continue; if [ -f "$workspace/.devcontainer/docker-compose.yml" ]; then (cd "$workspace" && "$runtime" compose -f .devcontainer/docker-compose.yml down -v --remove-orphans >/dev/null 2>&1) || true; fi; done; for id in $("$runtime" ps -aq --filter label=com.docker.compose.project.working_dir 2>/dev/null || true); do working_dir=$("$runtime" inspect --format "{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}" "$id" 2>/dev/null || true); case "$working_dir" in /workspaces/*) "$runtime" rm -f "$id" >/dev/null 2>&1 || true ;; esac; done; find /workspaces -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || sudo find /workspaces -mindepth 1 -maxdepth 1 -exec rm -rf {} +' \
+    || return 1
+  ok "SSH companion E2E state pruned (images and BuildKit cache preserved)"
+}
+
 cmd_test_e2e() {
-  info "Running local E2E contracts (no container-runtime bridge)..."
-  (cd "${CLI_DIR}" && cargo test --test e2e -- --test-threads=1) || die "Local E2E contracts failed"
-  ok "Local E2E contracts passed"
+  local status=0 test_threads="${AIBOX_E2E_TEST_THREADS:-4}"
+  [[ "${test_threads}" =~ ^[1-9][0-9]*$ ]] \
+    || die "AIBOX_E2E_TEST_THREADS must be a positive integer"
+  ensure_e2e_companion
+  prune_e2e_companion_storage || die "Failed to prune SSH companion nested runtime state"
+  info "Running Tier 2 SSH companion E2E tests..."
+  (cd "${CLI_DIR}" && cargo test --features e2e --test e2e -- --test-threads="${test_threads}") \
+    || status=$?
+  if [[ "${status}" -eq 0 ]]; then
+    info "Running release-gated disposable Kubernetes cluster E2E..."
+    (cd "${CLI_DIR}" && cargo test --features e2e --test e2e \
+      kubernetes_kind -- --ignored --nocapture --test-threads=1) \
+      || status=$?
+  fi
+  prune_e2e_companion_storage || warn "Post-suite SSH companion prune failed"
+  [[ "${status}" -eq 0 ]] || die "Tier 2 SSH companion E2E tests failed"
+  ok "Tier 2 SSH companion E2E tests passed"
 }
 
 cmd_test_e2e_visual_status() {
-  info "Running visual E2E: generated tmux layouts, themes, and status line..."
-  (cd "${CLI_DIR}" && cargo test --test e2e \
-    visual_generated_layouts_render_across_all_themes -- --nocapture --test-threads=1) \
+  ensure_e2e_companion
+  info "Running opt-in visual E2E: generated tmux layouts, themes, and status line..."
+  (cd "${CLI_DIR}" && cargo test --features e2e --test e2e \
+    visual_generated_layouts_render_across_all_themes -- --ignored --nocapture --test-threads=1) \
     || die "Visual E2E status/theme matrix failed"
   ok "Visual E2E status/theme matrix passed"
 }
 
 cmd_test_e2e_visual_tabs() {
-  info "Running visual E2E: generated tmux windows, tools, and harnesses..."
-  (cd "${CLI_DIR}" && cargo test --test e2e \
-    visual_generated_tools_and_harness_windows_render_when_enabled -- --nocapture --test-threads=1) \
+  ensure_e2e_companion
+  info "Running opt-in visual E2E: generated tmux windows, tools, and harnesses..."
+  (cd "${CLI_DIR}" && cargo test --features e2e --test e2e \
+    visual_generated_tools_and_harness_windows_render_when_enabled -- --ignored --nocapture --test-threads=1) \
     || die "Visual E2E generated window traversal failed"
   ok "Visual E2E generated window traversal passed"
 }
 
 cmd_test_e2e_visual_yazi() {
-  info "Running visual E2E: Yazi previews, git symbols, and plugins..."
-  (cd "${CLI_DIR}" && cargo test --test e2e \
-    visual_yazi_previews_git_symbols_and_optional_plugins_render -- --nocapture --test-threads=1) \
+  ensure_e2e_companion
+  info "Running opt-in visual E2E: Yazi previews, git symbols, and plugins..."
+  (cd "${CLI_DIR}" && cargo test --features e2e --test e2e \
+    visual_yazi_previews_git_symbols_and_optional_plugins_render -- --ignored --nocapture --test-threads=1) \
     || die "Visual E2E Yazi preview matrix failed"
   ok "Visual E2E Yazi preview matrix passed"
 }
 
 cmd_test_e2e_visual() {
-  info "Running all visual E2E tiers..."
+  info "Running all opt-in visual E2E tiers..."
   info "Visual E2E tier 1/3: generated layouts, themes, and tmux status line"
   cmd_test_e2e_visual_status
   info "Visual E2E tier 2/3: generated windows, tools, and harnesses"
@@ -280,7 +449,8 @@ cmd_test_e2e_visual() {
 # tmux-bg-not-themed regression to ship undetected. Captures actual painted
 # terminal cells via `tmux capture-pane -p -e` / `starship prompt` stdout and
 # replays them through vt100 to assert per-cell bg/fg against the theme
-# palette. All process/file visual tests run locally with isolated tmux sockets.
+# palette. Starship tier is local (no companion). tmux+yazi tiers need the
+# companion and are #[ignore]-gated.
 cmd_test_e2e_render_starship() {
   info "Running Tier 3 rendered-color tests: Starship prompt (local, no companion)..."
   (cd "${CLI_DIR}" && cargo test --features e2e-render --test e2e \
@@ -335,11 +505,12 @@ cmd_test_e2e_render() {
 }
 
 cmd_test_e2e_doc_captures() {
+  ensure_e2e_companion
   local artifact_dir="${AIBOX_E2E_VISUAL_ARTIFACT_DIR:-${PROJECT_ROOT}/docs-site/static/img/e2e}"
   mkdir -p "${artifact_dir}"
   info "Running visual E2E with docs-ready artifacts at ${artifact_dir}..."
   (cd "${CLI_DIR}" && AIBOX_E2E_VISUAL_ARTIFACT_DIR="${artifact_dir}" \
-    cargo test --test e2e visual_matrix -- --ignored --nocapture --test-threads=1) \
+    cargo test --features e2e --test e2e visual_matrix -- --ignored --nocapture --test-threads=1) \
     || die "Visual E2E docs capture run failed"
   ok "Visual E2E docs artifacts written to ${artifact_dir}"
 }
@@ -1167,15 +1338,14 @@ cmd_ghcr_prune_buildcache_tags() {
 
 cmd_docs_serve() {
   command -v hugo &>/dev/null || die "Hugo extended not found. Install Hugo >= 0.157.0."
-  command -v go &>/dev/null   || die "Go not found. It is required to resolve the pinned Hugo module."
+  command -v go &>/dev/null   || die "Go not found. Install Go to resolve the pinned Hugo module."
   command -v npm &>/dev/null  || die "npm not found. Install Node.js."
-  if [[ ! -d "${PROJECT_ROOT}/docs-site/node_modules" ]]; then
+  if [[ ! -d "${PROJECT_ROOT}/docs-site/node_modules/@tabler/icons/icons/outline" || ! -x "${PROJECT_ROOT}/docs-site/node_modules/.bin/tailwindcss" ]]; then
     npm --prefix "${PROJECT_ROOT}/docs-site" ci
   fi
-  node "${PROJECT_ROOT}/scripts/generate-theme-catalog.mjs"
-  info "Serving docs with Hugo/projectious.work at http://localhost:1316/aibox/ ..."
+  info "Serving v1 preview docs with Hugo and the pinned brand theme at http://localhost:1316/aibox/v1.x/ ..."
   hugo server --source "${PROJECT_ROOT}/docs-site" \
-    --bind 0.0.0.0 --port 1316 --baseURL "http://localhost:1316/aibox/"
+    --bind 0.0.0.0 --port 1316 --baseURL "http://localhost:1316/aibox/v1.x/"
 }
 
 cmd_docs_deploy() {
@@ -1207,7 +1377,7 @@ cmd_docs_deploy_legacy() {
   info "Source: ${current_branch}@${commit_sha}"
 
   cd "${PROJECT_ROOT}"
-  info "Building docs with the projectious.work Hugo brand theme..."
+  info "Building docs with Hugo and the pinned brand theme..."
   "${PROJECT_ROOT}/scripts/build-docs.sh"
   ok "Site built in docs-site/public/"
 
@@ -1220,7 +1390,20 @@ cmd_docs_deploy_legacy() {
   # Bug (b): use ${tmpdir:-} so trap is safe even if mktemp never ran (set -u).
   trap '[[ -n "${tmpdir:-}" ]] && rm -rf "${tmpdir}"' EXIT
 
-  cp -r "${PROJECT_ROOT}/docs-site/public/." "${tmpdir}/"
+  # This branch publishes the v1.x preview docs under the /v1.x/ subpath.
+  # The stable v0.x line publishes at the site root on the same gh-pages
+  # branch. Clone the existing gh-pages tree first (if any) so a
+  # v1.x-only rebuild here never touches the root; only replace the
+  # v1.x/ subtree.
+  if git clone -q --depth 1 --branch gh-pages "${remote_url}" "${tmpdir}" 2>/dev/null; then
+    info "Found existing gh-pages branch — preserving everything outside v1.x/"
+    rm -rf "${tmpdir}/.git" "${tmpdir}/v1.x"
+  else
+    info "No existing gh-pages branch — starting fresh"
+  fi
+
+  mkdir -p "${tmpdir}/v1.x"
+  cp -r "${PROJECT_ROOT}/docs-site/public/." "${tmpdir}/v1.x/"
   touch "${tmpdir}/.nojekyll"
 
   info "Pushing to gh-pages branch..."
@@ -1546,9 +1729,9 @@ release_usage() {
 release_list_steps() {
   cat <<'STEPS'
 Release step aliases:
-  all       state,doctors,sync,version,test,visual,changelog,audit,build-linux,version-smoke,push-main,notes,tag,github-release,docs,prompt
+  all       state,doctors,sync,version,test,docs-check,e2e,visual,audit,build-linux,version-smoke,push-main,notes,tag,github-release,docs,prompt
   phase0    state,doctors
-  checks    sync,version,test,visual,changelog,audit
+  checks    sync,version,test,e2e,visual,audit
   build     build-linux,version-smoke
   publish   push-main,notes,tag,github-release
 
@@ -1558,12 +1741,13 @@ Concrete release steps:
   sync            Check/sync processkit default version
   version         Bump cli/Cargo.toml and Cargo.lock if needed, then commit
   test            Run fmt, clippy, and unit/integration tests
-  visual          Run mandatory visual E2E matrix and all-theme cast invariants
-  changelog       Require the exact release to be the newest public changelog entry
+  docs-check      Verify release notes, README/contributor surfaces, compatibility metadata, and the Hugo build
+  e2e             Run Tier 2 SSH companion E2E
+  visual          Run the selected visual E2E tier from AIBOX_RELEASE_VISUAL_E2E
   audit           Run cargo audit
   build-linux     Build Linux release archives and checksums
   version-smoke   Verify the native release binary reports the requested version
-  push-main       Promote an exact v0 dev candidate through staging, release, and main
+  push-main       Promote the candidate to its protected release branch
   notes           Prepare or reuse dist/RELEASE-NOTES.md
   tag             Create and push the annotated release tag
   github-release  Create the GitHub release with Linux archives
@@ -1575,13 +1759,6 @@ Examples:
   ./scripts/maintain.sh release 0.25.15 --skip e2e,visual
   ./scripts/maintain.sh release 0.25.15 --steps phase0
   ./scripts/maintain.sh release 0.25.15 --steps publish,prompt
-
-Heavy E2E controls:
-  AIBOX_RELEASE_HEAVY_E2E=auto|all             Select by changed paths or force all (default: auto)
-  AIBOX_RELEASE_IMPACT_BASE_REF=<ref>          Override the comparison base for auto selection
-  AIBOX_RELEASE_ADDON_PARALLELISM=<count>      Concurrent addon shard limit (default: 2)
-  AIBOX_RELEASE_PROGRESS_INTERVAL_SECONDS=<s>  Long-running-step progress interval (default: 30)
-  AIBOX_RELEASE_SKIP_VISUAL=1                  Emergency-only override for mandatory visual gates
 STEPS
 }
 
@@ -1612,8 +1789,9 @@ release_expand_step_token() {
       release_add_step sync
       release_add_step version
       release_add_step test
+      release_add_step docs-check
+      release_add_step e2e
       release_add_step visual
-      release_add_step changelog
       release_add_step audit
       ;;
     build)
@@ -1626,7 +1804,7 @@ release_expand_step_token() {
       release_add_step tag
       release_add_step github-release
       ;;
-    state|doctors|sync|version|test|visual|changelog|audit|build-linux|version-smoke|push-main|notes|tag|github-release|docs|prompt)
+    state|doctors|sync|version|test|docs-check|e2e|visual|audit|build-linux|version-smoke|push-main|notes|tag|github-release|docs|prompt)
       release_add_step "${token}"
       ;;
     "")
@@ -1735,6 +1913,50 @@ release_validate_license_guardrails() {
   fi
 }
 
+release_docs_gate() {
+  local version="$1"
+  local tag="v${version}"
+  local notes="${PROJECT_ROOT}/release-notes/${tag}.md"
+  local compatibility="${PROJECT_ROOT}/docs-site/content/docs/reference/compatibility.md"
+  local maintenance="${PROJECT_ROOT}/docs-site/content/docs/contributing/maintenance.md"
+  local docs_readme="${PROJECT_ROOT}/docs-site/README.md"
+  local build_dir
+
+  [[ -f "${notes}" ]] \
+    || die "Tracked release notes are required at release-notes/${tag}.md before publication."
+  grep -Fqx "# aibox ${tag}" "${notes}" \
+    || die "release-notes/${tag}.md must start with '# aibox ${tag}'."
+  for heading in "## Added" "## Changed" "## Fixed" "## Known limitations" "## Install" "## Roll back"; do
+    grep -Fqx "${heading}" "${notes}" \
+      || die "release-notes/${tag}.md is missing required section '${heading}'."
+  done
+
+  [[ -f "${compatibility}" ]] \
+    || die "The Hugo compatibility page is required before release."
+  grep -Eq "^[|][[:space:]]*${version//./\\.}[[:space:]]*[|]" "${compatibility}" \
+    || die "The Hugo compatibility matrix must contain an entry for ${version}."
+  grep -Fq "projectious-work.github.io/aibox/v1.x/" "${PROJECT_ROOT}/README.md" \
+    || die "README.md must link to the maintained v1.x documentation."
+  grep -Fq "v1.x-pre-release" "${PROJECT_ROOT}/CONTRIBUTING.md" \
+    || die "CONTRIBUTING.md must document the v1 prerelease authority branch."
+  grep -Fq "v1.x-release" "${maintenance}" \
+    || die "The Hugo maintenance guide must document the v1 GA release branch."
+  grep -Fq "./scripts/maintain.sh release X.Y.Z" "${docs_readme}" \
+    || die "docs-site/README.md must document release-driven publication."
+
+  build_dir="$(mktemp -d)"
+  if ! "${PROJECT_ROOT}/scripts/build-docs.sh" --destination "${build_dir}"; then
+    rm -rf "${build_dir}"
+    die "Hugo production build failed."
+  fi
+  [[ -f "${build_dir}/index.html" ]] || {
+    rm -rf "${build_dir}"
+    die "Hugo build did not produce index.html."
+  }
+  rm -rf "${build_dir}"
+  ok "Release documentation is complete and the Hugo production build passes"
+}
+
 # Release validation evidence is local by design. Each marker is bound to the
 # exact candidate commit, requested version, and Rust toolchain. This lets an
 # interrupted release resume without weakening the gate or trusting evidence
@@ -1751,9 +1973,8 @@ release_evidence_init() {
   fi
   RELEASE_EVIDENCE_DIR="${DIST_DIR}/release-evidence/v${version}/${RELEASE_CANDIDATE_SHA}"
   RELEASE_LOG_DIR="${RELEASE_EVIDENCE_DIR}/logs"
-  RELEASE_TIMING_LOG="${RELEASE_EVIDENCE_DIR}/timing-events.tsv"
   mkdir -p "${RELEASE_LOG_DIR}"
-  export RELEASE_PHASE RELEASE_CANDIDATE_SHA RELEASE_TOOLCHAIN_FINGERPRINT RELEASE_TREE_STATE RELEASE_EVIDENCE_DIR RELEASE_LOG_DIR RELEASE_TIMING_LOG
+  export RELEASE_PHASE RELEASE_CANDIDATE_SHA RELEASE_TOOLCHAIN_FINGERPRINT RELEASE_TREE_STATE RELEASE_EVIDENCE_DIR RELEASE_LOG_DIR
 }
 
 release_evidence_key_path() {
@@ -1761,47 +1982,20 @@ release_evidence_key_path() {
   printf '%s/%s.env' "${RELEASE_EVIDENCE_DIR}" "${key//[^a-zA-Z0-9._-]/_}"
 }
 
-# Timing events deliberately use an append-only log instead of the evidence
-# markers above. Markers describe the latest reusable successful result; this
-# event stream preserves failed attempts and every resumed invocation, which is
-# the information needed to account for real release wall time.
-release_timing_record_event() {
-  local event="$1" status="$2" step="$3" started_at="$4" completed_at="$5"
-  local duration="$6" exit_code="$7" details="${8:-}"
-  [[ -n "${RELEASE_TIMING_LOG:-}" ]] || return 0
-  if [[ ! -e "${RELEASE_TIMING_LOG}" ]]; then
-    printf 'event\trun_id\tphase\tstatus\tstep\tstarted_at\tcompleted_at\tduration_seconds\texit_code\tdetails\n' \
-      > "${RELEASE_TIMING_LOG}"
-  fi
-  # All fields are internal identifiers or ISO timestamps. Keep the event
-  # format one-record-per-line even if a future caller supplies prose details.
-  details="${details//$'\t'/ }"
-  details="${details//$'\n'/ }"
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "${event}" "${RELEASE_TIMING_RUN_ID:-unknown}" "${RELEASE_PHASE}" \
-    "${status}" "${step}" "${started_at}" "${completed_at}" "${duration}" \
-    "${exit_code}" "${details}" >> "${RELEASE_TIMING_LOG}"
-}
-
-release_timing_begin() {
-  local selected_steps="${1:-}"
-  RELEASE_TIMING_RUN_STARTED_EPOCH="$(date +%s)"
-  RELEASE_TIMING_RUN_STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  RELEASE_TIMING_RUN_ID="${RELEASE_PHASE}-$(date -u +%Y%m%dT%H%M%SZ)-$$"
-  export RELEASE_TIMING_RUN_STARTED_EPOCH RELEASE_TIMING_RUN_STARTED_AT RELEASE_TIMING_RUN_ID
-  release_timing_record_event run started "release-${RELEASE_PHASE}" \
-    "${RELEASE_TIMING_RUN_STARTED_AT}" "" 0 0 \
-    "steps=${selected_steps};parallelism=${AIBOX_RELEASE_PARALLELISM:-2}"
-}
-
-release_timing_finish() {
-  local duration="${1:-$(( $(date +%s) - RELEASE_TIMING_RUN_STARTED_EPOCH ))}"
-  local status="${2:-completed}"
-  local exit_code=0
-  [[ "${status}" == "completed" ]] || exit_code=1
-  release_timing_record_event run "${status}" "release-${RELEASE_PHASE}" \
-    "${RELEASE_TIMING_RUN_STARTED_AT}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    "${duration}" "${exit_code}" ""
+release_companion_fingerprint() {
+  local key="${PROJECT_ROOT}/.aibox-e2e-runner-home/.ssh/id_ed25519"
+  local host="${AIBOX_E2E_HOST:-aibox-e2e-testrunner}"
+  [[ -f "${key}" ]] || return 1
+  {
+    printf 'host=%s\n' "${host}"
+    ssh -i "${key}" \
+      -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o ConnectTimeout=5 \
+      -o LogLevel=ERROR \
+      "testuser@${host}" \
+      'printf "container="; cat /etc/hostname 2>/dev/null || true; uname -a; cat /etc/os-release 2>/dev/null || true; tmux -V 2>/dev/null || true; yazi --version 2>/dev/null || true; asciinema --version 2>/dev/null || true; if command -v docker >/dev/null 2>&1; then docker version --format "{{.Server.Version}}" 2>/dev/null || true; elif command -v podman >/dev/null 2>&1; then podman version --format "{{.Server.Version}}" 2>/dev/null || true; fi'
+  } | sha256_stdin
 }
 
 release_evidence_scope() {
@@ -1812,7 +2006,9 @@ release_evidence_scope() {
       # gives audit evidence a maximum useful lifetime of 24 hours.
       date -u +%Y-%m-%d
       ;;
-    visual-*) printf 'local-isolated-visual' ;;
+    e2e|visual-*)
+      release_companion_fingerprint
+      ;;
     test)
       printf 'render-local=%s' "${AIBOX_RELEASE_SKIP_RENDER_LOCAL:-0}"
       ;;
@@ -1889,31 +2085,15 @@ release_run_evidenced_step() {
   local key="$1" version="$2" label="$3"
   shift 3
   if release_evidence_valid "${key}" "${version}"; then
-    local reused_at
-    reused_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    release_timing_record_event step reused "${key}" "${reused_at}" "${reused_at}" 0 0 ""
     ok "${label}: reusing evidence for ${RELEASE_CANDIDATE_SHA:0:12}"
     return 0
   fi
 
-  local started started_at completed_at duration status
+  local started duration
   started="$(date +%s)"
-  started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  if "$@"; then
-    status=0
-  else
-    status="$?"
-  fi
+  "$@"
   duration=$(( $(date +%s) - started ))
-  completed_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  if [[ "${status}" -ne 0 ]]; then
-    release_timing_record_event step failed "${key}" "${started_at}" "${completed_at}" \
-      "${duration}" "${status}" ""
-    return "${status}"
-  fi
   release_record_evidence "${key}" "${version}" "${duration}"
-  release_timing_record_event step passed "${key}" "${started_at}" "${completed_at}" \
-    "${duration}" 0 ""
   ok "${label}: completed in ${duration}s"
 }
 
@@ -1929,64 +2109,92 @@ release_local_test_gate() {
   esac
 }
 
-release_visual_gate() {
-  cmd_test_e2e_visual
-  "${SCRIPT_DIR}/test-screencasts.sh" themes
+release_companion_e2e_gate() {
+  case "${AIBOX_RELEASE_SKIP_COMPANION_E2E:-}" in
+    1|true|yes)
+      warn "Skipping Tier 2 SSH companion E2E during release because AIBOX_RELEASE_SKIP_COMPANION_E2E=${AIBOX_RELEASE_SKIP_COMPANION_E2E}. Re-run ./scripts/maintain.sh test-e2e after rebuilding the companion."
+      ;;
+    *)
+      # Visual and lifecycle tests each serialize within their own group, but
+      # both groups exercise the same SSH companion runtime. Release runs
+      # prioritize deterministic evidence over throughput; callers may still
+      # opt into parallelism explicitly.
+      : "${AIBOX_E2E_TEST_THREADS:=1}"
+      export AIBOX_E2E_TEST_THREADS
+      cmd_test_e2e
+      ;;
+  esac
 }
 
-release_changelog_gate() {
-  local version="$1"
-  local changelog_dir="${PROJECT_ROOT}/docs-site/content/changelog"
-  python3 - "${changelog_dir}" "${version}" <<'PY'
-import datetime as dt
-import pathlib
-import re
-import sys
+# A v1 prerelease is allowed to publish only with fresh real-producer and
+# disposable-cluster evidence. Stable-v1 readiness deliberately includes
+# additional migration, security, adoption, and support gates, so it must not
+# be used as an alpha publication gate.
+release_v1_alpha_evidence_gate() {
+  local version="$1" evidence="${PROJECT_ROOT}/.aibox/release-evidence/m7c-live.json" candidate_binary_sha256
+  [[ "${version}" == 1.*-* ]] || return 0
+  [[ -f "${evidence}" ]] \
+    || die "v1 alpha release requires M7c evidence at ${evidence}; run the live disposable-cluster suite first"
+  grep -Eq "\"candidateCommit\"[[:space:]]*:[[:space:]]*\"${RELEASE_CANDIDATE_SHA}\"" "${evidence}" \
+    || die "M7c evidence is not bound to release candidate ${RELEASE_CANDIDATE_SHA}"
+  grep -Eq "\"binarySha256\"[[:space:]]*:[[:space:]]*\"sha256:[0-9a-f]{64}\"" "${evidence}" \
+    || die "M7c evidence does not bind the tested candidate binary digest"
+  [[ -f "${CLI_DIR}/target/debug/aibox" && -x "${CLI_DIR}/target/debug/aibox" && ! -L "${CLI_DIR}/target/debug/aibox" ]] \
+    || die "M7c candidate binary is missing; run the disposable-cluster suite before release gating"
+  candidate_binary_sha256="sha256:$(sha256_file "${CLI_DIR}/target/debug/aibox")"
+  grep -Eq "\"binarySha256\"[[:space:]]*:[[:space:]]*\"${candidate_binary_sha256}\"" "${evidence}" \
+    || die "M7c evidence is not bound to the exact candidate binary"
+  "${PROJECT_ROOT}/scripts/test-processkit-v1-consumer.sh"
+}
 
-root = pathlib.Path(sys.argv[1])
-version = sys.argv[2]
-expected = root / f"release-v{version.replace('.', '-')}.md"
-if not expected.is_file():
-    raise SystemExit(f"missing public changelog entry: {expected}")
+release_v1_stable_evidence_gate() {
+  local version="$1" candidate_binary_sha256
+  [[ "${version}" == 1.* && "${version}" != *-* ]] || return 0
+  [[ -f "${CLI_DIR}/target/debug/aibox" && -x "${CLI_DIR}/target/debug/aibox" && ! -L "${CLI_DIR}/target/debug/aibox" ]] \
+    || die "stable-v1 candidate binary is missing; run the local release test gate first"
+  candidate_binary_sha256="sha256:$(sha256_file "${CLI_DIR}/target/debug/aibox")"
+  RELEASE_CANDIDATE_SHA="${RELEASE_CANDIDATE_SHA}" \
+  AIBOX_RELEASE_BINARY_SHA256="${candidate_binary_sha256}" \
+    "${PROJECT_ROOT}/scripts/test-v1-stable-readiness.sh"
+  RELEASE_CANDIDATE_SHA="${RELEASE_CANDIDATE_SHA}" \
+  AIBOX_RELEASE_BINARY_SHA256="${candidate_binary_sha256}" \
+    "${PROJECT_ROOT}/scripts/test-v1-adoption-pilots.sh"
+  RELEASE_CANDIDATE_SHA="${RELEASE_CANDIDATE_SHA}" \
+  AIBOX_RELEASE_BINARY_SHA256="${candidate_binary_sha256}" \
+    "${PROJECT_ROOT}/scripts/test-v1-operational-readiness.sh"
+  (cd "${PROJECT_ROOT}" && \
+    RELEASE_CANDIDATE_SHA="${RELEASE_CANDIDATE_SHA}" \
+    AIBOX_RELEASE_BINARY_SHA256="${candidate_binary_sha256}" \
+      cargo run --quiet --manifest-path "${CLI_DIR}/Cargo.toml" -- \
+        config release-readiness --output json) \
+    || die "stable-v1 release readiness evidence is incomplete"
+}
 
-def metadata(path: pathlib.Path):
-    text = path.read_text(encoding="utf-8")
-    if not text.startswith("---\n"):
-        raise SystemExit(f"invalid changelog front matter: {path}")
-    front = text.split("---\n", 2)[1]
-    title_match = re.search(r'^title:\s*["\']?([^"\'\n]+)', front, re.M)
-    date_match = re.search(r'^date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$', front, re.M)
-    version_match = re.fullmatch(r"release-v(\d+)-(\d+)-(\d+)\.md", path.name)
-    if not title_match or not date_match or not version_match:
-        raise SystemExit(f"incomplete changelog metadata: {path}")
-    return (
-        dt.date.fromisoformat(date_match.group(1)),
-        tuple(map(int, version_match.groups())),
-        title_match.group(1),
-        text,
-    )
-
-entries = [(metadata(path), path) for path in root.glob("release-v*.md")]
-if not entries:
-    raise SystemExit(f"no public changelog entries found in {root}")
-latest_meta, latest_path = max(entries, key=lambda item: (item[0][0], item[0][1]))
-expected_meta = metadata(expected)
-if f"v{version}" not in expected_meta[2]:
-    raise SystemExit(f"changelog title does not contain exact version v{version}: {expected_meta[2]}")
-if f"/releases/tag/v{version}" not in expected_meta[3]:
-    raise SystemExit(f"changelog entry does not link to release tag v{version}: {expected}")
-if latest_path != expected:
-    raise SystemExit(
-        f"v{version} is not the newest changelog entry; Hugo will render {latest_path.name} first"
-    )
-print(f"public changelog gate passed: {expected.name} is newest")
-PY
+release_visual_gate() {
+  case "${AIBOX_RELEASE_VISUAL_E2E:-skip}" in
+    status) cmd_test_e2e_visual_status ;;
+    tabs|tools) cmd_test_e2e_visual_tabs ;;
+    yazi) cmd_test_e2e_visual_yazi ;;
+    render)
+      cmd_test_e2e_render_tmux
+      cmd_test_e2e_render_yazi
+      ;;
+    full)
+      cmd_test_e2e_visual
+      cmd_test_e2e_render_tmux
+      cmd_test_e2e_render_yazi
+      ;;
+    docs|captures) cmd_test_e2e_doc_captures ;;
+    *)
+      die "Unknown AIBOX_RELEASE_VISUAL_E2E=${AIBOX_RELEASE_VISUAL_E2E:-}; expected skip, status, tabs, yazi, render, full, or docs"
+      ;;
+  esac
 }
 
 release_audit_gate() {
   info "Running cargo audit..."
   command -v cargo-audit &>/dev/null \
-    || (cd "${CLI_DIR}" && cargo install cargo-audit --quiet)
+    || (cd "${CLI_DIR}" && cargo install cargo-audit --locked --quiet)
   local audit_db="${TMPDIR:-/tmp}/aibox-cargo-advisory-db"
   mkdir -p "${audit_db}"
   (cd "${CLI_DIR}" && cargo audit --db "${audit_db}") \
@@ -2078,16 +2286,12 @@ release_run_parallel_validation() {
   local version="$1"
   shift
   local max_jobs="${AIBOX_RELEASE_PARALLELISM:-2}"
-  local progress_interval="${AIBOX_RELEASE_PROGRESS_INTERVAL_SECONDS:-30}"
   [[ "${max_jobs}" =~ ^[1-9][0-9]*$ ]] \
     || die "AIBOX_RELEASE_PARALLELISM must be a positive integer"
-  [[ "${progress_interval}" =~ ^[1-9][0-9]*$ ]] \
-    || die "AIBOX_RELEASE_PROGRESS_INTERVAL_SECONDS must be a positive integer"
 
-  local specs=("$@") active=0 status=0 next=0 total="${#specs[@]}" now elapsed
-  local spec key label command log pid index completed job_status status_file started_at
-  local pids=() keys=() labels=() logs=() status_files=()
-  local started_epochs=() started_ats=() last_progress_epochs=()
+  local specs=("$@") active=0 status=0 next=0 total="${#specs[@]}"
+  local spec key label command log pid index completed job_status status_file
+  local pids=() labels=() logs=() status_files=()
 
   trap 'release_cleanup_parallel_children' EXIT
   trap 'release_cleanup_parallel_children; exit 130' INT TERM
@@ -2099,8 +2303,6 @@ release_run_parallel_validation() {
       log="${RELEASE_LOG_DIR}/${key}.log"
       status_file="${log}.status"
       rm -f "${status_file}"
-      now="$(date +%s)"
-      started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       (
         trap - EXIT INT TERM
         set +e
@@ -2113,13 +2315,9 @@ release_run_parallel_validation() {
       ) &
       pid="$!"
       pids+=("${pid}")
-      keys+=("${key}")
       labels+=("${label}")
       logs+=("${log}")
       status_files+=("${status_file}")
-      started_epochs+=("${now}")
-      started_ats+=("${started_at}")
-      last_progress_epochs+=("${now}")
       active=$((active + 1))
       next=$((next + 1))
     done
@@ -2145,45 +2343,21 @@ release_run_parallel_validation() {
           status=1
         fi
         rm -f "${status_file}"
-        unset 'pids[index]' 'keys[index]' 'labels[index]' 'logs[index]' \
-          'status_files[index]' 'started_epochs[index]' 'started_ats[index]' \
-          'last_progress_epochs[index]'
+        unset 'pids[index]' 'labels[index]' 'logs[index]' 'status_files[index]'
         active=$((active - 1))
         completed=1
         break
       done
-      if [[ "${completed}" -eq 0 ]]; then
-        now="$(date +%s)"
-        for index in "${!pids[@]}"; do
-          if (( now - last_progress_epochs[index] >= progress_interval )); then
-            elapsed=$(( now - started_epochs[index] ))
-            info "${labels[$index]} still running (${elapsed}s); log: ${logs[$index]}"
-            release_timing_record_event progress running "${keys[$index]}" \
-              "${started_ats[$index]}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-              "${elapsed}" 0 "log=${logs[$index]}"
-            last_progress_epochs[$index]="${now}"
-          fi
-        done
-        sleep 0.2
-      fi
+      [[ "${completed}" -eq 1 ]] || sleep 0.2
     done
   done
 
   trap - EXIT INT TERM
-  if [[ "${status}" -ne 0 ]]; then
-    # Failed validation attempts are already in the append-only timing log.
-    # Refresh the human-readable view before stopping so an interrupted release
-    # has an immediately useful cumulative report.
-    release_timing_finish "$(( $(date +%s) - RELEASE_TIMING_RUN_STARTED_EPOCH ))" failed
-    release_write_timing_report "${version}"
-    die "One or more parallel release validation jobs failed"
-  fi
+  [[ "${status}" -eq 0 ]] || die "One or more parallel release validation jobs failed"
 }
 
 release_write_timing_report() {
   local version="$1" total_duration="${2:-}" report phase_label marker
-  local timing_log total_steps passed_steps failed_steps reused_steps cumulative_duration
-  local completed_runs failed_runs cumulative_run_duration
   case "${RELEASE_PHASE}" in
     host)
       report="${DIST_DIR}/RELEASE-HOST-TIMINGS.md"
@@ -2194,38 +2368,13 @@ release_write_timing_report() {
       phase_label="Container"
       ;;
   esac
-  timing_log="${RELEASE_EVIDENCE_DIR}/timing-events.tsv"
   {
     printf '# %s release timings for v%s\n\n' "${phase_label}" "${version}"
     printf -- '- Candidate: `%s`\n' "${RELEASE_CANDIDATE_SHA}"
     printf -- '- Parallelism: `%s`\n\n' "${AIBOX_RELEASE_PARALLELISM:-2}"
     if [[ -n "${total_duration}" ]]; then
-      printf -- '- Most recent command duration: `%ss`\n\n' "${total_duration}"
+      printf -- '- End-to-end command duration: `%ss`\n\n' "${total_duration}"
     fi
-    if [[ -f "${timing_log}" ]]; then
-      total_steps="$(awk -F '\t' 'NR > 1 && $1 == "step" { count++ } END { print count + 0 }' "${timing_log}")"
-      passed_steps="$(awk -F '\t' 'NR > 1 && $1 == "step" && $4 == "passed" { count++ } END { print count + 0 }' "${timing_log}")"
-      failed_steps="$(awk -F '\t' 'NR > 1 && $1 == "step" && $4 == "failed" { count++ } END { print count + 0 }' "${timing_log}")"
-      reused_steps="$(awk -F '\t' 'NR > 1 && $1 == "step" && $4 == "reused" { count++ } END { print count + 0 }' "${timing_log}")"
-      cumulative_duration="$(awk -F '\t' 'NR > 1 && $1 == "step" { total += $8 } END { print total + 0 }' "${timing_log}")"
-      completed_runs="$(awk -F '\t' 'NR > 1 && $1 == "run" && $4 == "completed" { count++ } END { print count + 0 }' "${timing_log}")"
-      failed_runs="$(awk -F '\t' 'NR > 1 && $1 == "run" && $4 == "failed" { count++ } END { print count + 0 }' "${timing_log}")"
-      cumulative_run_duration="$(awk -F '\t' 'NR > 1 && $1 == "run" && ($4 == "completed" || $4 == "failed") { total += $8 } END { print total + 0 }' "${timing_log}")"
-      printf '## Cumulative attempts\n\n'
-      printf -- '- Recorded step attempts: `%s` (`%s` passed, `%s` failed, `%s` reused)\n' \
-        "${total_steps}" "${passed_steps}" "${failed_steps}" "${reused_steps}"
-      printf -- '- Cumulative executed-step duration: `%ss`\n' "${cumulative_duration}"
-      printf -- '- Completed command runs: `%s`; failed command runs: `%s`; cumulative command duration: `%ss`\n' \
-        "${completed_runs}" "${failed_runs}" "${cumulative_run_duration}"
-      printf -- '- Append-only event log: `%s`\n\n' "${timing_log#${PROJECT_ROOT}/}"
-      printf '| Run | Step | Result | Duration | Started | Completed |\n'
-      printf '|---|---|---|---:|---|---|\n'
-      awk -F '\t' 'NR > 1 && $1 == "step" {
-        printf "| %s | %s | %s | %ss | %s | %s |\\n", $2, $5, $4, $8, $6, $7
-      }' "${timing_log}"
-      printf '\n'
-    fi
-    printf '## Latest reusable evidence\n\n'
     printf '| Step | Duration | Completed |\n'
     printf '|---|---:|---|\n'
     for marker in "${RELEASE_EVIDENCE_DIR}"/*.env; do
@@ -2238,18 +2387,6 @@ release_write_timing_report() {
     done
   } > "${report}"
   ok "Release timing evidence written to ${report}"
-}
-
-release_host_prompt_path() {
-  local run_dir="$1"
-  case "${run_dir}" in
-    "${PROJECT_ROOT}"/tmp/host-gates/aibox-release/*)
-      printf './%s\n' "${run_dir#"${PROJECT_ROOT}"/}"
-      ;;
-    *)
-      die "Prepared host run directory is outside the project release-gate root: ${run_dir}"
-      ;;
-  esac
 }
 
 cmd_release() {
@@ -2307,6 +2444,7 @@ cmd_release() {
   release_parse_steps "${steps_spec}"
   release_apply_skip_steps "${skip_spec}"
   release_validate_license_guardrails
+  ensure_release_branch "${version}"
 
   info "Preparing release ${tag} with steps: $(release_steps_joined)"
 
@@ -2356,24 +2494,7 @@ cmd_release() {
     local current_cargo_version
     current_cargo_version=$(grep -m1 '^version = ' "${CLI_DIR}/Cargo.toml" | sed -E 's/version = "(.+)"/\1/')
     if [[ "${current_cargo_version}" != "${version}" ]]; then
-      if [[ "${version}" == 0.* ]]; then
-        die "Prepare the v0 version bump on a topic branch, merge it into v0.x-dev, then run the release from the exact v0.x-dev tip."
-      fi
-      info "Bumping cli/Cargo.toml ${current_cargo_version} → ${version}..."
-      # macOS/BSD sed and GNU sed differ on -i; write atomically via a tmp file.
-      local tmp_cargo
-      tmp_cargo=$(mktemp)
-      sed -E "s/^version = \"${current_cargo_version}\"$/version = \"${version}\"/" \
-        "${CLI_DIR}/Cargo.toml" > "${tmp_cargo}"
-      mv "${tmp_cargo}" "${CLI_DIR}/Cargo.toml"
-      # Refresh Cargo.lock so the new version is locked.
-      (cd "${CLI_DIR}" && cargo metadata --format-version 1 --quiet >/dev/null) \
-        || die "cargo metadata failed after version bump — review Cargo.toml"
-      git add "${CLI_DIR}/Cargo.toml" "${CLI_DIR}/Cargo.lock"
-      git commit -m "chore: bump CLI version to ${version}" \
-        -m "Version-Line-Port: not-applicable" \
-        || die "failed to commit Cargo.toml/Cargo.lock bump"
-      ok "Cargo.toml bumped and committed"
+      die "Cargo.toml is ${current_cargo_version}, not ${version}. Bump the version on the matching development branch and merge it into $(release_branch_for_version "${version}") through a pull request before running release."
     else
       ok "Cargo.toml already at ${version}"
     fi
@@ -2382,7 +2503,6 @@ cmd_release() {
   # Everything below this point is validated against the immutable candidate
   # commit. Evidence from an interrupted run is reusable only for this SHA.
   release_evidence_init "${version}"
-  release_timing_begin "$(release_steps_joined)"
   info "Release candidate: ${RELEASE_CANDIDATE_SHA}"
 
   # These gates own independent resources. Run a bounded number concurrently,
@@ -2393,8 +2513,21 @@ cmd_release() {
   if release_step_requested test; then
     validation_specs+=("test|Local fmt, Clippy, tests, and Starship render|release_local_test_gate")
   fi
+  if release_step_requested docs-check; then
+    validation_specs+=("docs-check|Release documentation and Hugo build|release_docs_gate")
+  fi
   if release_step_requested audit; then
     validation_specs+=("audit|Cargo dependency audit|release_audit_gate")
+  fi
+  if release_step_requested e2e; then
+    case "${AIBOX_RELEASE_SKIP_COMPANION_E2E:-}" in
+      1|true|yes)
+        warn "Skipping Tier 2 SSH companion E2E during release because AIBOX_RELEASE_SKIP_COMPANION_E2E=${AIBOX_RELEASE_SKIP_COMPANION_E2E}. Re-run ./scripts/maintain.sh test-e2e after rebuilding the companion."
+        ;;
+      *)
+        validation_specs+=("e2e|Tier 2 companion E2E|release_companion_e2e_gate")
+        ;;
+    esac
   fi
   if release_step_requested build-linux; then
     validation_specs+=("build-linux|Linux release artifacts|release_build_linux_gate")
@@ -2403,21 +2536,42 @@ cmd_release() {
     release_run_parallel_validation "${version}" "${validation_specs[@]}"
   fi
 
-  if release_step_requested visual; then
-    case "${AIBOX_RELEASE_SKIP_VISUAL:-}" in
-      1|true|yes)
-        warn "EMERGENCY OVERRIDE: skipping mandatory visual matrix and theme sweep because AIBOX_RELEASE_SKIP_VISUAL=${AIBOX_RELEASE_SKIP_VISUAL}."
-        ;;
-      *)
-        release_run_evidenced_step "visual-mandatory" "${version}" \
-          "Mandatory visual E2E matrix and all-theme cast invariants" release_visual_gate
-        ;;
-    esac
+  if [[ "${version}" == 1.*-* ]] && \
+     { release_step_requested tag || release_step_requested github-release; }; then
+    release_step_requested e2e \
+      || die "v1 alpha publication requires the e2e step so M7c evidence is generated"
+    release_run_evidenced_step "v1-alpha-evidence" "${version}" \
+      "V1 alpha producer and disposable-cluster evidence" \
+      release_v1_alpha_evidence_gate "${version}"
+  fi
+  if [[ "${version}" == 1.* && "${version}" != *-* ]] && \
+     { release_step_requested tag || release_step_requested github-release; }; then
+    release_step_requested test \
+      || die "stable-v1 publication requires the local test step"
+    release_step_requested audit \
+      || die "stable-v1 publication requires the dependency audit step"
+    release_step_requested e2e \
+      || die "stable-v1 publication requires the e2e step so M7c evidence is generated"
+    release_run_evidenced_step "v1-stable-evidence" "${version}" \
+      "Stable-v1 migration, security, M5, and M7c evidence" \
+      release_v1_stable_evidence_gate "${version}"
   fi
 
-  if release_step_requested changelog; then
-    release_run_evidenced_step "changelog" "${version}" \
-      "Exact and newest public changelog entry" release_changelog_gate "${version}"
+  if release_step_requested tag || release_step_requested github-release; then
+    release_step_requested docs-check \
+      || die "Publication requires the docs-check step; release notes, compatibility metadata, README/contributor guidance, and Hugo output must be validated."
+  fi
+
+  if release_step_requested visual; then
+    case "${AIBOX_RELEASE_VISUAL_E2E:-skip}" in
+      skip|"")
+        warn "Skipping opt-in visual E2E during release. The release agent must justify this in notes or handover, or run AIBOX_RELEASE_VISUAL_E2E=<status|tabs|yazi|render|full|docs>."
+        ;;
+      *)
+        release_run_evidenced_step "visual-${AIBOX_RELEASE_VISUAL_E2E}" "${version}" \
+          "Visual E2E (${AIBOX_RELEASE_VISUAL_E2E})" release_visual_gate
+        ;;
+    esac
   fi
 
   if release_step_requested version-smoke; then
@@ -2432,7 +2586,11 @@ cmd_release() {
 
   if release_step_requested notes; then
     local notes_file="${DIST_DIR}/RELEASE-NOTES.md"
-    if [[ ! -f "${notes_file}" ]] || ! grep -q "${tag}" "${notes_file}" 2>/dev/null; then
+    local tracked_notes_file="${PROJECT_ROOT}/release-notes/${tag}.md"
+    if [[ -f "${tracked_notes_file}" ]]; then
+      cp "${tracked_notes_file}" "${notes_file}"
+      ok "Using tracked release notes from ${tracked_notes_file}"
+    elif [[ ! -f "${notes_file}" ]] || ! grep -q "${tag}" "${notes_file}" 2>/dev/null; then
       info "Generating release-notes scaffold at ${notes_file}..."
       local prev_tag
       prev_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -2460,11 +2618,6 @@ cmd_release() {
   fi
 
   if release_step_requested tag; then
-    if [[ "${version}" == 0.* ]]; then
-      git fetch origin main
-      [[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] \
-        || die "Refusing to tag v0 candidate: main does not point at the validated commit."
-    fi
     info "Tagging and pushing ${tag}..."
     git tag -a "${tag}" -m "Release ${tag}"
     git push origin "${tag}"
@@ -2476,12 +2629,15 @@ cmd_release() {
       release_collect_linux_archives "${version}"
     fi
     local notes_file="${DIST_DIR}/RELEASE-NOTES.md"
+    local github_classification_args=()
     [[ -f "${notes_file}" ]] || die "Missing ${notes_file}; run the 'notes' step first or include the publish alias."
+    mapfile -t github_classification_args < <(release_github_classification_args "${version}")
     info "Creating GitHub release ${tag}..."
     gh release create "${tag}" \
       --repo "${GITHUB_REPO}" \
       --title "aibox ${tag}" \
       --notes-file "${notes_file}" \
+      "${github_classification_args[@]}" \
       "${PROJECT_ROOT}/LICENSE" \
       "${built_archives[@]}"
     ok "GitHub release ${tag} created with Linux binaries and LICENSE"
@@ -2503,19 +2659,19 @@ cmd_release() {
       echo "Run the following on the macOS host to sync the checkout and complete the release:"
       echo ""
       echo "\`\`\`bash"
-      echo "git fetch origin ${release_branch}"
-      echo "git switch ${release_branch}"
-      echo "git reset --keep origin/${release_branch}"
-      echo "host_run_dir=\"\$(./scripts/maintain.sh release-host-prepare ${version})\""
-      echo "./scripts/maintain.sh release-host \"\${host_run_dir}\""
+      echo "git fetch origin $(release_branch_for_version "${version}")"
+      echo "git switch $(release_branch_for_version "${version}")"
+      echo "git reset --keep origin/$(release_branch_for_version "${version}")"
+      echo "./scripts/maintain.sh release-host ${version}"
       echo "\`\`\`"
       echo ""
       echo "This will:"
-      echo "- Verify the immutable input provenance, checksums, tag, commit, and path policy"
-      echo "- Build and smoke-test both Darwin binaries without publication credentials"
-      echo "- Build and exercise the candidate image, including --forget-tmux-state"
-      echo "- Generate SBOM, vulnerability, command, manifest, and cleanup evidence"
-      echo "- Publish only manifest-listed artifacts and images after every gate passes"
+      echo "- Verify the host checkout is at the just-pushed release branch"
+      echo "- Build macOS binaries (aarch64-apple-darwin, x86_64-apple-darwin)"
+      echo "- Upload them to the existing GitHub release ${tag}"
+      echo "- Build and push container images to GHCR"
+      echo "- Refresh repo-owned generated runtime surfaces after the image tags exist"
+      echo "- Commit and push generated runtime changes if they drift"
     } > "${prompt_file}"
 
     ok "Host-side prompt written to dist/RELEASE-PROMPT.md"
@@ -2523,9 +2679,7 @@ cmd_release() {
 
   # ── Summary ──────────────────────────────────────────────────────────────
   echo ""
-  local release_duration="$(( $(date +%s) - release_started_epoch ))"
-  release_timing_finish "${release_duration}"
-  release_write_timing_report "${version}" "${release_duration}"
+  release_write_timing_report "${version}" "$(( $(date +%s) - release_started_epoch ))"
   echo "${bold}Release ${tag} selected steps complete: $(release_steps_joined).${reset}"
   echo ""
   echo "  GitHub release: https://github.com/projectious-work/aibox/releases/tag/${tag}"
@@ -2540,93 +2694,8 @@ cmd_release() {
   fi
   if release_step_requested prompt; then
     echo ""
-    echo "  ${bold}Remaining (macOS host):${reset} use the run-directory command in dist/RELEASE-PROMPT.md"
+    echo "  ${bold}Remaining (macOS host):${reset} ./scripts/maintain.sh release-host ${version}"
   fi
-}
-
-release_branch_for_version() {
-  local version="$1"
-  case "${version}" in
-    0.*) printf '%s\n' 'v0.x-release' ;;
-    1.*-*) printf '%s\n' 'v1.x-pre-release' ;;
-    1.*) printf '%s\n' 'v1.x-release' ;;
-    *) die "Unsupported release line for ${version}; add a branch mapping first." ;;
-  esac
-}
-
-publish_release_candidate() {
-  local version="$1" release_branch="$2"
-  local candidate_branch="chore/release-v${version}" pr_url
-
-  if [[ "${version}" == 0.* ]]; then
-    publish_v0_release_candidate "${version}"
-    return
-  fi
-
-  [[ "$(git branch --show-current)" == "${release_branch}" ]] \
-    || die "Release ${version} must be published from ${release_branch}."
-
-  git fetch origin "${release_branch}"
-  git merge-base --is-ancestor "origin/${release_branch}" HEAD \
-    || die "Local ${release_branch} does not descend from origin/${release_branch}; reconcile it before publishing."
-
-  if [[ "$(git rev-parse HEAD)" == "$(git rev-parse "origin/${release_branch}")" ]]; then
-    ok "${release_branch} is already current on origin"
-    return
-  fi
-
-  if git ls-remote --exit-code --heads origin "${candidate_branch}" >/dev/null 2>&1; then
-    die "Remote branch ${candidate_branch} already exists; inspect or merge it before publishing."
-  fi
-
-  info "Promoting the release candidate to protected branch ${release_branch}..."
-  git switch -c "${candidate_branch}"
-  git push -u origin "${candidate_branch}"
-  pr_url="$(gh pr create \
-    --base "${release_branch}" \
-    --head "${candidate_branch}" \
-    --title "chore: release v${version}" \
-    --body "Promotes the validated v${version} release candidate to ${release_branch}.")" \
-    || die "Could not create release-candidate PR."
-  gh pr merge "${pr_url}" --merge --delete-branch \
-    || die "Could not merge release-candidate PR ${pr_url}."
-  git switch "${release_branch}"
-  git pull --ff-only origin "${release_branch}"
-  ok "Release candidate merged into ${release_branch}"
-}
-
-publish_v0_release_candidate() {
-  local version="$1" candidate_sha branch remote_sha
-  [[ "$(git branch --show-current)" == "v0.x-dev" ]] \
-    || die "Release ${version} must be validated from v0.x-dev."
-  candidate_sha="$(git rev-parse HEAD)"
-  [[ "${candidate_sha}" == "${RELEASE_CANDIDATE_SHA}" ]] \
-    || die "Release candidate changed after validation."
-  git fetch origin v0.x-dev
-  [[ "${candidate_sha}" == "$(git rev-parse origin/v0.x-dev)" ]] \
-    || die "Merge all v0 changes into v0.x-dev before release validation."
-
-  # Preflight every destination before moving any pointer. Repeated calls may
-  # resume a partial promotion, but no destination may diverge from the
-  # validated commit.
-  for branch in v0.x-pre-release v0.x-release main; do
-    remote_sha="$(git ls-remote --heads origin "${branch}" | cut -f1)"
-    if [[ -n "${remote_sha}" ]]; then
-      git fetch origin "refs/heads/${branch}:refs/remotes/origin/${branch}"
-      git merge-base --is-ancestor "${remote_sha}" "${candidate_sha}" \
-        || die "Cannot fast-forward ${branch} to the validated v0 candidate."
-    fi
-  done
-  for branch in v0.x-pre-release v0.x-release main; do
-    remote_sha="$(git ls-remote --heads origin "${branch}" | cut -f1)"
-    if [[ "${remote_sha}" != "${candidate_sha}" ]]; then
-      git push origin "${candidate_sha}:refs/heads/${branch}" \
-        || die "Could not fast-forward ${branch}; check branch protection and resume after reconciling it."
-    fi
-    [[ "$(git ls-remote --heads origin "${branch}" | cut -f1)" == "${candidate_sha}" ]] \
-      || die "Promotion verification failed for ${branch}."
-  done
-  ok "v0.x-dev, v0.x-pre-release, v0.x-release, and main identify ${candidate_sha}"
 }
 
 cmd_release_finalize_runtime() {
@@ -2637,13 +2706,14 @@ cmd_release_finalize_runtime() {
     die "Version must be semver: X.Y.Z or X.Y.Z-prerelease (got: ${version})"
   fi
 
-  local release_branch finalization_branch pr_url
+  local release_branch topic_branch pr_url
   release_branch="$(release_branch_for_version "${version}")"
-  finalization_branch="chore/refresh-generated-runtime-v${version}"
+  topic_branch="release/v${version}-runtime-refresh"
 
   info "Refreshing repo-owned generated runtime surfaces..."
   (
     cd "${PROJECT_ROOT}"
+    ensure_release_branch "${version}"
     if ! git diff --cached --quiet; then
       die "Staged changes are already present; commit or unstage them before release runtime finalization."
     fi
@@ -2655,19 +2725,16 @@ cmd_release_finalize_runtime() {
     if git diff --cached --quiet -- .devcontainer aibox.lock context/migrations context/templates/aibox-home; then
       ok "Generated runtime surfaces already match v${version}; no commit needed."
     else
-      [[ "$(git branch --show-current)" == "${release_branch}" ]] \
-        || die "Generated runtime finalization for v${version} must start on ${release_branch}."
-      if git ls-remote --exit-code --heads origin "${finalization_branch}" >/dev/null 2>&1; then
-        die "Remote branch ${finalization_branch} already exists; inspect or merge it before rerunning release finalization."
+      if git ls-remote --exit-code --heads origin "${topic_branch}" >/dev/null 2>&1; then
+        die "Remote branch ${topic_branch} already exists; inspect or merge it before rerunning release finalization."
       fi
-
-      git switch -c "${finalization_branch}"
+      git switch -c "${topic_branch}"
       git commit -m "chore: refresh generated runtime for v${version}" \
         -m "Version-Line-Port: not-applicable"
-      git push -u origin "${finalization_branch}"
+      git push -u origin "${topic_branch}"
       pr_url="$(gh pr create \
         --base "${release_branch}" \
-        --head "${finalization_branch}" \
+        --head "${topic_branch}" \
         --title "chore: refresh generated runtime for v${version}" \
         --body "Post-image generated runtime refresh for v${version}.")" \
         || die "Could not create generated-runtime finalization PR."
@@ -2682,18 +2749,80 @@ cmd_release_finalize_runtime() {
 
 # ── Host-side release (run on macOS after container-side `release`) ──────────
 
-ensure_release_host_checkout_current() {
-  local version="$1" tag release_branch
+release_worktree_for_branch() {
+  local release_branch="$1"
+  git -C "${PROJECT_ROOT}" worktree list --porcelain | awk \
+    -v wanted="refs/heads/${release_branch}" '
+      $1 == "worktree" {
+        path = substr($0, length("worktree ") + 1)
+      }
+      $1 == "branch" && $2 == wanted {
+        print path
+        exit
+      }
+    '
+}
+
+stash_release_host_changes() {
+  local worktree="$1" tag="$2" label="$3"
+  if [[ -z "$(git -C "${worktree}" status --porcelain --untracked-files=all)" ]]; then
+    return
+  fi
+
+  local stash_message="pre-release-host-${tag}-${label}-$(date -u +%Y%m%dT%H%M%SZ)"
+  info "Preserving dirty ${label} checkout in a named stash..."
+  git -C "${worktree}" stash push --include-untracked -m "${stash_message}" >/dev/null \
+    || die "Could not preserve dirty ${label} checkout at ${worktree}."
+  ok "Saved ${label} checkout as stash '${stash_message}'"
+}
+
+prepare_release_host_checkout() {
+  local version="$1" tag release_branch branch_owner project_root_real owner_real
   tag="v${version}"
   release_branch="$(release_branch_for_version "${version}")"
 
-  info "Verifying host checkout is current with origin/${release_branch} and ${tag}..."
+  info "Preparing a clean host checkout for ${release_branch} and ${tag}..."
   (
     cd "${PROJECT_ROOT}"
+    git worktree prune
     git fetch origin \
       "refs/heads/${release_branch}:refs/remotes/origin/${release_branch}" \
       "refs/tags/${tag}:refs/tags/${tag}" >/dev/null
 
+    branch_owner="$(release_worktree_for_branch "${release_branch}")"
+    project_root_real="$(cd "${PROJECT_ROOT}" && pwd -P)"
+    if [[ -n "${branch_owner}" ]]; then
+      owner_real="$(cd "${branch_owner}" 2>/dev/null && pwd -P || true)"
+    else
+      owner_real=""
+    fi
+
+    if [[ -n "${branch_owner}" && "${owner_real}" != "${project_root_real}" ]]; then
+      stash_release_host_changes "${branch_owner}" "${tag}" "linked-worktree"
+      git -C "${branch_owner}" switch --detach >/dev/null \
+        || die "Could not detach ${release_branch} from linked worktree ${branch_owner}."
+      ok "Released ${release_branch} from linked worktree ${branch_owner}"
+    fi
+
+    stash_release_host_changes "${PROJECT_ROOT}" "${tag}" "primary"
+    if [[ "$(git branch --show-current)" != "${release_branch}" ]]; then
+      git switch "${release_branch}" >/dev/null \
+        || die "Could not switch the primary checkout to ${release_branch}."
+    fi
+    git reset --keep "origin/${release_branch}" \
+      || die "Could not synchronize the clean host checkout with origin/${release_branch}."
+  )
+  ok "Host checkout prepared at origin/${release_branch}"
+}
+
+ensure_release_host_checkout_current() {
+  local version="$1" tag release_branch
+  tag="v${version}"
+  release_branch="$(release_branch_for_version "${version}")"
+  prepare_release_host_checkout "${version}"
+  info "Verifying host checkout is current with origin/${release_branch} and ${tag}..."
+  (
+    cd "${PROJECT_ROOT}"
     local head remote_head tag_commit
     head=$(git rev-parse HEAD)
     remote_head=$(git rev-parse "origin/${release_branch}")
@@ -2705,24 +2834,76 @@ ensure_release_host_checkout_current() {
     fi
 
     if [[ "${head}" != "${remote_head}" ]]; then
-      die "release-host must run from current origin/${release_branch} containing ${tag}. Run: git fetch origin ${release_branch} && git switch ${release_branch} && git reset --keep origin/${release_branch}"
+      die "release-host could not prepare current origin/${release_branch} containing ${tag}; inspect the checkout and named pre-release-host stashes."
     fi
   )
   ok "Host checkout matches the ${release_branch} release line and contains ${tag}"
 }
 
-
-cmd_release_host_prepare() {
-  [[ "$#" -eq 1 ]] || die "Usage: ./scripts/maintain.sh release-host-prepare <version>"
-  "${SCRIPT_DIR}/release-host-prepare.sh" "$1"
-}
-
 cmd_release_host() {
-  if [[ "$#" -ge 1 && "$#" -le 5 ]]; then
-    "${SCRIPT_DIR}/release-host-gate.sh" "$@"
-  else
-    die "Usage: ./scripts/maintain.sh release-host [--dry-run] [--cold-cache] [--retry-from=<failed-run-dir>] [--ui=auto|textual|plain] <run-dir>"
+  local version="${1:-}"
+  local release_started_epoch="$(date +%s)"
+  [[ -z "${version}" ]] && die "Usage: ./scripts/maintain.sh release-host <version>  (e.g. 0.10.2)"
+
+  if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+    die "Version must be semver: X.Y.Z or X.Y.Z-prerelease (got: ${version})"
   fi
+
+  local tag="v${version}"
+  ensure_release_host_checkout_current "${version}"
+  release_evidence_init "${version}" host
+  info "Host release source: ${RELEASE_CANDIDATE_SHA}"
+
+  # ── Step 1: Build macOS binaries ──────────────────────────────────────────
+  # macOS compilation and image publication are independent. Run both with
+  # separate logs and aggregate their failures before continuing.
+  release_run_parallel_validation "${version}" \
+    "build-macos|macOS release artifacts|release_build_macos_gate" \
+    "publish-images|GHCR image publication|release_publish_images_gate"
+
+  # ── Step 2: Upload macOS binaries to existing GitHub release ──────────────
+  info "Uploading macOS binaries to GitHub release ${tag}..."
+  local release_view_output
+  if ! release_view_output=$(gh release view "${tag}" --repo "${GITHUB_REPO}" 2>&1); then
+    if grep -qiE 'not[[:space:]]+found|HTTP 404' <<<"${release_view_output}"; then
+      die "GitHub release ${tag} not found in ${GITHUB_REPO}. Run 'release' in the container first."
+    fi
+    die "Could not verify GitHub release ${tag} in ${GITHUB_REPO}: ${release_view_output}"
+  fi
+  gh release upload "${tag}" "${PROJECT_ROOT}/LICENSE" \
+    --repo "${GITHUB_REPO}" \
+    --clobber \
+    || warn "LICENSE upload failed — verify the GitHub release includes LICENSE"
+  gh release upload "${tag}" "${DIST_DIR}"/aibox-v${version}-*-apple-darwin.tar.gz "${DIST_DIR}"/aibox-v${version}-*-apple-darwin.tar.gz.sha256 \
+    --repo "${GITHUB_REPO}" \
+    || warn "Upload failed — binaries may already be attached"
+  ok "macOS binaries, checksums, and LICENSE uploaded to ${tag}"
+
+  # ── Step 3: Publish container images ─────────────────────────────────────
+  # ── Step 4: Run generated-runtime smoke against the pushed image ──────────
+  info "Running generated runtime smoke..."
+  cmd_release_runtime_smoke "${version}"
+
+  # ── Step 5: Commit generated runtime surfaces now that images exist ───────
+  cmd_release_finalize_runtime "${version}"
+
+  # ── Step 6: Final GHCR sanity check ───────────────────────────────────────
+  # cmd_publish_images_for_release also calls this internally; re-running at
+  # the end of release-host guards against any later step (smoke, finalize)
+  # accidentally clobbering the tags or against a retag that succeeded
+  # locally but didn't propagate to GHCR.
+  info "Re-verifying GHCR tags after smoke + runtime finalize..."
+  verify_release_images_in_ghcr "${version}" "base-debian"
+  release_write_timing_report "${version}" "$(( $(date +%s) - release_started_epoch ))"
+
+  # ── Done ──────────────────────────────────────────────────────────────────
+  echo ""
+  ok "Release ${tag} host-side steps complete."
+  echo ""
+  echo "  macOS binaries: uploaded to GitHub release"
+  echo "  Container images: pushed to GHCR and verified live"
+  echo "  Runtime smoke: passed (logs in dist/release-smoke/v${version}/)"
+  echo "  Generated runtime: refreshed and committed if needed"
 }
 
 # ── Container commands ───────────────────────────────────────────────────────
@@ -2809,7 +2990,6 @@ cmd_status() {
 
 cmd_test_visual() {
   info "Running visual smoke tests..."
-  "${SCRIPT_DIR}/test-powerkit-spacing.sh"
   "${SCRIPT_DIR}/test-screencasts.sh" all
 }
 
@@ -2855,7 +3035,6 @@ case "${COMMAND}" in
   release)      cmd_release "$@" ;;
   release-check-state) cmd_release_check_state "$@" ;;
   release-doctors) cmd_release_doctors ;;
-  release-host-prepare) cmd_release_host_prepare "$@" ;;
   release-host) cmd_release_host "$@" ;;
   release-finalize-runtime) cmd_release_finalize_runtime "$@" ;;
   start)        cmd_start ;;

@@ -1,11 +1,12 @@
 ---
-title: Change log
-description: "aibox release history."
-aliases: ["/blog/"]
+title: Changelog
+description: "aibox v1 prerelease history."
+draft: false
 ---
 
-# Change log
+# Changelog
 
-Release highlights for the current aibox lines. See the
-[GitHub Releases](https://github.com/projectious-work/aibox/releases) for the
-complete changelog and upgrade notes.
+No aibox v1 release has been published. The changelog will be updated from
+the exact candidate release notes when the first prerelease is available.
+Until then, the [release list](https://github.com/projectious-work/aibox/releases)
+is authoritative.

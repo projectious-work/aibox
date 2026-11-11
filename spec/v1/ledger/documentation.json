@@ -1,0 +1,824 @@
+[
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/_index.md",
+    "sha256": "af721ffd4ea0b928f90064fc3d5fe58114d6a97209fb3176e1d6fd61f702c258",
+    "headings": [
+      "# aibox Documentation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/_index.md",
+    "sha256": "6f6608e69cb1d6b760a0fdb1d1ce40beab554b47dec956a811821fe2fc057b7e",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/documentation.md",
+    "sha256": "122c02529e372fc059b91e720208067e1254128fd9032cc2e8463b3c7d90cae0",
+    "headings": [
+      "# Documentation Framework Addons",
+      "## Example"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/language-runtimes.md",
+    "sha256": "2481e7e33f0c6e58fd1aa7c8eb481b7b42484407cf480a8c3925dc8cce07963e",
+    "headings": [
+      "# Language Runtime Addons",
+      "## Python",
+      "# poetry = { version = \"2.4.1\" } # Optional: 1.8, 2.0, 2.4.1",
+      "# pdm = { version = \"2.28.1\" }   # Optional: 2.22, 2.26.9, 2.27.0, 2.28.0, 2.28.1",
+      "## Rust",
+      "## Node.js",
+      "# yarn = { version = \"4.17.0\" } # Optional: 4, 4.16.0, 4.17.0",
+      "# bun = { version = \"1.3.14\" }  # Optional",
+      "## Go",
+      "### Production Go groups",
+      "# Optional nested container engine without the other infrastructure defaults:",
+      "## Typst",
+      "## LaTeX",
+      "# texlive-music = {}            # Optional: LilyPond, MusiXTeX",
+      "# texlive-chemistry = {}        # Optional: chemfig, mhchem",
+      "### Emoji rendering with LuaLaTeX"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/latex-workflow.md",
+    "sha256": "d745ac1e27ffe5b13580e44254c3dea90c75994c8b719ce58d04d65e12e26245",
+    "headings": [
+      "# LaTeX Build and Preview",
+      "## Configure documents",
+      "# document = \"overview\" # optional compatibility-route default",
+      "## Build and watch",
+      "## Live PDF preview",
+      "### Host and network access",
+      "### Remote hosts over SSH"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/overview.md",
+    "sha256": "1afa042ffd444f343bc3c8f506c21cc7fa2691fb14f342d8e555b966c7d838bf",
+    "headings": [
+      "# Addons",
+      "## Managing Addons",
+      "### Via CLI",
+      "# See all available addons",
+      "# Add an addon (updates aibox.toml and runs apply)",
+      "# Remove an addon",
+      "# View addon details (tools, versions)",
+      "# Emit the machine-readable addon catalog index",
+      "### Via aibox.toml",
+      "## Available Addons",
+      "### Language Runtimes",
+      "### Tool Bundles",
+      "### Documentation Frameworks",
+      "### AI Harnesses",
+      "## Addons and Skills",
+      "## How Addons Work",
+      "### Addon Definition Format",
+      "## Extra Packages",
+      "## Version Selection"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/addons/tool-bundles.md",
+    "sha256": "c7849448a325ef349262e04e649b4965d7b630d77acf8e457819da3f4586e339",
+    "headings": [
+      "# Tool Bundle Addons",
+      "## Supply Chain",
+      "## Release Validation",
+      "## Git UI",
+      "## Browser Visual Testing",
+      "# Playwright Test and @axe-core/playwright are enabled by default.",
+      "# Optional cross-engine coverage:",
+      "## Build-time Graphics Rendering",
+      "## Preview and Archive Tools",
+      "## Data Preview",
+      "## Audio and Voice",
+      "## Infrastructure",
+      "## Kubernetes",
+      "# k9s = {}         # Optional: terminal UI for Kubernetes",
+      "## Cloud Providers",
+      "### AWS",
+      "### Google Cloud",
+      "### Azure"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/_index.md",
+    "sha256": "f8d275669aeacb7bc6e2e47df1a6486f8901149b68ec1ee2a95fbf1240fdf3c8",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/audio.md",
+    "sha256": "e529e076bb37fa20fb1b80e53d7d9f8270329d9c7e9a6efd3715e5b690187783",
+    "headings": [
+      "# Audio Support",
+      "## Why Audio Matters",
+      "## Architecture",
+      "## Configuration in aibox.toml",
+      "## Host Setup",
+      "# Check if your host is ready",
+      "# Automatic setup (macOS: installs PulseAudio, configures TCP, creates launchd agent)",
+      "### Manual setup",
+      "#### macOS",
+      "#### Linux",
+      "## Claude Code OAuth in Containers",
+      "## The .asoundrc File",
+      "## Troubleshooting",
+      "### No sound output",
+      "### Connection refused",
+      "### Audio works but is choppy",
+      "### Disabling audio"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/base-image.md",
+    "sha256": "3410ade67dd08921ae3dae74967a22c154dee4d4b639c13f8aae3389a05d651c",
+    "headings": [
+      "# Base Image",
+      "## Installed Tools",
+      "## Build Architecture",
+      "## tmux Configuration",
+      "### Plugin Policy",
+      "### Key Bindings",
+      "### Layouts",
+      "#### dev (default)",
+      "#### focus -- one tool per window, fullscreen",
+      "#### cowork -- side-by-side coding with AI",
+      "### Opening Files from Yazi",
+      "### Theme",
+      "## Vim Configuration",
+      "## Git Configuration",
+      "## AI Coding Agents",
+      "## Audio Support",
+      "## Configuration Persistence",
+      "## File Preview",
+      "## Container Entrypoint"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/configuration.md",
+    "sha256": "ff0d5902d8407ee2d74212943d2f4814f5ac6c75236b4663075a9d031ad96fbf",
+    "headings": [
+      "# Container Configuration",
+      "## Container Identity",
+      "## Post-Create Command",
+      "## Network Keepalive",
+      "## Custom Packages, Ports, Volumes, and Environment Variables",
+      "### Extra Packages — `Dockerfile.local`",
+      "### Ports, Volumes, and Environment Variables — `docker-compose.override.yml`",
+      "## Compose Override"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/file-preview.md",
+    "sha256": "9958b9460ad00f51bd7b8c225edd8c86bca041a48a0a1e1ce8ae6b0fc2dfb2d6",
+    "headings": [
+      "# File Preview",
+      "## Overview",
+      "## Yazi File Preview",
+      "### Supported formats",
+      "### How previewer dispatch works",
+      "### Preview controls",
+      "### Format notes",
+      "## Standalone TUI Viewers",
+      "### chafa — universal image renderer",
+      "# View any raster image",
+      "# Force half-block mode (safe inside tmux)",
+      "# SVG via librsvg (if chafa was compiled with librsvg support)",
+      "# Constrain to a specific cell size",
+      "### timg — terminal image and document viewer",
+      "# View an image",
+      "# View a PDF — renders all pages sequentially",
+      "# View a specific PDF page (page 2)",
+      "# Constrain output size",
+      "# Clear previous output before rendering (useful in watch loops)",
+      "## Watch-Mode Preview",
+      "### PDF watch preview ⟳",
+      "### SVG watch preview ⟳",
+      "### General pattern",
+      "# Watch a file and re-render on change",
+      "## Format Coverage Summary"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/container/runtime-operations.md",
+    "sha256": "1b74963b51e245886a883d9bd79d5f4dc82d5cd1b8b1650c2a92ead9f684897f",
+    "headings": [
+      "# Runtime Operations",
+      "## Start and Attach",
+      "## Stop or Remove",
+      "## Rebuild",
+      "## Inspect Runtime State",
+      "## Resource Thresholds",
+      "## Compose Identity",
+      "## Existing Containers After Generator Changes",
+      "## Common Symptoms",
+      "## Podman Notes"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/context/_index.md",
+    "sha256": "df421e19198c9c677d29b021c2f81f5e6cc2823d6080a574ae9dda37a06c31ca",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/context/migration.md",
+    "sha256": "287692ad05bb9d8bfae24d14bd9eb9758eabbd86a397e4895cdcc479aeda1b96",
+    "headings": [
+      "# Migration",
+      "## How Version Tracking Works",
+      "## Running Doctor",
+      "## Migration Artifacts",
+      "## Applying a Migration",
+      "## Strict Schema And Storage Policy",
+      "### With an AI agent (recommended)",
+      "### Manually",
+      "## Best Practices",
+      "## Schema Document Format"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/context/overview.md",
+    "sha256": "ea14db72b7711da0526825df89ea63fd65e4b2279db4dfbe827cacc8c5a44b6a",
+    "headings": [
+      "# Context System Overview",
+      "## The Problem",
+      "## How Context Files Work",
+      "### AGENTS.md, CLAUDE.md, and provider files",
+      "## OWNER.md — Developer Identity",
+      "## Skills and Processes",
+      "## Version Tracking",
+      "## Relationship to aibox.toml",
+      "## Design Principles"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/context/process-packages.md",
+    "sha256": "0b7606e00d6aaa3d90196710304fddcfaf05b6a0f9bb7822abf11f038a9bc054",
+    "headings": [
+      "# Skill Selection",
+      "## Where the Content Lands",
+      "## Upstream Source"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/contributing/_index.md",
+    "sha256": "31ece9c371b3815d4340d01e9e4f0537ad4e527b1179c7b2964554212325399c",
+    "headings": [
+      "# Contributing",
+      "## Getting Started",
+      "## Project Structure",
+      "## Development Workflow",
+      "### CLI Changes",
+      "### Image Changes",
+      "### Documentation Changes",
+      "## Pull Requests",
+      "## Reporting Issues"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/contributing/e2e-tests.md",
+    "sha256": "8327b7dc1f65cded357080941138ac453185bee58152ae57e20ae7eb26150d70",
+    "headings": [
+      "# E2E Test Catalogue",
+      "## Execution surfaces",
+      "## Removed companion",
+      "## Host run-directory protocol",
+      "## Failure and rerun"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/contributing/maintenance.md",
+    "sha256": "5dcf23e0f402ecdaff9c234f502c7de8d33c2e648504b87192db5f7c0d561bc6",
+    "headings": [
+      "# Maintenance",
+      "## Development Checks",
+      "## Documentation Site",
+      "## Published Image",
+      "## Release Boundary",
+      "## Container-Side Release",
+      "## Host-Side Release",
+      "## Verification",
+      "## Project Devcontainer"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/contributing/version-line-porting.md",
+    "sha256": "b4d90498d61eb99856f37e5c6ca775f37886510647181f438b3549f547c45beb",
+    "headings": [
+      "# Version-line porting"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/_index.md",
+    "sha256": "b435909da12165c4dc74741535936c3bc73f008543d41ffa22dab1f709c6c843",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/agent-attention-titles.md",
+    "sha256": "e72d1ac4732d1af3bd55480f1940b570a111ba6b315cd62fefa8f62f4017c0f5",
+    "headings": [
+      "## Configuration",
+      "# repository-style = \"full\"   # projectious-work/aibox",
+      "# agent-style = \"full\"   # gpt-5.6-sol low",
+      "## Harness support and fallback",
+      "## Terminal and shell title ownership",
+      "## Security and limits"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/custom-prompts.md",
+    "sha256": "adf45769ba8b5fed864c57e60f14ca523a62dcca1e0f2f16a844101c57263986",
+    "headings": [
+      "# Creating Custom Prompts",
+      "## Generated Config Location",
+      "## Manual Customization",
+      "## Adding Custom Presets"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/custom-themes.md",
+    "sha256": "a9d8cdc0cd9e1fef5d48a13fbc509c2aef851afb65345cd3c05fa4dbea23ec4b",
+    "headings": [
+      "# Extending the theme catalog",
+      "## Required palette roles",
+      "## Decoration roles",
+      "## Generated consumers",
+      "## Gallery assets",
+      "## Local overrides"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/layouts.md",
+    "sha256": "679f02997e58a51dd64b2c8a85b38cc23854c343cb9117250e06a65c3f27bf05",
+    "headings": [
+      "# Layouts",
+      "## Available Layouts",
+      "### ai",
+      "### dev",
+      "### focus",
+      "### cowork",
+      "## Setting The Default Layout",
+      "## Per-Session Override"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/prompts.md",
+    "sha256": "0b84719821e67fa44a032b89ec37b9e0bd7f349141190e618d8256cf9727ca95",
+    "headings": [
+      "# Starship Prompt Presets",
+      "## Available Presets",
+      "### default",
+      "### plain",
+      "### minimal",
+      "### nerd-font",
+      "### pastel",
+      "### powerline-pastel",
+      "### bracketed",
+      "### arrow",
+      "## Changing Presets",
+      "## Font Requirements"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/customization/themes.md",
+    "sha256": "9e8287f65a788286517b72147b3bb25bbfdb46307442adee9b31e04117d2b408",
+    "headings": [
+      "# Color themes",
+      "## Configure a theme",
+      "## Font decoration",
+      "## Families and variants",
+      "### Accessibility families",
+      "### Period terminal families",
+      "### Projectious",
+      "## Semantic colors",
+      "## Governed tools",
+      "## Switch without rebuilding"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/getting-started/_index.md",
+    "sha256": "7aea58ecbb0225b273151013f66ea754e9e309189a02860fe8f99570dcf4f9a6",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/getting-started/existing-project.md",
+    "sha256": "b7c271d96f6592e328840994aa12fd953dd4087b33e4205ebca74342fd338e79",
+    "headings": [
+      "# Existing Project",
+      "## Create aibox.toml",
+      "## Apply Devcontainer Files",
+      "## Replacing Hand-Written Devcontainer Files",
+      "### Option A: Let aibox take over",
+      "### Option B: Keep hand-written files",
+      "## Running Diagnostics",
+      "## Migrating from `.root/` to `.aibox-home/`",
+      "## Migrating Context Structure",
+      "## Common gaps to watch for",
+      "## Build and Start",
+      "## Next Steps"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/getting-started/installation.md",
+    "sha256": "1febaf1f1788794ccfce851e9509251708dfb88d35258918d8e603195dd6512a",
+    "headings": [
+      "# Installation",
+      "## Prerequisites",
+      "### Podman (recommended)",
+      "# macOS",
+      "# Fedora / RHEL",
+      "# Ubuntu / Debian",
+      "### Docker",
+      "# macOS",
+      "# Then launch Docker Desktop",
+      "# Linux — follow the official install guide",
+      "# https://docs.docker.com/engine/install/",
+      "## Install script (recommended)",
+      "# Install a specific version",
+      "# Install to a custom directory",
+      "## Manual download",
+      "# Example for macOS ARM64",
+      "## Build from source",
+      "## Verify",
+      "# aibox X.Y.Z",
+      "## Shell completion scripts",
+      "# Add to your shell profile for persistent completion scripts:",
+      "# Bash (~/.bashrc)",
+      "# Zsh (~/.zshrc)",
+      "# Fish (~/.config/fish/config.fish)",
+      "## Next steps"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/getting-started/new-project.md",
+    "sha256": "1b52da0b186c104382d6dbd7a619fbaa191cef0bced088ed7513bd70adc36aba",
+    "headings": [
+      "# New Project",
+      "## Initialize the Project",
+      "## What Gets Created",
+      "## The Generated aibox.toml",
+      "# aibox.toml — project configuration for aibox.",
+      "# All generated files (.devcontainer/) derive from this file.",
+      "# Run `aibox apply` after editing to regenerate.",
+      "# Full documentation: https://projectious-work.github.io/aibox/docs/reference/configuration",
+      "# user = \"aibox\"  # Container user (default: aibox)",
+      "# Addons install tool sets into the container.",
+      "# Run `aibox get addon` to see all available addons.",
+      "# [addons.python.tools]",
+      "# python = { version = \"3.14\" }",
+      "# uv     = { version = \"0.12.5\" }",
+      "# AI harnesses — controls which AI CLIs/configs are enabled.",
+      "# Audio support for PulseAudio bridging (e.g., Claude Code voice).",
+      "# Requires host-side PulseAudio setup: run `aibox apply audio`",
+      "# pulse_server = \"tcp:host.docker.internal:4714\"",
+      "## Build and Start",
+      "## VS Code Integration",
+      "## Next Steps"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/migrations/_index.md",
+    "sha256": "68eccfa63142cbb08d9f8336b99caac316a78cbc92d7a69e421d0891f61baea4",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/migrations/lockfile-v0-25-6.md",
+    "sha256": "727297e22872053a5ef0545bb0b7d155cb663fafc8956c42fc88b3fa7cf054c5",
+    "headings": [
+      "# Lockfile schema bump v0.25.6 — what's automatic, what to verify",
+      "## What changed",
+      "## Troubleshooting"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/migrations/zellij-eol.md",
+    "sha256": "0a95c14cc4b21f5daa0dea943a8e023cf4cecd67d076dd8e4ee85e8f706b1755",
+    "headings": [
+      "# Zellij end-of-life migration (v0.25.5 → v0.25.6)",
+      "## TL;DR",
+      "## What changed",
+      "## What you need to do",
+      "## Why",
+      "## Need help"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/overview.md",
+    "sha256": "aee6abdb767043e6abb897fb57b0067064de22be073ee43b6578b35da4973b99",
+    "headings": [
+      "# Overview",
+      "## The Short Version",
+      "## What aibox Owns",
+      "## What processkit Owns",
+      "## Why This Split Matters",
+      "## When To Use aibox",
+      "## Daily Mental Model"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/_index.md",
+    "sha256": "2de027c076139df23a3de355870b088393db304f3cbb2e2a19459f0d4a679c87",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-aider.md",
+    "sha256": "a1695f452de9f1adbb5914bd357908aadd31c4af7a8f0522c1c4dbc2d200cd90",
+    "headings": [
+      "# Aider",
+      "## Setup",
+      "## API Key",
+      "# Or for OpenAI:",
+      "# OPENAI_API_KEY = \"sk-...\"",
+      "## Configuration",
+      "## Installation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-claude.md",
+    "sha256": "3c8cf46e63c40e9d93bee971d3757a5aa2167c6622ffca88c971510361a57148",
+    "headings": [
+      "# Claude Code",
+      "## Setup",
+      "## Configuration",
+      "## Audio (Voice)",
+      "## MCP Integration",
+      "# aibox.toml — team-shared servers",
+      "# .aibox-local.toml — personal servers (not committed)",
+      "## tmux Integration"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-continue.md",
+    "sha256": "72ccaecc0f0d4e37cfe8307bd120afd368014b5122ea880873823da86c087984",
+    "headings": [
+      "# Continue CLI",
+      "## Setup",
+      "## API Key",
+      "# Or provider-specific:",
+      "# ANTHROPIC_API_KEY = \"sk-ant-...\"",
+      "# OPENAI_API_KEY = \"sk-...\"",
+      "## Configuration",
+      "## MCP Integration",
+      "# aibox.toml — team-shared servers",
+      "# .aibox-local.toml — personal servers",
+      "## Installation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-copilot.md",
+    "sha256": "9a1d6dabe19182f3d1ee438f467e348cfbc2e458e175efa909ae9de728799ef5",
+    "headings": [
+      "# GitHub Copilot CLI",
+      "## Setup",
+      "## Requirements",
+      "## Configuration",
+      "## MCP Integration",
+      "# aibox.toml — team-shared servers",
+      "# .aibox-local.toml — personal servers",
+      "## Installation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-gemini.md",
+    "sha256": "298df1d54beeda5ec71043b0e353e6eb7534175cc317ff53e773bb6ab1a9e8bc",
+    "headings": [
+      "# Gemini",
+      "## Setup",
+      "## API Key",
+      "## Configuration",
+      "## MCP Integration",
+      "# aibox.toml — team-shared servers",
+      "# .aibox-local.toml — personal servers",
+      "## Installation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-mistral.md",
+    "sha256": "f6d25982c1a5898cb67d4e2b9f3f9912a1d4463350e802bb6582776ca3532770",
+    "headings": [
+      "# Mistral (SDK)",
+      "## Setup",
+      "## API Key",
+      "## MCP Integration",
+      "## Installation"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/providers/ai-openai.md",
+    "sha256": "e93b641988bcefcb6c1faeb2864e9e990db49dc113a75433d77f0a8dea0b9816",
+    "headings": [
+      "# OpenAI Codex CLI",
+      "## Setup",
+      "## API Key",
+      "## Configuration",
+      "## processkit commands",
+      "## MCP Integration",
+      "# aibox.toml — team-shared servers",
+      "# .aibox-local.toml — personal servers",
+      "## Installation",
+      "## Sandbox prerequisites"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/_index.md",
+    "sha256": "0f097dda075ccdeabf7dcfad07ff6ac7f2de48ddc690c701017491ab495c4384",
+    "headings": []
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/cheatsheet.md",
+    "sha256": "e5af324727f561bde8e7cf5260787c20dae4a139d443b3a13cc924f6a1bb6989",
+    "headings": [
+      "# Keyboard Shortcuts"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/cli-commands.md",
+    "sha256": "26193b0af568543ba070a555fbce7c5af0d5effd07923fd95f18f929a6728a99",
+    "headings": [
+      "# CLI Commands",
+      "## Global Options",
+      "## Core Workflow",
+      "## Command Grammar",
+      "## init",
+      "## apply",
+      "## Runtime",
+      "## Inspecting Resources",
+      "### Preview projections",
+      "## Mutating Resources",
+      "## Reset And Backup",
+      "## Diagnostics",
+      "## LaTeX container scripts",
+      "## Self Management",
+      "## Removed Old Grammar"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/compatibility.md",
+    "sha256": "801e8cc034706e777a6433603dce0e9276aa27273d37ff28ad1c55f1b203e8e7",
+    "headings": [
+      "# Compatibility",
+      "## aibox ↔ processkit Version Matrix",
+      "## How compatibility is enforced",
+      "## Upgrading processkit"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/configuration.md",
+    "sha256": "e02cc27ae711a9c2289143d66e7c3c027ce2a47b33f952ccd1f726d43ef92f25",
+    "headings": [
+      "# Configuration",
+      "## Full Specification",
+      "# branch = \"main\"                     # Optional; tarball-first, branch as fallback",
+      "# release_asset_url_template = \"...\"  # Optional, for non-GitHub hosts",
+      "#   { harness = \"claude\", enable = true, install = true },",
+      "# Team-shared MCP servers merged into all generated MCP client configs",
+      "# (see also [[mcp.servers]] in .aibox-local.toml for personal servers)",
+      "# [ai.mcp.servers.env]                # Optional environment variables",
+      "# API_KEY = \"...\"",
+      "# The terminal tab title is owned by tmux while inside tmux.",
+      "# Row lists are ordered. Removing a name disables that status element.",
+      "# Allowed line1-left entries:",
+      "# - session: current tmux session name and prefix/copy-mode state",
+      "# - windows: tmux window list",
+      "# Allowed line1-right / line2-left / line2-right entries:",
+      "# - aibox_log: aibox log health counts",
+      "# - aibox_oom: cgroup OOM kill counters",
+      "# - aibox_proc: live process count versus configured process warning limit",
+      "# - aibox_ai: detected AI-agent/runtime process count",
+      "# - aibox_mcp: processkit/MCP daemon and server process status (processkit mode)",
+      "# - aibox_mig: pending processkit migration count (processkit mode)",
+      "# - weather: weather segment from tmux-powerkit",
+      "# - uptime: container uptime",
+      "# - datetime: local date/time",
+      "# - git: current repository branch/status",
+      "# - github: GitHub/repository integration status",
+      "# - kubernetes: Kubernetes context/status",
+      "# - terraform: Terraform/OpenTofu workspace/status",
+      "# - cloud: local cloud CLI/context status",
+      "# - cloudstatus: networked public provider status checks; opt-in, not enabled by default",
+      "# - hostname: container hostname",
+      "# - externalip: detected external IP",
+      "# - ssh: SSH agent/key status",
+      "# - netspeed: network throughput",
+      "# - ping: network latency",
+      "# - cpu: CPU usage",
+      "# - loadavg: system load average",
+      "# - memory: memory usage",
+      "# - swap: swap usage",
+      "# - disk: disk usage",
+      "# - gpu: GPU status when available",
+      "# - modelstatus_<provider>: per-provider AI status segment; explicit layout entries render even when model-provider auto-add is off",
+      "# Visible headers/icons for status segments. Layout controls which segments appear;",
+      "# this section controls how those segments are labeled once rendered.",
+      "# Values may be plain ASCII labels or symbols. ASCII is safest across terminals;",
+      "# Nerd Font / Powerline symbols are compact but require the user's terminal font.",
+      "# Practical symbol candidates from Nerd Fonts. Keep icons distinct across",
+      "# configured PowerKit segments so adjacent status cells remain scannable.",
+      "# PowerKit separator style. Options: normal | rounded | slant | slantup | trapezoid | flame | pixel | honeycomb | none",
+      "# Edge separators may use a different style at status boundaries.",
+      "# Spacing between elements. Options: false | true | both | windows | plugins",
+      "# Refresh/caching controls for extended tmux status.",
+      "# interval-seconds: tmux redraw cadence. Higher values reduce shell process churn.",
+      "# aibox-metrics-cache-ttl-seconds: LOG/OOM/PROC/AI/MCP/MIG cache TTL.",
+      "# netspeed-cache-ttl-seconds: network throughput cache TTL.",
+      "# kubernetes-cache-ttl-seconds: local kubeconfig context cache TTL.",
+      "# cloud-cache-ttl-seconds: local cloud CLI/context cache TTL.",
+      "# github-cache-ttl-seconds: local repo + GitHub issue/PR/discussion count cache TTL.",
+      "# Exact GitHub SSH hostnames and aliases recognized by the Forge segment.",
+      "# Optional networked model-provider health segments for the extended tmux status line.",
+      "# Each configured provider becomes one PowerKit segment when enabled, for example OAI ✓ or ANT 󰚌.",
+      "# enabled: false avoids auto-adding all configured providers; explicit layout entries still render.",
+      "# cache-ttl-seconds: minimum time between provider status requests per provider.",
+      "# timeout-seconds: per-request HTTP timeout so status rendering cannot hang tmux.",
+      "# show-ok: true shows healthy providers with ✓; false hides healthy providers and only shows degraded/unknown/outage.",
+      "# Provider entries:",
+      "# - provider: stable key from the model roster (openai, anthropic, google, mistral, deepseek, cohere, xai, alibaba, aws, meta, microsoft, minimax, moonshot, nvidia, xiaomi, zai)",
+      "# - label: short category header shown in the status segment; use text or a symbol that your font supports",
+      "# - checks: any of overall, models, harness; worst status wins (outage > degraded > unknown > ok)",
+      "# - status-url: JSON status endpoint; Statuspage summary APIs are supported, Google uses incidents.json",
+      "# - overall-components/model-components/harness-components: optional component-name filters for providers with componentized status APIs",
+      "#   Symbols: ✓ ok, 󰀦 degraded, 󰚌 outage, ? unknown.",
+      "## Section Reference",
+      "### [aibox]",
+      "### [container]",
+      "#### [container.resource_thresholds]",
+      "#### [[container.extra_volumes]]",
+      "### .aibox-local.toml",
+      "### [context]",
+      "### [latex]",
+      "### [addons]",
+      "### [skills]",
+      "### [ai]",
+      "#   { harness = \"claude\", enable = true, install = true },",
+      "#   { harness = \"cursor\", enable = true, install = false },",
+      "### [processkit]",
+      "#### [processkit.context]",
+      "#### Fetch strategy",
+      "#### Example: consume a Gitea-hosted fork",
+      "### [ai.mcp]",
+      "#### processkit Gateway: [ai.mcp.gateway]",
+      "#### Server Definitions: [[ai.mcp.servers]]",
+      "#### Permission Configuration: [ai.mcp.permissions]",
+      "# Use default settings; Claude Code will auto-allow all processkit tools",
+      "# Continue defaults to \"ask\" for safety; override to \"allow\" to auto-approve",
+      "### [ai.execution]",
+      "### [ai.agents]",
+      "### [customization]",
+      "### [audio]",
+      "### [integrations.github]",
+      "## Apply Behavior",
+      "## Environment Variable Overrides"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/local-config.md",
+    "sha256": "63060c9bcbbfa177fedb9abe0e323ad0b8a2e4bf4e699b660803c6740d6d4665",
+    "headings": [
+      "# Local Config (.aibox-local.toml)",
+      "## Why it exists",
+      "## Location and gitignore",
+      "## Supported sections",
+      "### [container.environment]",
+      "### [[container.extra_volumes]]",
+      "### [mcp]",
+      "## Merge behavior",
+      "## GitHub authentication",
+      "### Recommended: least-privilege PATs",
+      "### Alternative: persistent GitHub CLI login",
+      "## Full example",
+      "## What is NOT supported"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/reference/security.md",
+    "sha256": "7402e05dd255f7ec699cd008a729f2b3bfbab1d3e1fc075dce1736fbef7a4112",
+    "headings": [
+      "# Security Reference",
+      "## Support and vulnerability reporting",
+      "## Dependency and asset provenance review",
+      "## Data handling review",
+      "## MCP Gateway Trust Scope",
+      "### How processkit skills are registered",
+      "### Implications",
+      "### Third-party skill review checklist",
+      "### Opting out of a skill",
+      "## seccomp=unconfined Consent Gate"
+    ]
+  },
+  {
+    "source": "https://github.com/projectious-work/aibox/blob/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/docs-site/content/docs/skills/_index.md",
+    "sha256": "f273cb0e2e1848e4f03dcbb99c435c68c9eef3baf2697c436b468d8f0599f4fd",
+    "headings": [
+      "# Skills",
+      "## Where skills land in your project",
+      "## Skill catalogue and documentation",
+      "## Browsing installed skills",
+      "## Skill Selection",
+      "## Custom skills",
+      "## Core skills",
+      "## Why this split?"
+    ]
+  }
+]

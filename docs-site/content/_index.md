@@ -1,34 +1,37 @@
-+++
-title = "aibox"
-description = "Reproducible AI workspaces from one aibox.toml"
-eyebrow = "reproducible AI workspaces"
-tagline = "Generate a predictable development environment, selected tools, provider-neutral agent context, and a terminal workspace from one project contract."
-[[cta]]
-  label = "Get started"
-  href = "/docs/getting-started/installation/"
-[[cta]]
-  label = "Read the overview"
-  href = "/docs/overview/"
-  variant = "secondary"
-+++
+---
+title: aibox v1.x preview
+description: "The specification and implementation plan for a Go-based aibox distribution built on the Dev Container CLI."
+---
 
-## One contract, a complete workspace
+# aibox v1.x preview
 
-`aibox.toml` is the single source of truth for container identity, addons, AI
-harnesses, theme, layout, runtime settings, and processkit integration.
+**Preview status:** v1 is under development. The Go application, CLI, MCP
+server, Dev Container Features, and user workflows described by the
+specification are not yet implemented or available for installation.
 
-{{< cards >}}
-  {{< card title="Declarative workspaces" subtitle="One inspectable contract produces a reproducible development environment." link="/docs/" icon="settings" >}}
-  {{< card title="Standard output" subtitle="Dockerfile, Compose, and Dev Container files remain readable and interoperable." link="/docs/overview/" icon="file-code" >}}
-  {{< card title="Provider neutral" subtitle="Agent context lives in the project, with thin provider-specific entry points." link="/docs/context/" icon="users" >}}
-{{< /cards >}}
+The specification defines a curated workspace distribution built on the
+upstream Dev Container CLI. Projects will use standard `devcontainer.json`,
+Features, Dockerfiles, Compose files, and native tool configuration. aibox v1
+will not use `aibox.toml` as a project entry point.
 
-## Quick start
+## What this preview contains
 
-{{< terminal title="create a workspace" >}}
-curl -fsSL https://raw.githubusercontent.com/projectious-work/aibox/main/scripts/install.sh | bash
-mkdir my-project && cd my-project
-aibox init my-project --harness claude --addon python
-aibox apply
-aibox up
-{{< /terminal >}}
+This site currently publishes the v1 product specification and phase roadmap,
+not installation or operating instructions. Planned commands and
+configuration examples in the specification are design contracts, not usable
+interfaces. Each implementation phase must update its user or maintainer
+documentation and build this site before it can be marked shipped.
+
+Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1),
+including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml).
+
+## Stable version
+
+The stable documentation root continues to describe the current v0.x product.
+This `/v1.x/` site is a preview line and does not replace the stable site.
+For the current released product, use the [v0.x documentation](https://projectious-work.github.io/aibox/).
+
+## Contributing
+
+See the [documentation site README](https://github.com/projectious-work/aibox/blob/v1.x-dev/docs-site/README.md)
+for the local build and contribution workflow.

@@ -1,0 +1,8 @@
+{
+  "id": "inkscape",
+  "version": "1.0.0",
+  "name": "inkscape",
+  "description": "Installs inkscape (aibox catalog ID latex/inkscape).",
+  "documentationURL": "https://wiki.inkscape.org/wiki/Installing_Inkscape",
+  "options": {}
+}

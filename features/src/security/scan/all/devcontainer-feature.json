@@ -1,0 +1,15 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "security-scan bundle",
+  "description": "Installs every security-scan member Feature through dependsOn (aibox catalog ID security/scan/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/security/scan/cosign:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/scan/gitleaks:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/scan/grype:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/scan/osv-scanner:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/scan/semgrep:1": {},
+    "ghcr.io/projectious-work/aibox-features/security/scan/syft:1": {}
+  }
+}

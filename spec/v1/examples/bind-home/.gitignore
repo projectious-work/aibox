@@ -1,0 +1,3 @@
+.aibox-home/
+.env
+.devcontainer/compose.local.yaml

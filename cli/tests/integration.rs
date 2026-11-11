@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::process::Command;
 
 use serde_json::Value;
@@ -32,6 +33,22 @@ fn run_in_dir(dir: &std::path::Path, args: &[&str]) -> std::process::Output {
         .env("AIBOX_ADDONS_DIR", addons_dir())
         .output()
         .expect("failed to execute aibox binary")
+}
+
+fn run_in_dir_with_env(
+    dir: &std::path::Path,
+    args: &[&str],
+    env: &[(&str, std::ffi::OsString)],
+) -> std::process::Output {
+    let mut command = Command::new(aibox_bin());
+    command
+        .args(args)
+        .current_dir(dir)
+        .env("AIBOX_ADDONS_DIR", addons_dir());
+    for (key, value) in env {
+        command.env(key, value);
+    }
+    command.output().expect("failed to execute aibox binary")
 }
 
 fn parse_json(output: &std::process::Output) -> Value {
@@ -92,6 +109,558 @@ TEAM_TOKEN = "secret-token"
     .unwrap();
 }
 
+fn write_orchestration_compile_fixture(dir: &std::path::Path) {
+    std::fs::write(
+        dir.join("aibox.toml"),
+        r#"[container]
+name = "compile-test"
+
+[orchestration]
+enabled = true
+
+[orchestration.image]
+reference = "ghcr.io/acme/workspace"
+digest = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+platform = "linux-amd64"
+
+[orchestration.fleet]
+name = "workspace"
+services = [{ name = "workspace", ports = [{ container_port = 8080 }] }]
+
+[orchestration.target]
+backend = "compose"
+reference = "docker-context:default"
+scope = "workspace"
+
+[orchestration.deployment]
+name = "workspace-dev"
+owner_id = "team-a"
+"#,
+    )
+    .unwrap();
+}
+
+fn write_image_build_fixture(dir: &std::path::Path) {
+    write_orchestration_compile_fixture(dir);
+    let source = dir.join("image-source");
+    std::fs::create_dir_all(&source).unwrap();
+    std::fs::write(source.join("Containerfile"), "FROM scratch\n").unwrap();
+    std::fs::OpenOptions::new()
+        .append(true)
+        .open(dir.join("aibox.toml"))
+        .unwrap()
+        .write_all(
+            br#"
+
+[orchestration.image.build]
+context = "image-source"
+dockerfile = "Containerfile"
+target = "runtime"
+"#,
+        )
+        .unwrap();
+}
+
+#[test]
+fn config_compile_json_is_deterministic_and_read_only() {
+    let dir = tempfile::tempdir().unwrap();
+    write_orchestration_compile_fixture(dir.path());
+    let before = std::fs::read_dir(dir.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+
+    let first = Command::new(aibox_bin())
+        .args(["config", "compile", "--output", "json"])
+        .current_dir(dir.path())
+        .env("AIBOX_ADDONS_DIR", dir.path().join("missing-addons"))
+        .output()
+        .expect("run config compile without an addon catalog");
+    let second = run_in_dir(dir.path(), &["config", "compile", "--output", "json"]);
+    let first_json = parse_json(&first);
+    let second_json = parse_json(&second);
+
+    assert_eq!(first_json, second_json);
+    assert!(
+        first_json["desiredSpecDigest"]
+            .as_str()
+            .unwrap()
+            .starts_with("sha256:")
+    );
+    assert_eq!(first_json["actions"].as_array().unwrap().len(), 1);
+    assert_eq!(first_json["actions"][0]["type"], "deploy-fleet");
+
+    let after = std::fs::read_dir(dir.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        before, after,
+        "config compile must not create project files"
+    );
+}
+
+#[test]
+fn config_compile_human_reports_digest_and_disabled_build() {
+    let dir = tempfile::tempdir().unwrap();
+    write_orchestration_compile_fixture(dir.path());
+
+    let output = run_in_dir(dir.path(), &["config", "compile"]);
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("desired spec digest: sha256:"));
+    assert!(stdout.contains("image build: disabled"));
+    assert!(stdout.contains("target: compose:docker-context:default"));
+}
+
+#[test]
+fn deploy_plan_renders_compose_artifacts_without_writing_project_files() {
+    let dir = tempfile::tempdir().unwrap();
+    write_orchestration_compile_fixture(dir.path());
+    let before = std::fs::read_dir(dir.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+
+    let output = run_in_dir(dir.path(), &["deploy", "plan", "--output", "json"]);
+    let json = parse_json(&output);
+    assert_eq!(json["backend"], "compose");
+    assert!(
+        json["deploymentId"]
+            .as_str()
+            .unwrap()
+            .starts_with("workspace-")
+    );
+    assert!(
+        json["composeYaml"]
+            .as_str()
+            .unwrap()
+            .contains("aibox.projectious.work/deployment-id")
+    );
+    assert!(
+        json["devcontainerJson"]
+            .as_str()
+            .unwrap()
+            .contains("dockerComposeFile")
+    );
+
+    let after = std::fs::read_dir(dir.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+    assert_eq!(before, after, "deploy plan must not write project files");
+}
+
+#[test]
+fn image_build_requires_an_explicit_source_contract() {
+    let dir = tempfile::tempdir().unwrap();
+    write_orchestration_compile_fixture(dir.path());
+
+    let inspect = run_in_dir(dir.path(), &["image", "inspect", "--output", "json"]);
+    let inspect_json = parse_json(&inspect);
+    assert_eq!(inspect_json["operation"], "inspected");
+    assert_eq!(inspect_json["reference"], "ghcr.io/acme/workspace");
+    assert!(inspect_json["immutable"].as_bool().unwrap());
+
+    let build = run_in_dir(dir.path(), &["image", "build", "--output", "json"]);
+    assert!(!build.status.success());
+    assert!(
+        String::from_utf8_lossy(&build.stderr).contains("orchestration.image.build is required")
+    );
+}
+
+#[cfg(unix)]
+fn write_fake_container_runtime(dir: &std::path::Path) -> std::path::PathBuf {
+    use std::os::unix::fs::PermissionsExt;
+
+    let bin_dir = dir.join("fake-bin");
+    std::fs::create_dir_all(&bin_dir).unwrap();
+    let runtime = bin_dir.join("docker");
+    std::fs::write(
+        &runtime,
+        r#"#!/bin/sh
+case "$1" in
+  info)
+    exit 0
+    ;;
+  build)
+    shift
+    iidfile=""
+    while [ "$#" -gt 0 ]; do
+      printf '%s\n' "$1" >> "$AIBOX_FAKE_RUNTIME_LOG"
+      if [ "$1" = "--iidfile" ]; then
+        iidfile="$2"
+      fi
+      shift
+    done
+    printf '%s\n' "$AIBOX_FAKE_IMAGE_ID" > "$iidfile"
+    exit 0
+    ;;
+  push)
+    printf 'push %s\n' "$2" >> "$AIBOX_FAKE_RUNTIME_LOG"
+    exit 0
+    ;;
+  image)
+    printf 'image %s %s\n' "$2" "$3" >> "$AIBOX_FAKE_RUNTIME_LOG"
+    printf '%s\n' "${AIBOX_FAKE_REPO_DIGESTS:-[]}"
+    exit 0
+    ;;
+esac
+exit 1
+"#,
+    )
+    .unwrap();
+    std::fs::set_permissions(&runtime, std::fs::Permissions::from_mode(0o755)).unwrap();
+    bin_dir
+}
+
+#[cfg(unix)]
+fn fake_runtime_env(
+    dir: &std::path::Path,
+    repo_digests: &str,
+) -> Vec<(&'static str, std::ffi::OsString)> {
+    let bin_dir = write_fake_container_runtime(dir);
+    let path = std::env::var_os("PATH").unwrap_or_default();
+    let mut paths = std::env::split_paths(&path).collect::<Vec<_>>();
+    paths.insert(0, bin_dir);
+    vec![
+        ("PATH", std::env::join_paths(paths).unwrap()),
+        (
+            "AIBOX_FAKE_RUNTIME_LOG",
+            dir.join("runtime-args.log").into_os_string(),
+        ),
+        (
+            "AIBOX_FAKE_IMAGE_ID",
+            "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef".into(),
+        ),
+        ("AIBOX_FAKE_REPO_DIGESTS", repo_digests.into()),
+    ]
+}
+
+#[cfg(unix)]
+#[test]
+fn image_build_uses_source_contract_and_reports_only_a_local_identity_without_push() {
+    let dir = tempfile::tempdir().unwrap();
+    write_image_build_fixture(dir.path());
+    let env = fake_runtime_env(dir.path(), "[]");
+
+    let output = run_in_dir_with_env(dir.path(), &["image", "build", "--output", "json"], &env);
+    let json = parse_json(&output);
+    assert_eq!(json["operation"], "built");
+    assert_eq!(
+        json["localImageId"],
+        "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    );
+    assert!(json["deployableReference"].is_null());
+    assert!(json.get("immutableReference").is_none());
+
+    let argv = std::fs::read_to_string(dir.path().join("runtime-args.log")).unwrap();
+    assert!(argv.contains("--tag\nghcr.io/acme/workspace\n"));
+    assert!(argv.contains("--file\n"));
+    assert!(argv.contains("Containerfile\n"));
+    assert!(argv.contains("--target\nruntime\n"));
+    assert!(argv.contains("--iidfile\n"));
+}
+
+#[cfg(unix)]
+#[test]
+fn image_build_push_returns_only_a_verified_registry_manifest_reference() {
+    let dir = tempfile::tempdir().unwrap();
+    write_image_build_fixture(dir.path());
+    let repo_digests = "[\"ghcr.io/acme/workspace@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789\"]";
+    let env = fake_runtime_env(dir.path(), repo_digests);
+
+    let output = run_in_dir_with_env(
+        dir.path(),
+        &["image", "build", "--push", "--output", "json"],
+        &env,
+    );
+    let json = parse_json(&output);
+    assert_eq!(
+        json["deployableReference"],
+        "ghcr.io/acme/workspace@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+    );
+    let argv = std::fs::read_to_string(dir.path().join("runtime-args.log")).unwrap();
+    assert!(argv.contains("push ghcr.io/acme/workspace"));
+    assert!(argv.contains("image inspect --format"));
+}
+
+#[cfg(unix)]
+#[test]
+fn image_build_push_rejects_an_unresolved_registry_result() {
+    let dir = tempfile::tempdir().unwrap();
+    write_image_build_fixture(dir.path());
+    let env = fake_runtime_env(dir.path(), "[]");
+
+    let output = run_in_dir_with_env(dir.path(), &["image", "build", "--push"], &env);
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("registry manifest digest"));
+}
+
+#[test]
+fn v1_up_and_down_default_to_deployment_lifecycle_and_document_legacy_escape_hatch() {
+    let help = run(&["up", "--help"]);
+    assert!(help.status.success());
+    let help_text = String::from_utf8_lossy(&help.stdout);
+    assert!(help_text.contains("Apply the v1 deployment"));
+    assert!(help_text.contains("--legacy-runtime"));
+    assert!(help_text.contains("2026-12-31"));
+
+    let down_help = run(&["down", "--help"]);
+    assert!(down_help.status.success());
+    let down_help_text = String::from_utf8_lossy(&down_help.stdout);
+    assert!(down_help_text.contains("ownership record"));
+    assert!(down_help_text.contains("--legacy-runtime"));
+}
+
+#[test]
+fn config_compile_rejects_disabled_orchestration() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("aibox.toml"),
+        "[container]\nname = \"legacy\"\n",
+    )
+    .unwrap();
+
+    let output = run_in_dir(dir.path(), &["config", "compile", "--output", "json"]);
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("orchestration is not enabled"));
+}
+
+#[test]
+fn v1_config_migration_preview_apply_and_restore_are_explicit_and_isolated() {
+    const CANARY: &str = "AIBOX_V1_SECRET_CANARY_DO_NOT_LEAK";
+    let dir = tempfile::tempdir().unwrap();
+    let config = dir.path().join("aibox.toml");
+    let original = format!(
+        "[container]\nname = \"legacy\"\n\n[container.environment]\nTOKEN = \"{CANARY}\"\n"
+    );
+    std::fs::write(&config, &original).unwrap();
+
+    let preview = run_in_dir(dir.path(), &["config", "migrate-v1", "--output", "json"]);
+    let preview_json = parse_json(&preview);
+    assert!(preview_json["changed"].as_bool().unwrap());
+    assert_eq!(preview_json["readyToEnable"], false);
+    assert!(
+        preview_json["mappedFields"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|mapping| mapping["source"] == "container.name")
+    );
+    let decisions = preview_json["unresolvedDecisions"].as_array().unwrap();
+    for id in [
+        "immutable-image",
+        "platform",
+        "target",
+        "owner-id",
+        "connections",
+        "environment",
+    ] {
+        assert!(decisions.iter().any(|decision| decision["id"] == id));
+    }
+    assert!(!String::from_utf8_lossy(&preview.stdout).contains(CANARY));
+    assert_eq!(std::fs::read_to_string(&config).unwrap(), original);
+    assert!(!dir.path().join(".aibox").exists());
+
+    let applied = run_in_dir(
+        dir.path(),
+        &["config", "migrate-v1", "--apply", "--output", "json"],
+    );
+    let applied_json = parse_json(&applied);
+    let backup = applied_json["backupPath"].as_str().unwrap();
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join(backup)).unwrap_or_else(|error| {
+            panic!(
+                "backup path from apply result should exist ({backup}): {error}; stdout: {}",
+                String::from_utf8_lossy(&applied.stdout)
+            )
+        }),
+        original
+    );
+    assert!(
+        std::fs::read_to_string(&config)
+            .unwrap()
+            .contains("[orchestration]\nenabled = false")
+    );
+
+    // This is a v1-owned receipt. Configuration rollback must leave it alone;
+    // v0 lifecycle commands have no authority over deployment state.
+    let deployment = dir.path().join(".aibox/deployments/v1-owned.json");
+    std::fs::create_dir_all(deployment.parent().unwrap()).unwrap();
+    std::fs::write(&deployment, "v1 receipt").unwrap();
+    let restored = run_in_dir(
+        dir.path(),
+        &[
+            "config",
+            "migrate-v1",
+            "--restore",
+            backup,
+            "--output",
+            "json",
+        ],
+    );
+    let restored_json = parse_json(&restored);
+    assert_eq!(restored_json["operation"], "restore");
+    assert_eq!(std::fs::read_to_string(&config).unwrap(), original);
+    assert_eq!(std::fs::read_to_string(&deployment).unwrap(), "v1 receipt");
+}
+
+#[test]
+fn v1_config_migration_applies_a_reviewed_complete_intent_but_keeps_it_disabled() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = dir.path().join("aibox.toml");
+    std::fs::write(&config, "[container]\nname = \"legacy\"\n").unwrap();
+    let intent = dir.path().join("v1-intent.toml");
+    std::fs::write(
+        &intent,
+        r#"[orchestration]
+enabled = true
+
+[orchestration.image]
+reference = "ghcr.io/acme/workspace"
+digest = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+platform = "linux-amd64"
+
+[orchestration.fleet]
+name = "legacy"
+services = [{ name = "legacy" }]
+
+[orchestration.target]
+backend = "compose"
+reference = "docker-context:default"
+scope = "legacy"
+
+[orchestration.deployment]
+name = "legacy"
+owner_id = "team-a"
+
+[[orchestration.connections]]
+name = "shell"
+service = "legacy"
+transport = "compose-exec"
+interactive = true
+"#,
+    )
+    .unwrap();
+
+    let applied = run_in_dir(
+        dir.path(),
+        &[
+            "config",
+            "migrate-v1",
+            "--apply",
+            "--intent-file",
+            "v1-intent.toml",
+            "--output",
+            "json",
+        ],
+    );
+    let report = parse_json(&applied);
+    assert_eq!(report["readyToEnable"], true);
+    assert!(report["unresolvedDecisions"].as_array().unwrap().is_empty());
+    let migrated = std::fs::read_to_string(&config).unwrap();
+    assert!(migrated.contains("[orchestration.image]"));
+    assert!(migrated.contains("enabled = false"));
+
+    let compile = run_in_dir(dir.path(), &["config", "compile", "--output", "json"]);
+    assert!(
+        !compile.status.success(),
+        "disabled intent must not compile or deploy"
+    );
+    assert!(String::from_utf8_lossy(&compile.stderr).contains("not enabled"));
+}
+
+#[test]
+fn v1_config_migration_rejects_incomplete_or_secret_bearing_intent_before_backup() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = dir.path().join("aibox.toml");
+    let original = "[container]\nname = \"legacy\"\n";
+    std::fs::write(&config, original).unwrap();
+    std::fs::write(
+        dir.path().join("invalid-intent.toml"),
+        r#"[orchestration]
+enabled = true
+
+[orchestration.image]
+reference = "ghcr.io/acme/workspace"
+digest = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+platform = "linux-amd64"
+
+[orchestration.fleet]
+name = "legacy"
+services = [{ name = "legacy", environment = [{ name = "TOKEN", value = "must-not-copy" }] }]
+"#,
+    )
+    .unwrap();
+
+    let output = run_in_dir(
+        dir.path(),
+        &[
+            "config",
+            "migrate-v1",
+            "--apply",
+            "--intent-file",
+            "invalid-intent.toml",
+            "--output",
+            "json",
+        ],
+    );
+    assert!(!output.status.success());
+    assert!(!String::from_utf8_lossy(&output.stderr).contains("must-not-copy"));
+    assert_eq!(std::fs::read_to_string(&config).unwrap(), original);
+    assert!(!dir.path().join(".aibox").exists());
+}
+
+#[test]
+fn stable_v1_readiness_json_is_machine_readable_while_blocked() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("aibox.toml"),
+        "[container]\nname = \"legacy\"\n",
+    )
+    .unwrap();
+    let output = run_in_dir(
+        dir.path(),
+        &["config", "release-readiness", "--output", "json"],
+    );
+    assert!(
+        !output.status.success(),
+        "stable v1 must not be declared ready"
+    );
+    let report: Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["kind"], "StableV1ReleaseReadiness");
+    assert_eq!(report["ready"], false);
+    let gates = report["gates"].as_array().unwrap();
+    for id in [
+        "v0-to-v1-config-migration",
+        "ownership-credentials-supply-chain-canaries",
+        "m5-alpha3-exact-lifecycle",
+        "m5-interruption-recovery",
+        "m5-v0-coexistence-and-rollback",
+        "m5-secret-safety",
+        "adoption-pilots",
+        "support-deprecation-retirement-policy",
+        "portfolio-boundary-audit",
+        "four-platform-release-rollback-rehearsal",
+        "external-pilot-feedback",
+    ] {
+        assert!(
+            gates
+                .iter()
+                .any(|gate| { gate["id"] == id && gate["status"] == "blocked" }),
+            "{id} must remain blocked without a candidate-bound evidence record"
+        );
+    }
+    assert!(gates.iter().any(|gate| {
+        gate["id"] == "m7c-live-disposable-cluster-evidence" && gate["status"] == "blocked"
+    }));
+}
+
 fn installed_addon_files_from_install_script() -> Vec<String> {
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let script_path = std::path::Path::new(manifest_dir)
@@ -139,8 +708,6 @@ fn release_scripts_publish_checksum_sidecars() {
         std::fs::read_to_string(repo_root.join("scripts/maintain.sh")).expect("read maintain.sh");
     let build_macos = std::fs::read_to_string(repo_root.join("scripts/build-macos.sh"))
         .expect("read build-macos.sh");
-    let host_publisher = std::fs::read_to_string(repo_root.join("scripts/release_host_publish.py"))
-        .expect("read release_host_publish.py");
     let install =
         std::fs::read_to_string(repo_root.join("scripts/install.sh")).expect("read install.sh");
 
@@ -149,16 +716,27 @@ fn release_scripts_publish_checksum_sidecars() {
             r#"sha256_file "${DIST_DIR}/${binary_name}.tar.gz" > "${DIST_DIR}/${binary_name}.tar.gz.sha256""#,
         )
             && maintain.contains(r#"built_archives+=("${archive}" "${checksum}")"#)
-            && host_publisher.contains("manifest must list exactly two Darwin archives and two checksums")
-            && host_publisher.contains(r#"run(["gh", "release", "upload"#),
+            && maintain.contains(r#""${DIST_DIR}"/aibox-v${version}-*-apple-darwin.tar.gz.sha256"#),
         "maintain.sh must generate and upload sha256 sidecars for Linux and macOS release assets"
     );
     assert!(
         maintain.contains("release_validate_license_guardrails")
             && maintain.contains(r#"-C "${PROJECT_ROOT}" LICENSE"#)
             && maintain.contains(r#""${PROJECT_ROOT}/LICENSE""#)
-            && host_publisher.contains("--clobber"),
+            && maintain.contains("--clobber"),
         "maintain.sh must enforce README license notice, include LICENSE in Linux tarballs, and upload LICENSE to GitHub releases"
+    );
+    assert!(
+        maintain.contains("release_github_classification_args")
+            && maintain.contains(r#"[[ "${version}" == *-* ]]"#)
+            && maintain.contains("'--prerelease'")
+            && maintain.contains(r#""${github_classification_args[@]}""#),
+        "maintain.sh must publish semver prereleases as GitHub prereleases"
+    );
+    assert!(
+        maintain.contains(r#"release-notes/${tag}.md"#)
+            && maintain.contains(r#"cp "${tracked_notes_file}" "${notes_file}""#),
+        "maintain.sh must prefer reviewed, tracked release notes over an autogenerated commit dump"
     );
     assert!(
         build_macos.contains(r#"shasum -a 256 "${DIST_DIR}/${local_name}.tar.gz""#)
@@ -173,6 +751,10 @@ fn release_scripts_publish_checksum_sidecars() {
             && install
                 .contains(r#"computed_digest="$(sha256_digest "${tmpdir}/${tarball_name}")""#),
         "install.sh must verify checksums using sha256sum or macOS shasum"
+    );
+    assert!(
+        install.contains(r#"(-[0-9A-Za-z.-]+)?"#),
+        "install.sh must preserve a SemVer prerelease suffix when detecting an existing installation"
     );
     assert!(
         maintain.contains("image_source_sha()")
@@ -190,6 +772,70 @@ fn release_scripts_publish_checksum_sidecars() {
             && maintain.contains("Docker Buildx is required"),
         "maintain.sh must support label-based image retagging and require Docker Buildx for BuildKit-only image builds"
     );
+}
+
+#[test]
+fn e2e_companion_delegates_kind_through_systemd() {
+    let manifest_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let root = manifest_dir.parent().unwrap();
+    let dockerfile = std::fs::read_to_string(root.join(".devcontainer/Dockerfile.e2e")).unwrap();
+    let compose =
+        std::fs::read_to_string(root.join(".devcontainer/docker-compose.override.yml")).unwrap();
+    let kind_gate =
+        std::fs::read_to_string(manifest_dir.join("tests/e2e/kubernetes_kind.rs")).unwrap();
+    let kind_lifecycle =
+        std::fs::read_to_string(root.join("scripts/test-kubernetes-kind.sh")).unwrap();
+    let maintain = std::fs::read_to_string(root.join("scripts/maintain.sh")).unwrap();
+
+    assert!(dockerfile.contains("CMD [\"/sbin/init\"]"));
+    assert!(dockerfile.contains("Delegate=yes"));
+    assert!(dockerfile.contains("cgroup_manager = \"systemd\""));
+    assert!(dockerfile.contains("log_driver = \"k8s-file\""));
+    assert!(compose.contains("cgroup: private"));
+    assert!(compose.contains("/lib/modules:/lib/modules:ro"));
+    assert!(kind_gate.contains("systemd-run --user --scope --quiet -p Delegate=yes"));
+    assert!(kind_gate.contains(r#"awk -F: \"\\$1 == 0 { print \\$3 }\""#));
+    assert!(maintain.contains("systemd-run --user --scope --quiet -p Delegate=yes"));
+    assert!(maintain.contains("e2e_companion_preflight"));
+    assert!(maintain.contains("E2E companion is stale. Rebuild it on the Docker host"));
+    assert!(kind_gate.contains("copy_file_to"));
+    assert!(kind_gate.contains("/bin/bash /tmp/test-kubernetes-kind.sh"));
+    assert!(kind_lifecycle.contains("snapshotter = \"native\""));
+    assert!(kind_lifecycle.contains("kubernetesAPICall: 3m"));
+    assert!(kind_lifecycle.contains("--config \"${kind_config}\""));
+    for required in [
+        "deploy apply",
+        "deploy status",
+        "deploy logs",
+        "connect shell",
+        "connect web-forward",
+        "rollout status",
+        "operation already in progress",
+        "refusing resources not owned",
+        "DisposableClusterEvidence",
+        "candidateCommit",
+        "binarySha256",
+        "AIBOX_M7C_BINARY_SHA256",
+        "deployed candidate binary digest does not match",
+        "foreign-destroy-refusal",
+    ] {
+        assert!(
+            kind_lifecycle.contains(required),
+            "M7c live lifecycle must cover {required}"
+        );
+    }
+    assert!(
+        kind_gate.contains("candidate_binary_sha256")
+            && kind_gate
+                .contains("M7c evidence must be bound to the checked-out release candidate"),
+        "the M7c harness must bind the deployed binary and commit to the checked-out candidate"
+    );
+    assert!(
+        maintain.contains("M7c evidence is not bound to the exact candidate binary")
+            && maintain.contains("AIBOX_RELEASE_BINARY_SHA256"),
+        "the release gate must reject evidence from another candidate binary"
+    );
+    assert!(maintain.contains("kubernetes_kind -- --ignored --nocapture"));
 }
 
 #[test]
@@ -290,34 +936,6 @@ fn install_script_lists_every_repo_addon_yaml() {
 }
 
 #[test]
-fn install_script_refreshes_addons_when_binary_version_is_unchanged() {
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let script = std::fs::read_to_string(
-        std::path::Path::new(manifest_dir)
-            .parent()
-            .unwrap()
-            .join("scripts/install.sh"),
-    )
-    .expect("read scripts/install.sh");
-
-    let same_version_branch = script
-        .split_once(r#"if [[ "${current}" == "${version}" ]]; then"#)
-        .expect("install script should detect an unchanged version")
-        .1
-        .split_once("fi")
-        .expect("same-version branch should be closed")
-        .0;
-    assert!(
-        !same_version_branch.contains("exit 0"),
-        "same-version installs must continue to refresh addon definitions"
-    );
-    assert!(
-        same_version_branch.contains("refreshing binary and addon catalog"),
-        "same-version refresh behavior should be visible to users"
-    );
-}
-
-#[test]
 fn apply_with_installed_catalog_installs_gh_from_git_ui() {
     let dir = tempfile::tempdir().unwrap();
     let installed_addons = install_script_addons_dir();
@@ -367,126 +985,6 @@ lazygit = { enabled = false }
         !dockerfile.contains("unknown addon 'git-ui'"),
         "git-ui must be known in installed-catalog simulation:\n{dockerfile}"
     );
-}
-
-#[test]
-fn apply_with_stale_installed_catalog_uses_embedded_supply_chain_addon() {
-    let dir = tempfile::tempdir().unwrap();
-    let stale_catalog = tempfile::tempdir().unwrap();
-    std::fs::create_dir_all(stale_catalog.path().join("tools")).unwrap();
-    std::fs::write(
-        stale_catalog.path().join("tools/git-ui.yaml"),
-        std::fs::read_to_string(
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../addons/tools/git-ui.yaml"),
-        )
-        .unwrap(),
-    )
-    .unwrap();
-    std::fs::write(
-        dir.path().join("aibox.toml"),
-        r#"[aibox]
-version = "0.32.4"
-base = "debian"
-
-[container]
-name = "embedded-supply-chain"
-
-[processkit]
-version = "unset"
-
-[addons.supply-chain.tools]
-syft = { version = "1.50.0" }
-grype = { version = "0.116.1" }
-"#,
-    )
-    .unwrap();
-
-    let output = Command::new(aibox_bin())
-        .args(["apply", "--no-container"])
-        .current_dir(dir.path())
-        .env("AIBOX_ADDONS_DIR", stale_catalog.path())
-        .output()
-        .expect("failed to execute aibox apply");
-    assert!(
-        output.status.success(),
-        "embedded catalog apply should succeed\nstderr:\n{}\nstdout:\n{}",
-        String::from_utf8_lossy(&output.stderr),
-        String::from_utf8_lossy(&output.stdout)
-    );
-
-    let dockerfile = std::fs::read_to_string(dir.path().join(".devcontainer/Dockerfile")).unwrap();
-    assert!(dockerfile.contains("Addon: supply-chain"));
-    assert!(!dockerfile.contains("unknown addon 'supply-chain'"));
-    assert!(dockerfile.contains("syft_1.50.0_linux_${ARCH}.tar.gz"));
-    assert!(dockerfile.contains("grype_0.116.1_linux_${ARCH}.tar.gz"));
-}
-
-#[test]
-fn nested_go_groups_expand_render_and_honor_tool_disablement() {
-    let dir = tempfile::tempdir().unwrap();
-    let installed_addons = install_script_addons_dir();
-    std::fs::write(
-        dir.path().join("aibox.toml"),
-        r#"[aibox]
-version = "0.29.0"
-base = "debian"
-
-[container]
-name = "nested-go-groups"
-
-[processkit]
-version = "unset"
-
-[addons.go]
-
-[addons.go.quality.tools]
-staticcheck = { enabled = false }
-
-[addons.go.supply-chain.tools]
-grype = { enabled = false }
-
-[addons.go.release]
-"#,
-    )
-    .unwrap();
-
-    let output = Command::new(aibox_bin())
-        .args(["apply", "--no-container"])
-        .current_dir(dir.path())
-        .env("AIBOX_ADDONS_DIR", installed_addons.path())
-        .output()
-        .expect("failed to execute aibox apply");
-    assert!(
-        output.status.success(),
-        "nested Go groups should apply successfully\nstderr:\n{}\nstdout:\n{}",
-        String::from_utf8_lossy(&output.stderr),
-        String::from_utf8_lossy(&output.stdout)
-    );
-
-    let dockerfile = std::fs::read_to_string(dir.path().join(".devcontainer/Dockerfile")).unwrap();
-    for marker in [
-        "Addon: go (runtime)",
-        "Addon: go-quality (runtime)",
-        "Addon: supply-chain (runtime)",
-        "Addon: release (runtime)",
-        "Addon: go-release (runtime)",
-        "go test -race ./...",
-        "go install golang.org/x/tools/cmd/goimports@v0.50.0",
-        "goreleaser_Linux_",
-    ] {
-        assert!(
-            dockerfile.contains(marker),
-            "missing {marker}:\n{dockerfile}"
-        );
-    }
-    assert!(dockerfile.contains("rm -f /usr/local/bin/staticcheck"));
-    assert!(dockerfile.contains("rm -f /usr/local/bin/grype"));
-    assert!(!dockerfile.contains("go install honnef.co/go/tools/cmd/staticcheck"));
-    assert!(!dockerfile.contains("COPY --from=supply-chain-builder /build/bin/grype"));
-    let persisted = std::fs::read_to_string(dir.path().join("aibox.toml")).unwrap();
-    assert!(persisted.contains("[addons.go.quality.tools]"));
-    assert!(persisted.contains("[addons.go.supply-chain.tools]"));
-    assert!(persisted.contains("[addons.go.release]"));
 }
 
 #[test]
@@ -979,14 +1477,6 @@ fn describe_addon_catalog_json_contract() {
             .iter()
             .any(|tool| tool["name"] == "python")
     );
-
-    let go = addons
-        .iter()
-        .find(|addon| addon["name"] == "go")
-        .expect("catalog should include go addon");
-    assert_eq!(go["groups"]["quality"], "go-quality");
-    assert_eq!(go["groups"]["supply-chain"], "supply-chain");
-    assert_eq!(go["groups"]["release"], "go-release");
 }
 
 #[test]
@@ -1106,6 +1596,6 @@ fn describe_image_provenance_policy_json_contract() {
     );
     assert_eq!(
         json["release_phase"]["host_command_template"],
-        "./scripts/maintain.sh release-host {run_dir}"
+        "./scripts/maintain.sh release-host {version}"
     );
 }

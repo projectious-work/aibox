@@ -21,8 +21,8 @@ done
   echo "--line must be v0.x or v1.x" >&2
   exit 2
 }
-[[ "${LINE}" == "v0.x" ]] || {
-  echo "This documentation source publishes only the v0.x line" >&2
+[[ "${LINE}" == "v1.x" ]] || {
+  echo "This documentation source publishes only the v1.x line" >&2
   exit 2
 }
 [[ -z "${VERSION}" || "${VERSION}" =~ ^v[01]\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || {
@@ -52,6 +52,7 @@ trap cleanup EXIT
 
 git -C "${ROOT_DIR}" fetch origin "+${PAGES_BRANCH}:${PAGES_BRANCH}"
 git -C "${ROOT_DIR}" worktree add "${PAGES_DIR}" "${PAGES_BRANCH}"
+
 mkdir -p "${PAGES_DIR}/v0.x" "${PAGES_DIR}/v1.x"
 
 release_array() {
@@ -75,6 +76,9 @@ if [[ -e "${PAGES_DIR}/releases.json" ]]; then
   }
 fi
 if [[ -n "${VERSION}" ]]; then
+  # Include the selected archive in the build-time navigation manifest.
+  # This is a disposable worktree; its published contents are not replaced
+  # until both candidate builds succeed.
   ARCHIVE="${PAGES_DIR}/${LINE}/${VERSION}"
   mkdir -p "${ARCHIVE}"
 fi

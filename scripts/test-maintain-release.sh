@@ -6,127 +6,90 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 AIBOX_MAINTAIN_SOURCE_ONLY=1 source "${SCRIPT_DIR}/maintain.sh"
 
-[[ "$(release_branch_for_version 0.28.4)" == "v0.x-release" ]] \
+[[ "$(release_branch_for_version 0.28.5)" == "v0.x-release" ]] \
   || die "v0 release versions must resolve to v0.x-release"
 [[ "$(release_branch_for_version 1.0.0-alpha.1)" == "v1.x-pre-release" ]] \
   || die "v1 prereleases must resolve to v1.x-pre-release"
 [[ "$(release_branch_for_version 1.0.0)" == "v1.x-release" ]] \
-  || die "v1 release versions must resolve to v1.x-release"
-declare -f cmd_release_host | grep -Fq 'release-host [--dry-run] [--cold-cache] [--retry-from=<failed-run-dir>] [--ui=auto|textual|plain] <run-dir>' \
-  || die "release-host must accept a prepared run directory and fixed presentation/cache options"
+  || die "v1 GA versions must resolve to v1.x-release"
+declare -f cmd_release_host | grep -Fq 'X.Y.Z or X.Y.Z-prerelease' \
+  || die "release-host must accept prerelease SemVer"
 grep -Fq 'X.Y.Z or X.Y.Z-prerelease' "${SCRIPT_DIR}/build-macos.sh" \
   || die "macOS artifact builds must accept prerelease SemVer"
 grep -Fq 'X.Y.Z or X.Y.Z-prerelease' "${SCRIPT_DIR}/release-runtime-smoke.sh" \
   || die "release runtime smoke must accept prerelease SemVer"
+grep -Fq 'attach_args=(up --legacy-runtime --forget-tmux-state)' "${SCRIPT_DIR}/release-runtime-smoke.sh" \
+  || die "v1 release runtime smoke must select the legacy attach lifecycle explicitly"
+grep -Fq 'jobs -pr | grep -qx "${attach_pid}"' "${SCRIPT_DIR}/release-runtime-smoke.sh" \
+  || die "release runtime smoke must detect an exited background attach process"
 declare -F publish_release_candidate >/dev/null \
   || die "release candidate protected-branch publisher is missing"
-[[ "$(release_host_prompt_path "${PROJECT_ROOT}/tmp/host-gates/aibox-release/v9.9.9-test")" == \
-   "./tmp/host-gates/aibox-release/v9.9.9-test" ]] \
-  || die "release host prompt path must be project-relative and explicitly rooted with ./"
-if (release_host_prompt_path "/tmp/outside-project" >/dev/null 2>&1); then
-  die "release host prompt path accepted a run directory outside the project gate root"
+declare -F release_docs_gate >/dev/null \
+  || die "release documentation gate is missing"
+declare -F release_v1_stable_evidence_gate >/dev/null \
+  || die "stable-v1 producer evidence gate is missing"
+[[ -x "${SCRIPT_DIR}/test-v1-adoption-pilots.sh" ]] \
+  || die "v1 adoption-pilot evidence harness is missing or not executable"
+[[ -x "${SCRIPT_DIR}/test-v1-operational-readiness.sh" ]] \
+  || die "v1 operational-readiness evidence harness is missing or not executable"
+[[ -x "${SCRIPT_DIR}/record-v1-platform-rehearsal.sh" ]] \
+  || die "v1 platform-rehearsal recorder is missing or not executable"
+[[ -x "${SCRIPT_DIR}/record-v1-external-pilot-feedback.sh" ]] \
+  || die "v1 external-pilot feedback recorder is missing or not executable"
+grep -Fq 'new-compose-without-processkit' \
+  "${SCRIPT_DIR}/record-v1-external-pilot-feedback.sh" \
+  || die "external-pilot evidence does not require the processkit-disabled journey"
+grep -Fq '.operatorFeedback' \
+  "${SCRIPT_DIR}/record-v1-external-pilot-feedback.sh" \
+  || die "external-pilot evidence does not require operator feedback"
+grep -Fq 'tar -tzf "${archive}"' "${SCRIPT_DIR}/record-v1-platform-rehearsal.sh" \
+  || die "platform rehearsal does not inspect archive contents"
+grep -Fq 'release phase=host status=passed candidate=' \
+  "${SCRIPT_DIR}/record-v1-platform-rehearsal.sh" \
+  || die "platform rehearsal does not require exact-candidate host evidence"
+grep -Fq 'rollback status=passed candidate=' \
+  "${SCRIPT_DIR}/record-v1-platform-rehearsal.sh" \
+  || die "platform rehearsal does not require exact-candidate rollback evidence"
+declare -f release_v1_stable_evidence_gate |
+  grep -Fq 'test-v1-operational-readiness.sh' \
+  || die "stable-v1 release does not run the operational evidence producer"
+if declare -f release_v1_alpha_evidence_gate | grep -Fq 'config release-readiness'; then
+  die "v1 alpha publication must not require stable-v1 readiness"
 fi
-grep -Fq 'release-host-prepare ${version}' "${SCRIPT_DIR}/maintain.sh" \
-  || die "release prompt must prepare immutable inputs on the host"
-grep -Fq 'release-host \"\${host_run_dir}\"' "${SCRIPT_DIR}/maintain.sh" \
-  || die "release prompt must pass the prepared host-relative run directory"
-grep -Fq 'cargo test -- --test-threads=1' "${SCRIPT_DIR}/maintain.sh" \
-  || die "canonical release test gate must serialize process-level visual contracts"
-grep -Fq 'cargo test --test e2e -- --test-threads=1' "${SCRIPT_DIR}/maintain.sh" \
-  || die "canonical local E2E gate must serialize process-level visual contracts"
-declare -f release_visual_gate | grep -Fq 'test-screencasts.sh" themes' \
-  || die "release visual gate must run the all-theme cast-invariants sweep"
-! grep -Eq '#\[ignore.*visual' "${PROJECT_ROOT}/cli/tests/e2e/visual_matrix.rs" \
-  || die "mandatory visual matrix tests must not be ignored"
-grep -Fq 'socket_label="aibox-recordings-${slug' "${SCRIPT_DIR}/test-screencasts.sh" \
-  || die "theme matrix must use a distinct test-owned tmux server per theme"
-grep -Fq -- '-f /dev/null new-session' "${SCRIPT_DIR}/test-screencasts.sh" \
-  || die "theme matrix must not preload the live user tmux configuration"
-grep -Fq 'PowerKit palette mismatch' "${SCRIPT_DIR}/test-screencasts.sh" \
-  || die "theme matrix must fail closed when PowerKit loads the wrong palette"
+release_parse_steps all
+release_step_requested docs-check \
+  || die "the full release process must include docs-check"
+
+# A full publication and a reduced-step publication resume both pass the
+# designated branch into the protected-branch publisher. Keep this behavioral
+# probe lightweight by selecting only push-main after cmd_release has parsed
+# each public invocation form.
+release_branch_probe="$(mktemp)"
+(
+  release_parse_steps() { :; }
+  release_apply_skip_steps() { :; }
+  release_validate_license_guardrails() { :; }
+  ensure_release_branch() { :; }
+  release_steps_joined() { printf '%s' 'push-main'; }
+  release_requires_clean_tree() { return 1; }
+  release_step_requested() { [[ "$1" == "push-main" ]]; }
+  release_evidence_init() { RELEASE_CANDIDATE_SHA="test-candidate"; }
+  release_write_timing_report() { :; }
+  publish_release_candidate() { printf '%s\n' "$2" >> "${release_branch_probe}"; }
+
+  cmd_release 1.0.0-alpha.1 >/dev/null
+  cmd_release 1.0.0-alpha.1 --steps push-main >/dev/null
+)
+[[ "$(wc -l < "${release_branch_probe}" | tr -d ' ')" -eq 2 ]] \
+  || die "full and resumed publications did not both reach the branch publisher"
+while IFS= read -r published_branch; do
+  [[ "${published_branch}" == "v1.x-pre-release" ]] \
+    || die "release publication did not resolve the v1 prerelease branch"
+done < "${release_branch_probe}"
+rm -f "${release_branch_probe}"
 
 test_root="$(mktemp -d)"
 trap 'rm -rf "${test_root}"' EXIT
-
-promotion_remote="${test_root}/promotion.git"
-promotion_checkout="${test_root}/promotion"
-git init --bare -b main "${promotion_remote}" >/dev/null
-git init -b main "${promotion_checkout}" >/dev/null
-git -C "${promotion_checkout}" config user.name "Release Test"
-git -C "${promotion_checkout}" config user.email "release-test@example.invalid"
-git -C "${promotion_checkout}" remote add origin "${promotion_remote}"
-git -C "${promotion_checkout}" commit --allow-empty -m "stable baseline" >/dev/null
-git -C "${promotion_checkout}" branch v0.x-dev
-git -C "${promotion_checkout}" branch v0.x-release
-git -C "${promotion_checkout}" push origin main v0.x-dev v0.x-release >/dev/null
-git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
-git -C "${promotion_checkout}" commit --allow-empty -m "reviewed v0 candidate" >/dev/null
-git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
-promotion_sha="$(git -C "${promotion_checkout}" rev-parse HEAD)"
-(
-  cd "${promotion_checkout}"
-  RELEASE_CANDIDATE_SHA="${promotion_sha}"
-  publish_v0_release_candidate 0.35.3 >/dev/null
-  publish_v0_release_candidate 0.35.3 >/dev/null
-)
-for promotion_branch in v0.x-dev v0.x-pre-release v0.x-release main; do
-  [[ "$(git --git-dir="${promotion_remote}" rev-parse "refs/heads/${promotion_branch}")" == "${promotion_sha}" ]] \
-    || die "v0 promotion did not retain exact commit identity on ${promotion_branch}"
-done
-git -C "${promotion_checkout}" commit --allow-empty -m "unreviewed next change" >/dev/null
-if (
-  cd "${promotion_checkout}"
-  RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
-  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
-); then
-  die "v0 promotion accepted a local commit absent from origin/v0.x-dev"
-fi
-[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/main)" == "${promotion_sha}" ]] \
-  || die "rejected v0 promotion changed main"
-git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
-git -C "${promotion_checkout}" switch main >/dev/null
-git -C "${promotion_checkout}" fetch origin main >/dev/null
-git -C "${promotion_checkout}" merge --ff-only origin/main >/dev/null
-git -C "${promotion_checkout}" commit --allow-empty -m "independent main change" >/dev/null
-git -C "${promotion_checkout}" push origin main >/dev/null
-git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
-if (
-  cd "${promotion_checkout}"
-  RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
-  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
-); then
-  die "v0 promotion accepted a main commit absent from the development candidate"
-fi
-[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/v0.x-pre-release)" == "${promotion_sha}" ]] \
-  || die "divergent main changed the staging pointer before preflight failed"
-
-changelog_project="${test_root}/changelog-project"
-mkdir -p "${changelog_project}/docs-site/content/changelog"
-cat > "${changelog_project}/docs-site/content/changelog/release-v9-9-8.md" <<'EOF'
----
-title: "v9.9.8 — older"
-date: 2026-08-20
----
-[Full v9.9.8 release notes](https://github.com/projectious-work/aibox/releases/tag/v9.9.8)
-EOF
-cat > "${changelog_project}/docs-site/content/changelog/release-v9-9-9.md" <<'EOF'
----
-title: "v9.9.9 — current"
-date: 2026-08-21
----
-[Full v9.9.9 release notes](https://github.com/projectious-work/aibox/releases/tag/v9.9.9)
-EOF
-saved_project_root="${PROJECT_ROOT}"
-PROJECT_ROOT="${changelog_project}"
-release_changelog_gate 9.9.9 >/dev/null \
-  || die "valid exact/latest changelog entry was rejected"
-if release_changelog_gate 9.9.7 >/dev/null 2>&1; then
-  die "missing exact changelog entry was accepted"
-fi
-if release_changelog_gate 9.9.8 >/dev/null 2>&1; then
-  die "non-latest changelog entry was accepted"
-fi
-PROJECT_ROOT="${saved_project_root}"
 
 DIST_DIR="${test_root}/dist"
 RELEASE_EVIDENCE_DIR="${DIST_DIR}/evidence"
@@ -137,8 +100,6 @@ RELEASE_TREE_STATE="clean"
 RELEASE_PHASE="container"
 AIBOX_RELEASE_REUSE_EVIDENCE=0
 mkdir -p "${RELEASE_LOG_DIR}"
-RELEASE_TIMING_LOG="${RELEASE_EVIDENCE_DIR}/timing-events.tsv"
-release_timing_begin "test-evidence"
 
 probe_output="${test_root}/probe-ran"
 release_test_probe() {
@@ -159,38 +120,6 @@ AIBOX_RELEASE_REUSE_EVIDENCE=1
 release_run_evidenced_step \
   evidence-probe 9.9.9 "Evidence probe" release_test_probe
 [[ ! -e "${probe_output}" ]] || die "valid evidence did not skip command execution"
-
-RELEASE_CANDIDATE_SHA="different-candidate"
-release_run_evidenced_step \
-  evidence-probe 9.9.9 "Changed-candidate evidence probe" release_test_probe
-[[ -f "${probe_output}" ]] \
-  || die "evidence from a different candidate SHA was incorrectly reused"
-RELEASE_CANDIDATE_SHA="test-candidate"
-rm -f "${probe_output}"
-
-release_test_fails() {
-  return 17
-}
-if release_run_evidenced_step timing-failure 9.9.9 "Timing failure probe" release_test_fails; then
-  die "failing evidenced step unexpectedly succeeded"
-fi
-grep -F $'step\t' "${RELEASE_TIMING_LOG}" >/dev/null \
-  || die "timing event log did not record step attempts"
-grep -F $'\tfailed\ttiming-failure\t' "${RELEASE_TIMING_LOG}" >/dev/null \
-  || die "timing event log did not retain failed step attempt"
-grep -F $'\treused\tevidence-probe\t' "${RELEASE_TIMING_LOG}" >/dev/null \
-  || die "timing event log did not retain evidence reuse"
-
-release_timing_finish 1
-release_write_timing_report 9.9.9 1
-timing_report="${DIST_DIR}/RELEASE-TIMINGS.md"
-[[ -f "${timing_report}" ]] || die "release timing report was not written"
-grep -Fq 'Cumulative attempts' "${timing_report}" \
-  || die "release timing report omitted cumulative attempts"
-grep -Fq 'cumulative command duration' "${timing_report}" \
-  || die "release timing report omitted cumulative command duration"
-grep -Fq 'timing-failure' "${timing_report}" \
-  || die "release timing report omitted failed attempt"
 
 RELEASE_TREE_STATE="dirty"
 release_run_evidenced_step \
@@ -213,13 +142,12 @@ if release_evidence_valid build-linux 9.9.9; then
 fi
 
 release_test_slow() {
-  sleep 1.2
+  sleep 0.2
 }
 release_test_fast() {
   sleep 0.05
 }
 AIBOX_RELEASE_PARALLELISM=2
-AIBOX_RELEASE_PROGRESS_INTERVAL_SECONDS=1
 release_run_parallel_validation 9.9.9 \
   "scheduler-slow|Scheduler slow probe|release_test_slow" \
   "scheduler-fast|Scheduler fast probe|release_test_fast"
@@ -227,9 +155,6 @@ release_run_parallel_validation 9.9.9 \
   || die "parallel scheduler did not record the slow probe"
 [[ -f "$(release_evidence_key_path scheduler-fast)" ]] \
   || die "parallel scheduler did not record the fast probe"
-grep -F $'progress\t' "${RELEASE_TIMING_LOG}" | grep -F $'\trunning\tscheduler-slow\t' >/dev/null \
-  || die "parallel scheduler did not emit a progress timing event"
-unset AIBOX_RELEASE_PROGRESS_INTERVAL_SECONDS
 
 host_remote="${test_root}/host-remote.git"
 host_seed="${test_root}/host-seed"
@@ -252,17 +177,28 @@ git -C "${host_primary}" config user.name "Release Test"
 git -C "${host_primary}" config user.email "release-test@example.invalid"
 git -C "${host_primary}" worktree add "${host_linked}" v0.x-release >/dev/null
 
+printf 'primary dirty\n' >> "${host_primary}/tracked.txt"
+printf 'primary untracked\n' > "${host_primary}/primary-untracked.txt"
+printf 'linked dirty\n' >> "${host_linked}/tracked.txt"
+printf 'linked untracked\n' > "${host_linked}/linked-untracked.txt"
+
 saved_project_root="${PROJECT_ROOT}"
 PROJECT_ROOT="${host_primary}"
-git -C "${host_linked}" switch --detach >/dev/null
-git -C "${host_primary}" switch v0.x-release >/dev/null
-ensure_release_host_checkout_current 0.28.13
+prepare_release_host_checkout 0.28.13
 [[ "$(git -C "${host_primary}" branch --show-current)" == "v0.x-release" ]] \
-  || die "release-host validation changed the primary checkout"
+  || die "release-host preparation did not switch the primary checkout"
 [[ "$(git -C "${host_primary}" rev-parse HEAD)" == \
    "$(git -C "${host_primary}" rev-parse origin/v0.x-release)" ]] \
-  || die "release-host validation accepted a stale release branch"
+  || die "release-host preparation did not synchronize the release branch"
+[[ -z "$(git -C "${host_primary}" status --porcelain --untracked-files=all)" ]] \
+  || die "release-host preparation left the primary checkout dirty"
+[[ -z "$(git -C "${host_linked}" branch --show-current)" ]] \
+  || die "release-host preparation did not detach the linked release worktree"
+[[ -z "$(git -C "${host_linked}" status --porcelain --untracked-files=all)" ]] \
+  || die "release-host preparation left the linked release worktree dirty"
+[[ "$(git -C "${host_primary}" stash list --format='%s' | \
+    grep -c 'pre-release-host-v0.28.13-')" -eq 2 ]] \
+  || die "release-host preparation did not preserve both dirty checkouts"
 PROJECT_ROOT="${saved_project_root}"
 
 ok "maintain.sh release evidence probe passed"
-"${SCRIPT_DIR}/test-release-host-gate.sh"

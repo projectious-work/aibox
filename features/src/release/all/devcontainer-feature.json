@@ -1,0 +1,11 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "release bundle",
+  "description": "Installs every release member Feature through dependsOn (aibox catalog ID release/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/release/hadolint:1": {},
+    "ghcr.io/projectious-work/aibox-features/release/shellcheck:1": {}
+  }
+}

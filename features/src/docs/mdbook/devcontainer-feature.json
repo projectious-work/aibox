@@ -1,0 +1,17 @@
+{
+  "id": "mdbook",
+  "version": "1.0.0",
+  "name": "mdbook",
+  "description": "Installs mdbook (aibox catalog ID docs/mdbook).",
+  "documentationURL": "https://rust-lang.github.io/mdBook/guide/installation.html",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.5.4"
+      ],
+      "default": "0.5.4",
+      "description": "Version of mdbook to install."
+    }
+  }
+}
