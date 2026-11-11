@@ -105,10 +105,13 @@ check("roadmap.schema.json", missing_completion_commit, False)
 missing_completion_evidence = copy.deepcopy(roadmap)
 missing_completion_evidence["groups"][0]["phases"][2].pop("evidence")
 check("roadmap.schema.json", missing_completion_evidence, False)
-unreleased_shipped = copy.deepcopy(roadmap)
-unreleased_shipped["groups"][0]["phases"][2]["status"] = "shipped"
-check("roadmap.schema.json", unreleased_shipped, False)
-released_done = copy.deepcopy(unreleased_shipped)
+released_without_release = copy.deepcopy(roadmap)
+released_without_release["groups"][0]["phases"][2]["status"] = "released"
+check("roadmap.schema.json", released_without_release, False)
+former_status = copy.deepcopy(roadmap)
+former_status["groups"][0]["phases"][2]["status"] = "shipped"
+check("roadmap.schema.json", former_status, False)
+released_done = copy.deepcopy(released_without_release)
 released_done["groups"][0]["phases"][2]["release"] = "v1.0.0-alpha.1"
 check("roadmap.schema.json", released_done)
 missing_completion_note = copy.deepcopy(roadmap)

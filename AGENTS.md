@@ -126,53 +126,56 @@ architecture, and cross-compile steps.
   section-by-section body and `Refs: DEC-NNN, BACK-NNN` + `Co-Authored-By:` trailer.
 - **Reference GitHub issue numbers** in commits: `fixes #N`, `refs #N`.
 - **Include `Cargo.lock`** in version bump commits.
-- **Never force-push to `main`.**
 - **No hardcoded processkit vocabulary** in production Rust code — add constants to
   `cli/src/processkit_vocab.rs` instead.
 - **No trailing summaries** in agent responses — the user can read the diff.
 
 ### v1 engineering practice
 
-v1 work on `v1.x-dev` follows
+v1 work on `main` follows
 [`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md)
 from V1-05: development cycle and independent review per phase, a frozen
 test-ready phase contract with separate acceptance-test and implementation
-tracks,
-*Hexagonal Architecture* with a *Clean Architecture* core, *TDD, Chicago
-School* tests, refactoring by named smells, Conventional Commits, and a green
-`v1.x-dev` after every merge.
+tracks, *Hexagonal Architecture* with a *Clean Architecture* core, *TDD,
+Chicago School* tests, refactoring by named smells, Conventional Commits, and
+a green `main` after every merge. Agent execution and communication rules are
+in the company standards block at the end of this file.
 
-AI agents implementing v1 also follow these execution and communication
-rules (not part of the product specification):
+### Branches and pull requests
 
-- Run at most 3 sub-agents at once and work in waves beyond that. The primary
-  agent keeps concept, core implementation, integration, and review of
-  delegated results.
-- Give a red check at most 1 rerun. Report an infrastructure-only failure once
-  with evidence. Push fixes in batches. Do not spend turns polling; wait for
-  completion notifications.
-- Reply answer-first: result or next action first, numbered steps, one
-  closing next action, no preamble or recap. Personal output styles are opt-in
-  through the person's user-level agent instructions.
+The branch model is *GitHub Flow* as the company standard defines it
+(`.standards/git-branching-and-releases.md`; skill `standard-git-branching`).
 
-### Pull requests
-
-- **Version-line integration** — long-lived branches (`main`, `v0.x-dev`,
-  `v0.x-release`, `v1.x-dev`, `v1.x-pre-release`) are PR-only. Tag releases
-  only on their designated release branch; merge the tagged branch into `main`
-  as published history. Do not use GitHub Actions or workflow files.
-- **"Ship it" means the full release ritual** end-to-end: build, test, commit, tag,
-  push, GitHub release, deploy docs. Do not ask permission at each step.
-- **Phase 0 runs three steps before any version bump:** (1) `./scripts/maintain.sh release-check-state`
-  → `dist/RELEASE-STATE.md`; (2) `./scripts/maintain.sh release-doctors` → `dist/RELEASE-DOCTORS.md`
-  (v0 line: runs pk-doctor + aibox doctor; ERRORs from either block the release, WARNs surface in the report
-  but don't block); (3) review both reports. `./scripts/maintain.sh release <version>` calls all
-  three automatically.
-- **Phase 2 is always the user's job** — macOS host builds and GHCR image pushes
-  run via `./scripts/maintain.sh release-host X.Y.Z` on the host, never from the container.
-  Before Phase 2, sync the host checkout to the just-pushed container-side release
-  commits with `git fetch origin main && git reset --keep origin/main`.
-- **Detailed release procedures:** See [`archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) (v0 line, archived) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
+- **`main` is the v1 line.** Every change is made on a short-lived branch
+  from `main` (`feat/`, `fix/`, `chore/`, `spec/`) and squash-merged back
+  after owner approval. The squash title is a Conventional Commit whose type
+  matches the branch prefix, at most 72 characters.
+- **`lts/v0` is the v0 line** (current release `v0.35.4`). v0 work uses
+  branches named `fix/lts0-…`, `chore/lts0-…` with pull requests into
+  `lts/v0`. A fix that also applies to `main` lands on `main` first and is
+  then cherry-picked with `git cherry-pick -x`. Never merge `main` into
+  `lts/v0` or the reverse.
+- **A spec-driven phase** keeps its tracks on `<prefix>/<slug>-tests` and
+  `<prefix>/<slug>-impl`; the integration owner merges them into the phase
+  branch `<prefix>/<slug>`, which squash-merges into `main` when every
+  acceptance test passes.
+- **Releases** are cut on `release/vX.Y.Z` from `main` (v1) or `lts/v0` (v0).
+  The branch holds one commit, `chore(release): vX.Y.Z`. After the squash
+  merge, tag that commit with an annotated tag, then publish.
+- **No CI.** Do not add GitHub Actions or workflow files. Run the documented
+  verification locally and put the result in the pull request.
+- **`gh-pages`** is generated by the documented docs deployment and is never
+  developed on.
+- **Never force-push `main` or `lts/v0`.**
+- **v0 release tooling** (`scripts/maintain.sh` and its helpers, the release
+  note `archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`)
+  belongs to the v0 line. Run it from a checkout of `lts/v0`; the copies on
+  `main` are not used for v1 releases. macOS host builds and GHCR image pushes
+  are always the owner's job on the host
+  (`./scripts/maintain.sh release-host X.Y.Z`), never from the container.
+- **"Ship it" means the full release ritual** end-to-end for the line in
+  question: verify, release branch, squash merge, tag, GitHub release, deploy
+  docs.
 - **One big change preferred over many small PRs** for breaking releases. The user
   explicitly said: "make one big change, I'll handle derived project dependencies."
 - **Hold uncommitted changes when the user says "hold"** — leave in working tree,

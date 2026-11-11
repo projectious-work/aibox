@@ -109,7 +109,7 @@ The integration owner then runs the integration loop:
 A track that disputes a classification gets at most 2 rounds (R-REVIEW); then
 the integration owner decides against the contract and records the decision.
 This separation applies only to black-box acceptance tests; the tests and the
-implementation merge into `v1.x-dev` together (R-INTEGRATION).
+implementation merge into `main` together (R-INTEGRATION).
 
 A direct, narrowly scoped change request from the owner skips the planning
 round: implement it, update the baseline and affected tests in the same change
@@ -184,11 +184,12 @@ a diff in golden fixtures, schemas, or result envelopes stops the refactoring.
 ## Integration
 
 **R-INTEGRATION:** Commit messages and squash-merge titles follow
-*Conventional Commits*. After each merge into `v1.x-dev`, the author checks the
-verification of the merge commit; a red `v1.x-dev` is fixed forward before new
+*Conventional Commits*; branches follow *GitHub Flow* as the company branching
+standard defines it. After each merge into `main`, the author checks the
+verification of the merge commit; a red `main` is fixed forward before new
 work builds on it. Acceptance tests written ahead of their implementation
-(R-CYCLE) stay on the open change branch and merge into `v1.x-dev` together
-with the implementation that makes them pass; `v1.x-dev` never carries an
+(R-CYCLE) stay on the open change branch and merge into `main` together
+with the implementation that makes them pass; `main` never carries an
 intentionally failing test.
 
 ## Writing

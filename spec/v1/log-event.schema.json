@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/log-event.schema.json",
+  "$id": "https://github.com/projectious-work/aibox/blob/main/spec/v1/log-event.schema.json",
   "title": "aibox redacted operational log event",
   "type": "object",
   "additionalProperties": false,

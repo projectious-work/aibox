@@ -40,15 +40,15 @@ There is no installable release yet. The current runner is not safe
 for mutating lifecycle calls: policy-owned executable resolution, input
 binding, post-cancellation effect inspection, operation records and operation-specific
 schema validation remain to be implemented. The
-[canonical architecture contract](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)
+[canonical architecture contract](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md)
 defines those acceptance conditions.
 
 The V1-03 implementation candidate has a repeatable local verification gate:
 `./scripts/verify-v1-03.sh` builds the Go binary, exercises the successful
 inspection and an invalid-project refusal, validates their result schemas, and
 builds this site. Publication evidence is still required before the roadmap
-can call V1-03 shipped. Each later roadmap phase must keep this executable
+can call V1-03 released. Each later roadmap phase must keep this executable
 working and add paired CLI/MCP customer-runnable, documented demos. Public
 alpha/beta releases are prepared at verified checkpoints, not automatically
-after every phase; until publication, the demo is a preview, not a shipped
+after every phase; until publication, the demo is a preview, not a released
 support claim.

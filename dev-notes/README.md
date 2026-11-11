@@ -17,6 +17,6 @@ narrating commits or replacing user documentation.
 Update a phase note after each meaningful implementation wave: record what
 changed, which contract was checked, validation, remaining gaps, and security
 or compatibility consequences. A merged PR alone does not make a phase
-shipped; release and published-artifact evidence are separate gates. The
+released; release and published-artifact evidence are separate gates. The
 roadmap's `status: done` records a verified local implementation
 without claiming a release.

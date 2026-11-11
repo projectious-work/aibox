@@ -25,12 +25,12 @@ translate native image, Dockerfile, Compose, mount, or lifecycle settings.
 | `minimal` | You want a small native Dev Container definition and will choose optional Features yourself. | Debian base, non-root `aibox` user, shell, tmux and Yazi, persistent named home volume, and an optional pinned Codex harness. It leaves the aibox customization extension inactive. |
 | `curated` | You want the curated workspace defaults and can opt into additional Features. | The same base tools, native tmux/Yazi defaults, and a selectable pinned Codex harness. Additional Features remain explicit selections. |
 
-The source Template definitions are in [`templates/src/minimal`](https://github.com/projectious-work/aibox/tree/v1.x-dev/templates/src/minimal)
-and [`templates/src/curated`](https://github.com/projectious-work/aibox/tree/v1.x-dev/templates/src/curated).
-Rendered candidate examples are available for [minimal](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1/examples/minimal),
-[curated](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1/examples/customized),
-[custom users](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1/examples/custom-user),
-and [bind-mounted home](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1/examples/bind-home).
+The source Template definitions are in [`templates/src/minimal`](https://github.com/projectious-work/aibox/tree/main/templates/src/minimal)
+and [`templates/src/curated`](https://github.com/projectious-work/aibox/tree/main/templates/src/curated).
+Rendered candidate examples are available for [minimal](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/minimal),
+[curated](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/customized),
+[custom users](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/custom-user),
+and [bind-mounted home](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/bind-home).
 
 The source templates have no published registry references. In a source
 checkout, render a starter into a new, empty project directory. The helper
@@ -82,8 +82,8 @@ are not required. It renders both Template variants and records build/up/exec
 plus home-volume persistence evidence in the chosen
 output directory. It also checks the custom-user and bind-home examples. Keep
 the output directory, including `evidence.json` and step logs, and provide it
-with the implementation review. The [first](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
-and [repeat](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/evidence/V1-04-85cc0c9a/host-run-2.json)
+with the implementation review. The [first](https://github.com/projectious-work/aibox/blob/main/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
+and [repeat](https://github.com/projectious-work/aibox/blob/main/spec/v1/evidence/V1-04-85cc0c9a/host-run-2.json)
 checked-in host manifests record both passing runs of all four examples. The
 aibox Go preview cannot perform lifecycle actions.
 

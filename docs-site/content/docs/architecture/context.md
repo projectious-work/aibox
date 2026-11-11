@@ -65,7 +65,7 @@ other Feature. Delegating lifecycle commands through aibox is **Planned**
 - **CLI:** `aibox inspect --context local --project PATH --format json`
   writes one result envelope to stdout; diagnostics go to stderr. The exit
   code follows the stable classes in
-  [chapter 18](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/18-operational-contracts.md).
+  [chapter 18](https://github.com/projectious-work/aibox/blob/main/spec/v1/18-operational-contracts.md).
 - **MCP:** `aibox mcp serve --context local` runs a stdio server with no
   network listener. Stdout carries only the protocol.
 - **Features:** standard Dev Container Feature packages (`devcontainer-feature.json`

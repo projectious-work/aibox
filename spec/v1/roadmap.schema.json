@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.schema.json",
+  "$id": "https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.schema.json",
   "title": "aibox v1 specification roadmap",
   "type": "object",
   "additionalProperties": false,
@@ -44,7 +44,7 @@
         "title": {"type": "string", "minLength": 1},
         "summary": {"type": "string", "minLength": 1},
         "docs": {"type": "string", "minLength": 1},
-        "status": {"enum": ["idea", "planned", "in_progress", "done", "shipped", "cancelled"]},
+        "status": {"enum": ["idea", "planned", "in_progress", "done", "released", "cancelled"]},
         "implementationCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
         "target": {"type": "string"},
         "dependencies": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
@@ -57,8 +57,8 @@
         "rationale": {"type": "string"}
       },
       "allOf": [
-        {"if": {"properties": {"status": {"enum": ["done", "shipped"]}}}, "then": {"required": ["devNote", "evidence", "implementationCommit"]}},
-        {"if": {"properties": {"status": {"const": "shipped"}}}, "then": {"required": ["devNote", "release", "evidence", "implementationCommit"]}},
+        {"if": {"properties": {"status": {"enum": ["done", "released"]}}}, "then": {"required": ["devNote", "evidence", "implementationCommit"]}},
+        {"if": {"properties": {"status": {"const": "released"}}}, "then": {"required": ["devNote", "release", "evidence", "implementationCommit"]}},
         {"if": {"properties": {"status": {"const": "cancelled"}}}, "then": {"required": ["rationale"]}}
       ]
     }
