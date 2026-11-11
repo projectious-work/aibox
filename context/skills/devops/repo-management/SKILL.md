@@ -120,6 +120,9 @@ local changes through git when the repository policy allows it.
 - **Do not hide external auth failures.** Missing `gh`, `glab`, `tea`,
   `bb`, `az`, or `hut` authentication is an actionable blocker, not a
   successful no-op.
+- **Do not assume a reused gateway sees newly exported credentials.** A
+  long-lived daemon cannot inherit later shell environment changes. Configure
+  an owner-only token file for refreshable GitHub CLI authentication.
 
 ## Full reference
 
@@ -158,3 +161,20 @@ are first-class provider identities in the schema and detection layer;
 their remote issue and change-request mutation paths return
 `unsupported` until the matching local CLI or API credential contract is
 implemented.
+
+### Long-lived gateway GitHub authentication
+
+The gateway daemon and direct stdio servers continue to support normal `gh`
+authentication through `GH_TOKEN`, `GITHUB_TOKEN`, `GH_ENTERPRISE_TOKEN`,
+`GITHUB_ENTERPRISE_TOKEN`, and the GitHub CLI config or keyring.
+
+For a long-lived daemon that must observe token rotation without a restart,
+set `PROCESSKIT_GITHUB_TOKEN_FILE` to a regular file owned by the gateway user
+with mode `0600`. The file must contain only the token. GitHub Enterprise may
+use `PROCESSKIT_GITHUB_ENTERPRISE_TOKEN_FILE` instead. The file is read
+immediately before every `gh` call and injected only into that child process.
+Direct token environment variables take precedence.
+
+Token values are never added to MCP arguments, command results, diagnostics,
+the gateway catalog, or tracked MCP configuration. A shared daemon has one
+GitHub identity; use isolated daemons when clients require separate identities.

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -101,3 +102,120 @@ def test_unsupported_non_github_issue_listing(tmp_path):
 
     assert result["unsupported"] is True
     assert result["provider"]["provider"] == "gitlab"
+
+
+def test_gh_child_refreshes_token_from_owner_only_file(
+    tmp_path,
+    monkeypatch,
+):
+    token = "github-token-file-sentinel"
+    token_file = tmp_path / "github-token"
+    token_file.write_text(token + "\n", encoding="utf-8")
+    token_file.chmod(0o600)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv(
+        "PROCESSKIT_GITHUB_TOKEN_FILE",
+        token_file.as_posix(),
+    )
+    captured = {}
+
+    def fake_run(args, **kwargs):
+        captured["args"] = args
+        captured["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(args, 0, "[]", "")
+
+    monkeypatch.setattr(server.subprocess, "run", fake_run)
+
+    result = server._run(["gh", "issue", "list"], cwd=tmp_path)
+
+    assert result["ok"] is True
+    assert captured["env"]["GH_TOKEN"] == token
+    assert token not in " ".join(captured["args"])
+    assert token not in json.dumps(result)
+
+
+def test_direct_gh_token_takes_precedence_over_token_file(
+    tmp_path,
+    monkeypatch,
+):
+    direct = "direct-token-sentinel"
+    file_token = "file-token-sentinel"
+    token_file = tmp_path / "github-token"
+    token_file.write_text(file_token, encoding="utf-8")
+    token_file.chmod(0o600)
+    monkeypatch.setenv("GH_TOKEN", direct)
+    monkeypatch.setenv(
+        "PROCESSKIT_GITHUB_TOKEN_FILE",
+        token_file.as_posix(),
+    )
+    captured = {}
+
+    def fake_run(args, **kwargs):
+        captured["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(args, 0, "[]", "")
+
+    monkeypatch.setattr(server.subprocess, "run", fake_run)
+
+    result = server._run(["gh", "pr", "list"], cwd=tmp_path)
+
+    assert result["ok"] is True
+    assert captured["env"]["GH_TOKEN"] == direct
+    assert file_token not in json.dumps(result)
+
+
+def test_gh_token_file_rejects_group_or_world_access(
+    tmp_path,
+    monkeypatch,
+):
+    token_file = tmp_path / "github-token"
+    token_file.write_text("unsafe-token-sentinel", encoding="utf-8")
+    token_file.chmod(0o640)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv(
+        "PROCESSKIT_GITHUB_TOKEN_FILE",
+        token_file.as_posix(),
+    )
+
+    result = server._run(["gh", "issue", "list"], cwd=tmp_path)
+
+    assert result["ok"] is False
+    assert result["returncode"] == 78
+    assert "permissions must be 0600" in result["stderr"]
+    assert "unsafe-token-sentinel" not in json.dumps(result)
+
+
+def test_gh_output_and_timeout_redact_supported_tokens(
+    tmp_path,
+    monkeypatch,
+):
+    token = "long-github-token-sentinel"
+    monkeypatch.setenv("GH_TOKEN", token)
+
+    def failed_run(args, **kwargs):
+        return subprocess.CompletedProcess(
+            args,
+            4,
+            f"stdout {token}",
+            f"stderr {token}",
+        )
+
+    monkeypatch.setattr(server.subprocess, "run", failed_run)
+    failed = server._run(["gh", "issue", "list"], cwd=tmp_path)
+    assert token not in json.dumps(failed)
+    assert "<redacted>" in json.dumps(failed)
+
+    def timed_out(args, **kwargs):
+        raise subprocess.TimeoutExpired(
+            args,
+            kwargs["timeout"],
+            output=f"stdout {token}",
+            stderr=f"stderr {token}",
+        )
+
+    monkeypatch.setattr(server.subprocess, "run", timed_out)
+    timeout = server._run(["gh", "pr", "list"], cwd=tmp_path)
+    assert timeout["returncode"] == 124
+    assert token not in json.dumps(timeout)
+    assert "<redacted>" in json.dumps(timeout)

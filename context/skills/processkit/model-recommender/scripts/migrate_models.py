@@ -63,6 +63,8 @@ PROVIDER_MAP = {
     "Cohere": "cohere",
     "Moonshot AI": "moonshot",
     "NVIDIA": "nvidia",
+    "Subquadratic": "subquadratic",
+    "Xiaomi / Open": "xiaomi",
     "Z.AI": "zai",
 }
 
@@ -81,6 +83,8 @@ PROVIDER_STATUS_PAGES = {
     "aws": "https://health.aws.amazon.com/health/status",
     "moonshot": "https://platform.moonshot.ai/",
     "nvidia": "https://www.nvidia.com/en-us/ai-data-science/",
+    "subquadratic": "https://subq.ai/",
+    "xiaomi": "https://mimo.xiaomi.com/",
     "zai": "https://www.z.ai/",
 }
 

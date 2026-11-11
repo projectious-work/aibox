@@ -5,16 +5,27 @@ metadata:
   id: ART-20260503_1424-ModelSpec-anthropic-claude-opus
   created: '2026-05-03T14:24:00Z'
 spec:
-  name: Claude Opus 4.7
+  name: Claude Opus 4.8
   kind: model-spec
   format: markdown
   provider: anthropic
   family: claude-opus
   legacy_model_id: MODEL-anthropic-claude-opus
   profile_ids:
+  - claude-opus-4.8
   - claude-opus-4.7
   - claude-opus-4.6
   versions:
+  - version_id: '4.8'
+    status: ga
+    context_window: 1000000
+    pricing_usd_per_1m:
+      input: 5
+      output: 25
+    pricing_note: Current Anthropic flagship API model; official pricing.
+    lifecycle: active
+    source_urls: &id001
+    - https://docs.anthropic.com/en/docs/about-claude/models/overview
   - version_id: '4.7'
     status: ga
     context_window: 1000000
@@ -23,7 +34,7 @@ spec:
       output: 25.0
     pricing_note: Anthropic Opus 4.7 pricing; 1M context.
     lifecycle: active
-    source_urls: &id001
+    source_urls:
     - https://docs.anthropic.com/en/docs/about-claude/models/overview
     - https://www.anthropic.com/news/claude-opus-4-7
   - version_id: '4.6'
@@ -61,7 +72,7 @@ spec:
   access_tier: public
   equivalent_tier: xxl
   status_page_url: https://status.anthropic.com/
-  rationale: Frontier flagship
+  rationale: Frontier reasoning and agentic coding
   lifecycle: active
   source_urls: *id001
   model_classes:

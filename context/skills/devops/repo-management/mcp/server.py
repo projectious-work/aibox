@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
-#   "mcp[cli]>=1.0",
+#   "mcp[cli]>=1.0,<2.0",
 # ]
 # ///
 """Provider-neutral repository management MCP server."""
@@ -12,6 +12,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -71,6 +72,89 @@ PROVIDER_LABELS = {
     "unknown": "Unknown",
 }
 
+GITHUB_TOKEN_ENV_KEYS = (
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "GH_ENTERPRISE_TOKEN",
+    "GITHUB_ENTERPRISE_TOKEN",
+)
+
+GITHUB_TOKEN_FILE_ENV = {
+    "PROCESSKIT_GITHUB_TOKEN_FILE": (
+        "GH_TOKEN",
+        ("GH_TOKEN", "GITHUB_TOKEN"),
+    ),
+    "PROCESSKIT_GITHUB_ENTERPRISE_TOKEN_FILE": (
+        "GH_ENTERPRISE_TOKEN",
+        ("GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"),
+    ),
+}
+
+
+def _redact(value: object, secrets: list[str]) -> str:
+    """Render subprocess output without disclosing supported auth tokens."""
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        text = value.decode("utf-8", errors="replace")
+    else:
+        text = str(value)
+    for secret in sorted(set(secrets), key=len, reverse=True):
+        if secret:
+            text = text.replace(secret, "<redacted>")
+    return text
+
+
+def _read_owner_token_file(path_value: str) -> str:
+    """Read a regular, owner-only token file without following symlinks."""
+    path = Path(path_value).expanduser()
+    if path.is_symlink():
+        raise ValueError(f"GitHub token file must not be a symlink: {path}")
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ValueError(f"GitHub token file is unavailable: {path}") from exc
+    with os.fdopen(descriptor, encoding="utf-8") as handle:
+        file_stat = os.fstat(handle.fileno())
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise ValueError(f"GitHub token file must be a regular file: {path}")
+        if hasattr(os, "geteuid") and file_stat.st_uid != os.geteuid():
+            raise ValueError(
+                f"GitHub token file must be owned by the gateway user: {path}"
+            )
+        if stat.S_IMODE(file_stat.st_mode) & 0o077:
+            raise ValueError(
+                f"GitHub token file permissions must be 0600: {path}"
+            )
+        try:
+            token = handle.read().strip()
+        except OSError as exc:
+            raise ValueError(
+                f"GitHub token file could not be read: {path}"
+            ) from exc
+    if not token:
+        raise ValueError(f"GitHub token file is empty: {path}")
+    return token
+
+
+def _github_cli_environment() -> tuple[dict[str, str], list[str]]:
+    """Build a refreshable child environment for one GitHub CLI call."""
+    child_env = os.environ.copy()
+    secrets = [
+        child_env[key]
+        for key in GITHUB_TOKEN_ENV_KEYS
+        if child_env.get(key)
+    ]
+    for file_env, (target_env, direct_keys) in GITHUB_TOKEN_FILE_ENV.items():
+        path_value = child_env.get(file_env, "").strip()
+        if not path_value or any(child_env.get(key) for key in direct_keys):
+            continue
+        token = _read_owner_token_file(path_value)
+        child_env[target_env] = token
+        secrets.append(token)
+    return child_env, secrets
+
 
 def _project_root(project_root: Optional[str] = None) -> Path:
     if project_root:
@@ -93,6 +177,23 @@ def _run(
     timeout: int = 30,
     input_text: Optional[str] = None,
 ) -> dict:
+    child_env = None
+    secrets = [
+        os.environ[key]
+        for key in GITHUB_TOKEN_ENV_KEYS
+        if os.environ.get(key)
+    ]
+    if args and args[0] == "gh":
+        try:
+            child_env, secrets = _github_cli_environment()
+        except ValueError as exc:
+            return {
+                "ok": False,
+                "returncode": 78,
+                "command": args,
+                "stdout": "",
+                "stderr": _redact(exc, secrets),
+            }
     try:
         completed = subprocess.run(
             args,
@@ -102,6 +203,7 @@ def _run(
             text=True,
             timeout=timeout,
             input=input_text,
+            env=child_env,
         )
     except FileNotFoundError:
         return {
@@ -116,15 +218,15 @@ def _run(
             "ok": False,
             "returncode": 124,
             "command": args,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "command timed out",
+            "stdout": _redact(exc.stdout, secrets),
+            "stderr": _redact(exc.stderr or "command timed out", secrets),
         }
     return {
         "ok": completed.returncode == 0,
         "returncode": completed.returncode,
         "command": args,
-        "stdout": completed.stdout,
-        "stderr": completed.stderr,
+        "stdout": _redact(completed.stdout, secrets),
+        "stderr": _redact(completed.stderr, secrets),
     }
 
 

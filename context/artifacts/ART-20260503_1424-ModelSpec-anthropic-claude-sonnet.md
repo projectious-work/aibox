@@ -5,16 +5,27 @@ metadata:
   id: ART-20260503_1424-ModelSpec-anthropic-claude-sonnet
   created: '2026-05-03T14:24:00Z'
 spec:
-  name: Claude Sonnet 4.6
+  name: Claude Sonnet 5
   kind: model-spec
   format: markdown
   provider: anthropic
   family: claude-sonnet
   legacy_model_id: MODEL-anthropic-claude-sonnet
   profile_ids:
+  - claude-sonnet-5
   - claude-sonnet-4.6
   - claude-sonnet-4.5
   versions:
+  - version_id: '5'
+    status: preview
+    context_window: 200000
+    pricing_usd_per_1m:
+      input: 2
+      output: 10
+    pricing_note: Introductory API pricing through 2026-08-31; verify after expiry.
+    lifecycle: active
+    source_urls: &id001
+    - https://docs.anthropic.com/en/docs/about-claude/models/overview
   - version_id: '4.6'
     status: preview
     context_window: 200000
@@ -24,7 +35,7 @@ spec:
     pricing_note: Best price-capability ratio in the Claude family for engineering
       tasks
     lifecycle: unverified
-    source_urls: &id001
+    source_urls:
     - https://docs.anthropic.com/en/docs/about-claude/models/overview
     - https://www.anthropic.com/news/claude-opus-4-7
   - version_id: '4.5'
@@ -60,8 +71,8 @@ spec:
   access_tier: public
   equivalent_tier: xxl
   status_page_url: https://status.anthropic.com/
-  rationale: Frontier mid-size
-  lifecycle: unverified
+  rationale: Frontier coding and agentic work
+  lifecycle: active
   source_urls: *id001
   model_classes: []
   task_suitability:

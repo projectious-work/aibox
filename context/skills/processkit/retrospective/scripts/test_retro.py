@@ -1169,7 +1169,7 @@ class TestProductionMcpLoader:
 
         Skipped when the ``mcp`` package is not installed (test env uses
         ``--with pytest --with pyyaml --with jsonschema`` only; add
-        ``--with 'mcp[cli]>=1.0'`` to run this test in-process).
+        ``--with 'mcp[cli]>=1.0,<2.0'`` to run this test in-process).
         """
         pytest.importorskip("mcp", reason="mcp package not installed")
         result = retro._load_production_mcp()

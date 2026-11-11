@@ -19,3 +19,9 @@ state, issues, and change requests.
 Mutating issue and merge operations require exact confirmation tokens:
 `close-issue:<id>` and `merge-change-request:<id>`. The server never
 force-pushes and never bypasses provider checks.
+
+Long-lived gateways may set `PROCESSKIT_GITHUB_TOKEN_FILE` or
+`PROCESSKIT_GITHUB_ENTERPRISE_TOKEN_FILE` to a regular, gateway-user-owned
+file with mode `0600`. The server reads the selected file immediately before
+each `gh` invocation and redacts supported token values from subprocess
+results.

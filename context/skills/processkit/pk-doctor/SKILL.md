@@ -199,7 +199,7 @@ Additional checks added after Phase 1:
   addresses may be listed in `.pk-doctor-allowlist.toml`:
   ```toml
   [sensitive_data.email_allowlist]
-  addresses = ["deploy@example.local"]
+  addresses = ["info@projectious.work", "deploy@example.local"]
   ```
   The allowlist applies only to email-address findings; secrets and other PII
   are never suppressed.

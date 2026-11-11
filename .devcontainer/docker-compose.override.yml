@@ -20,6 +20,11 @@ services:
     #  - seccomp=unconfined
     ports:
       - "127.0.0.1:1316:1316"
+    volumes:
+      # Nested rootless Podman test cache: image store, local registry and
+      # downloads for acceptance runs. One volume, so the host can drop every
+      # cached build with `docker volume rm aibox-test-cache`.
+      - aibox-test-cache:/var/cache/aibox-test
   # ── E2E Test Companion Container ───────────────────────────────────────────
   # Simulates a user's host machine for end-to-end testing of the aibox CLI.
   # No shared volumes — the test harness SCPs the aibox binary + addons into
@@ -62,3 +67,8 @@ services:
       - /run
       - /run/lock
     stop_grace_period: 30s
+
+volumes:
+  aibox-test-cache:
+    # Fixed name, not prefixed with the compose project.
+    name: aibox-test-cache
