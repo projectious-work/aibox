@@ -125,8 +125,7 @@ never against a derived summary. A review gate runs at most 2 rounds; after
 that the integration owner decides open points against the baseline and
 records each decision in the development logbook. The designated reviewer
 (person or agent identity, and for an agent its model and provider) is
-recorded in the development logbook at plan review. Automated model routing,
-such as processkit `route_task`, may propose a reviewer, but its proposal is
+recorded in the development logbook at plan review. Automated model routing may propose a reviewer, but its proposal is
 recorded before the review starts. If the designated reviewer is unavailable,
 the gate is blocked and reported; it is never skipped. Changing the reviewer,
 model, or provider requires the owner's explicit authorization, recorded in
@@ -159,8 +158,9 @@ engine are details behind ports. In addition:
   It lives under `docs-site/content/docs/architecture/`; V1-05 creates it and
   each later phase updates the sections it affects. Architecture decisions
   use *ADR according to Nygard* structure (context, decision, consequences)
-  and are recorded as processkit DecisionRecords (`DEC-*`) in this
-  repository; the arc42 decisions section links them.
+  and are recorded under `docs/adr/` in this repository; decisions made
+  before 2026-11-11 are the `DEC-*` records under
+  `archive/processkit/decisions/`. The arc42 decisions section links them.
 
 ## Test style
 
