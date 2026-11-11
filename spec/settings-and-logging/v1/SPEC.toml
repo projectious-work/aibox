@@ -1,0 +1,6 @@
+slug = "settings-and-logging"
+version = 1
+status = "frozen"
+roadmap = ["V1-06"]
+issues = []
+decisions = ["DEC-20261026_1412-FastForge"]
