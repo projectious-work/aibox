@@ -147,13 +147,13 @@ class TraceTest(unittest.TestCase):
 
     def test_every_census_row_traces_in_the_frozen_contract(self):
         failures = {row: trace.trace_failures(row, REAL, self.table(),
-                                              REPO / "context" / "decisions")
+                                              REPO / "archive" / "processkit" / "decisions")
                     for row in CENSUS}
         self.assertEqual({row: f for row, f in failures.items() if f}, {})
 
     def test_unmapped_row_fails(self):
         failures = trace.trace_failures("ADDON:none/none", REAL, self.table(),
-                                        REPO / "context" / "decisions")
+                                        REPO / "archive" / "processkit" / "decisions")
         self.assertEqual(failures, ["maps to 0 catalog places: []"])
 
     def test_removal_without_decision_record_fails(self):

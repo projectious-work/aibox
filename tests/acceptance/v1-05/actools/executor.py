@@ -69,7 +69,7 @@ class Executor:
     # --- offline items ---------------------------------------------------
     def run_offline(self) -> None:
         table = json.loads((SPEC / "ledger" / "v1-05-tool-selection.json").read_text())
-        decisions = REPO / "context" / "decisions"
+        decisions = REPO / "archive" / "processkit" / "decisions"
         for test in self.plan.tests:
             if test.item == "trace":
                 failures = trace.trace_failures(test.payload["row"], self.ctx.catalog, table,
