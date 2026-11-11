@@ -93,7 +93,7 @@ environment file needs no private mode.
 | CFG-061 | Each settings entry shall have `domain` as listed for the key, the winning `layer`, the `source` defined by `effectiveConfig.source`, the winning `value`, `redacted`, and `invocationOnly` true only when the winning layer is `invocation`. | J |
 | CFG-062 | Where a lower layer other than `built_in` also set the key, the entry shall list each such value in `overridden`, from highest to lowest layer, with its `layer`, `source`, `value` and `redacted`. | J |
 | CFG-063 | aibox shall return `data.settingsSources` with one element for each source in `effectiveConfig.settingsSources`, giving its `layer`, `path` and `state` (`loaded` or `absent`). | J |
-| CFG-064 | aibox shall redact values, sources and paths in the view by `redaction`, and shall set `redacted` true on every entry whose value it changed. | J |
+| CFG-064 | aibox shall redact values, sources and paths in the view by `redaction`, and shall set `redacted` true on every entry whose value holds `redaction.replacement`; writing the home prefix as `~` does not set it. | J |
 | CFG-065 | aibox shall return the same `data.settingsSources` and the same settings entries for the CLI and for MCP when both resolve the same layers. | J |
 | CFG-066 | While it builds the view, aibox shall not run a hook, start a container, contact a container engine, or read a home directory other than that of the running user. | J |
 | CFG-067 | When `inspect` is run without `--effective-config`, aibox shall return in `data.configuration` only the native entries of `effectiveConfig.nativeEntries`, and no `data.settingsSources`. | J |
@@ -121,7 +121,7 @@ environment file needs no private mode.
 | LOG-003 | Events of one request shall carry the same `requestId` and a `sequence` that starts at 0 and increases by 1. | J |
 | LOG-004 | Process start and shutdown events of `mcp serve` shall carry a process correlation ID as `requestId` that differs from every operation request ID of that process. | J |
 | LOG-005 | aibox shall emit an event only if its severity is at or above `logging.level`, and shall emit no event where `logging.level` is `off`. | J |
-| LOG-006 | When a setting or a command line is rejected, aibox shall emit one `settings.rejected` event with the request ID of the failed command and `sequence` 0, written to stderr only, at any `logging.level` except `off`, in the format `logging.rejectionFormat` defines. | J |
+| LOG-006 | When a setting or a command line is rejected, aibox shall emit one `settings.rejected` event with the request ID of the failed command and `sequence` 0, written to stderr only, at the level and in the format that `logging.rejectionFormat` defines. `version` and `help` emit no event; OUT-007 alone applies to them. | J |
 | LOG-007 | aibox shall write no event and no progress text to stdout. | J |
 | LOG-008 | When `inspect` is interrupted by SIGINT or SIGTERM, aibox shall emit `operation.cancelled`, return outcome `cancelled` with error `operation_cancelled`, and exit 130. | C: `inspect` ends too quickly to interrupt from outside. |
 
@@ -147,7 +147,7 @@ environment file needs no private mode.
 |---|---|---|
 | LOG-030 | If the file sink cannot be opened or written during a read-only operation, then aibox shall complete the operation, add the warning `log_sink_degraded` to the result, and write one `logging.sink_degraded` event to stderr. | J for open failure; C for write failure (disk full needs a faulty file system). |
 | LOG-031 | If `logging.required` is true and the file sink has failed, then aibox shall refuse a mutating operation with `operation_record_unavailable` before any side effect, and shall continue a read-only operation as in LOG-030. | J for the read-only part; C for the mutating part: no mutating operation exists yet. |
-| LOG-032 | If stderr is closed or its reader has gone, then aibox shall still write the result to stdout, exit with the result's code, not run the operation again, and write no event text to any other file. | J |
+| LOG-032 | If stderr is closed or its reader has gone, then aibox shall still write the result to stdout, exit with the result's code, not run the operation again, add no warning, emit no event about stderr, and write no event text to any other file. | J |
 | LOG-033 | While the event queue holds `logging.queue.capacity` events, aibox shall drop `trace` and `debug` events first, write `warn` and `error` events directly to stderr within `logging.queue.directWriteMillis`, count the dropped events, and emit one `logging.dropped` event with the count when the queue has room. | C: needs a sink that blocks on demand. |
 | LOG-034 | At normal shutdown aibox shall try to flush the sinks for at most `logging.queue.flushSeconds` seconds, shall never block an operation on a sink for longer, and, if the flush did not complete, shall write one `logging.flush_incomplete` event directly to stderr. | C: needs a sink that blocks on demand. |
 

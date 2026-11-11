@@ -75,7 +75,7 @@ guess. Rows marked in bold change, tighten or narrow the baseline.
 | D8 | Permitted place of the log file without operator policy. | **Tightening.** Only inside `<state>/aibox/logs/` (chapter 16 anchors to `<state>/aibox/`). Operation records live beside it in `<state>/aibox/operations/`, so a log path can never name a record. |
 | D9 | Rotation naming and retention. | `<file>.1` is the newest rotated file. At most `retentionFiles` files exist including the active one. Rotated files older than `retentionDays` are deleted at rotation and at start. |
 | D10 | What counts as a known secret. | The value of every process environment variable whose name matches `redaction.secretNamePattern` and is at least 8 bytes long, plus the listed secret shapes. The home directory prefix of a path is written as `~`. **Limits the owner accepts:** a secret shorter than 8 bytes is not redacted; a secret that is in no such variable and has no listed shape is not recognized; `target.workspaceRoot` in the JSON and YAML envelope is not redacted, because it identifies the workspace. |
-| D11 | Unknown `AIBOX_*` names in the environment. | They fail, as chapter 16 says, except the 83 registered runtime identifiers in `fixtures/registered-environment.json` and names under the prefix family `AIBOX_TMUX_`. This matters inside v0 containers, which set many of them. |
+| D11 | Unknown `AIBOX_*` names in the environment. | They fail, as chapter 16 says, except the 82 registered runtime identifiers in `fixtures/registered-environment.json` and names under the prefix family `AIBOX_TMUX_`. This matters inside v0 containers, which set many of them. |
 | D12 | How a test sets a system layer. | No override exists; that would let a caller suppress the system layer. Journeys that need `/etc/aibox/settings.json` run in a disposable container. |
 | D13 | Project layer. | **Narrowing.** Only `customizations.aibox.workspace.theme`, `.mode` and `.layout` of the selected `devcontainer.json` take part, and only for the three `workspace.*` keys. Chapter 16 says "UX/diagnostic intent"; no diagnostic key is admitted from a project. |
 | D14 | MCP logging. | Fixed when `mcp serve` starts. A tool call can set `effectiveConfig` and nothing else from this feature. |
@@ -106,6 +106,14 @@ guess. Rows marked in bold change, tighten or narrow the baseline.
   non-blocking findings. All 11 blocking findings and findings N1 to N11 are
   applied in the following commit. N12 (the `spec/v1` layout error of
   `check-specs`) is tracked in issue #504.
+- Round 2, 2026-11-11: same reviewer, commit `34d35d77`: all 11 blocking
+  findings of round 1 closed; 2 new blocking findings (B12, B13) and 8
+  non-blocking (N13 to N20), all applied before the freeze. One point stays
+  open by decision of the integration owner: aibox does not check the
+  ownership of the system settings file (round 1, N8); the operator-policy
+  feature takes it. The reviewer ran no journey and no YAML parser.
+- Owner approval, 2026-11-11: decisions D3, D4, D6 and D15 as drafted, and
+  the merge of this version with the remaining decisions as stated.
 - Not covered by this version and not deferred to a named phase: backup
   exclusions for log files, and redaction of provider prompts and personal
   data. Neither occurs in the events of this version; the first feature that

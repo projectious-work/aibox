@@ -463,7 +463,7 @@
       "fixture": "fixtures/registered-environment.json",
       "rule": "a name is registered if it equals a name in the fixture, or starts with a name in the fixture that ends with an underscore (prefix family, for example AIBOX_TMUX_)"
     },
-    "failureOrder": "usage errors of the command line first; then layers in the order system, user, project, env_file (in load order), environment, invocation; within a file in document order; within the environment in byte order of the names. For one setting, a shape defect (malformed, unknown_key, invalid_value and the like) is reported before unauthorized_source.",
+    "failureOrder": "usage errors of the command line first; then no_home; then layers in the order system, user, project, env_file (in load order), environment, invocation. A failure to select or read a file (relative_env_file, missing_selected_file, not_regular_file, unreadable) is reported at the position of the layer that file would supply. Within a file in document order; within the environment in byte order of the names. For one setting, a shape defect (malformed, unknown_key, invalid_value and the like) is reported before unauthorized_source.",
     "nearestName": "the env name with the smallest Levenshtein distance to the unknown name; ties go to the earlier key in settings.keys"
   },
   "cli": {
@@ -566,7 +566,7 @@
       },
       {
         "key": "devcontainer.features",
-        "value": "array of the selected Feature references, in declaration order",
+        "value": "array of the selected Feature references, sorted ascending by byte order",
         "redacted": false,
         "layer": "project",
         "source": ".devcontainer/devcontainer.json",
@@ -684,7 +684,7 @@
       "warn",
       "error"
     ],
-    "plainLine": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z (TRACE|DEBUG|INFO|WARN|ERROR) [a-z][a-z0-9_.]*( [A-Za-z][A-Za-z0-9]*=\\S*)*$",
+    "plainLine": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z (TRACE|DEBUG|INFO|WARN|ERROR) [a-z][a-z0-9_.]*( [A-Za-z][A-Za-z0-9]*=.*)?$",
     "schema": "schemas/log-event.schema.json",
     "components": [
       "cli",
@@ -743,7 +743,8 @@
           "layer": "the layer, when one is known",
           "source": "as effectiveConfig.source, when known",
           "suggestion": "only for unknown_environment_name"
-        }
+        },
+        "note": "Not emitted by version and help."
       },
       {
         "event": "operation.started",
@@ -816,12 +817,12 @@
         "event": "logging.sink_degraded",
         "severity": "warn",
         "component": "logging",
-        "when": "a sink open or write fails; once per sink and process",
+        "when": "the file sink cannot be opened or written; once per process. A failure of stderr emits no event and adds no warning.",
         "members": [
           "executor"
         ],
         "fields": {
-          "sink": "file or stderr",
+          "sink": "file",
           "reason": "open_failed, write_failed or insecure_mode"
         }
       },
@@ -846,7 +847,7 @@
           "executor"
         ],
         "fields": {
-          "sink": "file or stderr"
+          "sink": "file"
         }
       },
       {
@@ -910,7 +911,7 @@
       "executor": "aibox"
     },
     "fieldValues": "Every fields value is a string. Numbers are base-10 text; booleans are true or false.",
-    "rejectionFormat": "jsonl if --log-format jsonl is on the command line or the command is mcp serve; otherwise plain. A rejected logging key does not change this.",
+    "rejectionFormat": "Format: jsonl if --log-format jsonl is on the command line or the command is mcp serve; otherwise plain. Level: the event is written unless --log-level off is on the command line. Settings files and the environment do not influence either, because they may be the rejected source.",
     "plainLineNote": "After the event name: member=value pairs, then fields as name=value; a value with spaces is JSON-quoted. Tests that read fields use jsonl.",
     "reserved": "Event names for authorization, dependency invocation, progress, partial effect and cleanup, and child-tool attribution, are defined by the features that add such operations."
   },
