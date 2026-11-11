@@ -1,0 +1,11 @@
+{
+  "id": "rustfmt",
+  "version": "1.0.0",
+  "name": "rustfmt",
+  "description": "Installs rustfmt (aibox catalog ID rust/rustfmt).",
+  "documentationURL": "https://rust-lang.github.io/rustup/concepts/components.html",
+  "options": {},
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/rust/rustc"
+  ]
+}

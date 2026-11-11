@@ -1,0 +1,17 @@
+{
+  "id": "copilot",
+  "version": "1.0.0",
+  "name": "copilot",
+  "description": "Installs copilot (aibox catalog ID ai/copilot).",
+  "documentationURL": "https://github.com/github/copilot-cli#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.0.105"
+      ],
+      "default": "1.0.105",
+      "description": "Version of copilot to install."
+    }
+  }
+}

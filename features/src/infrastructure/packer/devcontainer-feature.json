@@ -1,0 +1,17 @@
+{
+  "id": "packer",
+  "version": "1.0.0",
+  "name": "packer",
+  "description": "Installs packer (aibox catalog ID infrastructure/packer).",
+  "documentationURL": "https://developer.hashicorp.com/packer/install",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.16.0"
+      ],
+      "default": "1.16.0",
+      "description": "Version of packer to install."
+    }
+  }
+}

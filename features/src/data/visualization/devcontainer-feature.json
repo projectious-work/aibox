@@ -1,0 +1,11 @@
+{
+  "id": "visualization",
+  "version": "1.0.0",
+  "name": "vega-cli, vega-lite",
+  "description": "Installs vega-cli, vega-lite (aibox catalog ID data/visualization).",
+  "documentationURL": "https://github.com/vega/vega/tree/main/packages/vega-cli",
+  "options": {},
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/node/node"
+  ]
+}

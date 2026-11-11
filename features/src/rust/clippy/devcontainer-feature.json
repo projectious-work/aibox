@@ -1,0 +1,11 @@
+{
+  "id": "clippy",
+  "version": "1.0.0",
+  "name": "clippy",
+  "description": "Installs clippy (aibox catalog ID rust/clippy).",
+  "documentationURL": "https://rust-lang.github.io/rustup/concepts/components.html",
+  "options": {},
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/rust/rustc"
+  ]
+}

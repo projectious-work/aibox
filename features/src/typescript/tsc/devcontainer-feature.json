@@ -1,0 +1,20 @@
+{
+  "id": "tsc",
+  "version": "1.0.0",
+  "name": "tsc",
+  "description": "Installs tsc (aibox catalog ID typescript/tsc).",
+  "documentationURL": "https://www.npmjs.com/package/typescript",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "7.0.2"
+      ],
+      "default": "7.0.2",
+      "description": "Version of tsc to install."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/projectious-work/aibox-features/node/node"
+  ]
+}

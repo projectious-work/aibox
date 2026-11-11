@@ -1,0 +1,17 @@
+{
+  "id": "zig",
+  "version": "1.0.0",
+  "name": "zig",
+  "description": "Installs zig (aibox catalog ID zig/zig).",
+  "documentationURL": "https://ziglang.org/download/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.17.0"
+      ],
+      "default": "0.17.0",
+      "description": "Version of zig to install."
+    }
+  }
+}

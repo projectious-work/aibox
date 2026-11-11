@@ -1,0 +1,17 @@
+{
+  "id": "uv",
+  "version": "1.0.0",
+  "name": "uv",
+  "description": "Installs uv (aibox catalog ID python/uv).",
+  "documentationURL": "https://docs.astral.sh/uv/getting-started/installation/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.12.5"
+      ],
+      "default": "0.12.5",
+      "description": "Version of uv to install."
+    }
+  }
+}

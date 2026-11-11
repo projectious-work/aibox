@@ -15,6 +15,13 @@ The source-built Go preview can already inspect a native project without a
 container runtime; it is not yet an installable release. See the
 [runnable preview and current limits](core-status.md) for the exact command.
 
+The [tool catalog](tool-catalog.md) lists the optional tool Features, their
+versions, removals and v0 compatibility notes.
+
+Maintainers can read the [architecture](architecture/_index.md) of the v1
+implementation: context, building blocks, crosscutting concepts, decisions
+and risks.
+
 As each implementation phase is completed, publish its reviewed user and
 maintainer documentation here. Planned material remains separate from
 instructions for released software. The phase graph is in the [canonical v1

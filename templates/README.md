@@ -86,9 +86,10 @@ create the source on the daemon host first and check writable ownership.
 Bind mounts have different portability and cleanup behavior. Neither example
 copies a whole host home or silently changes host ownership.
 
-`provenance.json` records base/index platform digests, immutable Debian
-snapshot/package versions and checksummed tool assets for linux/amd64 and
-linux/arm64. APT verifies signed repository metadata. The initial snapshot
+`provenance.json` records base/index platform digests, the immutable Debian
+snapshot that configures the `trixie`, `trixie-updates` and `trixie-security`
+suites, the package versions taken from them, and checksummed tool assets for
+linux/amd64 and linux/arm64. APT verifies signed repository metadata. The initial snapshot
 transport is HTTP so the minimal base can bootstrap CA certificates; downloaded
 binaries use HTTPS plus SHA256 verification. Maintainers own pin updates and
 requalification. These platform pins are available upstream; live verification

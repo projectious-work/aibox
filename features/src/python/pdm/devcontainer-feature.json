@@ -1,0 +1,20 @@
+{
+  "id": "pdm",
+  "version": "1.0.0",
+  "name": "pdm",
+  "description": "Installs pdm (aibox catalog ID python/pdm).",
+  "documentationURL": "https://pdm-project.org/latest/#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.28.2"
+      ],
+      "default": "2.28.2",
+      "description": "Version of pdm to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

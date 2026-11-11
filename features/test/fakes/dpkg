@@ -1,0 +1,6 @@
+#!/bin/sh
+# Test double (Fake) for dpkg: reports the architecture in $FAKE_STATE/arch.
+case "$1" in
+  --print-architecture) cat "$FAKE_STATE/arch" ;;
+  *) echo "fake dpkg: unsupported arguments: $*" >&2; exit 2 ;;
+esac

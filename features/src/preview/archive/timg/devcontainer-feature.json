@@ -1,0 +1,8 @@
+{
+  "id": "timg",
+  "version": "1.0.0",
+  "name": "timg",
+  "description": "Installs timg (aibox catalog ID preview/archive/timg).",
+  "documentationURL": "https://packages.debian.org/trixie/timg",
+  "options": {}
+}

@@ -1,0 +1,17 @@
+{
+  "id": "opencode",
+  "version": "1.0.0",
+  "name": "opencode",
+  "description": "Installs opencode (aibox catalog ID ai/opencode).",
+  "documentationURL": "https://opencode.ai/docs/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.19.5"
+      ],
+      "default": "1.19.5",
+      "description": "Version of opencode to install."
+    }
+  }
+}

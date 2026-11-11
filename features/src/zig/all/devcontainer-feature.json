@@ -1,0 +1,11 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "zig bundle",
+  "description": "Installs every zig member Feature through dependsOn (aibox catalog ID zig/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/zig/zig:1": {},
+    "ghcr.io/projectious-work/aibox-features/zig/zls:1": {}
+  }
+}

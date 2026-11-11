@@ -1,0 +1,11 @@
+{
+  "id": "fonts",
+  "version": "1.0.0",
+  "name": "texlive-fonts",
+  "description": "Installs texlive-fonts (aibox catalog ID latex/fonts).",
+  "documentationURL": "https://tug.org/texlive/quickinstall.html",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {}
+  }
+}

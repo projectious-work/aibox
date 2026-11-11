@@ -1,0 +1,20 @@
+{
+  "id": "aider",
+  "version": "1.0.0",
+  "name": "aider",
+  "description": "Installs aider (aibox catalog ID ai/aider).",
+  "documentationURL": "https://aider.chat/docs/install.html",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.86.2"
+      ],
+      "default": "0.86.2",
+      "description": "Version of aider to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

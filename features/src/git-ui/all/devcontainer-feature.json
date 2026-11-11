@@ -1,0 +1,13 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "git-ui bundle",
+  "description": "Installs every git-ui member Feature through dependsOn (aibox catalog ID git-ui/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/devcontainers/features/github-cli@sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2": {
+      "version": "2.103.3"
+    },
+    "ghcr.io/projectious-work/aibox-features/git-ui/lazygit:1": {}
+  }
+}

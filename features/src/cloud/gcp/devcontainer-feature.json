@@ -1,0 +1,17 @@
+{
+  "id": "gcp",
+  "version": "1.0.0",
+  "name": "gcloud-cli",
+  "description": "Installs gcloud-cli (aibox catalog ID cloud/gcp).",
+  "documentationURL": "https://docs.cloud.google.com/sdk/docs/install-sdk#deb",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "591.0.0"
+      ],
+      "default": "591.0.0",
+      "description": "Version of gcloud-cli to install."
+    }
+  }
+}

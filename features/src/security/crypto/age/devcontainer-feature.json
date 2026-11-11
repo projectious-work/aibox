@@ -1,0 +1,17 @@
+{
+  "id": "age",
+  "version": "1.0.0",
+  "name": "age",
+  "description": "Installs age (aibox catalog ID security/crypto/age).",
+  "documentationURL": "https://github.com/FiloSottile/age#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.3.2"
+      ],
+      "default": "1.3.2",
+      "description": "Version of age to install."
+    }
+  }
+}

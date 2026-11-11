@@ -1,0 +1,8 @@
+{
+  "id": "podman",
+  "version": "1.0.0",
+  "name": "podman",
+  "description": "Installs podman (aibox catalog ID infrastructure/podman).",
+  "documentationURL": "https://podman.io/docs/installation#debian",
+  "options": {}
+}

@@ -1,0 +1,20 @@
+{
+  "id": "poetry",
+  "version": "1.0.0",
+  "name": "poetry",
+  "description": "Installs poetry (aibox catalog ID python/poetry).",
+  "documentationURL": "https://python-poetry.org/docs/#installation",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "2.4.1"
+      ],
+      "default": "2.4.1",
+      "description": "Version of poetry to install."
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "data-preview bundle",
+  "description": "Installs every data-preview member Feature through dependsOn (aibox catalog ID data/preview/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/data/preview/csvkit:1": {},
+    "ghcr.io/projectious-work/aibox-features/data/preview/sqlite3:1": {}
+  }
+}

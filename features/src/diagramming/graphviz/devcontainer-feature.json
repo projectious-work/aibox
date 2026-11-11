@@ -1,0 +1,8 @@
+{
+  "id": "graphviz",
+  "version": "1.0.0",
+  "name": "graphviz",
+  "description": "Installs graphviz (aibox catalog ID diagramming/graphviz).",
+  "documentationURL": "https://packages.debian.org/trixie/graphviz",
+  "options": {}
+}

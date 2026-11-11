@@ -1,0 +1,13 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "python bundle",
+  "description": "Installs every python member Feature through dependsOn (aibox catalog ID python/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/python/pdm:1": {},
+    "ghcr.io/projectious-work/aibox-features/python/poetry:1": {},
+    "ghcr.io/projectious-work/aibox-features/python/python:1": {},
+    "ghcr.io/projectious-work/aibox-features/python/uv:1": {}
+  }
+}

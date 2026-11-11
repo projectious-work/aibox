@@ -1,0 +1,20 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "latex bundle",
+  "description": "Installs every latex member Feature through dependsOn (aibox catalog ID latex/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/latex/biber:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/chemistry:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/code:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/core:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/diagrams:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/fonts:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/inkscape:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/linguistics:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/math:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/music:1": {},
+    "ghcr.io/projectious-work/aibox-features/latex/recommended:1": {}
+  }
+}

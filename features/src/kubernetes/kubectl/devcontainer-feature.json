@@ -1,0 +1,17 @@
+{
+  "id": "kubectl",
+  "version": "1.0.0",
+  "name": "kubectl",
+  "description": "Installs kubectl (aibox catalog ID kubernetes/kubectl).",
+  "documentationURL": "https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "1.36.4"
+      ],
+      "default": "1.36.4",
+      "description": "Version of kubectl to install."
+    }
+  }
+}

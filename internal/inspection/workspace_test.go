@@ -66,3 +66,74 @@ func TestWorkspaceRejectsMissingAndSymlinkedDeclaration(t *testing.T) {
 		t.Fatal("accepted symlinked declaration")
 	}
 }
+
+func TestWorkspaceReportsSelectedFeaturesWithoutOptionsOrSecrets(t *testing.T) {
+	root, config := fixture(t)
+	declaration := `{
+		// A native project owns its Feature selections.
+		"features": {
+			"ghcr.io/example/hugo@sha256:abc": {"version": "0.165.0", "token": "private-value"},
+			"ghcr.io/example/gh@sha256:def": {},
+		},
+		"containerEnv": {"PRIVATE_KEY": "another-private-value"},
+	}`
+	if err := os.WriteFile(config, []byte(declaration), 0600); err != nil {
+		t.Fatal(err)
+	}
+	_, _, data, err := Workspace(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data.Configuration) != 2 {
+		t.Fatalf("missing sourced Feature selection: %+v", data.Configuration)
+	}
+	entry := data.Configuration[1]
+	want := Configuration{
+		Key: "devcontainer.features", Redacted: false, Layer: "project",
+		Source: ".devcontainer/devcontainer.json", Domain: "native", InvocationOnly: false,
+	}
+	refs, ok := entry.Value.([]string)
+	entry.Value = nil
+	if entry != want {
+		t.Fatalf("unexpected Feature selection entry: %+v", entry)
+	}
+	if !ok || len(refs) != 2 || refs[0] != "ghcr.io/example/gh@sha256:def" ||
+		refs[1] != "ghcr.io/example/hugo@sha256:abc" {
+		t.Fatalf("unexpected selected Feature refs: %#v", refs)
+	}
+	if strings.Contains(strings.Join(refs, ","), "private-value") {
+		t.Fatal("inspection exposed a Feature option")
+	}
+}
+
+func TestWorkspaceOmitsFeaturesWhenNoneAreSelected(t *testing.T) {
+	for name, declaration := range map[string]string{
+		"absent":    `{"image":"example.invalid/base:one"}`,
+		"empty":     `{"image":"example.invalid/base:one","features":{}}`,
+		"commented": "{\n  \"image\": \"example.invalid/base:one\",\n  // \"features\": {\"ghcr.io/example/x:1\": {}},\n}",
+	} {
+		root, config := fixture(t)
+		if err := os.WriteFile(config, []byte(declaration), 0600); err != nil {
+			t.Fatal(err)
+		}
+		_, _, data, err := Workspace(root)
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		for _, entry := range data.Configuration {
+			if entry.Key == "devcontainer.features" {
+				t.Fatalf("%s: reported a Feature selection: %+v", name, data.Configuration)
+			}
+		}
+	}
+}
+
+func TestWorkspaceRejectsMalformedDeclaration(t *testing.T) {
+	root, config := fixture(t)
+	if err := os.WriteFile(config, []byte(`{"features": {"ghcr.io/example/x:1": {}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, err := Workspace(root); err == nil {
+		t.Fatal("accepted a malformed native declaration")
+	}
+}

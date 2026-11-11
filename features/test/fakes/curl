@@ -1,0 +1,41 @@
+#!/bin/sh
+# Test double (Fake) for curl. Serves URLs listed in $FAKE_STATE/urls as
+# "<url> <file>" lines; any other URL fails like curl -f with HTTP 404.
+# A URL listed in $FAKE_STATE/interrupted as "<url> <count>" drops its stream
+# on the first <count> attempts, like an HTTP/2 stream reset (exit 92). As in
+# real curl, --retry alone does not retry that error; --retry-all-errors does.
+out=""
+url=""
+retries=0
+retry_all=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o|--output) out=$2; shift 2 ;;
+    --retry) retries=$2; shift 2 ;;
+    --retry-all-errors) retry_all=1; shift ;;
+    --proto|--connect-timeout|--max-time) shift 2 ;;
+    -*) shift ;;
+    *) url=$1; shift ;;
+  esac
+done
+printf '%s\n' "$url" >> "$FAKE_STATE/curl.log"
+interruptions=$(awk -v u="$url" '$1 == u { print $2; exit }' "$FAKE_STATE/interrupted" 2>/dev/null)
+interruptions=${interruptions:-0}
+dropped=$(grep -cxF "$url" "$FAKE_STATE/dropped" 2>/dev/null)
+dropped=${dropped:-0}
+attempt=0
+while [ "$dropped" -lt "$interruptions" ]; do
+  printf '%s\n' "$url" >> "$FAKE_STATE/dropped"
+  dropped=$((dropped + 1))
+  attempt=$((attempt + 1))
+  echo "curl: (92) HTTP/2 stream 1 was not closed cleanly: INTERNAL_ERROR (err 2)" >&2
+  if [ -z "$retry_all" ] || [ "$attempt" -gt "$retries" ]; then
+    exit 92
+  fi
+done
+file=$(awk -v u="$url" '$1 == u { print $2; exit }' "$FAKE_STATE/urls" 2>/dev/null)
+if [ -z "$file" ]; then
+  echo "curl: (22) The requested URL returned error: 404" >&2
+  exit 22
+fi
+if [ -n "$out" ]; then cp "$file" "$out"; else cat "$file"; fi

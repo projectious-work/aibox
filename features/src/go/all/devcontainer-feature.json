@@ -1,0 +1,16 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "go bundle",
+  "description": "Installs every go member Feature through dependsOn (aibox catalog ID go/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/go/go:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/goimports:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/golangci-lint:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/goreleaser:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/gosec:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/govulncheck:1": {},
+    "ghcr.io/projectious-work/aibox-features/go/staticcheck:1": {}
+  }
+}

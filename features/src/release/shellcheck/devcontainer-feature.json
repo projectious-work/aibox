@@ -1,0 +1,17 @@
+{
+  "id": "shellcheck",
+  "version": "1.0.0",
+  "name": "shellcheck",
+  "description": "Installs shellcheck (aibox catalog ID release/shellcheck).",
+  "documentationURL": "https://github.com/koalaman/shellcheck#installing",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "0.11.0"
+      ],
+      "default": "0.11.0",
+      "description": "Version of shellcheck to install."
+    }
+  }
+}

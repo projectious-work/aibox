@@ -1,0 +1,8 @@
+{
+  "id": "ghostscript",
+  "version": "1.0.0",
+  "name": "ghostscript",
+  "description": "Installs ghostscript (aibox catalog ID preview/enhanced/ghostscript).",
+  "documentationURL": "https://packages.debian.org/trixie/ghostscript",
+  "options": {}
+}

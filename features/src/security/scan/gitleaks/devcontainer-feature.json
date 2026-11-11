@@ -1,0 +1,17 @@
+{
+  "id": "gitleaks",
+  "version": "1.0.0",
+  "name": "gitleaks",
+  "description": "Installs gitleaks (aibox catalog ID security/scan/gitleaks).",
+  "documentationURL": "https://github.com/gitleaks/gitleaks#installing",
+  "options": {
+    "version": {
+      "type": "string",
+      "enum": [
+        "8.30.1"
+      ],
+      "default": "8.30.1",
+      "description": "Version of gitleaks to install."
+    }
+  }
+}

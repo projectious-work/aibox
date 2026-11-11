@@ -1,0 +1,13 @@
+{
+  "id": "all",
+  "version": "1.0.0",
+  "name": "infrastructure bundle",
+  "description": "Installs every infrastructure member Feature through dependsOn (aibox catalog ID infrastructure/all).",
+  "options": {},
+  "dependsOn": {
+    "ghcr.io/projectious-work/aibox-features/infrastructure/ansible:1": {},
+    "ghcr.io/projectious-work/aibox-features/infrastructure/opentofu:1": {},
+    "ghcr.io/projectious-work/aibox-features/infrastructure/packer:1": {},
+    "ghcr.io/projectious-work/aibox-features/infrastructure/podman:1": {}
+  }
+}
