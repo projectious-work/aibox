@@ -33,7 +33,7 @@
 | R-CODE | Phase verification script: `gofmt -l` empty, `go vet ./...` clean; package-import test (chapter 7); no unfinished operation exposed; arc42/C4 pages under `docs-site/content/docs/architecture/` updated; architecture review | V1-05–V1-23 |
 | R-TESTSTYLE | Test review: fakes only at ports, regression test per confirmed defect, no unexplained skips | V1-05–V1-23 |
 | R-REFACTOR | `refactor:` commits leave golden fixtures, schemas and result envelopes unchanged | V1-05–V1-23 |
-| R-INTEGRATION | Conventional Commit titles; green `v1.x-dev` after each merge; no failing test merged ahead of its implementation | V1-05–V1-23 |
+| R-INTEGRATION | Conventional Commit titles; green `main` after each merge; no failing test merged ahead of its implementation | V1-05–V1-23 |
 | R-WRITING | Documentation review per phase `docs` deliverable | V1-05–V1-23 |
 | R-LOGGING | AC-LOGGING; stdout purity, sink/rotation/failure/redaction fixtures | V1-06, V1-21 |
 | R-SECRETS | AC-SECRETS; no-secret starter, native transfer modes, host approval, canary and cleanup fixtures | V1-07, V1-21, V1-22 |

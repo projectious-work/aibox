@@ -13,7 +13,7 @@ and reviewers, not for users who want to run a workspace; for that, read the
 
 The pages follow the [arc42](https://arc42.org/overview) template and use
 [C4 diagrams](https://c4model.com/) for the context and container views.
-They describe what exists on the `v1.x-dev` line now. Later roadmap phases
+They describe what exists on `main` now. Later roadmap phases
 are named where they will change a part, and are marked **Planned**.
 
 | arc42 section | Page | Content |
@@ -26,7 +26,7 @@ are named where they will change a part, and are marked **Planned**.
 | 11 | [Risks and technical debt](risks.md) | Known gaps and open risks |
 
 The specification in
-[`spec/v1/`](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1)
+[`spec/v1/`](https://github.com/projectious-work/aibox/tree/main/spec/v1)
 is the design source; these pages summarize it and show how far the code has
 realized it. Where a page and the specification differ, the specification
 wins and the page is out of date. Each roadmap phase updates the sections it
@@ -61,7 +61,7 @@ adds three things around it:
 
 - **One Go module, one executable.** Go 1.27.0, the official MCP Go SDK as
   the only protocol implementation, standard library first
-  ([chapter 7](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)).
+  ([chapter 7](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md)).
 - **Upstream owns container semantics.** No daemon, container registry,
   scheduler, Dev Container compiler or second resolver in aibox.
 - **Supported container targets for tool Features:** Debian 13 (trixie) on
@@ -69,6 +69,6 @@ adds three things around it:
   error; Arch and Nix are not inferred.
 - **Phased delivery.** Each phase starts from a frozen, reviewed contract and
   separate acceptance-test and implementation tracks
-  ([chapter 21](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/21-engineering-practice.md), R-CYCLE).
+  ([chapter 21](https://github.com/projectious-work/aibox/blob/main/spec/v1/21-engineering-practice.md), R-CYCLE).
 - **Code style.** `gofmt` and `go vet` are authoritative; Hexagonal and
   Clean Architecture guide package boundaries (R-CODE).

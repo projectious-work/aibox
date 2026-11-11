@@ -20,10 +20,10 @@ This site currently publishes the v1 product specification and phase roadmap,
 not installation or operating instructions. Planned commands and
 configuration examples in the specification are design contracts, not usable
 interfaces. Each implementation phase must update its user or maintainer
-documentation and build this site before it can be marked shipped.
+documentation and build this site before it can be marked released.
 
-Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1),
-including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml).
+Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/main/spec/v1),
+including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.yaml).
 
 ## Stable version
 
@@ -33,5 +33,5 @@ For the current released product, use the [v0.x documentation](https://projectio
 
 ## Contributing
 
-See the [documentation site README](https://github.com/projectious-work/aibox/blob/v1.x-dev/docs-site/README.md)
+See the [documentation site README](https://github.com/projectious-work/aibox/blob/main/docs-site/README.md)
 for the local build and contribution workflow.

@@ -147,7 +147,7 @@ const harnessSchema={type:'object',additionalProperties:false,properties:{
 }};
 const customizationSchema={
   $schema:'https://json-schema.org/draft/2020-12/schema',
-  $id:'https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/customization.schema.json',
+  $id:'https://github.com/projectious-work/aibox/blob/main/spec/v1/customization.schema.json',
   title:'aibox devcontainer.json customizations.aibox v1',type:'object',additionalProperties:false,
   required:['schemaVersion'],properties:{schemaVersion:{const:'1'},workspace:workspaceSchema,harnesses:harnessSchema,
     latex:latexSchema,diagnostics:diagnosticsSchema}

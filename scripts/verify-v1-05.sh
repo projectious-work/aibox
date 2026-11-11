@@ -46,7 +46,7 @@ node --test 'features/test/*.test.mjs' > "$evidence_dir/feature-component-tests.
 git diff --check
 
 # v0 stays the current line: this branch changes no v0 source.
-v1_base="$(git merge-base HEAD origin/v1.x-dev)"
+v1_base="$(git merge-base HEAD origin/main)"
 v0_changes="$(git diff --name-only "$v1_base" HEAD -- cli images)"
 if [[ -n "$v0_changes" ]]; then
   printf 'V1-05 changes v0 sources:\n%s\n' "$v0_changes" >&2

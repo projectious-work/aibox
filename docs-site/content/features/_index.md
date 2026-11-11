@@ -16,7 +16,7 @@ of the aibox-specific v1 capabilities below are available in this preview yet.
 - A read-only doctor, local refresh, and bounded v0 migration/recovery tools.
 - An operator-managed runtime interface with a separate authority boundary.
 
-These are roadmap targets from the [v1 specification](https://github.com/projectious-work/aibox/tree/v1.x-dev/spec/v1),
+These are roadmap targets from the [v1 specification](https://github.com/projectious-work/aibox/tree/main/spec/v1),
 not a v1 feature list for a released binary. Use the [stable v0.x
 documentation](https://projectious-work.github.io/aibox/) for currently
 available product behavior.

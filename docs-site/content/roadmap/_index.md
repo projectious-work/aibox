@@ -12,5 +12,5 @@ agreed scope is integrated, validated, and documented. **Shipped** requires a
 named published release and release evidence. Several done phases may share
 one release gate; implementation dependencies can use completed outcomes.
 
-See the [v1 roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml)
-and [documentation contract](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/15-documentation.md).
+See the [v1 roadmap](https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.yaml)
+and [documentation contract](https://github.com/projectious-work/aibox/blob/main/spec/v1/15-documentation.md).

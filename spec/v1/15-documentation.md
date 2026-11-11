@@ -15,7 +15,7 @@ CLI-based product, not a copied v0 `aibox.toml` manual.
 V1-02 establishes the shared v0/v1 Hugo build as a foundation prerequisite,
 not a final documentation sprint. Every later phase depends directly or
 transitively on it. The canonical roadmap gives every phase a
-`docs` deliverable; no phase may reach `done` or `shipped` with that field unfulfilled.
+`docs` deliverable; no phase may reach `done` or `released` with that field unfulfilled.
 Phase IDs follow this implementation order; the
 [crosswalk](phase-id-crosswalk.md) preserves references from earlier reviews.
 
@@ -91,13 +91,12 @@ line/version-specific.
 
 ## Alpha/beta branch and content contract
 
-The version line uses `v1.x-dev` and `v1.x-pre-release` branches;
-alpha and beta are prerelease versions/tags on the latter, not assumed
-permanent branch names. Before each alpha or beta tag, update the docs source
-on the branch from which that candidate is cut and build its immutable
-snapshot from the exact candidate commit. If distinct alpha/beta branches are
-introduced later, apply the same rule to each; do not publish docs built
-from a different branch or a later mainline commit. A candidate release
+v1 is developed on `main`; alpha and beta are prerelease versions, each cut
+on its own short-lived `release/vX.Y.Z` branch and tagged on `main` after the
+squash merge. There are no permanent prerelease branches. Before each alpha
+or beta tag, update the docs source on the release branch and build its
+immutable snapshot from the exact candidate commit; do not publish docs built
+from a different branch or a later commit on `main`. A candidate release
 cannot rely on an obsolete Docsy-only page or a v0-oriented instruction.
 
 At each verified preview checkpoint, the public v1 docs cover only the

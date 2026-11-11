@@ -1,7 +1,7 @@
 # 14. Verification, target qualification and release
 
 This chapter implements R-TARGETS and R-DEPENDENCIES and gives the roadmap
-evidence-based definitions of `done` and `shipped`. Each phase includes
+evidence-based definitions of `done` and `released`. Each phase includes
 implementation, AC/ledger trace, tests, its roadmap `docs` deliverable, and a
 passing local documentation build from the same commit. Unit-test success alone
 is insufficient. The development cycle, review gates and test style are defined
@@ -34,7 +34,7 @@ host gate proves the real claim before it is advertised.
 The phase development note records the demo command, source SHA, built-binary
 digest, fixture, observed output or redacted transcript, documentation paths,
 Hugo build result, and failed/skipped checks. Demo readiness is an integration
-checkpoint, not a new roadmap status and not `shipped`. The dev branch remains
+checkpoint, not a new roadmap status and not `released`. The dev branch remains
 buildable and demonstrable after every integrated increment; a later change
 that breaks an earlier supported journey blocks integration.
 
@@ -43,10 +43,10 @@ verified checkpoints rather than waiting for all v0 parity. A public preview
 has an explicit supported-scope and target matrix: run the complete applicable
 test, security, documentation, host and artifact gates for what it claims;
 label everything else planned, unavailable or unsupported. Publish only from
-the accepted exact candidate through the protected version-line path, verify
+the accepted exact candidate through a `release/vX.Y.Z` branch, verify
 downloaded artifacts and matching documentation, and keep v0 current. A
 locally working demo never bypasses owner approval, release identity,
-provenance, or post-publication checks. A phase becomes `shipped` only when its
+provenance, or post-publication checks. A phase becomes `released` only when its
 named release and conformance evidence support that status.
 
 ## Test layers and evidence format
@@ -122,15 +122,15 @@ and re-run of failure-sensitive gates after changed candidate bits.
 
 The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phases
 with dependency edges and spec references. Its standard `status` values are
-`idea`, `planned`, `in_progress`, `done`, `shipped`, and `cancelled`.
-`done` means the agreed scope is implemented, integrated into `v1.x-dev`,
+`idea`, `planned`, `in_progress`, `done`, `released`, and `cancelled`.
+`done` means the agreed scope is implemented, integrated into `main`,
 validated, and documented, with a verified `implementationCommit`, development
 note, and local acceptance evidence. A pending release alone does not keep a
-phase `in_progress`; incomplete item-level acceptance does. `shipped`
+phase `in_progress`; incomplete item-level acceptance does. `released`
 additionally requires a named published release and published-artifact evidence
 for the applicable release gates; merging code alone does not meet either gate.
-Implementation dependencies may be satisfied by `done` or `shipped`; a dependency
-on released availability explicitly requires `shipped` in its acceptance criteria.
+Implementation dependencies may be satisfied by `done` or `released`; a dependency
+on released availability explicitly requires `released` in its acceptance criteria.
 Several phases may be `done` before a shared release gate. Public roadmap text
 labels them **Done — awaiting release**; an explicitly internal foundation may
 remain **Done — internal foundation** without a separate release claim.

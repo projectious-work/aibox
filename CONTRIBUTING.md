@@ -124,12 +124,16 @@ Include `Cargo.lock` in version bump commits.
 ## Release
 
 See `archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md` for the full v0 release process (archived record).
-Run a release only from its designated protected integration branch: stable
-v0 releases from `v0.x-release`, v1 prereleases from `v1.x-pre-release`, and
-v1 GA releases from `v1.x-release` once created. Quick summary:
-`./scripts/maintain.sh release X.Y.Z` (in container) then
-`./scripts/maintain.sh release-host X.Y.Z` (on macOS host). Merge the tagged
-release branch into `main` through a pull request afterward.
+Branches follow GitHub Flow (`.standards/git-branching-and-releases.md`):
+short-lived `feat/`, `fix/`, `chore/` and `spec/` branches from `main`,
+squash-merged after owner approval. `main` is the v1 line; v0 is maintained on
+`lts/v0`.
+
+A release is cut on a `release/vX.Y.Z` branch that holds one commit,
+`chore(release): vX.Y.Z`: from `main` for v1, from `lts/v0` for v0. After the
+squash merge, tag that commit and publish. v0 quick summary, from a checkout
+of `lts/v0`: `./scripts/maintain.sh release X.Y.Z` (in container) then
+`./scripts/maintain.sh release-host X.Y.Z` (on macOS host).
 The container-side command requires tracked release notes and compatibility
 metadata, validates the root README and contributor guidance, and completes a
 production Hugo/Docsy build before it permits tag or GitHub-release

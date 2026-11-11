@@ -18,6 +18,12 @@
 > **Project status:** actively maintained. The latest minor release line is
 > supported; security and correctness fixes are released on the newest version.
 > See [SECURITY.md](SECURITY.md) for reporting and support details.
+>
+> **Branches:** `main` is the v1 line, which is in development and not yet
+> released. The current release is **v0.35.4**, maintained on
+> [`lts/v0`](https://github.com/projectious-work/aibox/tree/lts/v0); read that
+> branch's README for the released product. The install command below
+> installs the latest release (v0).
 
 ---
 

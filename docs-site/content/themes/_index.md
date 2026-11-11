@@ -13,5 +13,5 @@ instructions.
 
 When theme support ships, its guide will document the supported palettes,
 native tool files, local override ownership, and any refresh or rebuild
-requirements. See the [workspace experience specification](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/11-workspace-experience.md)
+requirements. See the [workspace experience specification](https://github.com/projectious-work/aibox/blob/main/spec/v1/11-workspace-experience.md)
 for the current design contract.

@@ -60,9 +60,9 @@ logs on stderr with file sinks). aibox records no further deviation.
 | Requirement | State | Tracking |
 |---|---|---|
 | Squash-only merges | Two one-time merge commits: #506 (V1-05 landing, keeps the frozen contract commits reachable) and #508 (`main` becomes the v1 line, keeps the v0 history). All later merges are squashes. | #501 |
-| GitHub Flow branch model | `main` and `lts/v0` exist. Documents, scripts and old version-line branches still follow the former model. | #501 |
+| GitHub Flow branch model | Adopted. The former version-line branches are deleted only after the owner confirms. The v0 release tooling on `lts/v0` still assumes the former branch names. | #501 |
 | Specification layout `spec/<slug>/vN/` | Not yet adopted. The v1 specification is one numbered set under `spec/v1/`, with the roadmap inside it. | #504 |
-| Roadmap status `released`, `specs` field, root `roadmap.yaml` | Not yet adopted: the status is still `shipped`. | #501, #504 |
+| Roadmap `specs` field, root `roadmap.yaml` | Not yet adopted. The status `released` is adopted. | #504 |
 | CLI command style recorded in an ADR | Not yet recorded. | #510 |
 | Conformance of the v1 code and documents with each selected profile | Not yet audited against v2.3.0. | #511 |
 | ADR location | `docs/adr/`. Decisions before 2026-11-11 are `DEC-*` records under `archive/processkit/decisions/`. | — |

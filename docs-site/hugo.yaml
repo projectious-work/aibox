@@ -76,7 +76,7 @@ params:
   build:
     tailwind: true
   editURL:
-    default: "https://github.com/projectious-work/aibox/edit/v1.x-dev/docs-site/content/"
+    default: "https://github.com/projectious-work/aibox/edit/main/docs-site/content/"
   versions:
     - label: "v0.x current"
       url: "https://projectious-work.github.io/aibox/"

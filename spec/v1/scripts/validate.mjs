@@ -160,8 +160,8 @@ if(roadmap.currentFocus){
 for(const p of phases){
  assert(p.title && p.summary,'Missing roadmap fields');
  assert(p.docs && /\bbuild\b/i.test(p.docs),`Missing phase documentation/build deliverable ${p.id}`);
- assert(['idea','planned','in_progress','done','shipped','cancelled'].includes(p.status),'Unknown roadmap status');
- if(['done','shipped'].includes(p.status)){
+ assert(['idea','planned','in_progress','done','released','cancelled'].includes(p.status),'Unknown roadmap status');
+ if(['done','released'].includes(p.status)){
   assert(/^[0-9a-f]{40}$/.test(p.implementationCommit??''),`Completed implementation needs its verified source commit ${p.id}`);
   assert(p.devNote && p.evidence?.length>0,`Completed implementation needs a note and evidence ${p.id}`);
  }
@@ -174,7 +174,7 @@ for(const p of phases){
  if(p.devNote)assert(existsSync(path.join(root,p.devNote)),`Missing development note ${p.id}`);
  for(const ref of p.evidence??[])assert(existsSync(path.join(root,ref)),`Missing evidence ${p.id}: ${ref}`);
  if(p.status==='in_progress')assert(p.devNote && p.evidence?.length>0,`Missing in-progress evidence ${p.id}`);
- if(p.status==='shipped')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing shipped evidence ${p.id}`);
+ if(p.status==='released')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing released evidence ${p.id}`);
 }
 const visited=new Set(),active=new Set();
 const byId=new Map(phases.map(x=>[x.id,x]));

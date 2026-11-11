@@ -47,6 +47,6 @@ notes cite. A later phase adds the decisions it relies on.
 
 The Go core, the delegation of container semantics to the Dev Container CLI,
 and the package boundaries were accepted as part of the v1 specification
-([chapter 7](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md))
+([chapter 7](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md))
 rather than as separate `DEC-*` records. The dev notes cite no decision
 record for them.

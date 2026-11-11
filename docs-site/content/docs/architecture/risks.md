@@ -7,7 +7,7 @@ weight: 50
 # Risks and technical debt
 
 This page lists where the code differs from the
-[chapter 7](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/07-architecture.md)
+[chapter 7](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md)
 architecture and which risks remain open at V1-05. Remove an entry when a
 phase closes it.
 

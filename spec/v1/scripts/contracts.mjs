@@ -31,7 +31,7 @@ const specs={
  migrate_apply:{fields:{planId:id,expectedInputDigest:digest},required:['planId','expectedInputDigest']},
  migrate_rollback:{fields:{planId:id,expectedInputDigest:digest},required:['planId','expectedInputDigest']}
 };
-const schema=(name,title,body)=>({$schema:'https://json-schema.org/draft/2020-12/schema',$id:`https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/${name}.schema.json`,title,...body});
+const schema=(name,title,body)=>({$schema:'https://json-schema.org/draft/2020-12/schema',$id:`https://github.com/projectious-work/aibox/blob/main/spec/v1/${name}.schema.json`,title,...body});
 const request=schema('operation-request','Closed per-operation aibox requests',{
  oneOf:Object.entries(specs).map(([operation,{fields,required}])=>({
   ...object({...base,operation:{const:operation},...fields},[...Object.keys(base),...required]),

@@ -25,6 +25,6 @@ and risks.
 As each implementation phase is completed, publish its reviewed user and
 maintainer documentation here. Planned material remains separate from
 instructions for released software. The phase graph is in the [canonical v1
-roadmap](https://github.com/projectious-work/aibox/blob/v1.x-dev/spec/v1/roadmap.yaml).
+roadmap](https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.yaml).
 
 For the current released aibox product, see the [v0.x documentation](https://projectious-work.github.io/aibox/).
