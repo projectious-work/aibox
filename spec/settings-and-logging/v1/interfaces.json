@@ -1,0 +1,819 @@
+{
+  "catalogVersion": "settings-and-logging/v1",
+  "commands": {
+    "inScope": [
+      "inspect",
+      "mcp serve",
+      "version",
+      "help"
+    ],
+    "mcpTools": [
+      "inspect_workspace"
+    ]
+  },
+  "settings": {
+    "layers": [
+      "built_in",
+      "system",
+      "user",
+      "project",
+      "env_file",
+      "environment",
+      "invocation"
+    ],
+    "layerNote": "Lowest to highest precedence. A key's 'layers' lists the layers that may set it; built_in is implied. An env name is listed for every key so that an attempt from a layer the key does not allow is not_authorized, not an unknown name.",
+    "keys": [
+      {
+        "key": "output.format",
+        "type": "enum",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment",
+          "invocation"
+        ],
+        "env": "AIBOX_OUTPUT__FORMAT",
+        "flag": "--format",
+        "default": {
+          "cli": "human",
+          "mcp": "json"
+        },
+        "values": [
+          "human",
+          "json",
+          "yaml"
+        ]
+      },
+      {
+        "key": "output.color",
+        "type": "enum",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment",
+          "invocation"
+        ],
+        "env": "AIBOX_OUTPUT__COLOR",
+        "flag": "--color",
+        "default": {
+          "cli": "auto",
+          "mcp": "auto"
+        },
+        "values": [
+          "auto",
+          "always",
+          "never"
+        ]
+      },
+      {
+        "key": "logging.level",
+        "type": "enum",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment",
+          "invocation"
+        ],
+        "env": "AIBOX_LOGGING__LEVEL",
+        "flag": "--log-level",
+        "default": {
+          "cli": "info",
+          "mcp": "info"
+        },
+        "values": [
+          "trace",
+          "debug",
+          "info",
+          "warn",
+          "error",
+          "off"
+        ]
+      },
+      {
+        "key": "logging.format",
+        "type": "enum",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment",
+          "invocation"
+        ],
+        "env": "AIBOX_LOGGING__FORMAT",
+        "flag": "--log-format",
+        "default": {
+          "cli": "plain",
+          "mcp": "jsonl"
+        },
+        "values": [
+          "plain",
+          "jsonl"
+        ]
+      },
+      {
+        "key": "logging.file",
+        "type": "path",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "invocation"
+        ],
+        "env": "AIBOX_LOGGING__FILE",
+        "flag": "--log-file",
+        "default": {
+          "cli": null,
+          "mcp": null
+        }
+      },
+      {
+        "key": "logging.required",
+        "type": "boolean",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user"
+        ],
+        "env": "AIBOX_LOGGING__REQUIRED",
+        "flag": null,
+        "default": {
+          "cli": false,
+          "mcp": false
+        }
+      },
+      {
+        "key": "logging.rotationMiB",
+        "type": "integer",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user"
+        ],
+        "env": "AIBOX_LOGGING__ROTATION_MIB",
+        "flag": null,
+        "default": {
+          "cli": 10,
+          "mcp": 10
+        },
+        "minimum": 1,
+        "maximum": 1024
+      },
+      {
+        "key": "logging.retentionFiles",
+        "type": "integer",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user"
+        ],
+        "env": "AIBOX_LOGGING__RETENTION_FILES",
+        "flag": null,
+        "default": {
+          "cli": 7,
+          "mcp": 7
+        },
+        "minimum": 1,
+        "maximum": 100
+      },
+      {
+        "key": "logging.retentionDays",
+        "type": "integer",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user"
+        ],
+        "env": "AIBOX_LOGGING__RETENTION_DAYS",
+        "flag": null,
+        "default": {
+          "cli": 7,
+          "mcp": 7
+        },
+        "minimum": 1,
+        "maximum": 365
+      },
+      {
+        "key": "execution.timeoutSeconds",
+        "type": "integer",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment",
+          "invocation"
+        ],
+        "env": "AIBOX_EXECUTION__TIMEOUT_SECONDS",
+        "flag": "--timeout",
+        "default": {
+          "cli": null,
+          "mcp": null
+        },
+        "minimum": 1,
+        "maximum": 86400,
+        "unsetMeans": "execution.classDefaults for the operation; the view reports that number with layer built_in"
+      },
+      {
+        "key": "execution.lockWaitSeconds",
+        "type": "integer",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment"
+        ],
+        "env": "AIBOX_EXECUTION__LOCK_WAIT_SECONDS",
+        "flag": null,
+        "default": {
+          "cli": 30,
+          "mcp": 30
+        },
+        "minimum": 0,
+        "maximum": 600
+      },
+      {
+        "key": "diagnostics.offline",
+        "type": "boolean",
+        "domain": "process",
+        "layers": [
+          "system",
+          "user",
+          "env_file",
+          "environment"
+        ],
+        "env": "AIBOX_DIAGNOSTICS__OFFLINE",
+        "flag": null,
+        "default": {
+          "cli": true,
+          "mcp": true
+        }
+      },
+      {
+        "key": "workspace.theme",
+        "type": "enum",
+        "domain": "workspace",
+        "layers": [
+          "system",
+          "user",
+          "project",
+          "env_file",
+          "environment"
+        ],
+        "env": "AIBOX_WORKSPACE__THEME",
+        "flag": null,
+        "default": {
+          "cli": null,
+          "mcp": null
+        },
+        "values": [
+          "andromeeda",
+          "aurora-x",
+          "ayu",
+          "borland",
+          "catppuccin",
+          "dracula",
+          "everforest",
+          "github",
+          "gruvbox",
+          "houston",
+          "kanagawa",
+          "laserwave",
+          "material",
+          "min",
+          "monokai",
+          "mono",
+          "moonlight",
+          "night-owl",
+          "nord",
+          "norton",
+          "one-dark",
+          "plastic",
+          "poimandres",
+          "phosphor",
+          "projectious",
+          "contrast",
+          "contrast-mono",
+          "red",
+          "rose-pine",
+          "slack",
+          "snazzy",
+          "solarized",
+          "synthwave84",
+          "tokyo-night",
+          "vesper",
+          "vitesse",
+          "vs-code"
+        ]
+      },
+      {
+        "key": "workspace.mode",
+        "type": "enum",
+        "domain": "workspace",
+        "layers": [
+          "system",
+          "user",
+          "project",
+          "env_file",
+          "environment"
+        ],
+        "env": "AIBOX_WORKSPACE__MODE",
+        "flag": null,
+        "default": {
+          "cli": null,
+          "mcp": null
+        },
+        "values": [
+          "dark",
+          "light",
+          "auto"
+        ]
+      },
+      {
+        "key": "workspace.layout",
+        "type": "enum",
+        "domain": "workspace",
+        "layers": [
+          "system",
+          "user",
+          "project",
+          "env_file",
+          "environment"
+        ],
+        "env": "AIBOX_WORKSPACE__LAYOUT",
+        "flag": null,
+        "default": {
+          "cli": null,
+          "mcp": null
+        },
+        "values": [
+          "ai",
+          "dev",
+          "focus",
+          "cowork"
+        ]
+      }
+    ],
+    "nullDefault": "A default of null means the key is unset; the view reports value null with layer built_in, except where unsetMeans says otherwise.",
+    "files": {
+      "system": {
+        "linux": "/etc/aibox/settings.json",
+        "darwin": "/Library/Application Support/aibox/settings.json"
+      },
+      "user": {
+        "linux": "${XDG_CONFIG_HOME:-$HOME/.config}/aibox/settings.json",
+        "darwin": "${XDG_CONFIG_HOME:-$HOME/.config}/aibox/settings.json"
+      },
+      "project": "<project>/.devcontainer/devcontainer.json (JSON with comments), object customizations.aibox.workspace, members theme, mode, layout",
+      "schema": "schemas/process-settings.schema.json",
+      "pathAnchor": "A relative logging.file in a settings file is anchored to logging.fileSink.stateDirectory."
+    },
+    "selectors": [
+      {
+        "name": "--settings-file",
+        "argument": "PATH",
+        "repeatable": false,
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ],
+        "anchor": "working directory at process start",
+        "effect": "replaces the default user settings file"
+      },
+      {
+        "name": "--env-file",
+        "argument": "PATH",
+        "repeatable": true,
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ],
+        "anchor": "working directory at process start",
+        "effect": "loads an environment file; left to right"
+      },
+      {
+        "name": "AIBOX_ENV_FILE",
+        "kind": "environment",
+        "effect": "names one environment file, absolute path, used only when no --env-file is given"
+      },
+      {
+        "name": "--project",
+        "argument": "PATH",
+        "repeatable": false,
+        "commands": [
+          "inspect"
+        ],
+        "anchor": "working directory at process start",
+        "default": "."
+      }
+    ],
+    "envFile": {
+      "grammar": [
+        "UTF-8 text; lines end with LF or CRLF",
+        "a line that is empty or consists only of spaces and tabs is ignored",
+        "a line whose first character is # is a comment",
+        "every other line is KEY=VALUE, split at the first =",
+        "KEY must match ^AIBOX_[A-Z0-9_]+$ with no surrounding spaces",
+        "VALUE is every byte after the first = up to the line ending; quotes, spaces and # are literal",
+        "no export prefix, no interpolation, no line continuation, no multi-line value"
+      ],
+      "permissions": "mode must have no group or other bits (mode & 0o077 == 0)"
+    },
+    "conversion": {
+      "boolean": "exactly true or false",
+      "integer": "base 10, optional leading minus, no sign plus, no spaces, within the key's range",
+      "enum": "case-sensitive member of values",
+      "path": "non-empty string",
+      "empty": "an empty value is invalid_value for every key of this version"
+    },
+    "rejectionReasons": [
+      "malformed",
+      "unreadable",
+      "missing_selected_file",
+      "not_regular_file",
+      "insecure_permissions",
+      "duplicate_key",
+      "unknown_key",
+      "unsupported_version",
+      "null_value",
+      "invalid_value",
+      "unauthorized_source",
+      "unknown_environment_name",
+      "relative_env_file",
+      "path_escape"
+    ],
+    "schemaDefects": {
+      "unknown member": "unknown_key",
+      "schemaVersion missing or not \"1\"": "unsupported_version",
+      "wrong type, enum or range": "invalid_value",
+      "not a JSON object or not JSON": "malformed"
+    },
+    "registeredEnvironment": "fixtures/registered-environment.json"
+  },
+  "cli": {
+    "flags": [
+      {
+        "flag": "--format",
+        "key": "output.format",
+        "commands": [
+          "inspect"
+        ]
+      },
+      {
+        "flag": "--color",
+        "key": "output.color",
+        "commands": [
+          "inspect"
+        ]
+      },
+      {
+        "flag": "--log-level",
+        "key": "logging.level",
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ]
+      },
+      {
+        "flag": "--log-format",
+        "key": "logging.format",
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ]
+      },
+      {
+        "flag": "--log-file",
+        "key": "logging.file",
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ]
+      },
+      {
+        "flag": "--timeout",
+        "key": "execution.timeoutSeconds",
+        "commands": [
+          "inspect"
+        ]
+      },
+      {
+        "flag": "--effective-config",
+        "key": null,
+        "commands": [
+          "inspect"
+        ],
+        "note": "boolean operation input; MCP field effectiveConfig"
+      },
+      {
+        "flag": "--context",
+        "key": null,
+        "commands": [
+          "inspect",
+          "mcp serve"
+        ],
+        "note": "unchanged from the operation core; only local"
+      }
+    ],
+    "syntax": "--name value and --name=value are both accepted; a flag given twice is invalid_input unless repeatable"
+  },
+  "mcp": {
+    "tool": "inspect_workspace",
+    "addedInput": {
+      "effectiveConfig": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "unchangedInput": [
+      "requestId",
+      "projectRoot"
+    ],
+    "additionalProperties": false
+  },
+  "effectiveConfig": {
+    "entry": {
+      "required": [
+        "key",
+        "value",
+        "redacted",
+        "layer",
+        "source",
+        "domain",
+        "invocationOnly"
+      ],
+      "optional": [
+        "overridden"
+      ]
+    },
+    "overriddenItem": {
+      "required": [
+        "layer",
+        "source",
+        "value",
+        "redacted"
+      ]
+    },
+    "source": {
+      "built_in": "built-in",
+      "system": "path of the system settings file",
+      "user": "path of the user settings file",
+      "project": "path of the devcontainer.json",
+      "env_file": "path of the environment file",
+      "environment": "the environment variable name",
+      "invocation": "the flag name for the CLI; request.<field> for MCP"
+    },
+    "settingsSources": {
+      "order": [
+        "system",
+        "user",
+        "project",
+        "env_file (one element per file, in load order)"
+      ],
+      "item": {
+        "required": [
+          "layer",
+          "path",
+          "state"
+        ],
+        "state": [
+          "loaded",
+          "absent"
+        ]
+      }
+    },
+    "resultSchemaDelta": "operation-result inspect_workspace data gains optional settingsSources (array, max 64) and configuration[].overridden (array, max 8). Both are additive."
+  },
+  "output": {
+    "formats": [
+      "human",
+      "json",
+      "yaml"
+    ],
+    "colorRule": "ANSI colour is written only when output.format is human, NO_COLOR is unset or empty, and either output.color is always, or output.color is auto and stdout is a terminal.",
+    "bootstrapDiagnostic": "^aibox: (invalid_input|not_authorized): [a-z_]+: .+$",
+    "bootstrapDiagnosticNote": "Second field is a rejection reason."
+  },
+  "errors": [
+    {
+      "code": "invalid_input",
+      "category": "invalid_input",
+      "exit": 2,
+      "retryable": false,
+      "nextAction": "edit_configuration"
+    },
+    {
+      "code": "not_authorized",
+      "category": "denied",
+      "exit": 3,
+      "retryable": false,
+      "nextAction": "edit_configuration"
+    },
+    {
+      "code": "operation_timeout",
+      "category": "timeout",
+      "exit": 124,
+      "retryable": true,
+      "nextAction": "retry_read"
+    },
+    {
+      "code": "operation_record_unavailable",
+      "category": "internal",
+      "exit": 5,
+      "retryable": false,
+      "nextAction": "manual_recovery"
+    }
+  ],
+  "warnings": [
+    "log_sink_degraded"
+  ],
+  "logging": {
+    "severities": [
+      "trace",
+      "debug",
+      "info",
+      "warn",
+      "error"
+    ],
+    "plainLine": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z (TRACE|DEBUG|INFO|WARN|ERROR) [a-z][a-z0-9_.]*( .*)?$",
+    "schema": "schemas/log-event.schema.json",
+    "components": [
+      "cli",
+      "mcp",
+      "settings",
+      "logging",
+      "usecase"
+    ],
+    "events": [
+      {
+        "event": "process.started",
+        "severity": "info",
+        "component": "mcp",
+        "emittedBy": [
+          "mcp serve"
+        ],
+        "correlation": "process"
+      },
+      {
+        "event": "settings.resolved",
+        "severity": "debug",
+        "component": "settings",
+        "emittedBy": [
+          "inspect",
+          "mcp serve"
+        ],
+        "fields": [
+          "layers"
+        ]
+      },
+      {
+        "event": "settings.rejected",
+        "severity": "error",
+        "component": "settings",
+        "emittedBy": [
+          "inspect",
+          "mcp serve"
+        ],
+        "fields": [
+          "key",
+          "layer",
+          "source",
+          "reason"
+        ],
+        "when": "a setting is rejected"
+      },
+      {
+        "event": "operation.started",
+        "severity": "info",
+        "component": "usecase",
+        "emittedBy": [
+          "inspect",
+          "inspect_workspace"
+        ]
+      },
+      {
+        "event": "operation.validated",
+        "severity": "debug",
+        "component": "usecase",
+        "emittedBy": [
+          "inspect",
+          "inspect_workspace"
+        ],
+        "when": "the input was accepted"
+      },
+      {
+        "event": "operation.finished",
+        "severity": "info",
+        "component": "usecase",
+        "emittedBy": [
+          "inspect",
+          "inspect_workspace"
+        ],
+        "sets": [
+          "outcome",
+          "errorCategory on failure"
+        ]
+      },
+      {
+        "event": "logging.sink_degraded",
+        "severity": "warn",
+        "component": "logging",
+        "fields": [
+          "sink",
+          "reason"
+        ],
+        "when": "a sink write or open fails"
+      },
+      {
+        "event": "logging.dropped",
+        "severity": "warn",
+        "component": "logging",
+        "fields": [
+          "count"
+        ],
+        "when": "events were dropped"
+      },
+      {
+        "event": "logging.flushed",
+        "severity": "debug",
+        "component": "logging",
+        "fields": [
+          "complete"
+        ],
+        "when": "shutdown flush ended"
+      },
+      {
+        "event": "process.finished",
+        "severity": "info",
+        "component": "mcp",
+        "emittedBy": [
+          "mcp serve"
+        ],
+        "correlation": "process"
+      }
+    ],
+    "eventOrder": "For inspect: settings.resolved, operation.started, operation.validated, operation.finished. operation is inspect_workspace on the three operation events. initiator is cli or mcp; executor is aibox.",
+    "reserved": "Event names for authorization, dependency invocation, progress, partial effect, cancel and cleanup are defined by the features that add such operations.",
+    "queue": {
+      "capacity": 1024,
+      "flushSeconds": 2
+    },
+    "fileSink": {
+      "stateDirectory": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/logs",
+      "permittedRoot": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/logs",
+      "operationRecordDirectory": "${XDG_STATE_HOME:-$HOME/.local/state}/aibox/operations",
+      "directoryMode": "0700",
+      "fileMode": "0600",
+      "format": "jsonl",
+      "rotation": "Under an exclusive lock on <file>.lock: delete <file>.<retentionFiles-1> if present, rename <file>.<n> to <file>.<n+1> from the highest n down, rename <file> to <file>.1, create a new <file>. At most retentionFiles files exist including the active one. A rotated file whose modification time is older than retentionDays days is deleted.",
+      "maxLineBytes": 65536,
+      "longLine": "fields are dropped from the event until it fits and fields.truncated is set to true"
+    }
+  },
+  "redaction": {
+    "replacement": "[redacted]",
+    "knownSecrets": "the value of every process environment variable whose name matches secretNamePattern and whose value is at least 8 bytes long",
+    "secretNamePattern": "(?i)(token|secret|password|passwd|credential|api_?key|private_?key)",
+    "secretShapes": [
+      "gh[pousr]_[A-Za-z0-9]{36,}",
+      "github_pat_[A-Za-z0-9_]{22,}",
+      "sk-[A-Za-z0-9_-]{20,}",
+      "AKIA[0-9A-Z]{16}",
+      "-----BEGIN [A-Z ]*PRIVATE KEY-----",
+      "(?i)bearer [A-Za-z0-9._~+/-]{16,}=*"
+    ],
+    "homePrefix": "a path that starts with the running user's home directory is written with that prefix replaced by ~",
+    "scope": [
+      "every log event field and message",
+      "effective-configuration values and sources",
+      "bootstrap diagnostics"
+    ]
+  },
+  "execution": {
+    "classDefaults": {
+      "read": 30,
+      "mutating": 3600
+    },
+    "operationClass": {
+      "inspect_workspace": "read"
+    }
+  },
+  "targets": {
+    "supported": [
+      "linux/amd64",
+      "linux/arm64"
+    ],
+    "specifiedNotQualified": [
+      "darwin/arm64",
+      "darwin/amd64"
+    ],
+    "note": "macOS path selection is unit-tested; host qualification is roadmap phase V1-22."
+  }
+}
