@@ -1,6 +1,0 @@
-spec:
-  interfaces:
-    - Entity
-  validation_mode: tolerant
-  generation:
-{% include "fragments/generation.yaml.j2" %}

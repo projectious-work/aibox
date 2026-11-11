@@ -1,119 +1,5 @@
 # AGENTS.md
 
-<!-- pk-managed:pk-compliance-contract-v2 BEGIN -->
-<!-- pk-compliance-contract v2 BEGIN -->
-<!-- pk-compliance v2 -->
-
-## processkit Compliance Contract
-
-<!-- BEGIN HOOK -->
-
-### processkit per-turn checklist
-
-- On session start, call `acknowledge_contract(version="v2")` once
-  before any write-side processkit tool call.
-- Before any sub-agent / `Task` dispatch or write-side MCP call
-  (`create_*`, `transition_*`, `link_*`, `record_*`, `open_*`),
-  call `route_task(task_description)` and use its recommendations.
-- On any domain-relevant request, consult `skill-finder` (or call
-  `find_skill(task_description)`) before acting.
-- Do not hand-edit files under `context/` — use MCP tools.
-- Do not browse `context/` with `ls` or `grep` — use `index-management`.
-- Do not edit `context/templates/` (read-only upstream mirror).
-- Full positive actions and prohibitions: see
-  `context/skills/processkit/skill-gate/assets/compliance-contract.md`.
-
-<!-- END HOOK -->
-
-## On session start
-
-- Call `acknowledge_contract(version="v2")` once before any write-side
-  processkit tool call. This unblocks the skill-gate for the session.
-- Treat each new domain-relevant request as a routing checkpoint (see
-  *Tool routing*).
-
-## Sub-agent dispatch
-
-- Call `route_task(task_description)` before any sub-agent / `Task` /
-  `Agent` dispatch; read `recommended_team_member_slug` and
-  `recommended_model_class` from the response.
-- Pass the recommended TeamMember slug as the sub-agent's identity where
-  the harness supports it, and pick the cheapest model in the recommended
-  class (Haiku < Sonnet < Opus).
-- Bare-model sub-agent dispatch without a prior `route_task` call is a
-  compliance miss.
-
-## Tool routing
-
-- Consult `skill-finder` (or call `find_skill(task_description)`) before
-  acting whenever there is even a 1% chance a processkit skill applies.
-- Call `route_task(task_description)` before any `create_*`,
-  `transition_*`, `link_*`, `record_*`, or `open_*` tool call.
-- Read entities through `index-management` (`query_entities`,
-  `get_entity`, `search_entities`) when looking up entity content.
-
-## Entity writes
-
-- Write entities through MCP tools so schema validation, state-machine
-  enforcement, and event-log auto-entry all run.
-- Create the WorkItem, DecisionRecord, Note, or Artifact in the same
-  turn you decide on it — deferred entity creation is lost.
-- Log an event after any state change that an MCP write did not already
-  produce automatically.
-
-## Decisions
-
-- Call `record_decision` in the same turn a cross-cutting recommendation
-  is accepted.
-- When the last five user messages contain explicit decision language
-  (approved / decided / ship it / let's go / ok / yes / confirmed),
-  either call `record_decision` in the same turn or call
-  `skip_decision_record(reason=...)` to acknowledge the skip.
-
-## Prohibitions
-
-- Do not hand-edit files under `context/` to create or mutate entities
-  (use MCP tools).
-- Do not browse `context/` with `ls`, `grep`, or raw filesystem walks
-  (use `index-management`).
-- Do not edit any file under `context/templates/` (read-only upstream
-  mirror used as a diff baseline).
-- Do not hand-edit the generated harness MCP config — edit the
-  per-skill `mcp-config.json` and let the installer re-merge.
-
-## Preferred MCP entry points by task type
-
-| Task type | Preferred MCP entry point |
-|-----------|--------------------------|
-| Read a single entity by ID | `get_entity(id=...)` or kind-specific `get_workitem` / `get_decision` / `get_team_member` |
-| Read an entity by filesystem path | `get_entity_by_path(path=...)` |
-| List entities across kinds | `list_entities(kind?, state?, limit?)` |
-| Search entities by text | `search_entities(text)` or `hybrid_search_entities(text)` |
-| Create / mutate an entity | `create_*` / `transition_*` / `record_*` / `open_*` tools (always route_task first) |
-| Run the aggregator health check | `run_pk_doctor(check?, fix?)` |
-| Run the pre-release validation sweep | `run_pk_release_audit(tree?)` |
-| Dispatch a sub-agent | `route_task(task_description=...)` first → then `Agent` or `Task` with recommended model |
-
-## Read is OK for non-entity files
-
-The Read tool is **blocked** on canonical entity files (paths matching
-`context/{workitems,decisions,artifacts,team-members,scopes,gates,actors,
-roles,bindings}/*.md`). A PreToolUse hook enforces this at runtime.
-
-Read is **allowed** (no hook block) for:
-- Skill source code under `context/skills/<skill>/` — scripts, SKILL.md,
-  configs, assets are all readable directly.
-- Schema definitions under `context/schemas/` (reading is fine; writes
-  require a Migration + DEC).
-- Log entries under `context/logs/` (append-only, safe to scan).
-- Applied migrations under `context/migrations/applied/`.
-- TeamMember sub-files: `persona.md`, `card.json`, and everything under
-  `knowledge/`, `journal/`, `skills/`, `relations/`, `lessons/`,
-  `private/`, `working/`.
-- Any file outside `context/` entirely (docs/, src/, README.md, etc.).
-<!-- pk-compliance-contract v2 END -->
-<!-- pk-managed:pk-compliance-contract-v2 END -->
-
 ## About & session start
 
 **aibox** is a Rust CLI that manages reproducible, AI-ready dev containers.
@@ -138,12 +24,28 @@ reproducible AI-ready dev environments without manual Docker/devcontainer setup.
 Success looks like: `aibox init` → working themed tmux session with processkit
 content in place in under 5 minutes.
 
-Run `pk-resume` before acting. Provider-specific files (`CLAUDE.md`,
-`CODEX.md`, `.cursor/rules`, …) are thin pointers — edit **this** file.
+Provider-specific files (`CLAUDE.md`, `CODEX.md`, `.cursor/rules`, …) are thin
+pointers — edit **this** file.
 
-**For structured workflows** (releases, migrations, design reviews, decision records):
-Always check `context/notes/` and `context/work-instructions/` for canonical documented
-procedures before acting. These take precedence over general knowledge or tool defaults.
+**For structured workflows** (releases, migrations, design reviews): check
+`CONTRIBUTING.md`, `dev-notes/` and the specification under `spec/` for the
+documented procedure before acting. These take precedence over general
+knowledge or tool defaults. Architecture decisions are recorded as ADRs under
+[`docs/adr/`](docs/adr/).
+
+## History: processkit archive
+
+processkit was removed from this repository's own development setup on
+2026-11-11 ([ADR 0001](docs/adr/0001-remove-processkit-from-the-development-setup.md)).
+Former decisions, work items, artifacts, discussions, notes and logs are plain
+files under `archive/processkit/`. Search them with ordinary tools (`grep`,
+`rg`); they are read-only history and must not be edited or extended. Paths
+inside the archived records still say `context/…`; read them as
+`archive/processkit/…`. The full former installation is preserved at the Git
+tag `processkit-final`.
+
+This concerns the development setup only. aibox's product support for
+`mode = "processkit"` is product code and is unchanged.
 
 ## Setup
 
@@ -182,10 +84,8 @@ companion itself owns the container runtime used by Tier 2 tests.
 
 ### aibox CLI commands inside this devcontainer
 
-Normal dogfood/self-management inside the workspace container uses processkit
-tools: run `pk-doctor` for processkit/runtime diagnostics. Do not run
-`aibox doctor` from inside the container to judge this live project; it checks
-aibox-managed host/project posture, not processkit runtime health.
+Do not run `aibox doctor` from inside the container to judge this live
+project; it checks aibox-managed host/project posture and belongs on the host.
 
 There are narrow exceptions when developing or releasing the aibox CLI itself.
 These are host-context simulations, not dogfood operations:
@@ -202,23 +102,11 @@ These are host-context simulations, not dogfood operations:
 - Local test-installs may run the freshly built `aibox` binary against a scratch
   project to simulate what a host user would do.
 
-Outside those explicit test/release contexts, prefer `pk-doctor` inside the
-container and reserve `aibox doctor` for the host.
+Outside those explicit test/release contexts, reserve `aibox doctor` for the
+host.
 
-See `context/work-instructions/DEVELOPMENT.md` (or `CONTRIBUTING.md`) for
-the full development workflow, E2E test architecture, and cross-compile steps.
-
-<!-- pk-managed:pk-commands BEGIN -->
-<!-- pk-commands BEGIN -->
-<!--
-build: "cd cli && cargo build"
-test: "cd cli && cargo test"
-lint: "cd cli && cargo clippy --all-targets -- -D warnings"
-fmt: "cd cli && cargo fmt"
-typecheck: ""
--->
-<!-- pk-commands END -->
-<!-- pk-managed:pk-commands END -->
+See `CONTRIBUTING.md` for the full development workflow, E2E test
+architecture, and cross-compile steps.
 
 ## Code style & PRs
 
@@ -272,93 +160,24 @@ rules (not part of the product specification):
   push, GitHub release, deploy docs. Do not ask permission at each step.
 - **Phase 0 runs three steps before any version bump:** (1) `./scripts/maintain.sh release-check-state`
   → `dist/RELEASE-STATE.md`; (2) `./scripts/maintain.sh release-doctors` → `dist/RELEASE-DOCTORS.md`
-  (runs pk-doctor + aibox doctor; ERRORs from either block the release, WARNs surface in the report
+  (v0 line: runs pk-doctor + aibox doctor; ERRORs from either block the release, WARNs surface in the report
   but don't block); (3) review both reports. `./scripts/maintain.sh release <version>` calls all
   three automatically.
 - **Phase 2 is always the user's job** — macOS host builds and GHCR image pushes
   run via `./scripts/maintain.sh release-host X.Y.Z` on the host, never from the container.
   Before Phase 2, sync the host checkout to the just-pushed container-side release
   commits with `git fetch origin main && git reset --keep origin/main`.
-- **Detailed release procedures:** See [`context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
+- **Detailed release procedures:** See [`archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) (v0 line, archived) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
 - **One big change preferred over many small PRs** for breaking releases. The user
   explicitly said: "make one big change, I'll handle derived project dependencies."
 - **Hold uncommitted changes when the user says "hold"** — leave in working tree,
   do not commit, do not bump version until the user says "ship".
 
-## processkit preferences
-
-Runtime configuration lives in per-skill config files under
-`context/skills/<name>/config/settings.toml`. The agent edits these
-directly; MCP servers read them on every call — no restart needed.
-
-Schema and storage policy is strict. When processkit changes entity
-vocabularies, filenames, IDs, or directory layouts, migrate existing entities
-forward and update references. Do not keep local grandfathering lists, mixed
-filename policies, or pk-doctor suppressions as the final state.
-
-Config overrides in `context/skills/id-management/config/settings.toml`:
-
-- **ID format:** `word` + `camel` + datetime prefix + slug — e.g. `BACK-20260411_0109-CalmFox-adapt-aibox-self-hosted`.
-- **Directory names:** all processkit defaults (`workitems/`, `decisions/`, etc.).
-- **Log sharding:** processkit default (no date-based subdirectories).
-
 ## AI agents on this project
 
-Configured providers: **claude**, **openai**. Other agents may be working
-on this project — coordinate through the entity layer
-(`workitem-management`, `event-log`, `discussion-management`) rather than
+Configured providers: **claude**, **openai**. Other agents may be working on
+this project; coordinate through GitHub issues and pull requests rather than
 assuming you are alone.
-
-### Team
-
-This project operates with a permanent multi-role AI-agent team backed
-by processkit primitives. The owner is the sole human approver; the
-TeamMember whose role is marked `primary_contact: true` is the single
-agent that speaks to the owner and routes work to the rest of the team.
-
-Roles, seniorities, and TeamMember identities are provider-neutral:
-
-- `context/roles/` — Role responsibilities (`junior → specialist → expert
-  → senior → principal` seniority ladder).
-- `context/team-members/<slug>/` — Persistent TeamMember identities
-  (persona + A2A card + tiered memory). These bind to
-  `Artifact(kind=model-profile)` capability profiles, not to provider
-  names or model IDs.
-- `context/bindings/` — Role and TeamMember model-assignment bindings.
-  Resolution: `model-recommender.resolve_model` selects a concrete
-  `Artifact(kind=model-spec)` candidate (which may encode a provider
-  name) at dispatch time, gated by runtime access.
-- `context/decisions/DEC-20260422_0234-BraveFalcon` — role catalog +
-  seniority charter.
-- `context/decisions/DEC-20260422_0234-LoyalComet` and
-  `DEC-20260503_1829-LoyalComet` — model artifacts + binding routing.
-- Active interlocutor: `team-manager.get_active_interlocutor`. If
-  configured, show the TeamMember identity at session start; otherwise
-  state that the current speaker is an ephemeral harness agent.
-- TeamMembers are cloneable on demand (default cap 5; owner approves
-  beyond). Clones get fresh IDs; processkit reserves the original
-  TeamMember slug. Do not reuse retired TeamMember IDs.
-
-Model-spec filenames may encode provider/model names; model profiles,
-roles, and TeamMember identities must not. Never hardcode a model tier
-or provider directly in a role definition — always go through the
-binding layer.
-
-**Commit to actions immediately.** If you decide to create an entity
-(WorkItem, DecisionRecord, etc.), call the tool in the same turn. Do
-not say "I'll track that" and move on — deferred commitments are
-routinely dropped and leave the entity layer out of sync with what was
-discussed.
-
-**Check the skill catalog before acting on domain tasks.** When a
-domain-specific task arrives — writing a PRD, creating a release,
-reviewing a skill, designing a schema — search the processkit skill
-catalog first. Use `search_entities` via index-management or check
-`skill-finder` before falling back to general knowledge. A matching
-skill may exist with processkit-specific conventions (entity storage
-paths, workitem linking, output formats) that general knowledge does
-not know. Missing a skill wastes work and produces non-standard
-output.
 
 ## Project-specific notes
 
@@ -379,7 +198,8 @@ Changes to `.devcontainer/` affect our development. Changes to `images/` affect 
 | `addons/` | YAML addon definitions (python, rust, node, latex, …) |
 | `images/` | Container image build recipes published to GHCR |
 | `docs-site/` | Hugo/Docsy documentation site |
-| `context/` | This project's context (backlog, decisions, research, …) |
+| `archive/processkit/` | Read-only records of the former processkit setup (decisions, work items, notes, logs) |
+| `docs/adr/` | Architecture decision records |
 | `scripts/` | Release and maintenance tooling (`maintain.sh`, `record-asciinema.sh`, …) |
 
 **Key Rust module:** `cli/src/processkit_vocab.rs` — central constants module.
@@ -521,19 +341,6 @@ When an AI agent is working inside a project that uses aibox:
 | `context/migrations/pending/` | Pending Migration entities awaiting review; resolve through `migration-management` MCP (`apply_migration` / `reject_migration`). Never hand-move migration files. |
 | `context/migrations/applied/` | Applied or rejected Migration entities (state-bucketed by processkit convention). |
 
-### MCP config topology
-
-Each MCP server ships a `mcp-config.json` next to its `server.py` under
-`context/skills/<category>/<skill>/mcp/`. `aibox sync` merges these
-into the harness-specific roots (`.mcp.json`, `.codex/config.toml`,
-`.opencode/config.toml`, …) and records a SHA256 aggregate in
-`context/.processkit-mcp-manifest.json`. Downstream installers compare
-the aggregate hash against their last-merged state and re-merge when
-they differ — independent of whether the processkit version changed.
-Never hand-edit the generated harness MCP config; edit the per-skill
-`mcp-config.json` and let the installer re-merge. The
-`mcp_config_drift` pk-doctor check validates the manifest locally.
-
 ### GitHub organization
 
 - **Repo:** `projectious-work/aibox`
@@ -541,7 +348,3 @@ Never hand-edit the generated harness MCP config; edit the per-skill
 - **Docs:** `https://projectious-work.github.io/aibox/`
 - **processkit upstream:** `https://github.com/projectious-work/processkit`
 - **processkit releases:** `https://github.com/projectious-work/processkit/releases`
-
----
-
-<sub>Scaffolded by processkit `v0.25.1` on `2026-05-03`. Re-rendered on each installer sync.</sub>

@@ -123,7 +123,7 @@ Include `Cargo.lock` in version bump commits.
 
 ## Release
 
-See `context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md` for the full release process.
+See `archive/processkit/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md` for the full v0 release process (archived record).
 Run a release only from its designated protected integration branch: stable
 v0 releases from `v0.x-release`, v1 prereleases from `v1.x-pre-release`, and
 v1 GA releases from `v1.x-release` once created. Quick summary:
@@ -150,7 +150,8 @@ and produced artifact checksums still match.
 | `images/` | Container image build recipes published to GHCR |
 | `docs-site/` | Hugo/Docsy documentation site |
 | `scripts/` | Release and maintenance tooling |
-| `context/` | This project's context (workitems, decisions, notes, …) |
+| `archive/processkit/` | Read-only records of the former processkit setup (work items, decisions, notes, …) |
+| `docs/adr/` | Architecture decision records |
 
 **Key Rust modules:**
 

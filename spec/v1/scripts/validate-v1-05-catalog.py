@@ -30,7 +30,7 @@ def require(condition, message):
 
 
 def decision_exists(decision_id):
-    return any((repo / "context/decisions").glob(f"{decision_id.split('-', 3)[0]}-{decision_id.split('-', 3)[1]}-{decision_id.split('-', 3)[2]}*.md"))
+    return any((repo / "archive/processkit/decisions").glob(f"{decision_id.split('-', 3)[0]}-{decision_id.split('-', 3)[1]}-{decision_id.split('-', 3)[2]}*.md"))
 
 
 # Census: the 98 frozen rows stay individually traceable.
