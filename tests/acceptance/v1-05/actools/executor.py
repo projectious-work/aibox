@@ -15,11 +15,14 @@ from typing import Callable, Mapping
 
 from . import checks, inspection, jsonc, metadata, trace
 from .catalog import REPO, SPEC, Catalog
-from .host import (PROCESS_BUDGET_SHARE, Completed, DevContainerCli, Docker, Registry, execute,
-                   process_usage)
+from .host import (CLEANUP_TIMEOUT, PROCESS_BUDGET_SHARE, Completed, DevContainerCli, Docker,
+                   Registry, abort_running, execute, process_usage)
 from .plan import Build, Plan, Test
 
 OUTPUT_LIMIT = 4000
+BUILD_TIMEOUT = 1800  # devcontainer build/up/exec; the slowest passing amd64 build took 610s
+PROBE_TIMEOUT = 610   # one probe: checks.probe_script gives each `timeout -k 10 600`
+PROBE_OVERHEAD = 120
 
 
 def trimmed(text: str) -> str:
@@ -48,6 +51,10 @@ class Context:
     progress: Callable[[str], None] = print
     engines: list[Docker] = field(default_factory=list)  # one per parallel build slot
     process_usage: Callable[[], tuple[int, int] | None] = process_usage
+    build_timeout: float = BUILD_TIMEOUT
+    # Passed records of an earlier run of the same commit, by test ID (--resume).
+    carried: dict[str, dict] = field(default_factory=dict)
+    carried_from: str | None = None
 
 
 class Executor:
@@ -57,10 +64,14 @@ class Executor:
         self.results: list[dict] = []
         self.cleanup_failures: list[str] = []
         self.stop_reason: str | None = None  # remaining builds do not start once set
+        self.abort_reason: str | None = None  # builds in progress were killed
         self.slot = threading.local()
         self.lock = threading.Lock()
         (context.output / "builds").mkdir(exist_ok=True)
         (context.output / "tests").mkdir(exist_ok=True)
+        # Every record is appended as soon as it exists, so an interrupted run
+        # keeps its results and a later run can resume from them.
+        self.journal = context.output / "results.jsonl"
 
     @property
     def docker(self) -> Docker | None:
@@ -123,6 +134,13 @@ class Executor:
 
         def run_one(index: int, key: str, tests: list[Test]) -> None:
             build = self.plan.builds[key]
+            carried = self.carried_records(tests)
+            if carried:
+                self.ctx.progress(f"[{index}/{total}] build {key} passed in run "
+                                  f"{self.ctx.carried_from}; not rebuilt")
+                for record in carried:
+                    self.record(record)
+                return
             engine = slots.get()
             self.slot.engine = engine
             self.check_process_budget()
@@ -139,6 +157,8 @@ class Executor:
                 records = [result_record(t, [f"harness error: {exc}"]) for t in tests]
             finally:
                 slots.put(engine)
+            if self.abort_reason:  # killed, so the outcome says nothing about the Features
+                records = [not_run(t, f"build killed: {self.abort_reason}") for t in tests]
             for record in records:
                 self.record(record)
 
@@ -148,6 +168,10 @@ class Executor:
                        for index, (key, tests) in enumerate(by_build.items(), start=1)]
             for future in futures:
                 future.result()
+        except BaseException as exc:
+            # Interrupted: kill the builds in progress instead of waiting for them.
+            self.abort(f"run interrupted ({type(exc).__name__})")
+            raise
         finally:
             # An interrupted run waits for builds in progress, then cleans up.
             pool.shutdown(wait=True, cancel_futures=True)
@@ -160,6 +184,25 @@ class Executor:
                 self.stop_reason = reason
                 self.ctx.progress(f"stopping before the next build: {reason}")
 
+    def abort(self, reason: str) -> None:
+        """Stop the run and kill every command in progress (engine stalled or
+        run interrupted). Safe to call from any thread."""
+        self.stop(reason)
+        with self.lock:
+            if self.abort_reason is None:
+                self.abort_reason = reason
+        killed = abort_running(reason)
+        self.ctx.progress(f"aborting: {reason}; killed {killed} running commands")
+
+    def carried_records(self, tests: list[Test]) -> list[dict]:
+        """The earlier run's records when every test of the build passed there."""
+        earlier = [self.ctx.carried.get(test.id) for test in tests]
+        if not all(record and record.get("status") == "passed" for record in earlier):
+            return []
+        # A record carried into the earlier run keeps the run that produced it.
+        return [{**record, "carriedFrom": record.get("carriedFrom") or self.ctx.carried_from}
+                for record in earlier]
+
     def check_process_budget(self) -> None:
         usage = self.ctx.process_usage()
         if usage and usage[0] >= usage[1] * PROCESS_BUDGET_SHARE:
@@ -169,6 +212,8 @@ class Executor:
     def record(self, record: dict) -> None:
         with self.lock:
             self.results.append(record)
+            with self.journal.open("a", encoding="utf-8") as journal:
+                journal.write(json.dumps(record) + "\n")
             self.ctx.progress(f"  {record['status'].upper():6} {record['id']}")
 
     def workspace(self, index: int, build: Build) -> Path:
@@ -266,20 +311,23 @@ class Executor:
             return records
         finally:
             for container_id in sorted(self.containers(label)):
-                if self.docker.run("rm", "-f", "-v", container_id, log=log).exit_code:
+                if self.docker.run("rm", "-f", "-v", container_id, log=log,
+                                   timeout=CLEANUP_TIMEOUT).exit_code:
                     self.cleanup_failures.append(f"remove container {container_id}")
                     # A container that cannot be removed keeps its processes.
                     self.stop(f"container {container_id} could not be removed")
 
     def containers(self, label: str) -> set[str]:
         assert self.docker
-        listing = self.docker.run("ps", "-aq", "--filter", f"label={label}")
+        listing = self.docker.run("ps", "-aq", "--filter", f"label={label}",
+                                  timeout=CLEANUP_TIMEOUT)
         if listing.exit_code:
             self.cleanup_failures.append(f"list containers {label}")
         return set(listing.stdout.split())
 
-    def cli(self, args: list[str], log: Path, timeout: float = 7200) -> Completed:
+    def cli(self, args: list[str], log: Path, timeout: float | None = None) -> Completed:
         assert self.ctx.cli
+        timeout = self.ctx.build_timeout if timeout is None else timeout
         env = {**self.ctx.cli.environment(), **(self.docker.cli_environment if self.docker else {})}
         return execute(self.ctx.cli.argv(*args), log=log, env=env, timeout=timeout)
 
@@ -290,9 +338,11 @@ class Executor:
         if not probes:
             return {"remote": {}, "root": {}}
         script = checks.probe_script(probes)
-        remote = self.cli(["exec", *common, "--id-label", label, "sh", "-c", script], log)
+        limit = PROBE_OVERHEAD + PROBE_TIMEOUT * len(probes)
+        remote = self.cli(["exec", *common, "--id-label", label, "sh", "-c", script], log,
+                          timeout=limit)
         root = self.docker.run("exec", "--user", "root", container_id, "sh", "-c", script,
-                                   log=log, timeout=7200)
+                               log=log, timeout=limit)
         return {"remote": self.parse(remote, probes), "root": self.parse(root, probes)}
 
     @staticmethod
@@ -355,6 +405,25 @@ class Executor:
         except Exception as exc:
             failures.append(f"cannot read published metadata: {exc}")
         return result_record(test, failures, log=f"builds/{build.key}.log")
+
+
+def not_run(test: Test, reason: str) -> dict:
+    record = result_record(test, [reason])
+    record["status"] = "not-run"
+    return record
+
+
+def read_journal(path: Path) -> list[dict]:
+    """Records of results.jsonl; a line cut off by an interrupt is skipped."""
+    records = []
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(record, dict) and "id" in record:
+            records.append(record)
+    return records
 
 
 def last_json_line(text: str) -> dict:

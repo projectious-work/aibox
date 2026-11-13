@@ -9,11 +9,19 @@ builds workspaces from the catalog's reference base, evaluates every planned
 test on the host's native target, removes the run's containers, images and
 registry, and writes evidence.json to the output directory.
 
+Every command has a time limit, and a watchdog asks the engine once a minute
+whether it answers. When it misses three answers in a row, the run kills the
+commands in progress, records engine-stall.log with host facts, skips engine
+cleanup and fails. Results are appended to results.jsonl as they come, so
+`--resume DIR` can take the passed builds of an interrupted run of the same
+commit instead of rebuilding them.
+
 Examples:
   run.sh --list
   run.sh --dry-run --item present --feature 'python/*'
   run.sh --item present,version --feature go/go
   run.sh                      # every AC-TOOLS item on this host's target
+  run.sh --resume /abs/earlier-evidence-dir --output /abs/new-dir
 """
 
 from __future__ import annotations
@@ -34,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from actools import host  # noqa: E402
 from actools.catalog import REPO, SPEC, Catalog  # noqa: E402
-from actools.executor import Context, Executor  # noqa: E402
+from actools.executor import BUILD_TIMEOUT, Context, Executor, read_journal  # noqa: E402
 from actools.plan import DOCKER_ITEMS, ITEMS, SCOPES, Plan, census_rows, make_plan  # noqa: E402
 
 
@@ -76,6 +84,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                              "bootstrapping the vendored CLI and a verified Node download")
     parser.add_argument("--registry-image", default=host.DEFAULT_REGISTRY_IMAGE,
                         help="OCI Distribution registry image for localhost:5000")
+    parser.add_argument("--build-timeout", type=positive_int, default=BUILD_TIMEOUT,
+                        help="seconds one devcontainer build, up or exec may take "
+                             "(default: %(default)s)")
+    parser.add_argument("--resume", metavar="DIR",
+                        help="evidence directory of an earlier run of the same commit, target "
+                             "and scope; builds whose tests all passed there are not rebuilt "
+                             "and their records name that run")
     return parser.parse_args(argv)
 
 
@@ -130,6 +145,11 @@ def summary_text(evidence: dict) -> str:
              f"(run {evidence['runId']}, source {evidence.get('sourceCommit')})",
              f"tests {evidence['summary']['tests']}, passed {evidence['summary']['passed']}, "
              f"not passed {evidence['summary']['failed']}"]
+    if evidence.get("resumedFrom"):
+        carried = sum(1 for r in evidence["results"] if "carriedFrom" in r)
+        lines.append(f"resumed from run {evidence['resumedFrom']['runId']} "
+                     f"({evidence['resumedFrom']['directory']}): {carried} passed records "
+                     "taken from earlier runs")
     for item, counts in evidence["summary"]["byItem"].items():
         lines.append(f"  {item}: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
     lines += [f"run failure: {f}" for f in evidence["failures"]]
@@ -162,6 +182,38 @@ def prepare_output(value: str | None) -> Path:
     return output
 
 
+def load_resume(directory: str, run: dict) -> tuple[dict[str, dict], dict]:
+    """Passed records of an earlier run that may stand in this one."""
+    path = Path(directory)
+    try:
+        earlier = json.loads((path / "run.json").read_text())
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"--resume {directory}: no readable run.json ({exc})") from exc
+    for key in ("sourceCommit", "target", "scope", "engineKind"):
+        if earlier.get(key) != run.get(key):
+            raise RuntimeError(f"--resume {directory}: {key} is {earlier.get(key)!r} there and "
+                               f"{run.get(key)!r} here")
+    if earlier.get("sourceDirty") is not False or run.get("sourceDirty") is not False:
+        raise RuntimeError("--resume needs a clean checkout in both runs")
+    journal = path / "results.jsonl"
+    records = read_journal(journal) if journal.is_file() else []
+    passed = {r["id"]: r for r in records if r.get("status") == "passed" and r.get("build")}
+    return passed, {"directory": str(path.resolve()), "runId": earlier.get("runId"),
+                    "passedRecords": len(passed)}
+
+
+def clean_up(context: Context, registry, run_id: str, log: Path, engine_stalled: bool) -> list[str]:
+    if context.docker is None:
+        return []
+    if engine_stalled or context.docker.answers().exit_code:
+        return ["the container engine does not answer; the run's containers, images and "
+                "registry were not removed (discard the machine)"]
+    cleanup = registry.stop(log) if registry is not None else []
+    cleanup += context.docker.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
+    cleanup += context.docker.remove_images(f"aibox-v1-05-{run_id}-*", log)
+    return cleanup
+
+
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
     catalog = Catalog.load()
@@ -180,12 +232,19 @@ def main(argv: list[str]) -> int:
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dt%H%M%S")
     output = prepare_output(args.output)
     work = Path(tempfile.mkdtemp(prefix=f"aibox-v1-05-{run_id}-", dir=args.work_dir)).resolve()
-    context = Context(catalog, run_id, output, work)
+    context = Context(catalog, run_id, output, work, build_timeout=args.build_timeout)
     evidence: dict = {"phase": "V1-05", "suite": "AC-TOOLS acceptance", "runId": run_id,
                       "startedAt": started, **source_state(),
                       "host": {"system": platform.system(), "machine": platform.machine(),
                                "python": platform.python_version()},
                       "scope": args.scope, "jobs": args.jobs,
+                      "limits": {"buildSeconds": args.build_timeout,
+                                 "probeSeconds": "120 + 610 per probe",
+                                 "engineCommandSeconds": host.ENGINE_TIMEOUT,
+                                 "cleanupSeconds": host.CLEANUP_TIMEOUT,
+                                 "watchdog": f"{host.WATCH_MISSES} missed answers, "
+                                             f"{host.WATCH_TIMEOUT}s each, every "
+                                             f"{host.WATCH_INTERVAL}s"},
                       "selection": {"items": args.item, "features": args.feature,
                                     "tests": args.test}}
     failures: list[str] = []
@@ -195,6 +254,17 @@ def main(argv: list[str]) -> int:
     log = output / "host.log"
     registry = None
     executor = None
+    watchdog = None
+    stalls: list[str] = []
+
+    def on_stall(reason: str) -> None:
+        stalls.append(reason)
+        print(f"V1-05 acceptance: {reason}; aborting", file=sys.stderr)
+        if executor is not None:
+            executor.abort(reason)
+        else:
+            host.abort_running(reason)
+
     try:
         probe_plan = build_plan(catalog, args, [args.target] if args.target
                                 else list(catalog.targets))
@@ -211,7 +281,16 @@ def main(argv: list[str]) -> int:
             evidence["engine"] = {"kind": context.docker.kind, "binary": context.docker.binary,
                                   "serverVersion": context.docker.version(),
                                   "serverArch": architecture}
+            watchdog = host.EngineWatchdog(context.docker, on_stall,
+                                           output / "engine-stall.log").start()
         evidence["target"] = target
+        run = {"runId": run_id, "sourceCommit": evidence["sourceCommit"],
+               "sourceDirty": evidence["sourceDirty"], "target": target, "scope": args.scope,
+               "engineKind": context.docker.kind if context.docker else None}
+        (output / "run.json").write_text(json.dumps(run, indent=2) + "\n")
+        if args.resume:
+            context.carried, evidence["resumedFrom"] = load_resume(args.resume, run)
+            context.carried_from = evidence["resumedFrom"]["runId"]
         plan = build_plan(catalog, args, [target] if target else [])
         evidence["planned"] = len(plan.tests)
         if not plan.tests:
@@ -227,6 +306,8 @@ def main(argv: list[str]) -> int:
             context.cli = (host.DevContainerCli.from_path(output) if args.cli_from_path
                            else host.DevContainerCli.bootstrap(work, output))
             evidence["devcontainerCli"] = context.cli.runtime
+        executor = Executor(context, plan)
+        results = executor.results
         if any(t.build for t in plan.tests):
             assert context.docker
             if args.jobs > 1:
@@ -244,24 +325,27 @@ def main(argv: list[str]) -> int:
                                    "log": "publish.log"}
             if published.exit_code:
                 failures.append(f"publish failed (exit {published.exit_code}); see publish.log")
-        executor = Executor(context, plan)
-        results = executor.results
         executor.run_offline()
-        if not failures:
+        if not failures and not stalls:
             executor.run_builds()
             if executor.stop_reason:
                 failures.append(f"run stopped early: {executor.stop_reason}")
     except BaseException as exc:  # recorded; cleanup still runs
+        if not isinstance(exc, Exception):  # interrupted: kill what still runs
+            host.abort_running(f"run interrupted ({type(exc).__name__})")
         failures.append(str(exc) or type(exc).__name__)
         print(f"V1-05 acceptance run failed: {failures[-1]}", file=sys.stderr)
     finally:
+        if watchdog is not None:
+            watchdog.stop()
+        failures += [f"run aborted: {reason}; see engine-stall.log" for reason in stalls]
         if executor is not None:
             cleanup += executor.cleanup_failures
-        if registry is not None:
-            cleanup += registry.stop(log)
-        if context.docker is not None:
-            cleanup += context.docker.remove_images(f"vsc-aibox-v1-05-{run_id}-*", log)
-            cleanup += context.docker.remove_images(f"aibox-v1-05-{run_id}-*", log)
+        try:
+            cleanup += clean_up(context, registry, run_id, log, bool(stalls))
+        except BaseException as exc:  # a second interrupt still leaves evidence
+            host.abort_running("cleanup interrupted")
+            cleanup.append(f"cleanup interrupted ({type(exc).__name__}); discard the machine")
         shutil.rmtree(work, ignore_errors=True)
 
     if plan is not None:

@@ -97,6 +97,38 @@ other content. Temporary build
 data goes to the system temporary directory unless you pass `--work-dir`, so give
 it room for several builds at once.
 
+### Time limits, a stalled engine and resuming
+
+Every command has a time limit: a `devcontainer` build, `up` or `exec` 1800 s
+(`--build-timeout`; the slowest passing amd64 build under translation took
+610 s), a probe run 120 s plus 610 s per probe, an ordinary engine command
+300 s, a cleanup command 120 s, publishing 1800 s. A command that runs over
+is killed with its whole process group and its tests fail.
+
+A watchdog asks the engine `info` once a minute with a 30 s limit. After three
+misses in a row the run aborts: it kills the commands in progress, marks the
+tests of those builds `not-run`, writes the misses and host facts (disk,
+memory, load, the engine service and its journal) to `engine-stall.log`,
+skips engine cleanup and fails. Discard the machine after such a run. The
+2026-11-11 amd64 run lost five hours to an engine that stopped answering
+while four builds were in progress; with these limits it would have stopped
+after about four minutes.
+
+Each result is appended to `results.jsonl` when it exists, and `run.json`
+names the run, commit, target, scope and engine. `--resume DIR` takes the
+passed records of the earlier run in `DIR` for every build whose tests all
+passed there, and rebuilds the rest. It refuses an earlier run of another
+commit, target, scope or engine kind, or from a dirty checkout. A taken record
+keeps `carriedFrom` with the run that produced it, and `evidence.json` names
+the earlier run under `resumedFrom`; hand in both evidence directories.
+Through the OrbStack scripts the Mac's evidence folder is visible in the
+machine, so pass the earlier run directory after `--`:
+
+```sh
+./run-amd64-acceptance.sh V1-05 --branch main -- \
+  --resume "$PWD/amd64-evidence/v1-05/<time>/<run directory>"
+```
+
 `--feature` filters the sampled plan, so a Feature outside the sample may plan
 no error tests; add `--scope full` to select it. `AC-TOOLS/guards` runs the
 component tests in `features/test/` and also fails when any aibox Feature lacks a

@@ -7,13 +7,16 @@ import os
 import sys
 import tempfile
 import textwrap
+import threading
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from actools.catalog import Catalog
-from actools.executor import Context, Executor
-from actools.host import DevContainerCli, Docker, process_usage
+from actools import host
+from actools.executor import Context, Executor, read_journal
+from actools.host import DevContainerCli, Docker, EngineWatchdog, execute, process_usage
 from actools.plan import make_plan
 from unit.fixtures import REAL, feature, tool
 
@@ -30,6 +33,9 @@ FAKE_DEVCONTAINER = textwrap.dedent('''
         print(config.get("buildOutput", ""), file=sys.stderr)
         sys.exit(config.get("buildExit", 1))
     if verb == "up":
+        if config.get("upSleep"):
+            import time
+            time.sleep(config["upSleep"])
         if config.get("upExit"):
             sys.exit(config["upExit"])
         print(json.dumps({"outcome": "success", "containerId": "fakecontainer",
@@ -45,7 +51,7 @@ FAKE_DOCKER = textwrap.dedent('''
     #!/bin/sh
     case "$1" in
       exec) shift 4; exec "$@" ;;
-      ps|images) exit 0 ;;
+      ps|images|info) exit 0 ;;
       rm|image) exit 0 ;;
     esac
     exit 2
@@ -94,6 +100,7 @@ class ExecutorTest(unittest.TestCase):
                                process_usage=lambda: None)
 
     def tearDown(self):
+        host.reset_abort()
         self.temp.cleanup()
 
     def configure(self, config):
@@ -126,8 +133,8 @@ class ExecutorTest(unittest.TestCase):
 
     def test_a_container_that_cannot_be_removed_stops_the_run(self):
         docker = self.fake_dir / "docker"
-        docker.write_text(FAKE_DOCKER.replace("ps|images) exit 0 ;;",
-                                              "ps) echo stuck; exit 0 ;;\n  images) exit 0 ;;")
+        docker.write_text(FAKE_DOCKER.replace("ps|images|info) exit 0 ;;",
+                                              "ps) echo stuck; exit 0 ;;\n  images|info) exit 0 ;;")
                           .replace("rm|image) exit 0 ;;", "rm) exit 125 ;;\n  image) exit 0 ;;"))
         plan = make_plan(self.catalog, [TARGET], [], items=["present"])
         executor = Executor(self.context, plan)
@@ -204,6 +211,114 @@ class ExecutorTest(unittest.TestCase):
     def test_workspaces_are_removed_after_each_build(self):
         self.run_items("present")
         self.assertEqual(list(self.work.iterdir()), [])
+
+    # --- stalls, limits and resume ------------------------------------------
+    def test_a_build_over_its_time_limit_fails_in_time(self):
+        self.configure({"upSleep": 30})
+        self.context.build_timeout = 1
+        started = time.monotonic()
+        results, _ = self.run_items("present", features=["t/here"])
+        self.assertLess(time.monotonic() - started, 15)
+        self.assertIn("devcontainer up failed (exit 124)",
+                      results[f"AC-TOOLS/present t/here here {TARGET}"]["failures"][0])
+
+    def test_an_abort_kills_builds_in_progress_and_marks_them_not_run(self):
+        self.configure({"upSleep": 60})
+        plan = make_plan(self.catalog, [TARGET], [], items=["present"], features=["t/here"])
+        executor = Executor(self.context, plan)
+        threading.Timer(1.0, executor.abort, ["engine stalled"]).start()
+        started = time.monotonic()
+        executor.run_builds()
+        self.assertLess(time.monotonic() - started, 20)
+        self.assertEqual([r["status"] for r in executor.results], ["not-run"])
+        self.assertIn("engine stalled", executor.results[0]["failures"][0])
+        self.assertEqual(executor.stop_reason, "engine stalled")
+
+    def test_results_are_journaled_as_they_come(self):
+        _, executor = self.run_items("present", features=["t/here"])
+        with executor.journal.open("a") as journal:
+            journal.write('{"id": "cut off')
+        self.assertEqual(read_journal(executor.journal), executor.results)
+
+    def test_a_build_that_passed_in_the_earlier_run_is_not_rebuilt(self):
+        _, first = self.run_items("present", features=["t/here"])
+        self.context.carried = {r["id"]: r for r in first.results}
+        self.context.carried_from = "earlier"
+        self.configure({"upExit": 1})  # a rebuild would fail
+        results, _ = self.run_items("present", features=["t/here"])
+        record = results[f"AC-TOOLS/present t/here here {TARGET}"]
+        self.assertEqual((record["status"], record["carriedFrom"]), ("passed", "earlier"))
+
+    def test_a_build_with_a_failure_in_the_earlier_run_is_rebuilt(self):
+        self.configure({"upExit": 1})
+        _, first = self.run_items("present", features=["t/here"])
+        self.context.carried = {r["id"]: r for r in first.results}
+        self.context.carried_from = "earlier"
+        self.configure({})
+        results, _ = self.run_items("present", features=["t/here"])
+        record = results[f"AC-TOOLS/present t/here here {TARGET}"]
+        self.assertEqual(record["status"], "passed")
+        self.assertNotIn("carriedFrom", record)
+
+
+class ExecuteTest(unittest.TestCase):
+    def tearDown(self):
+        host.reset_abort()
+
+    def test_a_timeout_kills_the_whole_process_group(self):
+        # The grandchild keeps stdout open; killing only the child would hang.
+        started = time.monotonic()
+        result = execute(["sh", "-c", "sleep 60 & sleep 60"], timeout=1)
+        self.assertEqual(result.exit_code, 124)
+        self.assertLess(time.monotonic() - started, 15)
+
+    def test_abort_running_kills_commands_of_other_threads(self):
+        outcome = {}
+        worker = threading.Thread(target=lambda: outcome.update(
+            result=execute(["sh", "-c", "sleep 60 & sleep 60"], timeout=120)))
+        worker.start()
+        time.sleep(0.5)
+        self.assertEqual(host.abort_running("engine stalled"), 1)
+        worker.join(20)
+        self.assertFalse(worker.is_alive())
+        self.assertIn("aborted: engine stalled", outcome["result"].stderr)
+
+
+class WatchdogTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def engine(self, body: str) -> Docker:
+        fake = self.root / "docker"
+        fake.write_text(f"#!/bin/sh\n{body}\n")
+        fake.chmod(0o755)
+        return Docker(str(fake))
+
+    def test_three_missed_answers_report_a_stall_with_host_facts(self):
+        stalls = []
+        log = self.root / "engine-stall.log"
+        watchdog = EngineWatchdog(self.engine("sleep 5"), stalls.append, log,
+                                  interval=0.05, timeout=0.2, misses=3).start()
+        deadline = time.monotonic() + 20
+        while not stalls and time.monotonic() < deadline:
+            time.sleep(0.05)
+        watchdog.stop()
+        self.assertEqual(len(stalls), 1)
+        self.assertIn("did not answer", stalls[0])
+        self.assertIn("miss 3 of 3", log.read_text())
+        self.assertIn("$ ", log.read_text())  # host facts follow the misses
+
+    def test_an_answering_engine_is_left_alone(self):
+        stalls = []
+        watchdog = EngineWatchdog(self.engine("exit 0"), stalls.append, self.root / "log",
+                                  interval=0.05, timeout=1, misses=2).start()
+        time.sleep(0.5)
+        watchdog.stop()
+        self.assertEqual(stalls, [])
 
 
 if __name__ == "__main__":
