@@ -6,8 +6,8 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 AIBOX_MAINTAIN_SOURCE_ONLY=1 source "${SCRIPT_DIR}/maintain.sh"
 
-[[ "$(release_branch_for_version 0.28.4)" == "v0.x-release" ]] \
-  || die "v0 release versions must resolve to v0.x-release"
+[[ "$(release_branch_for_version 0.28.4)" == "lts/v0" ]] \
+  || die "v0 release versions must resolve to lts/v0"
 [[ "$(release_branch_for_version 1.0.0-alpha.1)" == "v1.x-pre-release" ]] \
   || die "v1 prereleases must resolve to v1.x-pre-release"
 [[ "$(release_branch_for_version 1.0.0)" == "v1.x-release" ]] \
@@ -55,50 +55,51 @@ git init -b main "${promotion_checkout}" >/dev/null
 git -C "${promotion_checkout}" config user.name "Release Test"
 git -C "${promotion_checkout}" config user.email "release-test@example.invalid"
 git -C "${promotion_checkout}" remote add origin "${promotion_remote}"
-git -C "${promotion_checkout}" commit --allow-empty -m "stable baseline" >/dev/null
-git -C "${promotion_checkout}" branch v0.x-dev
-git -C "${promotion_checkout}" branch v0.x-release
-git -C "${promotion_checkout}" push origin main v0.x-dev v0.x-release >/dev/null
-git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
-git -C "${promotion_checkout}" commit --allow-empty -m "reviewed v0 candidate" >/dev/null
-git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
+git -C "${promotion_checkout}" commit --allow-empty -m "v1 line" >/dev/null
+git -C "${promotion_checkout}" push origin main >/dev/null
+v1_sha="$(git -C "${promotion_checkout}" rev-parse HEAD)"
+git -C "${promotion_checkout}" switch -c lts/v0 >/dev/null
+git -C "${promotion_checkout}" commit --allow-empty -m "chore(release): v0.35.5" >/dev/null
+git -C "${promotion_checkout}" push origin lts/v0 >/dev/null
 promotion_sha="$(git -C "${promotion_checkout}" rev-parse HEAD)"
 (
   cd "${promotion_checkout}"
   RELEASE_CANDIDATE_SHA="${promotion_sha}"
-  publish_v0_release_candidate 0.35.3 >/dev/null
-  publish_v0_release_candidate 0.35.3 >/dev/null
+  publish_v0_release_candidate 0.35.5 >/dev/null
+  publish_v0_release_candidate 0.35.5 >/dev/null
 )
-for promotion_branch in v0.x-dev v0.x-pre-release v0.x-release main; do
-  [[ "$(git --git-dir="${promotion_remote}" rev-parse "refs/heads/${promotion_branch}")" == "${promotion_sha}" ]] \
-    || die "v0 promotion did not retain exact commit identity on ${promotion_branch}"
+[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/lts/v0)" == "${promotion_sha}" ]] \
+  || die "v0 release verification moved lts/v0"
+[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/main)" == "${v1_sha}" ]] \
+  || die "v0 release verification touched main (the v1 line)"
+for retired in v0.x-dev v0.x-pre-release v0.x-release; do
+  if git --git-dir="${promotion_remote}" rev-parse --verify --quiet "refs/heads/${retired}" >/dev/null; then
+    die "v0 release verification created the retired branch ${retired}"
+  fi
 done
 git -C "${promotion_checkout}" commit --allow-empty -m "unreviewed next change" >/dev/null
 if (
   cd "${promotion_checkout}"
   RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
-  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
+  publish_v0_release_candidate 0.35.5 >/dev/null 2>&1
 ); then
-  die "v0 promotion accepted a local commit absent from origin/v0.x-dev"
+  die "v0 release accepted a local commit absent from origin/lts/v0"
 fi
-[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/main)" == "${promotion_sha}" ]] \
-  || die "rejected v0 promotion changed main"
-git -C "${promotion_checkout}" push origin v0.x-dev >/dev/null
+if (
+  cd "${promotion_checkout}"
+  RELEASE_CANDIDATE_SHA="${promotion_sha}"
+  publish_v0_release_candidate 0.35.5 >/dev/null 2>&1
+); then
+  die "v0 release accepted a candidate that changed after validation"
+fi
 git -C "${promotion_checkout}" switch main >/dev/null
-git -C "${promotion_checkout}" fetch origin main >/dev/null
-git -C "${promotion_checkout}" merge --ff-only origin/main >/dev/null
-git -C "${promotion_checkout}" commit --allow-empty -m "independent main change" >/dev/null
-git -C "${promotion_checkout}" push origin main >/dev/null
-git -C "${promotion_checkout}" switch v0.x-dev >/dev/null
 if (
   cd "${promotion_checkout}"
   RELEASE_CANDIDATE_SHA="$(git rev-parse HEAD)"
-  publish_v0_release_candidate 0.35.3 >/dev/null 2>&1
+  publish_v0_release_candidate 0.35.5 >/dev/null 2>&1
 ); then
-  die "v0 promotion accepted a main commit absent from the development candidate"
+  die "v0 release accepted a candidate validated outside lts/v0"
 fi
-[[ "$(git --git-dir="${promotion_remote}" rev-parse refs/heads/v0.x-pre-release)" == "${promotion_sha}" ]] \
-  || die "divergent main changed the staging pointer before preflight failed"
 
 changelog_project="${test_root}/changelog-project"
 mkdir -p "${changelog_project}/docs-site/content/changelog"
@@ -242,25 +243,25 @@ git -C "${host_seed}" config user.email "release-test@example.invalid"
 printf 'base\n' > "${host_seed}/tracked.txt"
 git -C "${host_seed}" add tracked.txt
 git -C "${host_seed}" commit -m "test: seed release repo" >/dev/null
-git -C "${host_seed}" branch v0.x-release
+git -C "${host_seed}" branch lts/v0
 git -C "${host_seed}" tag v0.28.13
 git -C "${host_seed}" remote add origin "${host_remote}"
-git -C "${host_seed}" push origin main v0.x-release v0.28.13 >/dev/null
+git -C "${host_seed}" push origin main lts/v0 v0.28.13 >/dev/null
 git -C "${host_remote}" symbolic-ref HEAD refs/heads/main
 git clone "${host_remote}" "${host_primary}" >/dev/null
 git -C "${host_primary}" config user.name "Release Test"
 git -C "${host_primary}" config user.email "release-test@example.invalid"
-git -C "${host_primary}" worktree add "${host_linked}" v0.x-release >/dev/null
+git -C "${host_primary}" worktree add "${host_linked}" lts/v0 >/dev/null
 
 saved_project_root="${PROJECT_ROOT}"
 PROJECT_ROOT="${host_primary}"
 git -C "${host_linked}" switch --detach >/dev/null
-git -C "${host_primary}" switch v0.x-release >/dev/null
+git -C "${host_primary}" switch lts/v0 >/dev/null
 ensure_release_host_checkout_current 0.28.13
-[[ "$(git -C "${host_primary}" branch --show-current)" == "v0.x-release" ]] \
+[[ "$(git -C "${host_primary}" branch --show-current)" == "lts/v0" ]] \
   || die "release-host validation changed the primary checkout"
 [[ "$(git -C "${host_primary}" rev-parse HEAD)" == \
-   "$(git -C "${host_primary}" rev-parse origin/v0.x-release)" ]] \
+   "$(git -C "${host_primary}" rev-parse origin/lts/v0)" ]] \
   || die "release-host validation accepted a stale release branch"
 PROJECT_ROOT="${saved_project_root}"
 

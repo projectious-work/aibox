@@ -244,8 +244,8 @@ typecheck: ""
   three automatically.
 - **Phase 2 is always the user's job** — macOS host builds and GHCR image pushes
   run via `./scripts/maintain.sh release-host X.Y.Z` on the host, never from the container.
-  Before Phase 2, sync the host checkout to the matching version-line release branch
-  (for example, `git fetch origin v0.x-release && git switch v0.x-release && git reset --keep origin/v0.x-release`).
+  Before Phase 2, sync the host checkout to the release line
+  (for v0: `git fetch origin lts/v0 && git switch lts/v0 && git reset --keep origin/lts/v0`).
 - **Detailed release procedures:** See [`context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md`](./context/notes/NOTE-20260411_0000-LoyalSpruce-aibox-release-process.md) for step-by-step Phase 1 and Phase 2 instructions, including exact commands and prerequisites.
 - **One big change preferred over many small PRs** for breaking releases. The user
   explicitly said: "make one big change, I'll handle derived project dependencies."
