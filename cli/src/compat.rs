@@ -798,6 +798,11 @@ pub static COMPAT_TABLE: &[CompatEntry] = &[
         processkit_version: "v0.28.8",
         note: "Patch release: resolves Claude Code `latest` to a concrete apt version so `aibox apply` rebuilds with the newest CLI, recreates the container on `aibox up` when `.aibox-local.toml` environment changed, refreshes curated tool pins, and updates Rust dependencies for RustSec advisories.",
     },
+    CompatEntry {
+        aibox_version: "0.35.5",
+        processkit_version: "v0.28.8",
+        note: "Patch release: the Mermaid add-on fetches the apt package lists before Puppeteer installs the headless browser's system libraries, so images with Mermaid build again.",
+    },
 ];
 
 /// Find the minimum compatible processkit version for the given aibox version.
