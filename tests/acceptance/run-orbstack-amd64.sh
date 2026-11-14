@@ -148,6 +148,10 @@ say "Checking Docker in the machine"
 in_user docker version
 in_user docker buildx version
 server_arch=$(in_user docker version --format '{{.Server.Arch}}')
+# Read once here: after a run whose engine stopped answering, a docker
+# command in host_json would wait forever.
+docker_server_version=$(in_user docker version --format '{{.Server.Version}}')
+docker_buildx=$(in_user docker buildx version 2>/dev/null | head -1)
 [ "$server_arch" = amd64 ] || die "Docker server architecture is $server_arch, not amd64"
 
 say "Cloning $full_commit into the machine"
@@ -186,9 +190,9 @@ json.dump({
               "os": "$(in_user sh -c '. /etc/os-release; echo $PRETTY_NAME')",
               "cpus": $(in_user nproc),
               "translation": "x86_64 on Apple silicon through OrbStack (Rosetta when enabled, else QEMU)"},
-  "docker": {"serverVersion": "$(in_user docker version --format '{{.Server.Version}}')",
+  "docker": {"serverVersion": "$docker_server_version",
              "serverArch": "$server_arch",
-             "buildx": "$(in_user docker buildx version 2>/dev/null | head -1)"},
+             "buildx": "$docker_buildx"},
 }, open(sys.argv[1], "w"), indent=2)
 PY
 }
