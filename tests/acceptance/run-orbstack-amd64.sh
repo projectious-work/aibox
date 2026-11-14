@@ -121,8 +121,11 @@ trap cleanup EXIT
 
 say "Creating $machine"
 orb create --arch amd64 debian:trixie "$machine"
-in_root() { orb -m "$machine" -u root "$@"; }
-in_user() { orb -m "$machine" "$@"; }
+# No command in the machine reads the terminal. With the terminal on stdin,
+# orb switches it to raw mode and every output line starts where the last one
+# ended.
+in_root() { orb -m "$machine" -u root "$@" </dev/null; }
+in_user() { orb -m "$machine" "$@" </dev/null; }
 
 arch=$(in_user uname -m)
 [ "$arch" = x86_64 ] || die "machine reports $arch, not x86_64"
@@ -200,12 +203,34 @@ run=1
 while [ "$run" -le "$runs" ]; do
   run_dir="debian-13-amd64-orbstack-$(date -u +%Y%m%dT%H%M%SZ)-run$run"
   say "Run $run of $runs: $run_dir"
-  if in_user sh -c "cd \"\$HOME/aibox\" && $host_script debian-13-amd64 \
-    --output \"\$HOME/evidence/$run_dir\"$quoted_args"; then
-    status=0
-  else
-    status=$?
+  # The run is a background job, so Ctrl-C reaches only this script, which
+  # passes it on to the runner in the machine. The runner then stops its
+  # builds and writes its evidence, and the copy below still happens. The
+  # host script records its process ID and execs the runner under it.
+  # A failing run is reported below, not by the ERR trap.
+  ( trap - ERR
+    in_user sh -c "cd \"\$HOME/aibox\" && echo \$\$ > \"\$HOME/run.pid\" && exec $host_script \
+      debian-13-amd64 --output \"\$HOME/evidence/$run_dir\"$quoted_args" ) &
+  run_pid=$!
+  interrupted=0
+  trap 'interrupted=1; echo; echo "Interrupt: asking the runner to stop and write its evidence"; in_user sh -c "kill -INT \$(cat \"\$HOME/run.pid\")" || true' INT
+  status=
+  while [ -z "$status" ]; do
+    if wait "$run_pid"; then
+      status=0
+    else
+      status=$?
+      # A status above 128 with the job still alive means the trap interrupted wait.
+      if [ "$status" -gt 128 ] && kill -0 "$run_pid" 2>/dev/null; then status=; fi
+    fi
+  done
+  if [ "$interrupted" = 1 ]; then
+    # orb may have ended with the interrupt; give the runner up to ten minutes
+    # to finish its evidence before it is copied.
+    in_user sh -c 'n=0; while kill -0 "$(cat "$HOME/run.pid")" 2>/dev/null && [ $n -lt 300 ]; do
+      sleep 2; n=$((n + 1)); done' || true
   fi
+  trap - INT
   mkdir -p "$evidence_root/$run_dir"
   if in_user sh -c "test -d \"\$HOME/evidence/$run_dir\""; then
     in_user sh -c "tar -C \"\$HOME/evidence/$run_dir\" -cf - ." | tar -C "$evidence_root/$run_dir" -xf -
