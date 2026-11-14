@@ -75,10 +75,17 @@ git -C "$repo" worktree add --quiet --detach "$run_checkout" "origin/$branch"
   || die "origin/$branch has no tests/acceptance/run-orbstack-amd64.sh"
 mkdir -p "$evidence"
 
+# The Mac stays awake while this script runs. caffeinate watches this script
+# instead of wrapping the run, so Ctrl-C reaches the run directly: it asks the
+# runner in the machine to stop and still copies the evidence. This script
+# waits for that and only then removes the temporary checkout.
+caffeinate -i -w $$ &
+trap 'echo "Interrupt: waiting for the run to stop and copy its evidence"' INT
 status=0
 ( cd "$run_checkout" &&
-  caffeinate -i tests/acceptance/run-orbstack-amd64.sh "$phase" --evidence-dir "$evidence" "$@" ) \
+  tests/acceptance/run-orbstack-amd64.sh "$phase" --evidence-dir "$evidence" "$@" ) \
   || status=$?
+trap - INT
 
 echo
 echo "Exit status: $status"
