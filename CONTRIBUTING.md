@@ -103,14 +103,15 @@ Include `Cargo.lock` in version bump commits.
 
 ## Release
 
-For v0, merge every code, documentation, and version change from a topic
-branch into `v0.x-dev` first. Validate the exact remote `v0.x-dev` commit
-with `./scripts/maintain.sh release X.Y.Z` in the container. The release
-command fast-forwards that commit through `v0.x-pre-release` and
-`v0.x-release` to `main`, then creates the annotated stable tag on that
-same commit. A divergent branch or protected-branch refusal stops promotion;
-do not replace a fast-forward with a merge commit on a promotion branch.
-Published tags stay immutable. Keep v1 changes on the independent v1 line.
+v0 lives on `lts/v0` (GitHub Flow; `main` is the v1 line). Every v0 change
+reaches `lts/v0` by a squash-merged pull request. For a release, cut
+`release/vX.Y.Z` from `lts/v0` with the single commit
+`chore(release): vX.Y.Z` (version in `cli/Cargo.toml` and `Cargo.lock`,
+changelog entry, compatibility row, `dist/RELEASE-NOTES.md`) and squash-merge
+it into `lts/v0`. Then, on `lts/v0` at exactly `origin/lts/v0`, run
+`./scripts/maintain.sh release X.Y.Z` in the container. It validates that
+commit, refuses any other, and creates the annotated tag on it; it moves no
+branch. Published tags stay immutable. Keep v1 changes on `main`.
 
 The container-side release prepares an immutable host handover. On macOS,
 run the version-bound command printed in `dist/RELEASE-PROMPT.md`.
