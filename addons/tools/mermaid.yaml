@@ -41,9 +41,13 @@ runtime: |
   RUN npm uninstall -g @mermaid-js/mermaid-cli || true
   {% endif %}
   {% if tools["mermaid-cli"].enabled and tools.puppeteer.enabled %}
+  # --install-deps runs apt-get install for the browser's libraries; the base
+  # image removes the package lists, so they are fetched here and removed again.
   RUN mkdir -p /ms-puppeteer && \
+      apt-get update && \
       puppeteer browsers install chrome-headless-shell --install-deps && \
-      chmod -R a+rX /ms-puppeteer
+      chmod -R a+rX /ms-puppeteer && \
+      rm -rf /var/lib/apt/lists/*
   {% else %}
   RUN npm uninstall -g puppeteer || true && rm -rf /ms-puppeteer
   {% endif %}

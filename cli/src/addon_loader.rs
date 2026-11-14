@@ -996,6 +996,14 @@ runtime: |
         assert!(
             rendered.contains("puppeteer browsers install chrome-headless-shell --install-deps")
         );
+        // The base image removes the apt lists that --install-deps needs.
+        let update = rendered
+            .find("apt-get update")
+            .expect("apt-get update before the browser");
+        let install = rendered
+            .find("chrome-headless-shell --install-deps")
+            .unwrap();
+        assert!(update < install);
         assert!(rendered.contains("PUPPETEER_CACHE_DIR=/ms-puppeteer"));
         let disabled = render_runtime(&mermaid, &all_disabled_tools(&mermaid)).unwrap();
         assert!(disabled.contains("npm uninstall -g @mermaid-js/mermaid-cli"));
