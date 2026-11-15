@@ -1,0 +1,144 @@
+{
+  "catalogVersion": "native-starters@v1",
+  "templates": {
+    "ids": [
+      "minimal",
+      "curated"
+    ],
+    "sourceRoot": "templates/src",
+    "format": "Dev Container Template (upstream)",
+    "version": "1.0.0",
+    "publisher": "projectious-work",
+    "platforms": [
+      "Any"
+    ],
+    "options": {
+      "harness": {
+        "type": "string",
+        "enum": [
+          "codex",
+          "none"
+        ],
+        "default": "codex",
+        "buildArg": "HARNESS"
+      }
+    },
+    "files": [
+      ".devcontainer/devcontainer.json",
+      ".devcontainer/Dockerfile",
+      ".devcontainer/install-tools.sh",
+      ".devcontainer/.gitignore"
+    ],
+    "curatedExtraFiles": [
+      ".devcontainer/tmux.conf"
+    ],
+    "gitignore": [
+      "*.env",
+      "compose.local.yaml"
+    ],
+    "renderer": {
+      "command": "node templates/render.mjs --template <minimal|curated> --output <absolute path> [--harness <codex|none>]",
+      "existingConfiguration": "refused"
+    },
+    "never": [
+      ".aibox/",
+      ".aibox-home/"
+    ],
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "."
+    },
+    "image": {
+      "user": "USER ${USERNAME}",
+      "usernameArg": "ARG USERNAME=aibox",
+      "base": "pinned by @sha256 digest",
+      "apt": "one snapshot.debian.org snapshot",
+      "downloads": "Yazi and Codex verified by per-architecture SHA-256",
+      "forbidden": "COPY or ADD of .aibox or .aibox-home content"
+    },
+    "homeMounts": 1
+  },
+  "user": {
+    "name": "aibox",
+    "home": "/home/aibox",
+    "containerUser": "aibox",
+    "remoteUser": "aibox"
+  },
+  "home": {
+    "mount": "source=aibox-home-${devcontainerId},target=/home/aibox,type=volume",
+    "kind": "named volume, project-scoped"
+  },
+  "examples": {
+    "root": "examples",
+    "ids": [
+      "minimal",
+      "customized",
+      "custom-user",
+      "bind-home"
+    ],
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "."
+    },
+    "bindHome": {
+      "mount": {
+        "source": "${localWorkspaceFolder}/.aibox-home",
+        "target": "/home/aibox",
+        "type": "bind"
+      },
+      "projectGitignore": [
+        ".aibox-home/",
+        ".env",
+        ".devcontainer/compose.local.yaml"
+      ]
+    },
+    "customUser": {
+      "name": "dev",
+      "home": "/home/dev",
+      "mount": "source=aibox-home-${devcontainerId},target=/home/dev,type=volume",
+      "dockerfile": [
+        "ARG USERNAME=dev",
+        "useradd creates $USERNAME"
+      ]
+    },
+    "minimalCustomizations": "absent",
+    "customizedSchema": "workspace-customization@v1",
+    "homeMounts": 1,
+    "forbiddenMembers": [
+      "image",
+      "dockerComposeFile",
+      "aibox"
+    ],
+    "users": "containerUser and remoteUser explicit and equal (a choice of these examples)",
+    "minimalFeatures": "absent",
+    "customizedFeatures": "equal to selected in tool-catalog@v1 fixtures/v1-05-native-features.json"
+  },
+  "customizationSchema": {
+    "spec": "workspace-customization@v1",
+    "path": "spec/workspace-customization/v1/schemas/customization.schema.json"
+  },
+  "devcontainerCli": {
+    "version": "0.89.0",
+    "archive": "tools/vendor/devcontainer-cli-0.89.0.tgz",
+    "commands": [
+      "read-configuration",
+      "build",
+      "up",
+      "exec"
+    ],
+    "lockfile": ".devcontainer/devcontainer-lock.json"
+  },
+  "inspection": {
+    "cli": "aibox inspect --context local --project <example> --format json",
+    "mcpTool": "inspect_workspace",
+    "readOnly": true
+  },
+  "precedence": "This file prevails over requirements.md and journeys.md; the sources cited in overview.md are provenance only; a divergence is a defect fixed in native-starters@v2.",
+  "targets": {
+    "supported": "any engine and host that the pinned Dev Container CLI 0.89.0 supports for these images",
+    "verified": [
+      "macOS arm64, Docker"
+    ],
+    "qualification": "V1-22"
+  }
+}
