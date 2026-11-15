@@ -61,3 +61,15 @@ func Usage(message string) *Rejection {
 func reject(reason Reason, layer Layer, source, key, message string) *Rejection {
 	return &Rejection{Reason: reason, Key: key, Layer: layer, Source: source, Message: message}
 }
+
+// Fields returns the fields of the settings.rejected event; source is
+// unredacted and is redacted by the logger.
+func (r *Rejection) Fields() map[string]string {
+	fields := map[string]string{"reason": string(r.Reason)}
+	for name, value := range map[string]string{"key": r.Key, "layer": string(r.Layer), "source": r.Source, "suggestion": r.Suggestion} {
+		if value != "" {
+			fields[name] = value
+		}
+	}
+	return fields
+}

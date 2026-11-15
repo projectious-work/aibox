@@ -352,8 +352,20 @@ func (s *stderrSink) write(line []byte) {
 // the format of logging.rejectionFormat, with sequence 0 (LOG-006).
 func WriteRejection(out io.Writer, format Format, requestID string, fields map[string]string, redactor *redact.Redactor, now time.Time) {
 	logger := &Logger{config: Config{Redactor: redactor, Format: format}}
-	event := Event{Timestamp: now, Severity: Error, Name: "settings.rejected", Component: "settings", RequestID: requestID,
-		Executor: Executor, Outcome: "failed", ErrorCategory: "invalid_input", Fields: fields}
+	event := RejectedEvent(fields)
+	event.Timestamp, event.RequestID = now, requestID
 	item := logger.encode(nil, logger.redact(event).fit(), true)
 	_, _ = out.Write(item.stderr)
+}
+
+// EmitStderr sends an event of this scope to stderr only, as LOG-006
+// requires for settings.rejected.
+func (s *Scope) EmitStderr(event Event) {
+	s.logger.emit(s, event, true)
+}
+
+// RejectedEvent is the settings.rejected event with the given fields.
+func RejectedEvent(fields map[string]string) Event {
+	return Event{Severity: Error, Name: "settings.rejected", Component: "settings", Executor: Executor,
+		Outcome: "failed", ErrorCategory: "invalid_input", Fields: fields}
 }

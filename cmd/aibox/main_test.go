@@ -19,16 +19,26 @@ func buildPreview(t *testing.T) string {
 	t.Helper()
 	binary := filepath.Join(t.TempDir(), "aibox")
 	build := exec.Command("go", "build", "-o", binary, ".")
+	build.Env = append(os.Environ(), "CGO_ENABLED=0")
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build preview: %v\n%s", err, output)
 	}
 	return binary
 }
 
+// cleanCommand runs the binary with only HOME and PATH, as the journeys do,
+// so that the developer's own settings and AIBOX_* variables stay out.
+func cleanCommand(t *testing.T, binary string, args ...string) *exec.Cmd {
+	t.Helper()
+	command := exec.Command(binary, args...)
+	command.Env = []string{"HOME=" + t.TempDir(), "PATH=" + os.Getenv("PATH")}
+	return command
+}
+
 func TestPreviewBinaryInspection(t *testing.T) {
 	binary := buildPreview(t)
 	for _, args := range [][]string{{"--version"}, {"--help"}} {
-		if output, err := exec.Command(binary, args...).CombinedOutput(); err != nil || len(output) == 0 {
+		if output, err := cleanCommand(t, binary, args...).CombinedOutput(); err != nil || len(output) == 0 {
 			t.Fatalf("%v: %v %s", args, err, output)
 		}
 	}
@@ -40,7 +50,7 @@ func TestPreviewBinaryInspection(t *testing.T) {
 	if err := os.WriteFile(config, []byte(`{"image":"example.invalid/base:one"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	command := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json")
+	command := cleanCommand(t, binary, "inspect", "--context", "local", "--project", root, "--format", "json", "--log-level", "off")
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil || stderr.Len() != 0 {
@@ -57,7 +67,7 @@ func TestPreviewBinaryInspection(t *testing.T) {
 		t.Fatalf("unexpected inspect result: %s", stdout.String())
 	}
 	for _, unavailable := range []string{"build", "up"} {
-		output, err := exec.Command(binary, unavailable).CombinedOutput()
+		output, err := cleanCommand(t, binary, unavailable).CombinedOutput()
 		if err == nil || !strings.Contains(string(output), "not available") {
 			t.Fatalf("%s unexpectedly available: %v %s", unavailable, err, output)
 		}
@@ -89,7 +99,7 @@ func callInspect(t *testing.T, session *mcp.ClientSession, root string) (contrac
 func TestPreviewBinaryMCPParity(t *testing.T) {
 	binary := buildPreview(t)
 	client := mcp.NewClient(&mcp.Implementation{Name: "aibox-test", Version: "1"}, nil)
-	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: exec.Command(binary, "mcp", "serve", "--context", "local")}, nil)
+	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: cleanCommand(t, binary, "mcp", "serve", "--context", "local")}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +122,7 @@ func TestPreviewBinaryMCPParity(t *testing.T) {
 	if isError || mcpResult.Outcome != contract.Succeeded || mcpResult.Target.WorkspaceRoot != root {
 		t.Fatalf("MCP inspect: %+v error=%v", mcpResult, isError)
 	}
-	output, err := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
+	output, err := cleanCommand(t, binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +154,7 @@ func TestPreviewBinaryMCPParity(t *testing.T) {
 	if !isError || mcpFailure.Outcome != contract.Failed || mcpFailure.Error.Code != "invalid_input" || mcpFailure.Target != nil {
 		t.Fatalf("MCP refusal: %+v error=%v", mcpFailure, isError)
 	}
-	command := exec.Command(binary, "inspect", "--context", "local", "--project", missing, "--format", "json")
+	command := cleanCommand(t, binary, "inspect", "--context", "local", "--project", missing, "--format", "json")
 	output, err = command.Output()
 	if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 2 {
 		t.Fatalf("CLI refusal exit: %v", err)
@@ -169,7 +179,7 @@ func TestPreviewBinaryMCPParity(t *testing.T) {
 func TestV104StarterCLIMCPParity(t *testing.T) {
 	binary := buildPreview(t)
 	client := mcp.NewClient(&mcp.Implementation{Name: "aibox-v1-04-test", Version: "1"}, nil)
-	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: exec.Command(binary, "mcp", "serve", "--context", "local")}, nil)
+	session, err := client.Connect(t.Context(), &mcp.CommandTransport{Command: cleanCommand(t, binary, "mcp", "serve", "--context", "local")}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +198,7 @@ func TestV104StarterCLIMCPParity(t *testing.T) {
 	repoRoot := filepath.Clean(filepath.Join(working, "..", ".."))
 	for _, name := range []string{"minimal", "customized", "custom-user", "bind-home"} {
 		root := filepath.Join(repoRoot, "examples", name)
-		cliOutput, err := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
+		cliOutput, err := cleanCommand(t, binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
 		if err != nil {
 			t.Fatalf("%s CLI inspection: %v", name, err)
 		}
@@ -249,7 +259,7 @@ func TestV104StarterCLIMCPParity(t *testing.T) {
 
 func TestPreviewBinaryMissingProject(t *testing.T) {
 	binary := buildPreview(t)
-	command := exec.Command(binary, "inspect", "--project", filepath.Join(t.TempDir(), "missing"), "--format", "json")
+	command := cleanCommand(t, binary, "inspect", "--project", filepath.Join(t.TempDir(), "missing"), "--format", "json", "--log-level", "off")
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	err := command.Run()
