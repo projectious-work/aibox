@@ -147,7 +147,7 @@ const harnessSchema={type:'object',additionalProperties:false,properties:{
 }};
 const customizationSchema={
   $schema:'https://json-schema.org/draft/2020-12/schema',
-  $id:'https://github.com/projectious-work/aibox/blob/main/spec/native-starters/v1/schemas/customization.schema.json',
+  $id:'https://github.com/projectious-work/aibox/blob/main/spec/workspace-customization/v1/schemas/customization.schema.json',
   title:'aibox devcontainer.json customizations.aibox v1',type:'object',additionalProperties:false,
   required:['schemaVersion'],properties:{schemaVersion:{const:'1'},workspace:workspaceSchema,harnesses:harnessSchema,
     latex:latexSchema,diagnostics:diagnosticsSchema}
@@ -269,7 +269,7 @@ const outputs={
   'defaults.json':defaults,'base-build.json':baseBuild,
   'documentation.json':docs,'environment.json':[...env].sort().map(([name,sources])=>({name,sources,classification:'source occurrence; distinguish internal/test override from supported user interface before migration',acceptance:'AC-CONFIG'})),
   'census.json':census,
-  [path.join(at.nativeStarters,'schemas','customization.schema.json')]:customizationSchema,
+  [path.join(at.workspaceCustomization,'schemas','customization.schema.json')]:customizationSchema,
 };
 const esc=s=>String(s).replaceAll('|','\\|').replaceAll('\n',' ');
 outputs['configuration.md']='# v0 configuration field ledger\n\nGenerated from the immutable baseline by `scripts/spec/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See docs/product/v1/02-configuration.md for custom-deserializer and authority exceptions.\n\n| v0 path | Type | Disposition / v1 destination | Acceptance |\n|---|---|---|---|\n'+uniqueConfig.map(r=>`| [\`${esc(r.path)}\`](${r.source}) | \`${esc(r.type)}\` | ${esc(r.disposition)}: ${esc(r.target)} | ${r.acceptance} |`).join('\n')+'\n';

@@ -4,10 +4,12 @@ Normative. Requirements use *EARS* patterns.
 
 ## Precedence and reading rules
 
-- `interfaces.json` and `schemas/customization.schema.json` prevail over this
-  file and over `journeys.md`. Where they differ, `interfaces.json` and the
-  schema win, and the difference is a specification defect that is fixed in
+- `interfaces.json` prevails over this file and over `journeys.md`. Where
+  they differ, `interfaces.json` wins, and the difference is a specification defect that is fixed in
   `native-starters@v2`.
+- The schema of `customizations.aibox` is specified by
+  `workspace-customization@v1` (`spec/workspace-customization/v1/schemas/customization.schema.json`,
+  "the customization schema"); this version only uses it.
 - The sources cited in `overview.md` (chapters 8 and 12 of the v1 product
   description and `templates/README.md`) are provenance only. They do not add
   to or override this version.
@@ -57,13 +59,15 @@ the contract but that no accepted V1-04 check exercises on its own.
 | NS-030 | Each starter, and the examples `custom-user` and `bind-home`, shall pass `devcontainer read-configuration`, `build`, `up` and `exec` with the pinned Dev Container CLI (`interfaces.json` `devcontainerCli.version`) without the aibox executable. | J-NS-06 |
 | NS-031 | A starter shall remain a valid Dev Container when no aibox runtime Feature is present. | J-NS-06 (no starter selects one) |
 
-## Examples and the customization schema
+## Examples
 
 | ID | Requirement | Verified by |
 |---|---|---|
 | NS-040 | aibox shall maintain the examples `minimal`, `customized`, `custom-user` and `bind-home`, each with `build` `{"dockerfile": "Dockerfile", "context": "."}`, no `image` and no `dockerComposeFile`, explicit and equal `containerUser` and `remoteUser`, exactly one home mount, a `Dockerfile` and an `install-tools.sh`, and no top-level `aibox` member. | J-NS-02 |
-| NS-041 | Each example shall show every option of `schemas/customization.schema.json` in place as a comment with its purpose and valid values, generated from the schema, and shall keep only its selected native fields active; inactive options shall stay commented, and comments shall not change the resolved native definition. | J-NS-03 |
-| NS-042 | The `minimal` example shall have no active `customizations` and no `features`; the `customized` example shall have `customizations.aibox` that validates against the schema. | J-NS-02 |
-| NS-043 | The schema shall be closed: an unknown key, an unknown `schemaVersion` or a `null` value shall fail validation. | J-NS-04 |
+| NS-041 | Each example shall show every option of the customization schema in place as a comment with its purpose and valid values, generated from the schema, and shall keep only its selected native fields active; inactive options shall stay commented, and comments shall not change the resolved native definition. | J-NS-03 |
+| NS-042 | The `minimal` example shall have no active `customizations` and no `features`; the `customized` example shall have `customizations.aibox` that validates against the customization schema. | J-NS-02 |
 | NS-044 | An example shall not invent a Feature registry reference; a published reference shall include its tested ID, digest and actual options in the example and in the selection table together. The `customized` example's `features` shall equal `selected` in `tool-catalog@v1` `fixtures/v1-05-native-features.json`. | J-NS-02 (equality with the fixture) |
 | NS-045 | `aibox inspect --context local` and the MCP tool `inspect_workspace` shall inspect each example read-only and give equivalent results. | J-NS-09 |
+
+Retired IDs: NS-043 (the closed customization schema), now WC-011 of
+`workspace-customization@v1`.

@@ -10,7 +10,7 @@ const locate=p=>p==='roadmap.yaml'?at.roadmap:p==='roadmap.schema.json'?at.roadm
  :p.startsWith('scripts/')?path.join(at.scripts,p.slice(8))
  :p.startsWith('catalog/')||p.startsWith('fixtures/v1-05')?path.join(at.toolCatalog,p)
  :p==='feature-catalog.schema.json'?path.join(at.toolCatalog,'schemas',p)
- :p==='customization.schema.json'?path.join(at.nativeStarters,'schemas',p)
+ :p==='customization.schema.json'?path.join(at.workspaceCustomization,'schemas',p)
  :p.endsWith('.md')?path.join(at.docs,p):path.join(at.contracts,p);
 const read=p=>readFileSync(locate(p),'utf8');
 const json=p=>JSON.parse(read(p));

@@ -32,7 +32,8 @@ V1-05 implemented and accepted; only their directory changed (path map:
 [`docs/engineering/spec-layout-migration.md`](../../../docs/engineering/spec-layout-migration.md)).
 The generated Feature sources under `features/src/` name the new catalog path
 in their header comment, so the published Feature tarballs differ in those
-bytes from the ones accepted at `651506fa`; behaviour does not change.
+bytes from the ones accepted at `651506fa`; behaviour does not change. The owner accepted this
+byte change without a rerun on 2026-11-15.
 
 Contract history: first contract `34d06da0` (DEC-20261029_1515-ShinySpire),
 amendments 1 `59c35acc` (AmberBeam), 2 `d3f6e08e` (NobleBlossom), 3
@@ -72,6 +73,9 @@ V1-05 is `done` at implementation commit `651506fa`
   machine under x86-64 translation on Apple silicon, completed over three
   resumed runs. Full scope never ran on amd64.
 - The owner accepted both as host evidence on 2026-11-15.
-- Open from V1-05 verification: N2 (the departure from LaTeX layer reuse
-  awaits owner acknowledgement); N6 to N8 and N10 deferred, N7 before amd64
-  is advertised.
+- V1-05 verification finding N2 (the departure from LaTeX layer reuse of
+  DEC-20261031_1856-CuriousBeacon) is closed: the owner acknowledged it on
+  2026-11-15. N6 to N8 and N10 stay deferred, N7 before amd64 is advertised.
+- Owner decisions of 2026-11-15 for this version: requirements that no
+  accepted check exercises stay in the contract, marked "not separately
+  verified"; the comment-only Feature header change is accepted.

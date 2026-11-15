@@ -1,7 +1,7 @@
 # Native workspace starters: overview
 
 This file is not normative. The contract is `requirements.md`,
-`interfaces.json`, `journeys.md` and `schemas/customization.schema.json`;
+`interfaces.json` and `journeys.md`;
 `requirements.md` states their precedence.
 
 ## Goal
@@ -29,9 +29,10 @@ requirements restate, as provenance only:
 - the checks of `scripts/verify-v1-04.sh`, `scripts/spec/validate-examples.mjs`,
   `scripts/spec/validate-contracts.py` and `scripts/verify-v1-04-host.py`.
 
-`schemas/customization.schema.json` is byte-identical to the former
-`spec/v1/customization.schema.json` except for its `$id`, which names the new
-path; `scripts/spec/inventory.mjs` still generates it from the v0 ledger. The
+The closed schema of `customizations.aibox` is not part of this version. By
+owner decision of 2026-11-15 it is its own specification,
+`workspace-customization@v1`, because later UX phases change its keys; this
+version cites it (NS-041, NS-042). The
 maintained examples stay in `examples/` because later phases change them;
 the Templates stay in `templates/src/` as product source
 ([path map](../../../docs/engineering/spec-layout-migration.md)).
@@ -53,8 +54,8 @@ the Templates stay in `templates/src/` as product source
   specification's `fixtures/v1-05-native-features.json` (NS-044).
 - No published Template reference exists; OCI Template publication is a
   separate release task.
-- The UX keys of `customizations.aibox` are declared by the closed schema
-  here; their behaviour belongs to later phases (V1-11, V1-12) and, for
+- The UX keys of `customizations.aibox` are declared by
+  `workspace-customization@v1`; their behaviour belongs to later phases (V1-11, V1-12) and, for
   `workspace.theme`, `.mode` and `.layout`, to `settings-and-logging@v1`.
 
 ## Evidence

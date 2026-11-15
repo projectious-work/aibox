@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/projectious-work/aibox/blob/main/spec/native-starters/v1/schemas/customization.schema.json",
+  "$id": "https://github.com/projectious-work/aibox/blob/main/spec/workspace-customization/v1/schemas/customization.schema.json",
   "title": "aibox devcontainer.json customizations.aibox v1",
   "type": "object",
   "additionalProperties": false,

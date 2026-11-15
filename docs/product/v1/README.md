@@ -73,7 +73,7 @@ Baseline: v0.35.0 release-line commit
 - [Configuration ledger](../../../ledger/v0-parity/configuration.md), [machine-readable rows](../../../ledger/v0-parity/configuration.json),
   [type/enum/alias declarations](../../../ledger/v0-parity/configuration-types.json),
   [default-function and Default-implementation evidence](../../../ledger/v0-parity/defaults.json),
-  [closed aibox customization schema](../../../spec/native-starters/v1/schemas/customization.schema.json).
+  [closed aibox customization schema](../../../spec/workspace-customization/v1/schemas/customization.schema.json).
 - [Tool/dependency ledger](../../../ledger/v0-parity/addons.md), [full recipe metadata](../../../ledger/v0-parity/addons.json).
 - [Complete CLI declarations](../../../ledger/v0-parity/commands.json), [atomic action rows](../../../ledger/v0-parity/command-actions.json)
   and [argument rows](../../../ledger/v0-parity/command-arguments.json),

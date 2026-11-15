@@ -102,7 +102,7 @@
       ]
     },
     "minimalCustomizations": "absent",
-    "customizedSchema": "schemas/customization.schema.json",
+    "customizedSchema": "workspace-customization@v1",
     "homeMounts": 1,
     "forbiddenMembers": [
       "image",
@@ -114,9 +114,8 @@
     "customizedFeatures": "equal to selected in tool-catalog@v1 fixtures/v1-05-native-features.json"
   },
   "customizationSchema": {
-    "path": "schemas/customization.schema.json",
-    "schemaVersion": "1",
-    "closed": true
+    "spec": "workspace-customization@v1",
+    "path": "spec/workspace-customization/v1/schemas/customization.schema.json"
   },
   "devcontainerCli": {
     "version": "0.89.0",
@@ -134,7 +133,7 @@
     "mcpTool": "inspect_workspace",
     "readOnly": true
   },
-  "precedence": "This file and schemas/customization.schema.json prevail over requirements.md and journeys.md; the sources cited in overview.md are provenance only; a divergence is a defect fixed in native-starters@v2.",
+  "precedence": "This file prevails over requirements.md and journeys.md; the sources cited in overview.md are provenance only; a divergence is a defect fixed in native-starters@v2.",
   "targets": {
     "supported": "any engine and host that the pinned Dev Container CLI 0.89.0 supports for these images",
     "verified": [

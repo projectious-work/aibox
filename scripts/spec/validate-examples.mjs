@@ -8,7 +8,7 @@ import * as at from './paths.mjs';
 const repoRoot = at.repo;
 const locate = relative => relative.startsWith('examples/') ? path.join(at.examples, relative.slice(9))
   : relative.startsWith('fixtures/v1-05') ? path.join(at.toolCatalog, relative)
-  : relative === 'customization.schema.json' ? path.join(at.nativeStarters, 'schemas', relative)
+  : relative === 'customization.schema.json' ? path.join(at.workspaceCustomization, 'schemas', relative)
   : path.join(at.contracts, relative);
 const readJSON = relative => JSON.parse(readFileSync(locate(relative), 'utf8'));
 // Maintained examples use full-line JSONC comments for inactive options.

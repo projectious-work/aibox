@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import * as at from './paths.mjs';
 
-const schema = JSON.parse(readFileSync(path.join(at.nativeStarters, 'schemas', 'customization.schema.json'), 'utf8'));
+const schema = JSON.parse(readFileSync(path.join(at.workspaceCustomization, 'schemas', 'customization.schema.json'), 'utf8'));
 const nativeFeatureFixture = JSON.parse(readFileSync(path.join(at.toolCatalog, 'fixtures/v1-05-native-features.json'), 'utf8'));
 const check = process.argv.includes('--check');
 
@@ -280,7 +280,7 @@ function render(flavor) {
     '// image, build and dockerComposeFile are alternative native definitions.',
     '// aibox does not parse or transform native build/up fields; devcontainer.cli owns them.',
     '// Native options below are limited to aibox journeys; upstream documents all others.',
-    '// Optional aibox keys come from spec/native-starters/v1/schemas/customization.schema.json, not a parallel build schema.',
+    '// Optional aibox keys come from spec/workspace-customization/v1/schemas/customization.schema.json, not a parallel build schema.',
     '// For unconstrained strings, comments state schema-valid types; check runtime support before activation.',
     '// Feature-specific options come from each selected Feature manifest, not this file.',
     '{',

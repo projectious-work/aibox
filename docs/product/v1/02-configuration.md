@@ -51,7 +51,7 @@ Map each accepted old setting to an effective new outcome in migration tests.
 ### aibox extension schema
 
 The specified `customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
-and `diagnostics` sections. The [closed schema](../../../spec/native-starters/v1/schemas/customization.schema.json)
+and `diagnostics` sections. The [closed schema](../../../spec/workspace-customization/v1/schemas/customization.schema.json)
 retains the 115 v0 workspace UX leaf paths under `workspace` with their existing
 names and primitive types. This is a narrow preservation of aibox-owned UX
 intent, **not** a transplant of old image, install, security or lifecycle

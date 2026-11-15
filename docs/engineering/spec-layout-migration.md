@@ -18,7 +18,7 @@ the commands and paths of the run it records.
 | `spec/v1/catalog/v1-05-features.json` | `spec/tool-catalog/v1/catalog/v1-05-features.json` | Contract: `tool-catalog@v1` |
 | `spec/v1/feature-catalog.schema.json` | `spec/tool-catalog/v1/schemas/feature-catalog.schema.json` | Contract: `tool-catalog@v1` |
 | `spec/v1/fixtures/v1-05-*` | `spec/tool-catalog/v1/fixtures/v1-05-*` | Contract: `tool-catalog@v1` |
-| `spec/v1/customization.schema.json` | `spec/native-starters/v1/schemas/customization.schema.json` | Contract: `native-starters@v1` |
+| `spec/v1/customization.schema.json` | `spec/workspace-customization/v1/schemas/customization.schema.json` | Contract: `workspace-customization@v1` |
 
 Paths in `roadmap.yaml` are relative to the repository root. The validators in
 `scripts/spec/` read every location from `scripts/spec/paths.mjs` and
@@ -33,7 +33,10 @@ draft that the owner freezes:
   header comment, so published Feature tarballs differ in those bytes from
   the ones accepted at `651506fa`; no install logic, option or version
   changes.
-- `native-starters@v1` (V1-04): `customization.schema.json`.
+- `workspace-customization@v1`: `customization.schema.json`, the closed
+  `customizations.aibox` schema.
+- `native-starters@v1` (V1-04): no contract file; it cites
+  `workspace-customization@v1`.
 - `operation-core@v1` (V1-03): the operation request, result, record and
   operator-policy schemas; it waits for V1-06, which changes the result
   schema.
