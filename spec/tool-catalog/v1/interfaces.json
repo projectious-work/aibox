@@ -4,7 +4,7 @@
     "path": "catalog/v1-05-features.json",
     "schema": "schemas/feature-catalog.schema.json",
     "schemaVersion": "aibox.feature-catalog/v1",
-    "precedence": "Where prose in requirements.md and the catalog differ, the catalog wins and the difference is a specification defect (TOOL-001)."
+    "precedence": "The catalog and this file prevail over requirements.md and journeys.md; the chapters cited in overview.md are provenance only; a divergence is a defect fixed in tool-catalog@v2."
   },
   "registry": "ghcr.io/projectious-work/aibox-features",
   "targets": [
@@ -56,13 +56,13 @@
     "smoke": "fixtures/v1-05-smoke",
     "nativeFeatures": "fixtures/v1-05-native-features.json"
   },
-  "checkKinds": [
-    "version",
-    "command",
-    "package",
-    "texlive",
-    "path"
-  ],
+  "checkKinds": {
+    "version": "argv exits 0 and the output matches regex after {version} is replaced by the regular-expression-escaped selected version",
+    "command": "argv exits 0 and the output matches regex, which has no placeholder",
+    "package": "dpkg-query -W -f '${Version}' <package> exits 0 and prints exactly version",
+    "texlive": "tlmgr info --only-installed --data name <package> prints package",
+    "path": "test -d <path> succeeds"
+  },
   "forbiddenMetadata": [
     "onCreateCommand",
     "updateContentCommand",
@@ -83,7 +83,16 @@
       "<major>",
       "<major>.<minor>"
     ],
-    "testRegistry": "localhost:5000/aibox-features"
+    "testRegistry": "localhost:5000/aibox-features",
+    "runFrom": "repository root",
+    "requiresOnPath": [
+      "docker",
+      "devcontainer",
+      "node"
+    ],
+    "testRegistryTransport": "plain HTTP on localhost:5000",
+    "extraTags": "tags the pinned CLI adds, such as latest, are allowed but never selected by tests",
+    "select": "aibox Features by <major> tag; upstream Features by digest"
   },
   "inspection": {
     "key": "devcontainer.features",
@@ -114,17 +123,81 @@
       "trace",
       "guards"
     ],
-    "stacks": [
-      "STACK-PYTHON",
-      "STACK-NODE",
-      "STACK-DOCS",
-      "STACK-NATIVE",
-      "STACK-SECURITY"
-    ],
-    "unsupportedVersionValue": "0.0.0-unsupported"
+    "stacks": {
+      "STACK-PYTHON": [
+        "python/all",
+        "every Feature whose tool method is uv-tool"
+      ],
+      "STACK-NODE": [
+        "node/all",
+        "typescript/all",
+        "mermaid",
+        "data/visualization",
+        "browser-testing/all"
+      ],
+      "STACK-DOCS": [
+        "latex/all",
+        "preview/archive/all",
+        "preview/enhanced/all"
+      ],
+      "STACK-NATIVE": [
+        "go/all",
+        "rust/all",
+        "zig/all"
+      ],
+      "STACK-SECURITY": [
+        "security/crypto/all",
+        "security/scan/all"
+      ]
+    },
+    "unsupportedVersionValue": "0.0.0-unsupported",
+    "testIdSlots": {
+      "present": "<feature-id> <tool> <target-id>",
+      "version": "<feature-id> <tool> <target-id> version=<value>",
+      "isolated": "<feature-id> <tool> <target-id>",
+      "depends": "<feature-id> <tool> <target-id>",
+      "absent": "<target-id>",
+      "bundle": "<feature-id> <target-id>",
+      "side-effects": "<feature-id> <target-id>",
+      "requires": "<feature-id> <target-id> missing=<feature-id>",
+      "unsupported-version": "<feature-id> <target-id>",
+      "unsupported-target": "<feature-id> fixture=<unsupportedTargets id>",
+      "conflict": "<feature-id> <target-id> version=<value>",
+      "smoke": "<smoke-id> <target-id>",
+      "stack": "<stack-id> <target-id>",
+      "inspect": "example=<name>",
+      "trace": "<census-row>",
+      "guards": ""
+    },
+    "stackRuntimes": "node/node, go/go and rust/rustc are added where a member requires them",
+    "scope": {
+      "default": "sampled",
+      "sampled": "first eligible Feature in catalog order per key value; key = install method (bundle for a bundle, else the method of the first tool); requires keyed by distinct requires set",
+      "full": "every eligible Feature: requires per Feature with requires, unsupported-version per Feature with version, unsupported-target per Feature x fixture"
+    }
   },
   "external": {
     "selectionTable": "ledger/v0-parity/v1-05-tool-selection.json",
     "censusBaselineRevision": "9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6"
+  },
+  "checkRules": {
+    "regex": "ECMAScript; searched anywhere in the combined standard output and standard error; ^ and $ match at line boundaries",
+    "selectedVersion": "the Feature's version option value, otherwise the tool's version; versionFrom does not change how checks run",
+    "commands": "each commands entry passes when it resolves through command -v",
+    "runAs": [
+      "fixture remoteUser through devcontainer exec",
+      "root through docker exec --user root <containerId>"
+    ],
+    "packageInstalled": "dpkg-query -W -f '${db:Status-Status}' <package> prints installed",
+    "absenceObservables": [
+      "commands entries",
+      "package checks",
+      "path checks",
+      "command checks"
+    ],
+    "notAbsenceObservables": [
+      "version checks",
+      "texlive checks"
+    ]
   }
 }
