@@ -31,6 +31,19 @@ notes cite. A later phase adds the decisions it relies on.
 | [DEC-20261029_1409-DaringTrail](https://github.com/projectious-work/aibox/blob/main/archive/processkit/decisions/DEC-20261029_1409-DaringTrail-v1-05-contract-review-resolutions-runtime.md) | Review resolutions for runtime dependencies, Debian versions, version counts and approved deviations. |
 | [DEC-20261029_2107-QuietSeal](https://github.com/projectious-work/aibox/blob/main/archive/processkit/decisions/DEC-20261029_2107-QuietSeal-replace-rich-cli-with-glow-and.md) | Replace `rich-cli` with `glow` and `bat` for previews. |
 
+## Go executable
+
+| Decision | Summary |
+|---|---|
+| [ADR 0002](https://github.com/projectious-work/aibox/blob/main/docs/adr/0002-replace-the-standard-flag-parser.md) | Replace the standard `flag` package with a small parser driven by the contract's flag table, so that repeated flags, positional arguments and flags on the wrong command are `usage_error` and aibox controls all usage output (V1-06). |
+| [ADR 0003](https://github.com/projectious-work/aibox/blob/main/docs/adr/0003-hand-written-yaml-encoder.md) | Write the YAML result with a small hand-written encoder of block YAML whose scalars are JSON scalars, instead of adding a YAML dependency (V1-06, decision D7 of the contract). |
+
+The settings-and-logging contract itself records 21 decisions (D1 to D21) in
+[its overview](https://github.com/projectious-work/aibox/blob/main/spec/settings-and-logging/v1/overview.md),
+among them the human default format (D6), the log directory as the only
+permitted place of the log file (D8), the narrowed project layer (D13) and
+`operation_record_unavailable` for a failed required sink (D16).
+
 ## Delivery process
 
 | Decision | Summary |
