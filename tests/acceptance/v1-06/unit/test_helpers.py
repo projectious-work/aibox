@@ -387,6 +387,20 @@ class ExpectationTest(unittest.TestCase):
         b["data"]["observedAt"] = "later"
         self.assertEqual(journeys_out.without_volatile(a), journeys_out.without_volatile(b))
 
+    def test_view_comparison_ignores_only_the_format_value(self):
+        def fmt_entry(value, layer="invocation"):
+            return {"key": "output.format", "value": value, "redacted": False, "layer": layer,
+                    "source": "--format", "domain": "process", "invocationOnly": True}
+        a = success_result([fmt_entry("json")])
+        b = success_result([fmt_entry("yaml")])
+        self.assertEqual(journeys_out.without_volatile(a, True), journeys_out.without_volatile(b, True))
+        self.assertNotEqual(journeys_out.without_volatile(a), journeys_out.without_volatile(b))
+        c = success_result([fmt_entry("yaml", layer="built_in")])
+        self.assertNotEqual(journeys_out.without_volatile(a, True), journeys_out.without_volatile(c, True))
+        d = success_result([dict(fmt_entry("json"), key="output.color")])
+        e = success_result([dict(fmt_entry("yaml"), key="output.color")])
+        self.assertNotEqual(journeys_out.without_volatile(d, True), journeys_out.without_volatile(e, True))
+
 
 class RotationHelpersTest(unittest.TestCase):
     def test_rotation_set(self):
