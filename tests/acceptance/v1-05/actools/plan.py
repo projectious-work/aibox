@@ -36,9 +36,9 @@ BASE_FIXTURE = "baseline"
 class Build:
     key: str
     fixture: str                       # "baseline" or an unsupportedTargets ID
-    fixture_path: str                  # relative to spec/v1
+    fixture_path: str                  # relative to spec/tool-catalog/v1
     selection: tuple[tuple[str, str], ...]  # (Feature ID, options as JSON)
-    copies: tuple[str, ...] = ()       # smoke fixtures, relative to spec/v1
+    copies: tuple[str, ...] = ()       # smoke fixtures, relative to spec/tool-catalog/v1
     expect_failure: bool = False
 
     def selection_dict(self) -> dict[str, dict]:

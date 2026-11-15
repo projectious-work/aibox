@@ -12,4 +12,5 @@ export const scripts = path.join(repo, 'scripts/spec');
 export const roadmap = path.join(repo, 'roadmap.yaml');
 export const roadmapSchema = path.join(repo, 'roadmap.schema.json');
 export const contracts = path.join(repo, 'spec/v1');
+export const toolCatalog = path.join(repo, 'spec/tool-catalog/v1');
 export const templates = path.join(repo, 'templates/src');

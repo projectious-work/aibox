@@ -38,14 +38,14 @@ continue from that commit.
 
 | Artifact | Role |
 |---|---|
-| [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 120 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
-| [`spec/v1/feature-catalog.schema.json`](../spec/v1/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
+| [`spec/tool-catalog/v1/catalog/v1-05-features.json`](../spec/tool-catalog/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 120 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
+| [`spec/tool-catalog/v1/schemas/feature-catalog.schema.json`](../spec/tool-catalog/v1/schemas/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
 | [Chapter 8, Tool Feature interface](../docs/product/v1/08-native-artifacts.md#tool-feature-interface) | Identity, shapes, options, dependencies, targets, errors, presence, absence, side effects, publishing for tests, inspection |
 | [Chapter 5, AC-TOOLS items](../docs/product/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix) | Acceptance item IDs and known-risk stacks |
 | [Chapter 19](../docs/product/v1/19-configuration-realization.md) | Grouped Feature realization and owner-approval rule |
-| `spec/v1/fixtures/v1-05-base/`, `spec/v1/fixtures/v1-05-targets/` | Reference base (snapshot `20261028T000000Z`) and unsupported-target fixtures |
+| `spec/tool-catalog/v1/fixtures/v1-05-base/`, `spec/tool-catalog/v1/fixtures/v1-05-targets/` | Reference base (snapshot `20261028T000000Z`) and unsupported-target fixtures |
 | [`ledger/v0-parity/v1-05-tool-selection.json`](../ledger/v0-parity/v1-05-tool-selection.json) | Census table: each of the 98 rows retained with its Feature or removed with its decision |
-| `spec/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
+| `spec/tool-catalog/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
 | `scripts/spec/validate-v1-05-catalog.py` | Cross-reference checks between census, catalog and table |
 
 Census result: 93 rows retained, 5 removed (mistral, starlight, docusaurus,
@@ -237,7 +237,7 @@ notes are applied in `3d93aa7e`. The owner approved the amendment and froze it a
 `3d93aa7e` on 2026-11-05 (DEC-20261105_1634-ProudFjord).
 
 The departure from DEC-20261031_1856-CuriousBeacon's LaTeX reuse awaits the
-owner's acknowledgement or a new decision (verification finding N2).
+owner's acknowledgement or a new decision (verification finding N2). The owner acknowledged it on 2026-11-15; N2 is closed (logbook).
 
 ## Integration loop
 
@@ -372,3 +372,4 @@ engine, but not CPU-specific behaviour. The owner accepted this evidence for the
 | 2026-11-14 | amd64 run `20261114T170634Z` (owner, OrbStack, candidate `651506fa`, `--jobs` 2, `--resume` from `20261114T160656Z`, which carried 91 passed results of whole builds): the engine stopped answering after 178 of 184 builds. The watchdog missed `docker info` at 18:15:01, 18:16:31 and 18:18:01 UTC and stopped the run: 586 passed, 8 `not-run` (`SMOKE-MERMAID`, `SMOKE-MDBOOK`, `SMOKE-ZENSICAL` and five `AC-TOOLS/stack` tests), none failed. Load average was 0.75 over one minute and 7.98 over fifteen, so load does not explain the stall; Docker under x86-64 translation stops answering after 30 to 70 minutes of builds. `operator.json` was written, so the fix in `479a5361` works. |
 | 2026-11-15 | amd64 run `20261115T113342Z` (owner, OrbStack, candidate `651506fa`, `--jobs` 2, `--resume` from `20261114T170634Z`): 594 of 594 passed, no cleanup failures, exit status 0. 109 results come from this run, 394 from `20261114T170634Z` and 91 from `20261114T160656Z`; each carried result names its run in `carriedFrom`. All three runs used a clean checkout of `651506fa` on Docker 26.1.5 in a disposable Debian 13 amd64 OrbStack machine (Apple M2, x86-64 translation). `651506fa` changes no file under `features/` relative to `fbd178d6`. Evidence: [`host-run-amd64-sampled-651506fa.json`](../evidence/v1/V1-05-fbd178d6/host-run-amd64-sampled-651506fa.json) and the run chain [`host-run-amd64-chain-651506fa.json`](../evidence/v1/V1-05-fbd178d6/host-run-amd64-chain-651506fa.json). |
 | 2026-11-15 | Owner decision, given to the integration owner (`claude-opus-5-5`, Anthropic) in session: the resumed OrbStack runs count as the `debian-13-amd64` host evidence, including the split over three runs and the x86-64 translation, and the nested Podman runs count as the `debian-13-arm64` host evidence. B1 and R1 are closed and V1-05 is `done`. N2 stays open; N6–N8 and N10 stay deferred, N7 before amd64 is advertised. |
+| 2026-11-15 | Owner decisions on the `tool-catalog@v1` draft (#504, PR #525), given in session: (1) the generated Feature sources' header comments now name `spec/tool-catalog/v1/catalog/v1-05-features.json`, so published Feature tarballs differ in those bytes from the ones accepted at `651506fa`; accepted without a rerun, because install logic, options and versions are unchanged. (2) The departure from DEC-20261031_1856-CuriousBeacon's LaTeX layer reuse is acknowledged; verification finding N2 is closed. |
