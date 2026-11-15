@@ -28,3 +28,9 @@ instructions for released software. The phase graph is in the [canonical v1
 roadmap](https://github.com/projectious-work/aibox/blob/main/roadmap.yaml).
 
 For the current released aibox product, see the [v0.x documentation](https://projectious-work.github.io/aibox/).
+
+[Settings](settings.md) explains where the executable reads its process
+settings and how to see which value won; [logging and redaction](logging.md)
+covers the diagnostic events, the log file and what is redacted; and
+[troubleshooting](troubleshooting.md) lists every rejection reason and how to
+capture the diagnostics of `mcp serve` under systemd and launchd.

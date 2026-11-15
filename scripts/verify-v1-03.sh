@@ -26,7 +26,7 @@ GOOS=darwin GOARCH=arm64 go build -o "$evidence_dir/aibox-darwin-arm64" ./cmd/ai
 "$evidence_dir/aibox" --help > "$evidence_dir/help.txt"
 "$evidence_dir/aibox" inspect --context local --project examples/minimal --format json > "$evidence_dir/inspect.json"
 set +e
-"$evidence_dir/aibox" inspect --context local --project "$evidence_dir/missing" --format json > "$evidence_dir/invalid-project.json" 2> "$evidence_dir/invalid-project.stderr"
+"$evidence_dir/aibox" inspect --context local --project "$evidence_dir/missing" --format json --log-level off > "$evidence_dir/invalid-project.json" 2> "$evidence_dir/invalid-project.stderr"
 invalid_exit=$?
 set -e
 [[ "$invalid_exit" == 2 && ! -s "$evidence_dir/invalid-project.stderr" ]] || {

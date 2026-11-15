@@ -41,9 +41,82 @@ incompatible, 6 rebuild, restart or recovery required, 124 timed out,
 130 cancelled, and 5 for any other failure. CLI and MCP produce equivalent envelopes for equivalent
 requests; black-box tests compare them.
 
+## Result formats and the stdout rule
+
+The CLI writes the envelope to stdout in the format of `output.format`:
+`human` (the CLI default since V1-06; wording is not a contract), `json`
+(one document and a newline) or `yaml`. The YAML form is block YAML whose
+scalars are JSON scalars, written without a YAML library
+([ADR 0003](https://github.com/projectious-work/aibox/blob/main/docs/adr/0003-hand-written-yaml-encoder.md)).
+Nothing else is written to stdout: events, progress and diagnostics go to
+stderr. A failure before the operation starts uses operation
+`invalid_request`, error `invalid_input` and exit 2.
+
+## Layered settings
+
+Process settings come from seven layers, lowest first: `built_in`,
+`system`, `user`, `project`, `env_file`, `environment`, `invocation`
+([settings](../settings.md)). Each key names the layers that may set it; a
+value from any other layer fails the command (`unauthorized_source`) rather
+than falling back, so that a project or an environment file cannot move logs
+or weaken an administrator's choices. The project layer is limited to three
+workspace preferences in `customizations.aibox.workspace`.
+
+[`internal/settings`](https://github.com/projectious-work/aibox/tree/main/internal/settings)
+keeps the catalog as Go data. Because `go:embed` cannot reach `spec/`, drift
+tests compare it with `interfaces.json`, the process-settings schema and the
+registered-environment fixture whenever the tests run. Loading is separated
+from resolution: `mcp serve` loads once at start and adds only the project
+layer of each called project, so a tool call can never change a setting.
+Resolution reads files and an injected environment only. It never writes,
+never changes the working directory and never modifies the process
+environment, so a value from an environment file cannot reach a child
+process. All defects of all layers are found before the operation starts,
+and the first in a fixed order is reported, with one `settings.rejected`
+event and a reason from a closed list.
+
+## Diagnostic events and redaction
+
+Diagnostics are semantic events (`aibox.log-event/v1`) with a request ID and
+a per-request sequence, a component, and string fields
+([logging and redaction](../logging.md)). The same use case emits the same
+events for CLI and MCP; `mcp serve` has its own process ID.
+
+[`internal/logging`](https://github.com/projectious-work/aibox/tree/main/internal/logging)
+applies the level filter and then
+[`internal/redact`](https://github.com/projectious-work/aibox/tree/main/internal/redact)
+before an event reaches the queue, so no sink ever sees an unredacted value.
+A single writer drains a bounded queue (1024) to the stderr sink and the file
+sink. No operation waits on a sink for longer than 2 seconds: under
+backpressure `trace` and `debug` are dropped and counted, `warn` and `error`
+bypass the queue, and the shutdown flush is bounded. A failed file sink is a
+warning on a read-only result; with `logging.required` it refuses a
+mutating operation before any effect. A broken stderr is ignored silently.
+
+The file sink keeps no descriptor of the log file between events: each event
+takes an exclusive `flock` on `<file>.lock`, rotates if needed, appends one
+line with one write, and releases the lock. That makes concurrent processes
+safe on local file systems. The sink only ever touches its rotation set, and
+the log directory is separate from the operation records.
+
+Redaction replaces the values of secret-named environment variables (at
+least 8 bytes), a list of secret shapes, and, in paths shown to people, the
+home directory prefix. It cannot be disabled. The streaming writer of
+`internal/redact` handles secrets split over several writes, for the child
+output of later phases.
+
+## Time limits and cancellation
+
+`usecase.Execute` gives every operation a deadline from
+`execution.timeoutSeconds` or its class default (30 seconds for a read,
+3600 for a mutating operation) and runs it under the CLI's SIGINT/SIGTERM
+context. A deadline yields `timed_out` (exit 124); a signal yields
+`cancelled` (exit 130) and the event `operation.cancelled`. The read-only
+inspection has no effects, so both outcomes are exact.
+
 ## Read-only by default, authority from outside the project
 
-The executable registers only complete operations. In V1-05 that is one
+The executable registers only complete operations. Up to V1-06 that is one
 read-only use case, so neither adapter can mutate anything. Actor labels
 such as `cli` or `mcp` are attribution, never authorization. Repository
 content can request, but never grant, host authority; operator policy will

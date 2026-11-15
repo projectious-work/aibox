@@ -3,6 +3,7 @@ package inspection
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -24,7 +25,7 @@ func fixture(t *testing.T) (string, string) {
 
 func TestWorkspaceReadsOnlyDeclaredConfig(t *testing.T) {
 	root, config := fixture(t)
-	resolved, first, data, err := Workspace(root)
+	resolved, first, data, err := Workspace(t.Context(), root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,14 +35,14 @@ func TestWorkspaceReadsOnlyDeclaredConfig(t *testing.T) {
 	if len(data.Configuration) != 1 || data.Configuration[0].Value != ".devcontainer/devcontainer.json" {
 		t.Fatalf("missing sourced native declaration: %+v", data.Configuration)
 	}
-	_, again, _, err := Workspace(root)
+	_, again, _, err := Workspace(t.Context(), root)
 	if err != nil || first != again {
 		t.Fatalf("stable declaration changed digest: %q %q %v", first, again, err)
 	}
 	if err := os.WriteFile(config, []byte(`{"image":"example.invalid/base:two"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	_, changed, _, err := Workspace(root)
+	_, changed, _, err := Workspace(t.Context(), root)
 	if err != nil || changed == first {
 		t.Fatalf("changed declaration retained digest: %q %q %v", first, changed, err)
 	}
@@ -52,7 +53,7 @@ func TestWorkspaceRejectsMissingAndSymlinkedDeclaration(t *testing.T) {
 	if err := os.Remove(config); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err := Workspace(root); err == nil {
+	if _, _, _, err := Workspace(t.Context(), root); err == nil {
 		t.Fatal("accepted missing native declaration")
 	}
 	outside := filepath.Join(t.TempDir(), "secret")
@@ -62,7 +63,7 @@ func TestWorkspaceRejectsMissingAndSymlinkedDeclaration(t *testing.T) {
 	if err := os.Symlink(outside, config); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err := Workspace(root); err == nil {
+	if _, _, _, err := Workspace(t.Context(), root); err == nil {
 		t.Fatal("accepted symlinked declaration")
 	}
 }
@@ -80,7 +81,7 @@ func TestWorkspaceReportsSelectedFeaturesWithoutOptionsOrSecrets(t *testing.T) {
 	if err := os.WriteFile(config, []byte(declaration), 0600); err != nil {
 		t.Fatal(err)
 	}
-	_, _, data, err := Workspace(root)
+	_, _, data, err := Workspace(t.Context(), root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +95,7 @@ func TestWorkspaceReportsSelectedFeaturesWithoutOptionsOrSecrets(t *testing.T) {
 	}
 	refs, ok := entry.Value.([]string)
 	entry.Value = nil
-	if entry != want {
+	if !reflect.DeepEqual(entry, want) {
 		t.Fatalf("unexpected Feature selection entry: %+v", entry)
 	}
 	if !ok || len(refs) != 2 || refs[0] != "ghcr.io/example/gh@sha256:def" ||
@@ -116,7 +117,7 @@ func TestWorkspaceOmitsFeaturesWhenNoneAreSelected(t *testing.T) {
 		if err := os.WriteFile(config, []byte(declaration), 0600); err != nil {
 			t.Fatal(err)
 		}
-		_, _, data, err := Workspace(root)
+		_, _, data, err := Workspace(t.Context(), root)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
@@ -133,7 +134,7 @@ func TestWorkspaceRejectsMalformedDeclaration(t *testing.T) {
 	if err := os.WriteFile(config, []byte(`{"features": {"ghcr.io/example/x:1": {}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, err := Workspace(root); err == nil {
+	if _, _, _, err := Workspace(t.Context(), root); err == nil {
 		t.Fatal("accepted a malformed native declaration")
 	}
 }
