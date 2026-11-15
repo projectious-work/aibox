@@ -3,7 +3,7 @@
 // image, build and dockerComposeFile are alternative native definitions.
 // aibox does not parse or transform native build/up fields; devcontainer.cli owns them.
 // Native options below are limited to aibox journeys; upstream documents all others.
-// Optional aibox keys come from spec/v1/customization.schema.json, not a parallel build schema.
+// Optional aibox keys come from spec/native-starters/v1/schemas/customization.schema.json, not a parallel build schema.
 // For unconstrained strings, comments state schema-valid types; check runtime support before activation.
 // Feature-specific options come from each selected Feature manifest, not this file.
 {

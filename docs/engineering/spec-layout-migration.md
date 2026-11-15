@@ -15,6 +15,7 @@ the commands and paths of the run it records.
 | `spec/v1/baseline-evidence.md`, `spec/v1/docs-foundation-evidence.md` | `evidence/v1/` | Evidence |
 | `spec/v1/scripts/` | `scripts/spec/` | Tooling |
 | `spec/v1/examples/` | `examples/` | Product examples |
+| `spec/v1/customization.schema.json` | `spec/native-starters/v1/schemas/customization.schema.json` | Contract: `native-starters@v1` |
 
 Paths in `roadmap.yaml` are relative to the repository root. The validators in
 `scripts/spec/` read every location from `scripts/spec/paths.mjs` and

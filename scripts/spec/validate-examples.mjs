@@ -6,7 +6,9 @@ import * as at from './paths.mjs';
 
 // Contract files are read from the contract root; examples/ from the repository.
 const repoRoot = at.repo;
-const locate = relative => relative.startsWith('examples/') ? path.join(at.examples, relative.slice(9)) : path.join(at.contracts, relative);
+const locate = relative => relative.startsWith('examples/') ? path.join(at.examples, relative.slice(9))
+  : relative === 'customization.schema.json' ? path.join(at.nativeStarters, 'schemas', relative)
+  : path.join(at.contracts, relative);
 const readJSON = relative => JSON.parse(readFileSync(locate(relative), 'utf8'));
 // Maintained examples use full-line JSONC comments for inactive options.
 const readJSONC = relative => JSON.parse(readFileSync(locate(relative), 'utf8')

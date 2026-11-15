@@ -1,0 +1,110 @@
+{
+  "catalogVersion": "native-starters@v1",
+  "templates": {
+    "ids": [
+      "minimal",
+      "curated"
+    ],
+    "sourceRoot": "templates/src",
+    "format": "Dev Container Template (upstream)",
+    "version": "1.0.0",
+    "publisher": "projectious-work",
+    "platforms": [
+      "Any"
+    ],
+    "options": {
+      "harness": {
+        "type": "string",
+        "enum": [
+          "codex",
+          "none"
+        ],
+        "default": "codex",
+        "buildArg": "HARNESS"
+      }
+    },
+    "files": [
+      ".devcontainer/devcontainer.json",
+      ".devcontainer/Dockerfile",
+      ".devcontainer/install-tools.sh",
+      ".devcontainer/.gitignore"
+    ],
+    "curatedExtraFiles": [
+      ".devcontainer/tmux.conf"
+    ],
+    "gitignore": [
+      "*.env",
+      "compose.local.yaml"
+    ],
+    "renderer": {
+      "command": "node templates/render.mjs --template <minimal|curated> --output <absolute path> [--harness <codex|none>]",
+      "existingConfiguration": "refused"
+    },
+    "never": [
+      ".aibox/",
+      ".aibox-home/"
+    ]
+  },
+  "user": {
+    "name": "aibox",
+    "home": "/home/aibox",
+    "containerUser": "aibox",
+    "remoteUser": "aibox"
+  },
+  "home": {
+    "mount": "source=aibox-home-${devcontainerId},target=/home/aibox,type=volume",
+    "kind": "named volume, project-scoped"
+  },
+  "examples": {
+    "root": "examples",
+    "ids": [
+      "minimal",
+      "customized",
+      "custom-user",
+      "bind-home"
+    ],
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "."
+    },
+    "bindHome": {
+      "mount": {
+        "source": "${localWorkspaceFolder}/.aibox-home",
+        "target": "/home/aibox",
+        "type": "bind"
+      },
+      "projectGitignore": [
+        ".aibox-home/",
+        ".env"
+      ]
+    },
+    "customUser": {
+      "name": "dev",
+      "home": "/home/dev",
+      "mount": "source=aibox-home-${devcontainerId},target=/home/dev,type=volume"
+    },
+    "minimalCustomizations": "absent",
+    "customizedSchema": "schemas/customization.schema.json"
+  },
+  "customizationSchema": {
+    "path": "schemas/customization.schema.json",
+    "schemaVersion": "1",
+    "closed": true
+  },
+  "devcontainerCli": {
+    "version": "0.89.0",
+    "archive": "tools/vendor/devcontainer-cli-0.89.0.tgz",
+    "commands": [
+      "read-configuration",
+      "build",
+      "up",
+      "exec"
+    ],
+    "lockfile": ".devcontainer/devcontainer-lock.json"
+  },
+  "inspection": {
+    "cli": "aibox inspect --context local --project <example> --format json",
+    "mcpTool": "inspect_workspace",
+    "readOnly": true
+  }
+}
