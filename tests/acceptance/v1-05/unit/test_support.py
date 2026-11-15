@@ -126,7 +126,7 @@ class InspectionTest(unittest.TestCase):
         self.assertTrue(any("echoes option value" in f for f in failures))
 
     def test_mcp_arguments_follow_the_request_branch(self):
-        schema = json.loads((SPEC / "operation-request.schema.json").read_text())
+        schema = json.loads((REPO / "spec" / "v1" / "operation-request.schema.json").read_text())
         branch = next(b for b in schema["oneOf"]
                       if b["properties"]["operation"].get("const") == "inspect_workspace")
         self.assertEqual(inspection.mcp_arguments(branch, "/p", "r1"),

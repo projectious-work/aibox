@@ -15,6 +15,9 @@ the commands and paths of the run it records.
 | `spec/v1/baseline-evidence.md`, `spec/v1/docs-foundation-evidence.md` | `evidence/v1/` | Evidence |
 | `spec/v1/scripts/` | `scripts/spec/` | Tooling |
 | `spec/v1/examples/` | `examples/` | Product examples |
+| `spec/v1/catalog/v1-05-features.json` | `spec/tool-catalog/v1/catalog/v1-05-features.json` | Contract: `tool-catalog@v1` |
+| `spec/v1/feature-catalog.schema.json` | `spec/tool-catalog/v1/schemas/feature-catalog.schema.json` | Contract: `tool-catalog@v1` |
+| `spec/v1/fixtures/v1-05-*` | `spec/tool-catalog/v1/fixtures/v1-05-*` | Contract: `tool-catalog@v1` |
 
 Paths in `roadmap.yaml` are relative to the repository root. The validators in
 `scripts/spec/` read every location from `scripts/spec/paths.mjs` and

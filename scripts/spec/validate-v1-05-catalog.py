@@ -8,18 +8,18 @@ import json
 import re
 from collections import Counter
 
-from spec_paths import CONTRACTS, LEDGER, REPO
+from spec_paths import LEDGER, REPO, TOOL_CATALOG
 
-# Catalog fixture paths are relative to the contract root.
-root = CONTRACTS
+# Catalog fixture paths are relative to the tool-catalog specification.
+root = TOOL_CATALOG
 repo = REPO
 read = lambda path: json.loads(path.read_text())
 ledger = read(LEDGER / "addons.json")
 table = read(LEDGER / "v1-05-tool-selection.json")
 audit = read(REPO / "evidence/v1/V1-05/source-audit.json")
 oci = read(REPO / "evidence/v1/V1-05/oci-evidence.json")
-fixture = read(CONTRACTS / "fixtures/v1-05-native-features.json")
-catalog = read(CONTRACTS / "catalog/v1-05-features.json")
+fixture = read(TOOL_CATALOG / "fixtures/v1-05-native-features.json")
+catalog = read(TOOL_CATALOG / "catalog/v1-05-features.json")
 
 
 def fail(message):
@@ -184,5 +184,21 @@ for ref, options in fixture["selected"].items():
     require(upstream_refs.get(ref) == options, f"example Feature not in catalog: {ref}")
 
 counts = Counter(f["role"] for f in features.values())
+# tool-catalog@v1 interfaces.json indexes the catalog; it must not drift from it.
+interfaces = read(TOOL_CATALOG / "interfaces.json")
+require((TOOL_CATALOG / interfaces["catalog"]["path"]).resolve() == (TOOL_CATALOG / "catalog/v1-05-features.json").resolve(),
+        "interfaces.json catalog path")
+require((TOOL_CATALOG / interfaces["catalog"]["schema"]).exists(), "interfaces.json schema path")
+require(interfaces["catalog"]["schemaVersion"] == catalog["schemaVersion"], "interfaces.json schemaVersion")
+require(interfaces["registry"] == catalog["registry"], "interfaces.json registry")
+require(interfaces["targets"] == [t["id"] for t in catalog["targets"]], "interfaces.json targets")
+require(interfaces["errors"] == [{"code": e["code"], "verification": e["verification"]} for e in catalog["errors"]],
+        "interfaces.json errors")
+require(interfaces["unsupportedTargetFixtures"] == {u["id"]: u.get("fixture") for u in catalog["unsupportedTargets"]},
+        "interfaces.json unsupported targets")
+require(all((TOOL_CATALOG / f).exists() for f in interfaces["fixtures"].values()), "interfaces.json fixture paths")
+require((REPO / interfaces["external"]["selectionTable"]).exists(), "interfaces.json selection table")
+require(interfaces["external"]["censusBaselineRevision"] == catalog["baselineRevision"], "interfaces.json baseline revision")
+
 print(f"V1-05 catalog: {len(rows)} census rows ({len(rows) - len(removed)} retained, {len(removed)} removed), "
       f"{len(groups)} groups, {len(features)} Features ({counts['tool']} tool, {counts['atomic']} atomic, {counts['bundle']} bundle)")

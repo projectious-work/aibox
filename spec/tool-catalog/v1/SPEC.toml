@@ -1,0 +1,16 @@
+slug = "tool-catalog"
+version = 1
+status = "draft"
+roadmap = ["V1-05"]
+issues = ["504"]
+decisions = [
+  "DEC-20261002_0046-SmoothLotus",
+  "DEC-20261002_0054-AmberCompass",
+  "DEC-20261026_1412-FastForge",
+  "DEC-20261029_0802-DeepOtter",
+  "DEC-20261029_0835-HumbleBridge",
+  "DEC-20261029_1034-ActiveJay",
+  "DEC-20261029_1409-DaringTrail",
+  "DEC-20261031_1743-MightyRaven",
+  "DEC-20261105_1634-ProudFjord",
+]

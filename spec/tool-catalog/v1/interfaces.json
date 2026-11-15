@@ -1,0 +1,130 @@
+{
+  "catalogVersion": "tool-catalog@v1",
+  "catalog": {
+    "path": "catalog/v1-05-features.json",
+    "schema": "schemas/feature-catalog.schema.json",
+    "schemaVersion": "aibox.feature-catalog/v1",
+    "precedence": "Where prose in requirements.md and the catalog differ, the catalog wins and the difference is a specification defect (TOOL-001)."
+  },
+  "registry": "ghcr.io/projectious-work/aibox-features",
+  "targets": [
+    "debian-13-amd64",
+    "debian-13-arm64"
+  ],
+  "unsupportedTargetFixtures": {
+    "debian-12": "fixtures/v1-05-targets/bookworm",
+    "ubuntu-24.04": "fixtures/v1-05-targets/ubuntu-24.04"
+  },
+  "errors": [
+    {
+      "code": "AIBOX_FEATURE_UNSUPPORTED_TARGET",
+      "verification": "acceptance"
+    },
+    {
+      "code": "AIBOX_FEATURE_UNSUPPORTED_VERSION",
+      "verification": "acceptance"
+    },
+    {
+      "code": "AIBOX_FEATURE_VERSION_CONFLICT",
+      "verification": "acceptance"
+    },
+    {
+      "code": "AIBOX_FEATURE_COUPLING_MISMATCH",
+      "verification": "component"
+    },
+    {
+      "code": "AIBOX_FEATURE_DEPENDENCY_MISSING",
+      "verification": "acceptance"
+    },
+    {
+      "code": "AIBOX_FEATURE_DOWNLOAD_FAILED",
+      "verification": "component"
+    },
+    {
+      "code": "AIBOX_FEATURE_VERIFICATION_FAILED",
+      "verification": "component"
+    },
+    {
+      "code": "AIBOX_FEATURE_PACKAGE_UNAVAILABLE",
+      "verification": "component"
+    }
+  ],
+  "errorLine": "aibox-feature error <CODE> feature=<catalog-id> <detail>",
+  "fixtures": {
+    "baseline": "fixtures/v1-05-base",
+    "targets": "fixtures/v1-05-targets",
+    "smoke": "fixtures/v1-05-smoke",
+    "nativeFeatures": "fixtures/v1-05-native-features.json"
+  },
+  "checkKinds": [
+    "version",
+    "command",
+    "package",
+    "texlive",
+    "path"
+  ],
+  "forbiddenMetadata": [
+    "onCreateCommand",
+    "updateContentCommand",
+    "postCreateCommand",
+    "postStartCommand",
+    "postAttachCommand",
+    "mounts",
+    "privileged",
+    "capAdd",
+    "securityOpt",
+    "init",
+    "entrypoint"
+  ],
+  "publish": {
+    "command": "scripts/v1-05-features.sh publish --registry <host>/<prefix>",
+    "tags": [
+      "<featureVersion>",
+      "<major>",
+      "<major>.<minor>"
+    ],
+    "testRegistry": "localhost:5000/aibox-features"
+  },
+  "inspection": {
+    "key": "devcontainer.features",
+    "layer": "project",
+    "source": ".devcontainer/devcontainer.json",
+    "domain": "native",
+    "redacted": false,
+    "invocationOnly": false,
+    "value": "sorted list of selected Feature references; options never echoed; entry absent when no Feature is selected"
+  },
+  "acceptance": {
+    "testId": "AC-TOOLS/<item> [<feature-id> [<tool>]] [<target-id>] [<key>=<value> ...]",
+    "items": [
+      "present",
+      "version",
+      "absent",
+      "isolated",
+      "bundle",
+      "depends",
+      "requires",
+      "unsupported-version",
+      "unsupported-target",
+      "conflict",
+      "side-effects",
+      "smoke",
+      "stack",
+      "inspect",
+      "trace",
+      "guards"
+    ],
+    "stacks": [
+      "STACK-PYTHON",
+      "STACK-NODE",
+      "STACK-DOCS",
+      "STACK-NATIVE",
+      "STACK-SECURITY"
+    ],
+    "unsupportedVersionValue": "0.0.0-unsupported"
+  },
+  "external": {
+    "selectionTable": "ledger/v0-parity/v1-05-tool-selection.json",
+    "censusBaselineRevision": "9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6"
+  }
+}
