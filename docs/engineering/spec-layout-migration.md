@@ -34,7 +34,9 @@ draft that the owner freezes:
   the ones accepted at `651506fa`; no install logic, option or version
   changes.
 - `workspace-customization@v1`: `customization.schema.json`, the closed
-  `customizations.aibox` schema.
+  `customizations.aibox` schema. Its `$id` is a GitHub blob URL of the file,
+  so it follows the move; `tool-catalog@v1` kept its schema's
+  `https://projectious.work/...` `$id`, which names no path.
 - `native-starters@v1` (V1-04): no contract file; it cites
   `workspace-customization@v1`.
 - `operation-core@v1` (V1-03): the operation request, result, record and

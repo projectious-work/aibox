@@ -1,6 +1,6 @@
 {
   "catalogVersion": "workspace-customization@v1",
-  "precedence": "The schema and this file prevail over requirements.md and journeys.md; the chapters cited in overview.md are provenance only; a divergence is a defect fixed in workspace-customization@v2.",
+  "precedence": "The schema prevails over this file; both prevail over requirements.md and journeys.md; the chapters cited in overview.md are provenance only; a divergence is a defect fixed in workspace-customization@v2.",
   "schema": {
     "path": "schemas/customization.schema.json",
     "$id": "https://github.com/projectious-work/aibox/blob/main/spec/workspace-customization/v1/schemas/customization.schema.json",
@@ -11,13 +11,14 @@
       "unknown key",
       "unknown schemaVersion",
       "value outside a named enumeration",
+      "number below its declared minimum",
       "null"
     ]
   },
   "generator": {
     "command": "node scripts/spec/inventory.mjs",
     "check": "node scripts/spec/inventory.mjs --check",
-    "source": "ledger/v0-parity/configuration.json (v0 baseline 9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6)"
+    "source": "v0 source at baseline 9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6; the same run writes ledger/v0-parity/configuration.json"
   },
   "sections": {
     "workspace": {
