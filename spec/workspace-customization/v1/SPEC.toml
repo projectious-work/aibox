@@ -1,0 +1,6 @@
+slug = "workspace-customization"
+version = 1
+status = "draft"
+roadmap = ["V1-01", "V1-04"]
+issues = ["504"]
+decisions = []

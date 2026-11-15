@@ -1,0 +1,74 @@
+{
+  "catalogVersion": "workspace-customization@v1",
+  "precedence": "The schema prevails over this file; both prevail over requirements.md and journeys.md; the chapters cited in overview.md are provenance only; a divergence is a defect fixed in workspace-customization@v2.",
+  "schema": {
+    "path": "schemas/customization.schema.json",
+    "$id": "https://github.com/projectious-work/aibox/blob/main/spec/workspace-customization/v1/schemas/customization.schema.json",
+    "location": "customizations.aibox in .devcontainer/devcontainer.json",
+    "schemaVersion": "1",
+    "closed": true,
+    "rejects": [
+      "unknown key",
+      "unknown schemaVersion",
+      "value outside a named enumeration",
+      "number below its declared minimum",
+      "null"
+    ]
+  },
+  "generator": {
+    "command": "node scripts/spec/inventory.mjs",
+    "check": "node scripts/spec/inventory.mjs --check",
+    "source": "v0 source at baseline 9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6; the same run writes ledger/v0-parity/configuration.json"
+  },
+  "sections": {
+    "workspace": {
+      "v0LeafPaths": 115,
+      "newSections": [
+        "sidebar",
+        "review"
+      ],
+      "interpretedBy": [
+        "V1-11",
+        "V1-12",
+        "V1-17",
+        "V1-18",
+        "settings-and-logging@v1 (theme, mode, layout only)"
+      ]
+    },
+    "harnesses": {
+      "members": [
+        "order",
+        "launch.<name>.enabled"
+      ],
+      "meaning": "launch intent, not installation",
+      "interpretedBy": [
+        "V1-10"
+      ]
+    },
+    "latex": {
+      "interpretedBy": [
+        "V1-13"
+      ],
+      "excludes": "preview network and service settings (native Compose)"
+    },
+    "diagnostics": {
+      "interpretedBy": [
+        "V1-16"
+      ]
+    }
+  },
+  "closedAfterBaseline": {
+    "workspace.tmux.layout_switch.style": [
+      "menu",
+      "table"
+    ],
+    "workspace.tmux.notifications.protocol": [
+      "osc-9",
+      "bell"
+    ]
+  },
+  "consumers": [
+    "examples/*/.devcontainer/devcontainer.json (native-starters@v1)",
+    "spec/settings-and-logging/v1 project layer"
+  ]
+}

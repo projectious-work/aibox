@@ -7,9 +7,9 @@ import copy
 import json
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
-from spec_paths import CONTRACTS, EXAMPLES, ROADMAP, ROADMAP_SCHEMA, TEMPLATES, TOOL_CATALOG
+from spec_paths import CONTRACTS, EXAMPLES, ROADMAP, ROADMAP_SCHEMA, TEMPLATES, TOOL_CATALOG, WORKSPACE_CUSTOMIZATION
 
-schemas = {p.name: json.loads(p.read_text()) for p in [*CONTRACTS.glob("*.schema.json"), *TOOL_CATALOG.glob("schemas/*.schema.json"), ROADMAP_SCHEMA]}
+schemas = {p.name: json.loads(p.read_text()) for p in [*CONTRACTS.glob("*.schema.json"), *TOOL_CATALOG.glob("schemas/*.schema.json"), *WORKSPACE_CUSTOMIZATION.glob("schemas/*.schema.json"), ROADMAP_SCHEMA]}
 registry = Registry().with_resources((s["$id"], Resource.from_contents(s)) for s in schemas.values())
 validators = {}
 for name, schema in schemas.items():
@@ -213,5 +213,18 @@ for name in ("minimal", "customized", "custom-user", "bind-home"):
         dockerfile = (example_dir / ".devcontainer" / "Dockerfile").read_text()
         assert "ARG USERNAME=dev" in dockerfile and "useradd --create-home" in dockerfile
     template_checks += 1
+# workspace-customization@v1 interfaces.json must describe the schema it indexes.
+customization_index = json.loads((WORKSPACE_CUSTOMIZATION / "interfaces.json").read_text())
+customization = schemas["customization.schema.json"]
+assert customization_index["schema"]["$id"] == customization["$id"]
+assert (WORKSPACE_CUSTOMIZATION / customization_index["schema"]["path"]).is_file()
+assert set(customization_index["sections"]) == set(customization["properties"]) - {"schemaVersion"}
+assert customization["properties"]["schemaVersion"] == {"const": customization_index["schema"]["schemaVersion"]}
+for dotted, values in customization_index["closedAfterBaseline"].items():
+    node = customization
+    for part in dotted.split("."):
+        node = node["properties"][part]
+    assert node["enum"] == values, dotted
+
 print(f"Draft 2020-12 validation passed: {len(schemas)} schemas, {count} contract fixtures.")
 print(f"Native starter contracts passed: {template_checks} Template metadata and rendered example fixtures.")
