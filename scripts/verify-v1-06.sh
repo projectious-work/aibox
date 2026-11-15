@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Verify V1-06's offline gate: the frozen contract is unchanged, Go
 # format/vet/tests, the static build, the roadmap demo with the
-# effective-configuration view, the earlier phases' specification checks,
-# the V1-06 acceptance harness unit tests and the v1 Hugo build. It runs in
-# localhost/aibox-docs-build:go1.27.0. The V1-06 acceptance journeys need
-# rootless Podman and run separately in the development container:
+# effective-configuration view, the earlier phases' specification checks and
+# the v1 Hugo build. It runs in localhost/aibox-docs-build:go1.27.0. The V1-06
+# acceptance harness needs rootless Podman and the development container's
+# Python, so its unit tests and journeys run separately there:
+#   python3 -I -m unittest discover -s tests/acceptance/v1-06/unit -t tests/acceptance/v1-06
 #   tests/acceptance/v1-06/run.sh --aibox <evidence>/aibox --evidence <dir>
 set -euo pipefail
 
@@ -52,7 +53,6 @@ node scripts/spec/validate.mjs
 node scripts/spec/validate-examples.mjs
 uv run --script scripts/spec/validate-contracts.py
 node scripts/spec/render-devcontainer-examples.mjs --check
-python3 -I -m unittest discover -s tests/acceptance/v1-06/unit -t tests/acceptance/v1-06 2> "$evidence_dir/acceptance-unit-tests.txt"
 
 ./scripts/build-docs.sh --destination "$evidence_dir/hugo" > "$evidence_dir/hugo-build.txt"
 git diff --check
@@ -77,7 +77,6 @@ const text = name => readFileSync(join(directory, name), 'utf8');
 const pages = Number((text('hugo-build.txt').match(/Pages\s*\│?\s*(\d+)/) || [])[1]);
 const demo = JSON.parse(text('inspect-customized-effective.json'));
 const level = (demo.data.configuration || []).find(entry => entry.key === 'logging.level') || {};
-const unitTests = Number((text('acceptance-unit-tests.txt').match(/^Ran (\d+) tests?/m) || [])[1]);
 const evidence = {
   phase: 'V1-06', verification: 'offline', spec: 'settings-and-logging@v1', sourceCommit, startedAt, finishedAt,
   actor: process.env.AIBOX_VERIFY_ACTOR || 'local-verifier',
@@ -88,19 +87,19 @@ const evidence = {
     userSettings: {logging: {level: 'debug'}}, result: 'inspect-customized-effective.json',
     resultDigest: digest('inspect-customized-effective.json'), outcome: demo.outcome,
     loggingLevel: {value: level.value, layer: level.layer}},
-  acceptanceHarnessUnitTests: unitTests,
   documentation: {command: './scripts/build-docs.sh', pages, result: 'passed'},
   v0: {current: true, check: `no change under cli/ or images/ since ${v1Base}`},
   checks: ['FREEZE.sha256 and no change to spec/settings-and-logging/v1', 'gofmt -l', 'go vet ./...',
     'go test ./...', 'go test -race ./...', 'go mod verify', 'static Linux build and macOS arm64 cross build',
     'roadmap demo with --effective-config', 'specification and example checks', 'Draft 2020-12 fixtures',
-    'V1-06 acceptance harness unit tests', 'v1 Hugo build', 'git diff --check', 'no v0 source change'],
-  containerAcceptance: {status: 'separate', runner: 'tests/acceptance/v1-06/run.sh'},
+    'v1 Hugo build', 'git diff --check', 'no v0 source change'],
+  containerAcceptance: {status: 'separate', runner: 'tests/acceptance/v1-06/run.sh',
+    harnessUnitTests: 'tests/acceptance/v1-06/unit'},
   artifacts: readdirSync(directory).filter(name => name !== 'evidence.json' && name !== 'hugo'),
   failed: [], skipped: [],
 };
-if (!(pages > 0) || !(unitTests > 0) || demo.outcome !== 'succeeded' || level.value !== 'debug' || level.layer !== 'user') {
-  throw new Error('V1-06 offline evidence is incomplete: ' + JSON.stringify({pages, unitTests, outcome: demo.outcome, level}));
+if (!(pages > 0) || demo.outcome !== 'succeeded' || level.value !== 'debug' || level.layer !== 'user') {
+  throw new Error('V1-06 offline evidence is incomplete: ' + JSON.stringify({pages, outcome: demo.outcome, level}));
 }
 writeFileSync(join(directory, 'evidence.json'), JSON.stringify(evidence, null, 2) + '\n');
 NODE
