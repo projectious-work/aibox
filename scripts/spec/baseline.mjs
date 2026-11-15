@@ -3,13 +3,12 @@
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
-import {fileURLToPath} from 'node:url';
+import * as at from './paths.mjs';
 import path from 'node:path';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const spec = path.join(root, 'spec/v1');
-const fixture = JSON.parse(readFileSync(path.join(spec, 'fixtures/baseline/v0.35.0.json')));
-const ledger = name => JSON.parse(readFileSync(path.join(spec, `ledger/${name}.json`)));
+const root = at.repo;
+const fixture = JSON.parse(readFileSync(path.join(at.contracts, 'fixtures/baseline/v0.35.0.json')));
+const ledger = name => JSON.parse(readFileSync(path.join(at.ledger, `${name}.json`)));
 const git = (...args) => execFileSync('git', args, {cwd: root, encoding: 'utf8', maxBuffer: 16e6});
 const fail = message => {throw Error(message);};
 const assert = (condition, message) => {if (!condition) fail(message);};
@@ -160,5 +159,5 @@ for (const name of ['configuration-types', 'defaults', 'base-build']) {
 
 // The generator's exact-output comparison catches omissions in parsed fields,
 // declarations, and metadata that cardinality and link checks alone cannot.
-execFileSync(process.execPath, [path.join(spec, 'scripts/inventory.mjs'), '--check'], {cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 16e6});
+execFileSync(process.execPath, [path.join(at.scripts, 'inventory.mjs'), '--check'], {cwd: root, encoding: 'utf8', stdio: 'pipe', maxBuffer: 16e6});
 console.log(`V1-01 baseline ${commit}: verified ${config.length} config fields, ${addons.length} recipes/${toolCount} tools, ${actions.length} actions/${args.length} arguments, ${runtime.length} assets, ${docs.length} docs, ${env.length} env IDs; source links, hashes and inventory match.`);

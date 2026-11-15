@@ -12,7 +12,7 @@ specification chapter that defines it.
 ## One owner for each setting
 
 Every setting has exactly one authoritative input and one interpreter
-([chapter 8](https://github.com/projectious-work/aibox/blob/main/spec/v1/08-native-artifacts.md#one-owner-for-each-setting)).
+([chapter 8](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/08-native-artifacts.md#one-owner-for-each-setting)).
 Image, user, mounts, ports and lifecycle belong to `devcontainer.json` and
 the Dev Container CLI. Tool selection, versions and removal belong to the
 `features` object. `customizations.aibox` carries UX preferences only and
@@ -35,7 +35,7 @@ warnings, evidence, and either data or a structured error with a closed
 
 The outcome records what was observed, not the child's exit status. The CLI
 maps it to the stable exit classes of
-[chapter 18](https://github.com/projectious-work/aibox/blob/main/spec/v1/18-operational-contracts.md):
+[chapter 18](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/18-operational-contracts.md):
 0 succeeded or no change, 2 invalid input, 3 denied, 4 missing dependency or
 incompatible, 6 rebuild, restart or recovery required, 124 timed out,
 130 cancelled, and 5 for any other failure. CLI and MCP produce equivalent envelopes for equivalent
@@ -48,7 +48,7 @@ read-only use case, so neither adapter can mutate anything. Actor labels
 such as `cli` or `mcp` are attribution, never authorization. Repository
 content can request, but never grant, host authority; operator policy will
 live outside the project
-([chapter 13](https://github.com/projectious-work/aibox/blob/main/spec/v1/13-security.md)).
+([chapter 13](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/13-security.md)).
 Policy loading and authorization are **Planned** (V1-08).
 
 ## Path containment and input digest
@@ -79,7 +79,7 @@ or parent directories, and binds the program to a byte digest.
 provides the primitives for the mutating state machine
 `validated → authorized → locked → revalidated → executing → inspected →
 recorded`
-([chapter 7](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md#resource-and-operation-state)).
+([chapter 7](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/07-architecture.md#resource-and-operation-state)).
 An OS advisory lock is keyed by project, configuration and runtime endpoint.
 Operation records are small, non-secret and schema-shaped; they are written
 by sync and atomic rename into a private directory and only move forward.
@@ -90,7 +90,7 @@ but not yet wired to a use case.
 ## Tool Feature conventions
 
 Every aibox Feature follows the
-[Tool Feature interface](https://github.com/projectious-work/aibox/blob/main/spec/v1/08-native-artifacts.md#tool-feature-interface)
+[Tool Feature interface](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/08-native-artifacts.md#tool-feature-interface)
 through the shared POSIX `sh` library `features/lib/aibox-feature.sh`:
 
 - **Guards before change.** `af_init` checks, in order, the target
@@ -133,7 +133,7 @@ filesystem root with fakes and run the real `install.sh` and library. Only
 the acceptance suites and host verifiers need a container engine, and they
 build disposable workspaces from pinned fixtures with a checksummed Dev
 Container CLI. Test style is defined in
-[chapter 21](https://github.com/projectious-work/aibox/blob/main/spec/v1/21-engineering-practice.md)
+[chapter 21](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/21-engineering-practice.md)
 (R-TESTSTYLE).
 
 ## Phase contracts and evidence

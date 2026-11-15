@@ -41,7 +41,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from actools import host  # noqa: E402
-from actools.catalog import REPO, SPEC, Catalog  # noqa: E402
+from actools.catalog import LEDGER, REPO, Catalog  # noqa: E402
 from actools.executor import BUILD_TIMEOUT, Context, Executor, read_journal  # noqa: E402
 from actools.plan import DOCKER_ITEMS, ITEMS, SCOPES, Plan, census_rows, make_plan  # noqa: E402
 
@@ -108,7 +108,7 @@ def positive_int(value: str) -> int:
 
 
 def build_plan(catalog: Catalog, args: argparse.Namespace, targets: list[str]) -> Plan:
-    addons = json.loads((SPEC / "ledger" / "addons.json").read_text())
+    addons = json.loads((LEDGER / "addons.json").read_text())
     return make_plan(catalog, targets, census_rows(addons), items=args.item,
                      features=args.feature, tests=args.test, scope=args.scope)
 

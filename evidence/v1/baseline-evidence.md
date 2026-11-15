@@ -20,7 +20,7 @@ the v1 branch point; it is not the source inventory baseline.
 
 ## Baseline fixture and source census
 
-[`fixtures/baseline/v0.35.0.json`](fixtures/baseline/v0.35.0.json) records the
+[`fixtures/baseline/v0.35.0.json`](../../spec/v1/fixtures/baseline/v0.35.0.json) records the
 source commit, audited source scopes and expected counts. These are counts of
 declarations and files in those source scopes; they are not runtime measurements
 and do not establish behavioral parity or prove that v1 implements any row.

@@ -5,12 +5,11 @@
 """Validate the real JSON Schema vocabulary and regression fixtures offline after install."""
 import copy
 import json
-from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
+from spec_paths import CONTRACTS, EXAMPLES, ROADMAP, ROADMAP_SCHEMA, TEMPLATES
 
-root = Path(__file__).resolve().parent.parent
-schemas = {p.name: json.loads(p.read_text()) for p in root.glob("*.schema.json")}
+schemas = {p.name: json.loads(p.read_text()) for p in [*CONTRACTS.glob("*.schema.json"), ROADMAP_SCHEMA]}
 registry = Registry().with_resources((s["$id"], Resource.from_contents(s)) for s in schemas.values())
 validators = {}
 for name, schema in schemas.items():
@@ -91,7 +90,7 @@ operation_record = dict(schemaVersion="aibox.operation-record/v1", operationId="
 check("operation-record.schema.json", operation_record)
 check("operation-record.schema.json", dict(operation_record, result=dict(envelope, operation="start_environment", data=payloads["start_environment"])))
 check("operation-record.schema.json", dict(operation_record, createdAt="not-a-date"), False)
-roadmap = json.loads((root / "roadmap.yaml").read_text())
+roadmap = json.loads(ROADMAP.read_text())
 check("roadmap.schema.json", roadmap)
 missing_demo = copy.deepcopy(roadmap)
 missing_demo.pop("demos")
@@ -121,11 +120,11 @@ legacy_completion = copy.deepcopy(roadmap)
 legacy_completion["groups"][0]["phases"][2]["implementationStatus"] = "done"
 check("roadmap.schema.json", legacy_completion, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
-native_features = json.loads((root / "fixtures/v1-05-native-features.json").read_text())
+native_features = json.loads((CONTRACTS / "fixtures/v1-05-native-features.json").read_text())
 assert native_features["schemaVersion"] == "aibox.v1-05-native-features/v1"
 assert len(native_features["selected"]) == 1
 for example_name in ("minimal", "customized"):
-    example_path = root / "examples" / example_name / ".devcontainer" / "devcontainer.json"
+    example_path = EXAMPLES / example_name / ".devcontainer" / "devcontainer.json"
     # The maintained files are JSONC option catalogs: whole-line comments
     # describe inactive choices and must not become active configuration.
     active_lines = (line for line in example_path.read_text().splitlines()
@@ -156,8 +155,7 @@ check("log-event.schema.json", dict(event, secret="unexpected"), False)
 check("log-event.schema.json", dict(event, sequence=-1), False)
 
 # V1-04 Template metadata and rendered native configuration contracts.
-repo_root = root.parent.parent
-template_root = repo_root / "templates" / "src"
+template_root = TEMPLATES
 template_checks = 0
 def active_jsonc(path):
     return json.loads("\n".join(line for line in path.read_text().splitlines()
@@ -190,7 +188,7 @@ for name in ("minimal", "curated"):
     template_checks += 1
 
 for name in ("minimal", "customized", "custom-user", "bind-home"):
-    example_dir = root / "examples" / name
+    example_dir = EXAMPLES / name
     config = active_jsonc(example_dir / ".devcontainer" / "devcontainer.json")
     assert config["build"] == {"dockerfile": "Dockerfile", "context": "."} and "image" not in config
     assert config["containerUser"] == config["remoteUser"]

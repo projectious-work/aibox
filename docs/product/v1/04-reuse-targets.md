@@ -24,7 +24,7 @@ license/supply-chain clearance.
 
 ### Tool-family disposition
 
-Every one of the 98 recipe tool entries in [addons.md](ledger/addons.md) has
+Every one of the 98 recipe tool entries in [addons.md](../../../ledger/v0-parity/addons.md) has
 its source default/pin/option declaration. All retain version and explicit
 disablement where supported. This matrix assigns a reuse route; it does not
 assert a matching Feature exists for every tool.
@@ -44,7 +44,7 @@ assert a matching Feature exists for every tool.
 | audio-voice | PulseAudio client/SoX/ALSA packages | Native host service readiness separate; no in-container host setup. |
 
 Base-image packages and runtime assets are separately enumerated in
-[runtime-assets.json](ledger/runtime-assets.json). Do not consider a tool
+[runtime-assets.json](../../../ledger/v0-parity/runtime-assets.json). Do not consider a tool
 covered merely because it is absent from the addon catalog. For each selected
 dependency record upstream owner, license, version/digest, provenance source,
 platform assets, known vulnerabilities, maintenance evidence and update owner.

@@ -1,6 +1,6 @@
 # v0 configuration field ledger
 
-Generated from the immutable baseline by `scripts/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See ../02-configuration.md for custom-deserializer and authority exceptions.
+Generated from the immutable baseline by `scripts/spec/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See docs/product/v1/02-configuration.md for custom-deserializer and authority exceptions.
 
 | v0 path | Type | Disposition / v1 destination | Acceptance |
 |---|---|---|---|

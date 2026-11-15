@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 from actools import inspection, jsonc, metadata, trace
-from actools.catalog import REPO, SPEC
+from actools.catalog import EXAMPLES, LEDGER, REPO, SPEC
 from unit.fixtures import CENSUS, REAL
 
 
@@ -80,13 +80,13 @@ class JsoncTest(unittest.TestCase):
 
     def test_maintained_examples_parse(self):
         for example in ("minimal", "customized"):
-            path = SPEC / "examples" / example / ".devcontainer" / "devcontainer.json"
+            path = EXAMPLES / example / ".devcontainer" / "devcontainer.json"
             self.assertIn("name", jsonc.loads(path.read_text()))
 
 
 class InspectionTest(unittest.TestCase):
     def config(self, example):
-        return (SPEC / "examples" / example / ".devcontainer" / "devcontainer.json").read_text()
+        return (EXAMPLES / example / ".devcontainer" / "devcontainer.json").read_text()
 
     def result(self, entries):
         return {"outcome": "succeeded", "data": {"configuration": [
@@ -143,7 +143,7 @@ class InspectionTest(unittest.TestCase):
 
 class TraceTest(unittest.TestCase):
     def table(self):
-        return json.loads((SPEC / "ledger" / "v1-05-tool-selection.json").read_text())
+        return json.loads((LEDGER / "v1-05-tool-selection.json").read_text())
 
     def test_every_census_row_traces_in_the_frozen_contract(self):
         failures = {row: trace.trace_failures(row, REAL, self.table(),

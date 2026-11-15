@@ -42,7 +42,7 @@ Host-only properties are proven by the owner on real hosts: the
 
 - Per phase: the phase's offline gate (`scripts/verify-v1-NN.sh`) and its
   container acceptance run (`tests/acceptance/<phase>/run-host.sh`), with
-  evidence under `spec/v1/evidence/` and the phase note in `dev-notes/`.
+  evidence under `evidence/v1/` and the phase note in `dev-notes/`.
 - No CI. Verification runs locally or in the development container, and its
   result goes into the pull request.
 - Release gates follow chapter 14 of the v1 specification and the company
@@ -61,8 +61,8 @@ logs on stderr with file sinks). aibox records no further deviation.
 |---|---|---|
 | Squash-only merges | Two one-time merge commits: #506 (V1-05 landing, keeps the frozen contract commits reachable) and #508 (`main` becomes the v1 line, keeps the v0 history). All later merges are squashes. | #501 |
 | GitHub Flow branch model | Adopted. The former version-line branches are deleted only after the owner confirms. The v0 release tooling on `lts/v0` still assumes the former branch names. | #501 |
-| Specification layout `spec/<slug>/vN/` | Not yet adopted. The v1 specification is one numbered set under `spec/v1/`, with the roadmap inside it. | #504 |
-| Roadmap `specs` field, root `roadmap.yaml` | Not yet adopted. The status `released` is adopted. | #504 |
+| Specification layout `spec/<slug>/vN/` | Partly adopted. `settings-and-logging@v1` is frozen in the new layout. The numbered v1 chapters are product documentation in `docs/product/v1/`; ledger, evidence, scripts and examples are outside `spec/` ([path map](spec-layout-migration.md)). The contract files left in `spec/v1/` (schemas, catalog, fixtures) move into `operation-core`, `native-starters` and `tool-catalog` specifications; until then `check-specs` fails on `spec/v1`, and with `--base` it reports each move out of `spec/v1/` as a deleted specification file, because it compares without rename detection. `spec/v1/` was never a versioned feature specification, so these moves delete no frozen version. | #504 |
+| Roadmap `specs` field, root `roadmap.yaml` | `roadmap.yaml` is at the repository root. The `specs` field is not yet adopted: the roadmap schema does not allow it yet; it is added with the per-slug specifications. The status `released` is adopted. | #504 |
 | CLI command style recorded in an ADR | Not yet recorded. | #510 |
 | Conformance of the v1 code and documents with each selected profile | Not yet audited against v2.3.0. | #511 |
 | ADR location | `docs/adr/`. Decisions before 2026-11-11 are `DEC-*` records under `archive/processkit/decisions/`. | — |

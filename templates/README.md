@@ -79,8 +79,8 @@ changing Feature installation/version options.
 
 For a custom user, change Dockerfile `ARG USERNAME`, `containerUser`,
 `remoteUser` and the home mount target together. The rendered
-`spec/v1/examples/custom-user` uses `dev` and `/home/dev`. The
-`spec/v1/examples/bind-home` example replaces the volume with an explicitly
+`examples/custom-user` uses `dev` and `/home/dev`. The
+`examples/bind-home` example replaces the volume with an explicitly
 selected `${localWorkspaceFolder}/.aibox-home` bind and ignores it in Git;
 create the source on the daemon host first and check writable ownership.
 Bind mounts have different portability and cleanup behavior. Neither example

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Mapping
 
 from . import checks, inspection, jsonc, metadata, trace
-from .catalog import REPO, SPEC, Catalog
+from .catalog import EXAMPLES, LEDGER, REPO, SPEC, Catalog
 from .host import (CLEANUP_TIMEOUT, PROCESS_BUDGET_SHARE, Completed, DevContainerCli, Docker,
                    Registry, abort_running, execute, process_usage)
 from .plan import Build, Plan, Test
@@ -79,7 +79,7 @@ class Executor:
 
     # --- offline items ---------------------------------------------------
     def run_offline(self) -> None:
-        table = json.loads((SPEC / "ledger" / "v1-05-tool-selection.json").read_text())
+        table = json.loads((LEDGER / "v1-05-tool-selection.json").read_text())
         decisions = REPO / "archive" / "processkit" / "decisions"
         for test in self.plan.tests:
             if test.item == "trace":
@@ -104,7 +104,7 @@ class Executor:
 
     def run_inspect(self, test: Test) -> dict:
         example = test.payload["example"]
-        project = SPEC / "examples" / example
+        project = EXAMPLES / example
         if self.ctx.aibox is None:
             return result_record(test, ["no aibox binary available"])
         text = (project / ".devcontainer" / "devcontainer.json").read_text()

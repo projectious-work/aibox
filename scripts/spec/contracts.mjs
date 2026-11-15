@@ -1,8 +1,7 @@
 // Generate the specification's executable contracts; no product code or runtime calls.
 import {readFileSync,writeFileSync} from 'node:fs';
-import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+import {contracts as root} from './paths.mjs';
 const str={type:'string',minLength:1,maxLength:4096};
 const id={type:'string',pattern:'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'};
 const digest={type:'string',pattern:'^sha256:[0-9a-f]{64}$'};

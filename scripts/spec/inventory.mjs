@@ -3,10 +3,10 @@
 import {execFileSync} from 'node:child_process';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {fileURLToPath} from 'node:url';
 import path from 'node:path';
+import * as at from './paths.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const root = at.repo;
 const baseline = '9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6';
 const git = (...args) => execFileSync('git', args, {cwd: root, encoding: 'utf8', maxBuffer: 16e6});
 const show = p => git('show', `${baseline}:${p}`);
@@ -269,17 +269,17 @@ const outputs={
   'defaults.json':defaults,'base-build.json':baseBuild,
   'documentation.json':docs,'environment.json':[...env].sort().map(([name,sources])=>({name,sources,classification:'source occurrence; distinguish internal/test override from supported user interface before migration',acceptance:'AC-CONFIG'})),
   'census.json':census,
-  '../customization.schema.json':customizationSchema,
+  [path.join(at.contracts,'customization.schema.json')]:customizationSchema,
 };
 const esc=s=>String(s).replaceAll('|','\\|').replaceAll('\n',' ');
-outputs['configuration.md']='# v0 configuration field ledger\n\nGenerated from the immutable baseline by `scripts/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See ../02-configuration.md for custom-deserializer and authority exceptions.\n\n| v0 path | Type | Disposition / v1 destination | Acceptance |\n|---|---|---|---|\n'+uniqueConfig.map(r=>`| [\`${esc(r.path)}\`](${r.source}) | \`${esc(r.type)}\` | ${esc(r.disposition)}: ${esc(r.target)} | ${r.acceptance} |`).join('\n')+'\n';
-outputs['addons.md']='# v0 tool and dependency ledger\n\nEvery recipe/tool below retains its enabled/version choices; runtime build dependencies and pins are preserved in each source-linked recipe. These are baseline pins, not selected v1 pins. All rows require AC-TOOLS; see ../04-reuse-targets.md.\n\n| Recipe | Tool | Baseline declaration |\n|---|---|---|\n'+addons.flatMap(a=>a.tools.map(t=>`| [${a.id.slice(6)}](${a.source}) | ${esc(t.name)} | ${esc(t.declaration)} |`)).join('\n')+'\n';
-const out=path.join(root,'spec/v1/ledger');
+outputs['configuration.md']='# v0 configuration field ledger\n\nGenerated from the immutable baseline by `scripts/spec/inventory.mjs`. Wildcards denote maps/arrays. Types, annotations, aliases and enum/default source evidence are preserved in the JSON companions. Targets are proposed destinations, not proven mappings. See docs/product/v1/02-configuration.md for custom-deserializer and authority exceptions.\n\n| v0 path | Type | Disposition / v1 destination | Acceptance |\n|---|---|---|---|\n'+uniqueConfig.map(r=>`| [\`${esc(r.path)}\`](${r.source}) | \`${esc(r.type)}\` | ${esc(r.disposition)}: ${esc(r.target)} | ${r.acceptance} |`).join('\n')+'\n';
+outputs['addons.md']='# v0 tool and dependency ledger\n\nEvery recipe/tool below retains its enabled/version choices; runtime build dependencies and pins are preserved in each source-linked recipe. These are baseline pins, not selected v1 pins. All rows require AC-TOOLS; see docs/product/v1/04-reuse-targets.md.\n\n| Recipe | Tool | Baseline declaration |\n|---|---|---|\n'+addons.flatMap(a=>a.tools.map(t=>`| [${a.id.slice(6)}](${a.source}) | ${esc(t.name)} | ${esc(t.declaration)} |`)).join('\n')+'\n';
+const out=at.ledger;
 const check=process.argv.includes('--check');
 if(!check)mkdirSync(out,{recursive:true});
 for(const [name,value] of Object.entries(outputs)) {
   const body=typeof value==='string'?value:JSON.stringify(value,null,2)+'\n';
-  const dest=path.join(out,name);
+  const dest=path.isAbsolute(name)?name:path.join(out,name);
   if(check) {if(readFileSync(dest,'utf8')!==body)throw Error(`Inventory drift: ${name}`);}
   else writeFileSync(dest,body);
 }
