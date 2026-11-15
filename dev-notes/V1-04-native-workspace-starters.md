@@ -33,7 +33,7 @@ container lifecycle operations to aibox.
 
 | Check | Result |
 |---|---|
-| Template rendering and overwrite refusal | Passed in the [offline verification](../evidence/v1/V1-04-85cc0c9a/offline-evidence.json) for source `85cc0c9af67e74175b0efc1499d48193bb73a629`. Both Template variants and `codex`/`none` options were checked. |
+| Template rendering | Passed in the [offline verification](../evidence/v1/V1-04-85cc0c9a/offline-evidence.json) for source `85cc0c9af67e74175b0efc1499d48193bb73a629`. Both Template variants and `codex`/`none` options were checked. The renderer's refusal of an existing destination is implemented, but no recorded check exercises it (correction of 2026-11-15, `native-starters@v1` review). |
 | Rendered example/schema checks | Passed for minimal, customized, custom-user, and bind-home in the same offline verification. |
 | Pinned Dev Container CLI configuration parsing | Passed in the [first host run](../evidence/v1/V1-04-85cc0c9a/host-run-1.json) for all four examples with CLI `0.89.0` on macOS arm64 and Docker. |
 | Direct upstream `build`, `up` and `exec` | The [first](../evidence/v1/V1-04-85cc0c9a/host-run-1.json) and [repeat](../evidence/v1/V1-04-85cc0c9a/host-run-2.json) macOS arm64 Docker host runs each passed all 34 recorded steps and had zero cleanup failures. Both checked minimal, curated, custom-user, and bind-home; no-cache rebuild and home-marker persistence passed for the two Template variants. Each manifest records 43 checksummed artifacts. |

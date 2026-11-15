@@ -43,7 +43,20 @@
     "never": [
       ".aibox/",
       ".aibox-home/"
-    ]
+    ],
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "."
+    },
+    "image": {
+      "user": "USER ${USERNAME}",
+      "usernameArg": "ARG USERNAME=aibox",
+      "base": "pinned by @sha256 digest",
+      "apt": "one snapshot.debian.org snapshot",
+      "downloads": "Yazi and Codex verified by per-architecture SHA-256",
+      "forbidden": "COPY or ADD of .aibox or .aibox-home content"
+    },
+    "homeMounts": 1
   },
   "user": {
     "name": "aibox",
@@ -75,16 +88,30 @@
       },
       "projectGitignore": [
         ".aibox-home/",
-        ".env"
+        ".env",
+        ".devcontainer/compose.local.yaml"
       ]
     },
     "customUser": {
       "name": "dev",
       "home": "/home/dev",
-      "mount": "source=aibox-home-${devcontainerId},target=/home/dev,type=volume"
+      "mount": "source=aibox-home-${devcontainerId},target=/home/dev,type=volume",
+      "dockerfile": [
+        "ARG USERNAME=dev",
+        "useradd creates $USERNAME"
+      ]
     },
     "minimalCustomizations": "absent",
-    "customizedSchema": "schemas/customization.schema.json"
+    "customizedSchema": "schemas/customization.schema.json",
+    "homeMounts": 1,
+    "forbiddenMembers": [
+      "image",
+      "dockerComposeFile",
+      "aibox"
+    ],
+    "users": "containerUser and remoteUser explicit and equal (a choice of these examples)",
+    "minimalFeatures": "absent",
+    "customizedFeatures": "equal to selected in tool-catalog@v1 fixtures/v1-05-native-features.json"
   },
   "customizationSchema": {
     "path": "schemas/customization.schema.json",
@@ -106,5 +133,13 @@
     "cli": "aibox inspect --context local --project <example> --format json",
     "mcpTool": "inspect_workspace",
     "readOnly": true
+  },
+  "precedence": "This file and schemas/customization.schema.json prevail over requirements.md and journeys.md; the sources cited in overview.md are provenance only; a divergence is a defect fixed in native-starters@v2.",
+  "targets": {
+    "supported": "any engine and host that the pinned Dev Container CLI 0.89.0 supports for these images",
+    "verified": [
+      "macOS arm64, Docker"
+    ],
+    "qualification": "V1-22"
   }
 }

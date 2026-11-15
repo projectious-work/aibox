@@ -220,6 +220,8 @@ assert starters["templates"]["options"]["harness"] == {"type": "string", "enum":
                                                        "default": "codex", "buildArg": "HARNESS"}
 assert starters["home"]["mount"] == "source=aibox-home-${devcontainerId},target=/home/aibox,type=volume"
 assert starters["examples"]["ids"] == ["minimal", "customized", "custom-user", "bind-home"]
+assert starters["examples"]["bindHome"]["projectGitignore"] == [".aibox-home/", ".env", ".devcontainer/compose.local.yaml"]
+assert set((EXAMPLES / "bind-home" / ".gitignore").read_text().splitlines()) >= set(starters["examples"]["bindHome"]["projectGitignore"])
 assert all((EXAMPLES / name).is_dir() for name in starters["examples"]["ids"])
 assert (NATIVE_STARTERS / starters["customizationSchema"]["path"]).is_file()
 assert (TEMPLATES.parent.parent / starters["devcontainerCli"]["archive"]).is_file()
