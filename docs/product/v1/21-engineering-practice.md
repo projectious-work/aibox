@@ -6,7 +6,7 @@ refactoring, integration, and writing) to the aibox v1 implementation. It
 governs how every roadmap phase is built; the other chapters govern what is
 built. Where a product chapter is more specific, the product chapter wins.
 Agent execution and communication rules are not part of
-the product contract; they live in [`AGENTS.md`](../../AGENTS.md).
+the product contract; they live in [`AGENTS.md`](../../../AGENTS.md).
 
 This chapter applies to every phase from V1-05 onward without being listed in
 each phase's `spec` links. Phases started before specification

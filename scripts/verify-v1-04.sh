@@ -23,14 +23,14 @@ go build -o "$evidence_dir/aibox" ./cmd/aibox
 GOOS=darwin GOARCH=arm64 go build -o "$evidence_dir/aibox-darwin-arm64" ./cmd/aibox
 
 for example in minimal customized custom-user bind-home; do
-  "$evidence_dir/aibox" inspect --context local --project "spec/v1/examples/$example" --format json > "$evidence_dir/inspect-$example.json"
+  "$evidence_dir/aibox" inspect --context local --project "examples/$example" --format json > "$evidence_dir/inspect-$example.json"
 done
 
-node spec/v1/scripts/inventory.mjs --check
-node spec/v1/scripts/validate.mjs
-node spec/v1/scripts/validate-examples.mjs
-uv run --script spec/v1/scripts/validate-contracts.py
-node spec/v1/scripts/render-devcontainer-examples.mjs --check
+node scripts/spec/inventory.mjs --check
+node scripts/spec/validate.mjs
+node scripts/spec/validate-examples.mjs
+uv run --script scripts/spec/validate-contracts.py
+node scripts/spec/render-devcontainer-examples.mjs --check
 
 # Python bootstraps pinned upstream CLI and Node archives without npm, then
 # runs upstream Template metadata generation. Configuration reading requires a

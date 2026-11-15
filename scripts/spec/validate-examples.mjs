@@ -2,13 +2,14 @@
 // Runtime image build/up/exec qualification lives in scripts/verify-v1-04.sh.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import * as at from './paths.mjs';
 
-const specRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const repoRoot = path.resolve(specRoot, '..', '..');
-const readJSON = relative => JSON.parse(readFileSync(path.join(specRoot, relative), 'utf8'));
+// Contract files are read from the contract root; examples/ from the repository.
+const repoRoot = at.repo;
+const locate = relative => relative.startsWith('examples/') ? path.join(at.examples, relative.slice(9)) : path.join(at.contracts, relative);
+const readJSON = relative => JSON.parse(readFileSync(locate(relative), 'utf8'));
 // Maintained examples use full-line JSONC comments for inactive options.
-const readJSONC = relative => JSON.parse(readFileSync(path.join(specRoot, relative), 'utf8')
+const readJSONC = relative => JSON.parse(readFileSync(locate(relative), 'utf8')
   .split('\n').filter(line => !line.trimStart().startsWith('//')).join('\n'));
 const readExternalJSONC = file => JSON.parse(readFileSync(file, 'utf8')
   .split('\n').filter(line => !line.trimStart().startsWith('//')).join('\n'));
@@ -52,7 +53,7 @@ const exampleNames = ['minimal', 'customized', 'custom-user', 'bind-home'];
 const examples = new Map();
 for (const name of exampleNames) {
   const relative = `examples/${name}/.devcontainer/devcontainer.json`;
-  const file = path.join(specRoot, relative);
+  const file = locate(relative);
   assert(existsSync(file), `${name}: missing rendered native example`);
   const example = readJSONC(relative);
   examples.set(name, example);
@@ -62,7 +63,7 @@ for (const name of exampleNames) {
   assert(example.build.dockerfile === 'Dockerfile' && example.build.context === '.',
     `${name}: build must use its checked-in Dockerfile and project context`);
   for (const required of ['Dockerfile', 'install-tools.sh']) {
-    assert(existsSync(path.join(specRoot, 'examples', name, '.devcontainer', required)),
+    assert(existsSync(path.join(at.examples, name, '.devcontainer', required)),
       `${name}: missing .devcontainer/${required}`);
   }
   assert(example.containerUser && example.remoteUser, `${name}: both containerUser and remoteUser must be explicit`);
@@ -97,7 +98,7 @@ for (const name of exampleNames) {
   }
 }
 
-const customUserDockerfile = readFileSync(path.join(specRoot, 'examples/custom-user/.devcontainer/Dockerfile'), 'utf8');
+const customUserDockerfile = readFileSync(path.join(at.examples, 'custom-user/.devcontainer/Dockerfile'), 'utf8');
 assert(/ARG USERNAME=dev\b/.test(customUserDockerfile), 'custom-user: Dockerfile user must match the example');
 assert(/useradd[^\n]*\$USERNAME/.test(customUserDockerfile), 'custom-user: Dockerfile must create the declared user');
 assert(examples.get('custom-user').remoteUser === 'dev', 'custom-user: expected dev remote user');
@@ -147,13 +148,13 @@ for (const name of ['minimal', 'curated']) {
 }
 
 for (const name of exampleNames) {
-  const ignore = readFileSync(path.join(specRoot, 'examples', name, '.devcontainer/.gitignore'), 'utf8').split('\n');
+  const ignore = readFileSync(path.join(at.examples, name, '.devcontainer/.gitignore'), 'utf8').split('\n');
   for (const ignored of ['*.env', 'compose.local.yaml'])
     assert(ignore.includes(ignored), `${name}: native starter must ignore ${ignored}`);
 }
 
-assert(existsSync(path.join(specRoot, 'examples/bind-home/.gitignore')), 'bind-home: missing private-path ignores');
-const bindIgnore = readFileSync(path.join(specRoot, 'examples/bind-home/.gitignore'), 'utf8');
+assert(existsSync(path.join(at.examples, 'bind-home/.gitignore')), 'bind-home: missing private-path ignores');
+const bindIgnore = readFileSync(path.join(at.examples, 'bind-home/.gitignore'), 'utf8');
 for (const ignored of ['.aibox-home/', '.env', '.devcontainer/compose.local.yaml'])
   assert(bindIgnore.split('\n').includes(ignored), `bind-home: missing ${ignored} ignore`);
 

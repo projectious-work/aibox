@@ -31,7 +31,7 @@ aibox process settings file. Flags are invocation-only; no config-write
 command is implied.
 
 All machine calls return the closed `aibox.operation-result/v1` envelope.
-The [closed request schema](operation-request.schema.json) defines
+The [closed request schema](../../../spec/v1/operation-request.schema.json) defines
 `requestId`, `projectRoot`,
 `configPath`, `expectedInputDigest`, and an operation-specific selector:
 `build` has `frozenLockfile`; `start` has no implicit attach; `stop` and

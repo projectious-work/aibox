@@ -24,7 +24,7 @@ repository root, build and try the current Linux/macOS customer preview:
 ```sh
 go build -o /tmp/aibox-v1-preview ./cmd/aibox
 /tmp/aibox-v1-preview --version
-/tmp/aibox-v1-preview inspect --context local --project spec/v1/examples/minimal --format json
+/tmp/aibox-v1-preview inspect --context local --project examples/minimal --format json
 # An MCP client can launch: /tmp/aibox-v1-preview mcp serve --context local
 # and call inspect_workspace with requestId and a canonical absolute projectRoot.
 ```
@@ -40,7 +40,7 @@ There is no installable release yet. The current runner is not safe
 for mutating lifecycle calls: policy-owned executable resolution, input
 binding, post-cancellation effect inspection, operation records and operation-specific
 schema validation remain to be implemented. The
-[canonical architecture contract](https://github.com/projectious-work/aibox/blob/main/spec/v1/07-architecture.md)
+[canonical architecture contract](https://github.com/projectious-work/aibox/blob/main/docs/product/v1/07-architecture.md)
 defines those acceptance conditions.
 
 The V1-03 implementation candidate has a repeatable local verification gate:

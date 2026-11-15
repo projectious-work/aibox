@@ -66,7 +66,7 @@ server may run under a service account and therefore reads that account's
 user layer, not the interactive human's home. An absent optional file is
 recorded as absent. An unreadable or malformed present file fails with a
 source-specific diagnostic. `settings.json` follows the closed, versioned
-[process-settings schema](process-settings.schema.json); duplicate JSON keys,
+[process-settings schema](../../../spec/v1/process-settings.schema.json); duplicate JSON keys,
 unknown keys, unsupported versions and null values fail. Paths in it resolve
 relative to the file containing them unless a key declares another anchor;
 `logging.file` is anchored to the process state directory and then checked

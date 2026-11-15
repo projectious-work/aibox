@@ -2,12 +2,17 @@
 import {readFileSync,readdirSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const read=p=>readFileSync(path.join(root,p),'utf8');
+import * as at from './paths.mjs';
+// Logical names keep their pre-#504 form; locate() maps them to files.
+const locate=p=>p==='roadmap.yaml'?at.roadmap:p==='roadmap.schema.json'?at.roadmapSchema
+ :p.startsWith('ledger/')?path.join(at.ledger,p.slice(7))
+ :p.startsWith('examples/')?path.join(at.examples,p.slice(9))
+ :p.startsWith('scripts/')?path.join(at.scripts,p.slice(8))
+ :p.endsWith('.md')?path.join(at.docs,p):path.join(at.contracts,p);
+const read=p=>readFileSync(locate(p),'utf8');
 const json=p=>JSON.parse(read(p));
 const assert=(v,m)=>{if(!v)throw Error(m);};
-const docs=readdirSync(root).filter(x=>x.endsWith('.md'));
+const docs=readdirSync(at.docs).filter(x=>x.endsWith('.md'));
 const normative=docs.filter(x=>/^\d{2}-/.test(x)).map(read).join('\n');
 const personaChapter=read('20-personas-and-user-stories.md');
 const firstStory=personaChapter.indexOf('## Independent developer stories');
@@ -84,7 +89,7 @@ let rejectedIncompleteDone=false;
 try{schemaCheck(incompleteDone,roadmapSchema);}catch{rejectedIncompleteDone=true;}
 assert(rejectedIncompleteDone,'Roadmap schema accepted done without its verified commit');
 const customizationSchema=json('customization.schema.json');
-execFileSync(process.execPath,[path.join(root,'scripts/render-devcontainer-examples.mjs'),'--check'],{stdio:'pipe'});
+execFileSync(process.execPath,[locate('scripts/render-devcontainer-examples.mjs'),'--check'],{stdio:'pipe'});
 const parseDocumentedExample=flavor=>JSON.parse(read(`examples/${flavor}/.devcontainer/devcontainer.json`)
  .split('\n').filter(line=>!line.trimStart().startsWith('//')).join('\n'));
 assert(!Object.hasOwn(parseDocumentedExample('minimal'),'customizations'),
@@ -126,7 +131,7 @@ for(const row of json('ledger/configuration.json').filter(x=>x.path.startsWith('
 }
 const featureCatalog=json('catalog/v1-05-features.json');
 schemaCheck(featureCatalog,json('feature-catalog.schema.json'));
-execFileSync('python3',[path.join(root,'scripts/validate-v1-05-catalog.py')],{stdio:'pipe'});
+execFileSync('python3',[locate('scripts/validate-v1-05-catalog.py')],{stdio:'pipe'});
 const logEventSchema=json('log-event.schema.json');
 const logEventExample={schemaVersion:'aibox.log-event/v1',timestamp:'2026-09-26T12:00:00Z',severity:'info',event:'operation.started',component:'app',requestId:'example-1',sequence:0,fields:{scope:'operator'}};
 schemaCheck(logEventExample,logEventSchema);
@@ -170,11 +175,11 @@ for(const p of phases){
   assert(position.get(dep)<position.get(p.id),`Dependency ${dep} must precede ${p.id}`);
  }
  assert(p.spec?.length>0,`Missing spec references ${p.id}`);
- for(const ref of p.spec)assert(existsSync(path.join(root,ref)),`Missing phase spec ${p.id}: ${ref}`);
- if(p.devNote)assert(existsSync(path.join(root,p.devNote)),`Missing development note ${p.id}`);
- for(const ref of p.evidence??[])assert(existsSync(path.join(root,ref)),`Missing evidence ${p.id}: ${ref}`);
+ for(const ref of p.spec)assert(existsSync(path.join(at.repo,ref)),`Missing phase spec ${p.id}: ${ref}`);
+ if(p.devNote)assert(existsSync(path.join(at.repo,p.devNote)),`Missing development note ${p.id}`);
+ for(const ref of p.evidence??[])assert(existsSync(path.join(at.repo,ref)),`Missing evidence ${p.id}: ${ref}`);
  if(p.status==='in_progress')assert(p.devNote && p.evidence?.length>0,`Missing in-progress evidence ${p.id}`);
- if(p.status==='released')assert(p.release && p.devNote && existsSync(path.join(root,p.devNote)),`Missing released evidence ${p.id}`);
+ if(p.status==='released')assert(p.release && p.devNote && existsSync(path.join(at.repo,p.devNote)),`Missing released evidence ${p.id}`);
 }
 const visited=new Set(),active=new Set();
 const byId=new Map(phases.map(x=>[x.id,x]));
@@ -194,7 +199,7 @@ for(const id of ids)if(!['V1-01','V1-02','V1-03'].includes(id))
 for(const file of [...docs,'ledger/configuration.md','ledger/addons.md']){
  for(const m of read(file).matchAll(/\]\(([^)]+)\)/g)){
   const link=m[1];if(/^(https?:|#)/.test(link))continue;
-  assert(existsSync(path.resolve(root,path.dirname(file),link.split('#')[0])),`Broken link ${file}: ${link}`);
+  assert(existsSync(path.resolve(path.dirname(locate(file)),link.split('#')[0])),`Broken link ${file}: ${link}`);
  }
 }
 console.log(`Specification checks passed: ${defs.size} requirements, ${criteria.size} acceptance groups, ${phases.length} phases; ledger counts and local links consistent.`);

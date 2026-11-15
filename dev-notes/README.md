@@ -3,7 +3,7 @@
 This is the maintainer-facing logbook required by the [projectious.work
 development-evidence standard](https://github.com/projectious-work/internal/blob/main/docs/standards/product-roadmap-and-development-evidence.md).
 Each non-trivial v1 phase has an evolving note named for its roadmap ID. The
-[v1 roadmap](../spec/v1/roadmap.yaml) remains the source of truth for phase
+[v1 roadmap](../roadmap.yaml) remains the source of truth for phase
 scope and status. Notes explain choices, evidence and gaps rather than
 narrating commits or replacing user documentation.
 

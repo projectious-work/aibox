@@ -1,12 +1,11 @@
 // Render the example JSONC option catalog from the closed aibox schema.
 // This is documentation generation, not a Dev Container configuration parser.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import * as at from './paths.mjs';
 
-const specRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const schema = JSON.parse(readFileSync(path.join(specRoot, 'customization.schema.json'), 'utf8'));
-const nativeFeatureFixture = JSON.parse(readFileSync(path.join(specRoot, 'fixtures/v1-05-native-features.json'), 'utf8'));
+const schema = JSON.parse(readFileSync(path.join(at.contracts, 'customization.schema.json'), 'utf8'));
+const nativeFeatureFixture = JSON.parse(readFileSync(path.join(at.contracts, 'fixtures/v1-05-native-features.json'), 'utf8'));
 const check = process.argv.includes('--check');
 
 const native = [
@@ -313,7 +312,7 @@ function render(flavor) {
 }
 
 for (const flavor of ['minimal', 'customized', 'custom-user', 'bind-home']) {
-  const file = path.join(specRoot, 'examples', flavor, '.devcontainer', 'devcontainer.json');
+  const file = path.join(at.examples, flavor, '.devcontainer', 'devcontainer.json');
   const expected = render(flavor);
   // Every emitted example is also strict JSON once its documentation comments
   // are removed. This checks our active keys without interpreting native fields.
@@ -327,7 +326,7 @@ for (const flavor of ['minimal', 'customized', 'custom-user', 'bind-home']) {
     if (readFileSync(file, 'utf8') !== expected) throw Error(`Example option catalog drift: ${file}`);
   } else { mkdirSync(path.dirname(file), {recursive: true}); writeFileSync(file, expected); }
   const template = flavor === 'customized' ? 'curated' : 'minimal';
-  const sourceRoot = path.resolve(specRoot, '../../templates/src', template, '.devcontainer');
+  const sourceRoot = path.join(at.templates, template, '.devcontainer');
   for (const name of ['Dockerfile', 'install-tools.sh', '.gitignore', ...(template === 'curated' ? ['tmux.conf'] : [])]) {
     let content = readFileSync(path.join(sourceRoot, name), 'utf8');
     if (flavor === 'custom-user' && name === 'Dockerfile') content = content.replace('ARG USERNAME=aibox', 'ARG USERNAME=dev');
@@ -337,7 +336,7 @@ for (const flavor of ['minimal', 'customized', 'custom-user', 'bind-home']) {
     } else writeFileSync(destination, content);
   }
   if (flavor === 'bind-home') {
-    const ignore = path.join(specRoot, 'examples', flavor, '.gitignore');
+    const ignore = path.join(at.examples, flavor, '.gitignore');
     const contents = '.aibox-home/\n.env\n.devcontainer/compose.local.yaml\n';
     if (check) { if (readFileSync(ignore, 'utf8') !== contents) throw Error(`Example private-path ignore drift: ${ignore}`); }
     else writeFileSync(ignore, contents);

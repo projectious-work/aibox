@@ -16,7 +16,7 @@ unavailable operation is absent from help or returns a documented,
 side-effect-free unavailable result; neither adapter implies support from a
 schema declaration alone. The roadmap defines delivery order separately.
 The [command audit](command-disposition.md) covers removals/delegation, while
-[commands.json](ledger/commands.json) preserves every original declaration.
+[commands.json](../../../ledger/v0-parity/commands.json) preserves every original declaration.
 
 | CLI | MCP | Context | Effects |
 |---|---|---|---|
@@ -53,7 +53,7 @@ host hooks, mounts, privileges or executable downloads.
 **R-RESULT:** each core operation returns a versioned result containing
 operation/request identity, target identity, input digest, outcome, changed
 resources, warnings, evidence references and structured error/next action.
-The [closed result schema](operation-result.schema.json) fixes the
+The [closed result schema](../../../spec/v1/operation-result.schema.json) fixes the
 common envelope for both adapters. It records initiating and executing actors
 separately; a resource ID is never substituted for an actor. Local results omit
 host runtime context/resource identity rather than inventing it. Evidence

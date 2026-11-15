@@ -16,7 +16,7 @@ credentials. It does not expose unfinished lifecycle mutation or claim v0
 parity. V1-09 expands the guarded MCP registry and thin CLI surfaces to the
 authorized operator use cases.
 
-For every phase from V1-03 onward, the [roadmap's phase demo](roadmap.yaml)
+For every phase from V1-03 onward, the [roadmap's phase demo](../../../roadmap.yaml)
 names a product-binary CLI command, an MCP tool, and observable, feature-specific
 outcomes. Each implementation phase proves equivalent CLI/MCP operation results
 and refusal behavior for its new shared use cases. The foundation phases V1-01
@@ -120,7 +120,7 @@ and re-run of failure-sensitive gates after changed candidate bits.
 
 ## Roadmap state and publication
 
-The canonical [roadmap](roadmap.yaml) groups twenty-three content-specific phases
+The canonical [roadmap](../../../roadmap.yaml) groups twenty-three content-specific phases
 with dependency edges and spec references. Its standard `status` values are
 `idea`, `planned`, `in_progress`, `done`, `released`, and `cancelled`.
 `done` means the agreed scope is implemented, integrated into `main`,

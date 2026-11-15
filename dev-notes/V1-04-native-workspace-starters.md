@@ -20,7 +20,7 @@ container lifecycle operations to aibox.
 - Source Templates live at `templates/src/minimal` and
   `templates/src/curated`. The local renderer applies Template options and
   refuses to overwrite an existing destination.
-- Rendered examples live under `spec/v1/examples/{minimal,customized,
+- Rendered examples live under `examples/{minimal,customized,
   custom-user,bind-home}`. The minimal example has no active aibox extension;
   curated is explicit about optional Features and UX metadata.
 - Standard home persistence uses a project-scoped named volume mounted at the
@@ -33,12 +33,12 @@ container lifecycle operations to aibox.
 
 | Check | Result |
 |---|---|
-| Template rendering and overwrite refusal | Passed in the [offline verification](../spec/v1/evidence/V1-04-85cc0c9a/offline-evidence.json) for source `85cc0c9af67e74175b0efc1499d48193bb73a629`. Both Template variants and `codex`/`none` options were checked. |
+| Template rendering and overwrite refusal | Passed in the [offline verification](../evidence/v1/V1-04-85cc0c9a/offline-evidence.json) for source `85cc0c9af67e74175b0efc1499d48193bb73a629`. Both Template variants and `codex`/`none` options were checked. |
 | Rendered example/schema checks | Passed for minimal, customized, custom-user, and bind-home in the same offline verification. |
-| Pinned Dev Container CLI configuration parsing | Passed in the [first host run](../spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json) for all four examples with CLI `0.89.0` on macOS arm64 and Docker. |
-| Direct upstream `build`, `up` and `exec` | The [first](../spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json) and [repeat](../spec/v1/evidence/V1-04-85cc0c9a/host-run-2.json) macOS arm64 Docker host runs each passed all 34 recorded steps and had zero cleanup failures. Both checked minimal, curated, custom-user, and bind-home; no-cache rebuild and home-marker persistence passed for the two Template variants. Each manifest records 43 checksummed artifacts. |
-| Go CLI/MCP parity | Passed against all four starters; see the [MCP parity transcript](../spec/v1/evidence/V1-04-85cc0c9a/mcp-parity.txt). The maintained `inspect_workspace` operation remains read-only. |
-| Hugo documentation build | Passed locally with Hugo Extended v0.167.0: 35 pages and 142 static files, including the [latest offline verification](../spec/v1/evidence/V1-04-85cc0c9a/offline-evidence-667d1fdd.json). |
+| Pinned Dev Container CLI configuration parsing | Passed in the [first host run](../evidence/v1/V1-04-85cc0c9a/host-run-1.json) for all four examples with CLI `0.89.0` on macOS arm64 and Docker. |
+| Direct upstream `build`, `up` and `exec` | The [first](../evidence/v1/V1-04-85cc0c9a/host-run-1.json) and [repeat](../evidence/v1/V1-04-85cc0c9a/host-run-2.json) macOS arm64 Docker host runs each passed all 34 recorded steps and had zero cleanup failures. Both checked minimal, curated, custom-user, and bind-home; no-cache rebuild and home-marker persistence passed for the two Template variants. Each manifest records 43 checksummed artifacts. |
+| Go CLI/MCP parity | Passed against all four starters; see the [MCP parity transcript](../evidence/v1/V1-04-85cc0c9a/mcp-parity.txt). The maintained `inspect_workspace` operation remains read-only. |
+| Hugo documentation build | Passed locally with Hugo Extended v0.167.0: 35 pages and 142 static files, including the [latest offline verification](../evidence/v1/V1-04-85cc0c9a/offline-evidence-667d1fdd.json). |
 
 No v1 release or published Template reference exists. Template registry
 publication is not implied by local source Templates. Full logs for the two

@@ -1,5 +1,5 @@
 # shellcheck shell=sh
-# aibox tool Feature install conventions (spec/v1/08-native-artifacts.md,
+# aibox tool Feature install conventions (docs/product/v1/08-native-artifacts.md,
 # "Tool Feature interface"). POSIX sh, so the target guard also runs on
 # unsupported bases.
 #

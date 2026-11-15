@@ -3,16 +3,16 @@
 V1-03 implementation is done with local evidence; publication is pending.
 This note is for Go implementers,
 security reviewers, and independent conformance reviewers. The accepted
-[architecture](../spec/v1/07-architecture.md),
-[lifecycle](../spec/v1/09-lifecycle.md), and
-[operational contracts](../spec/v1/18-operational-contracts.md) are the baseline.
+[architecture](../docs/product/v1/07-architecture.md),
+[lifecycle](../docs/product/v1/09-lifecycle.md), and
+[operational contracts](../docs/product/v1/18-operational-contracts.md) are the baseline.
 The initial slice was merged through
 [PR #467](https://github.com/projectious-work/aibox/pull/467).
 The CLI/MCP completion slice was merged through
 [PR #490](https://github.com/projectious-work/aibox/pull/490). Its verified
 source is `05dd13b1556ff300cac77f08fbd628f966e807bc`; the
-[local evidence record](../spec/v1/evidence/V1-03-05dd13b1/evidence.json)
-and [MCP client transcript](../spec/v1/evidence/V1-03-05dd13b1/mcp-parity.txt)
+[local evidence record](../evidence/v1/V1-03-05dd13b1/evidence.json)
+and [MCP client transcript](../evidence/v1/V1-03-05dd13b1/mcp-parity.txt)
 are preserved in this repository. The roadmap records `status: done`
 (Done — awaiting release). It becomes `shipped` only when a named release has
 published-artifact evidence.
@@ -78,10 +78,10 @@ stable path order and binds optional policy/executable digests. The read-only
 CLI now uses this shared builder for its single declared native entry point;
 the broader lifecycle dependency set still needs upstream-assisted discovery.
 
-The [architecture status](../spec/v1/07-architecture.md) and
+The [architecture status](../docs/product/v1/07-architecture.md) and
 [public preview walkthrough](../docs-site/content/docs/core-status.md) document
 these boundaries. The first offline executable demo builds `cmd/aibox`, then
-inspects `spec/v1/examples/minimal`; its successful result binds the native
+inspects `examples/minimal`; its successful result binds the native
 declaration digest and reports runtime state as unknown. No host authority or
 v1 runtime compatibility claim is exposed by this slice.
 
@@ -98,7 +98,7 @@ documentation build in its evidence directory. Publication remains a separate
 gate before the roadmap can call the phase `shipped`.
 
 The following work belongs to later capability phases under the canonical
-[verification plan](../spec/v1/14-verification-and-release.md):
+[verification plan](../docs/product/v1/14-verification-and-release.md):
 
 - V1-08 owns operator policy loading and authorization, runtime-specific effect
   inspection, complete upstream-assisted input discovery, recovery reads for

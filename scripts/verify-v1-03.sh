@@ -24,7 +24,7 @@ GOOS=darwin GOARCH=arm64 go build -o "$evidence_dir/aibox-darwin-arm64" ./cmd/ai
 
 "$evidence_dir/aibox" --version > "$evidence_dir/version.txt"
 "$evidence_dir/aibox" --help > "$evidence_dir/help.txt"
-"$evidence_dir/aibox" inspect --context local --project spec/v1/examples/minimal --format json > "$evidence_dir/inspect.json"
+"$evidence_dir/aibox" inspect --context local --project examples/minimal --format json > "$evidence_dir/inspect.json"
 set +e
 "$evidence_dir/aibox" inspect --context local --project "$evidence_dir/missing" --format json > "$evidence_dir/invalid-project.json" 2> "$evidence_dir/invalid-project.stderr"
 invalid_exit=$?
@@ -52,9 +52,9 @@ assert invalid["error"]["code"] == "invalid_input"
 assert "target" not in invalid
 ' "$evidence_dir/inspect.json" "$evidence_dir/invalid-project.json"
 
-node spec/v1/scripts/inventory.mjs --check
-node spec/v1/scripts/validate.mjs
-uv run --script spec/v1/scripts/validate-contracts.py
+node scripts/spec/inventory.mjs --check
+node scripts/spec/validate.mjs
+uv run --script scripts/spec/validate-contracts.py
 ./scripts/build-docs.sh --destination "$evidence_dir/hugo"
 git diff --check
 
@@ -68,8 +68,8 @@ const digest = name => 'sha256:' + createHash('sha256').update(readFileSync(join
 const demo = JSON.parse(readFileSync(join(directory, 'inspect.json'), 'utf8'));
 const evidence = {
   phase: 'V1-03', sourceCommit, actor: 'local-verifier', startedAt, finishedAt,
-  fixture: 'spec/v1/examples/minimal',
-  demo: {command: 'aibox inspect --context local --project spec/v1/examples/minimal --format json',
+  fixture: 'examples/minimal',
+  demo: {command: 'aibox inspect --context local --project examples/minimal --format json',
     operation: demo.operation, outcome: demo.outcome, state: demo.data.state,
     transcript: 'inspect.json', transcriptDigest: digest('inspect.json')},
   mcp: {command: 'aibox mcp serve --context local', tool: 'inspect_workspace',

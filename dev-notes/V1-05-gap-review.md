@@ -325,7 +325,7 @@ Every listed row needs an owner retain/remove decision. The route sketches below
 - [Official/community registry](https://containers.dev/features), used only for publisher attribution and candidate discovery.
 - [Frozen official Feature source](https://github.com/devcontainers/features/tree/9640551520736897481d83e92082186e4d812d50/src), install scripts and metadata inspected.
 - [Frozen aibox source](https://github.com/projectious-work/aibox/tree/9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6/addons), all 41 recipes inspected.
-- `spec/v1/evidence/V1-05/source-audit.json`: every row, its primary sources, candidate publisher/source/ref/digest, reasons, proposals, drift.
-- `spec/v1/evidence/V1-05/oci-evidence.json`: independently fetched GHCR manifests/metadata, including conditional upstream candidates.
+- `evidence/v1/V1-05/source-audit.json`: every row, its primary sources, candidate publisher/source/ref/digest, reasons, proposals, drift.
+- `evidence/v1/V1-05/oci-evidence.json`: independently fetched GHCR manifests/metadata, including conditional upstream candidates.
 
 Go and Rust Features add `SYS_PTRACE` and `seccomp=unconfined`; no suppression option was found. Kubernetes Feature always creates `minikube-config` volume at `/home/vscode/.minikube`. Node Feature always installs Yarn without independent pin/disable. Python Feature always provides pip. Exact install tests are still required before production mapping.

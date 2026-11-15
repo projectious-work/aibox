@@ -27,10 +27,10 @@ translate native image, Dockerfile, Compose, mount, or lifecycle settings.
 
 The source Template definitions are in [`templates/src/minimal`](https://github.com/projectious-work/aibox/tree/main/templates/src/minimal)
 and [`templates/src/curated`](https://github.com/projectious-work/aibox/tree/main/templates/src/curated).
-Rendered candidate examples are available for [minimal](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/minimal),
-[curated](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/customized),
-[custom users](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/custom-user),
-and [bind-mounted home](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples/bind-home).
+Rendered candidate examples are available for [minimal](https://github.com/projectious-work/aibox/tree/main/examples/minimal),
+[curated](https://github.com/projectious-work/aibox/tree/main/examples/customized),
+[custom users](https://github.com/projectious-work/aibox/tree/main/examples/custom-user),
+and [bind-mounted home](https://github.com/projectious-work/aibox/tree/main/examples/bind-home).
 
 The source templates have no published registry references. In a source
 checkout, render a starter into a new, empty project directory. The helper
@@ -46,7 +46,7 @@ node templates/render.mjs --template minimal --output "$PROJECT" --harness codex
 The helper refuses to overwrite an existing `.devcontainer` directory. Use
 `--template curated` for the curated starter or `--harness none` to omit the
 optional Codex install. The custom-user and bind-home configurations are
-separate rendered examples under `spec/v1/examples/`; review their files before
+separate rendered examples under `examples/`; review their files before
 adapting a project. Do not edit files under `templates/src` to configure an
 individual project.
 
@@ -57,7 +57,7 @@ example:
 
 ```sh
 go build -o /tmp/aibox-v1-preview ./cmd/aibox
-/tmp/aibox-v1-preview inspect --context local --project spec/v1/examples/minimal --format json
+/tmp/aibox-v1-preview inspect --context local --project examples/minimal --format json
 ```
 
 Inspection is read-only. It checks the project and reports the native
@@ -82,8 +82,8 @@ are not required. It renders both Template variants and records build/up/exec
 plus home-volume persistence evidence in the chosen
 output directory. It also checks the custom-user and bind-home examples. Keep
 the output directory, including `evidence.json` and step logs, and provide it
-with the implementation review. The [first](https://github.com/projectious-work/aibox/blob/main/spec/v1/evidence/V1-04-85cc0c9a/host-run-1.json)
-and [repeat](https://github.com/projectious-work/aibox/blob/main/spec/v1/evidence/V1-04-85cc0c9a/host-run-2.json)
+with the implementation review. The [first](https://github.com/projectious-work/aibox/blob/main/evidence/v1/V1-04-85cc0c9a/host-run-1.json)
+and [repeat](https://github.com/projectious-work/aibox/blob/main/evidence/v1/V1-04-85cc0c9a/host-run-2.json)
 checked-in host manifests record both passing runs of all four examples. The
 aibox Go preview cannot perform lifecycle actions.
 

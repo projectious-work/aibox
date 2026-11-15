@@ -7,17 +7,19 @@ cross-references that a schema cannot express.
 import json
 import re
 from collections import Counter
-from pathlib import Path
 
-root = Path(__file__).resolve().parents[1]
-repo = root.parents[1]
-read = lambda name: json.loads((root / name).read_text())
-ledger = read("ledger/addons.json")
-table = read("ledger/v1-05-tool-selection.json")
-audit = read("evidence/V1-05/source-audit.json")
-oci = read("evidence/V1-05/oci-evidence.json")
-fixture = read("fixtures/v1-05-native-features.json")
-catalog = read("catalog/v1-05-features.json")
+from spec_paths import CONTRACTS, LEDGER, REPO
+
+# Catalog fixture paths are relative to the contract root.
+root = CONTRACTS
+repo = REPO
+read = lambda path: json.loads(path.read_text())
+ledger = read(LEDGER / "addons.json")
+table = read(LEDGER / "v1-05-tool-selection.json")
+audit = read(REPO / "evidence/v1/V1-05/source-audit.json")
+oci = read(REPO / "evidence/v1/V1-05/oci-evidence.json")
+fixture = read(CONTRACTS / "fixtures/v1-05-native-features.json")
+catalog = read(CONTRACTS / "catalog/v1-05-features.json")
 
 
 def fail(message):

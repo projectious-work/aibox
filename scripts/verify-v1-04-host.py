@@ -272,7 +272,7 @@ class Gate:
             if name in ("minimal", "curated"):
                 render_template(self.node, self.work, name, project)
             else:
-                shutil.copytree(REPO / "spec/v1/examples" / name, project)
+                shutil.copytree(REPO / "examples" / name, project)
             if name == "bind-home":
                 (project / ".aibox-home").mkdir(mode=0o700)
             common = ["--docker-path", self.engine, "--workspace-folder", str(project)]

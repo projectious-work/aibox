@@ -91,7 +91,7 @@ cell; schema validity alone does not prove runtime compatibility.
 ## Specification maintenance checks
 
 Run inventory and contract generation with `--check`, `validate.mjs`,
-`uv run --script spec/v1/scripts/validate-contracts.py`, and `git diff --check`.
+`uv run --script scripts/spec/validate-contracts.py`, and `git diff --check`.
 The inventory extractor is deliberately baseline-specific, not a general Rust
 parser. It preserves original declarations alongside 66 atomic command-action,
 74 argument and 265 configuration rows. The v0 behavioral source map covers
