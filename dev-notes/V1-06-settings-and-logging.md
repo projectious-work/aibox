@@ -87,7 +87,9 @@ starts when the interfaces it consumes are stable.
      `internal/operation/lock_unix.go`. It is not counted by and never deleted
      by retention. No descriptor of the log file is kept between events; a
      write waits for the lock at most as long as LOG-034's `flushSeconds`
-     allows, and otherwise counts as a sink failure.
+     allows, and otherwise counts as a sink failure. A component test runs 16
+     writers contending for the lock and shows that all finish within that
+     limit and none reaches the failure path (LOG-018).
 3. **W3 result and output** (`internal/contract`, `internal/output`): result
    fields `settingsSources` and `overridden`, warning `log_sink_degraded`,
    pre-operation error envelope (`invalid_request`), the operation-result
@@ -135,8 +137,8 @@ and `schemas/` when the tests run and fails on any difference.
 | `internal/**`, `cmd/**`, `go.mod`, `go.sum` | Implementation track |
 | `docs-site/content/**` pages for settings and logging, `docs-site/content/docs/architecture/**`, `docs/adr/**` | Implementation track (W5) |
 | `tests/acceptance/v1-06/**` | Acceptance-test track |
-| `scripts/verify-v1-06.sh`, `dev-notes/V1-06-settings-and-logging.md`, the V1-06 entry of the roadmap | Integration owner |
-| `spec/settings-and-logging/v1/**` and the rest of `spec/` | Nobody during the phase, except the roadmap's V1-06 status, which the integration owner sets (the roadmap is `spec/v1/roadmap.yaml` until #504 moves it) |
+| `scripts/verify-v1-06.sh`, `dev-notes/V1-06-settings-and-logging.md`, the V1-06 entry of `roadmap.yaml` | Integration owner |
+| `spec/settings-and-logging/v1/**` and the rest of `spec/` | Nobody during the phase, (the roadmap is now `roadmap.yaml` at the repository root, outside `spec/`) |
 
 The tests track does not read `internal/**`, `cmd/**` or any implementation
 branch. The implementation track does not read `tests/acceptance/v1-06/**` or
@@ -181,11 +183,14 @@ rules:
 - **YAML 1.2:** J-OUT-02 uses `ruamel.yaml` 0.19.1, vendored as its wheel
   under `tests/acceptance/v1-06/` with its SHA-256 recorded and checked. The
   gate runs offline.
-- **J-CFG-24:** the test uses the frozen path `spec/v1/examples/customized`.
-  If #504 moves the examples during the phase, the integration owner records
-  the new path as a decision in this logbook and passes it to the tests track
-  through the test-defect route; the tests track does not follow the move on
-  its own.
+- **J-CFG-24:** the frozen journey names `spec/v1/examples/customized`. #504
+  moved the example to `examples/customized` before the tracks started
+  (logbook, 2026-11-15); the test runs the journey's command with that path
+  and nothing else changed. The frozen text stays a historical reference
+  ([path map](../docs/engineering/spec-layout-migration.md)).
+- **Vendored wheel:** the tests track fetches the `ruamel.yaml` wheel once,
+  records its source URL and SHA-256, and treats a missing or mismatching
+  wheel as an infrastructure error (exit 2), never as a skip.
 
 ### Offline gate
 
@@ -218,3 +223,5 @@ The demo line in `scripts/verify-v1-05.sh` stays as it is.
 |---|---|
 | 2026-11-15 | Phase started after V1-05 closed (#523). Plan written by the integration owner; plan review by `sage` requested. |
 | 2026-11-15 | Plan review round 1 by `sage` on `9e7be163`: ready with changes; blocking B1 (root journeys could be skipped), B2 (J-CFG-24 path guidance pointed at files that do not exist yet), B3 (no entry point, build and run environment or YAML parser for the suite; ownership of `verify-v1-06.sh`); non-blocking N1 to N12. All applied in the following commit: root journeys required in a pinned Debian image, frozen J-CFG-24 path with a logbook route for #504, fixed entry point and environment, vendored `ruamel.yaml`, the gate script with the integration owner, and the wave details for N2 to N12. |
+| 2026-11-15 | Plan review round 2 by `sage` on `88f37621`: ready; B1 to B3 and N1 to N12 closed. New non-blocking N13 (lock-wait failure path against LOG-018) and N14 (vendored wheel provenance) applied in the following commit. |
+| 2026-11-15 | Decision of the integration owner: #504 (PR #524, `70a750f4`) moved `spec/v1/examples/` to `examples/` and `spec/v1/roadmap.yaml` to `roadmap.yaml` before the tracks started. J-CFG-24 runs with `examples/customized`; the frozen contract is unchanged and its path is a historical reference. The phase branch merged `main` at `70a750f4`. |
