@@ -1,0 +1,150 @@
+{
+  "phase": "V1-05",
+  "target": "debian-13-amd64",
+  "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+  "note": "Chain of resumed runs. The last run's evidence, host-run-amd64-sampled-651506fa.json, holds all 594 results; each carried result names its run in carriedFrom.",
+  "runs": [
+    {
+      "evidenceDirectory": "20261114T160656Z/debian-13-amd64-orbstack-20261114T160937Z-run1",
+      "runId": "20261114t160937",
+      "startedAt": "2026-11-14T16:09:37Z",
+      "finishedAt": "2026-11-14T16:36:32Z",
+      "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+      "sourceDirty": false,
+      "jobs": 4,
+      "status": "failed",
+      "summary": {
+        "tests": 594,
+        "passed": 192,
+        "failed": 402
+      },
+      "passedInThisRun": 192,
+      "resumedFrom": null,
+      "operator": "not written: the OrbStack script hung reading the Docker version after the watchdog stop (fixed in 479a5361); engine and host facts are in the evidence file"
+    },
+    {
+      "evidenceDirectory": "20261114T170634Z/debian-13-amd64-orbstack-20261114T170943Z-run1",
+      "runId": "20261114t170944",
+      "startedAt": "2026-11-14T17:09:44Z",
+      "finishedAt": "2026-11-14T18:20:01Z",
+      "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+      "sourceDirty": false,
+      "jobs": 2,
+      "status": "failed",
+      "summary": {
+        "tests": 594,
+        "passed": 586,
+        "failed": 8
+      },
+      "passedInThisRun": 495,
+      "resumedFrom": "20261114t160937",
+      "operator": {
+        "phase": "V1-05",
+        "hostScript": "tests/acceptance/v1-05/run-host.sh",
+        "target": "debian-13-amd64",
+        "run": 1,
+        "runs": 1,
+        "exitStatus": 1,
+        "operator": {
+          "user": "bernhardgerlach",
+          "role": "human-authorized operator",
+          "authorizedAt": "2026-11-14T17:06:38Z"
+        },
+        "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+        "runnerOptions": [
+          "--jobs",
+          "2",
+          "--resume",
+          "/Users/bernhardgerlach/2_Development/github/projectious/aibox/amd64-evidence/v1-05/20261114T160656Z/debian-13-amd64-orbstack-20261114T160937Z-run1"
+        ],
+        "mac": {
+          "model": "Mac14,15",
+          "chip": "Apple M2",
+          "macos": "27.2.1",
+          "memoryBytes": 17179869184,
+          "cpus": 8
+        },
+        "orbstack": {
+          "version": "Version: 2.2.5 (2020500)",
+          "machine": "aibox-v1-05-amd64-20261114t170636z",
+          "disposable": true,
+          "deletedAfterRun": true
+        },
+        "machine": {
+          "unameMachine": "x86_64",
+          "kernel": "7.2.12-orbstack-00394-gbecdd6130068",
+          "os": "Debian GNU/Linux 13 (trixie)",
+          "cpus": 7,
+          "translation": "x86_64 on Apple silicon through OrbStack (Rosetta when enabled, else QEMU)"
+        },
+        "docker": {
+          "serverVersion": "26.1.5+dfsg1",
+          "serverArch": "amd64",
+          "buildx": "github.com/docker/buildx 0.13.1+ds1 0.13.1+ds1-3"
+        }
+      }
+    },
+    {
+      "evidenceDirectory": "20261115T113342Z/debian-13-amd64-orbstack-20261115T113606Z-run1",
+      "runId": "20261115t113606",
+      "startedAt": "2026-11-15T11:36:06Z",
+      "finishedAt": "2026-11-15T11:59:03Z",
+      "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+      "sourceDirty": false,
+      "jobs": 2,
+      "status": "passed",
+      "summary": {
+        "tests": 594,
+        "passed": 594,
+        "failed": 0
+      },
+      "passedInThisRun": 109,
+      "resumedFrom": "20261114t170944",
+      "operator": {
+        "phase": "V1-05",
+        "hostScript": "tests/acceptance/v1-05/run-host.sh",
+        "target": "debian-13-amd64",
+        "run": 1,
+        "runs": 1,
+        "exitStatus": 0,
+        "operator": {
+          "user": "bernhardgerlach",
+          "role": "human-authorized operator",
+          "authorizedAt": "2026-11-15T11:33:46Z"
+        },
+        "sourceCommit": "651506fa19d9d9cf353b1e252af0512c9db4ea8a",
+        "runnerOptions": [
+          "--jobs",
+          "2",
+          "--resume",
+          "/Users/bernhardgerlach/2_Development/github/projectious/aibox/amd64-evidence/v1-05/20261114T170634Z/debian-13-amd64-orbstack-20261114T170943Z-run1"
+        ],
+        "mac": {
+          "model": "Mac14,15",
+          "chip": "Apple M2",
+          "macos": "27.2.1",
+          "memoryBytes": 17179869184,
+          "cpus": 8
+        },
+        "orbstack": {
+          "version": "Version: 2.2.5 (2020500)",
+          "machine": "aibox-v1-05-amd64-20261115t113344z",
+          "disposable": true,
+          "deletedAfterRun": true
+        },
+        "machine": {
+          "unameMachine": "x86_64",
+          "kernel": "7.2.12-orbstack-00394-gbecdd6130068",
+          "os": "Debian GNU/Linux 13 (trixie)",
+          "cpus": 7,
+          "translation": "x86_64 on Apple silicon through OrbStack (Rosetta when enabled, else QEMU)"
+        },
+        "docker": {
+          "serverVersion": "26.1.5+dfsg1",
+          "serverArch": "amd64",
+          "buildx": "github.com/docker/buildx 0.13.1+ds1 0.13.1+ds1-3"
+        }
+      }
+    }
+  ]
+}

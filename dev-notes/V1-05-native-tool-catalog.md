@@ -188,7 +188,8 @@ cannot pass with any correct implementation (DEC-20261031_1743-MightyRaven):
 Each corrected command passed on `debian-13-arm64` in a temporary catalog edit
 under rootless Podman, from the dirty tree at `3ca64b86` that also carried the
 Feature fixes (`mdbook-try-*` and `chromium-try-*`, in the local test cache only).
-Neither has run on `debian-13-amd64` or Docker. The defects are not attributed
+Both passed later on `debian-13-amd64` under Docker, in the amd64 run at `651506fa`
+(see the logbook, 2026-11-15). The defects are not attributed
 to the engine because of how the tools resolve these paths, not because of a
 Docker run.
 
@@ -268,8 +269,9 @@ file is the run's own start time.
 so the arm64 runs at `71124b37` stand for it. Both directories carry the time
 the pair was started; the sampled run's own `runId` is its start, after the full
 run ended. Whether these nested runs count as the `debian-13-arm64` host gate,
-and which cell is primary for chapter 14's repeated clean run, awaits the owner
-(verification round 2, finding R1).
+and which cell is primary for chapter 14's repeated clean run, awaited the owner
+(verification round 2, finding R1). The owner accepted them as the arm64 host
+evidence on 2026-11-15 (logbook).
 
 The offline gate, `scripts/verify-v1-05.sh`, passed at `d64ad905` on 2026-11-05:
 gofmt, vet, Go tests with the race detector, the CLI/MCP inspection demo, the
@@ -334,8 +336,8 @@ and the temporary checkout. Both scripts take the phase, so later phases reuse
 them by providing `tests/acceptance/<phase>/run-host.sh`. The amd64 code runs
 under OrbStack's x86_64 translation, not on an amd64 CPU, so this evidence
 covers every amd64 download, hash, package and install path and the Docker
-engine, but not CPU-specific behaviour. Whether it qualifies the amd64 cell is
-the owner's decision.
+engine, but not CPU-specific behaviour. The owner accepted this evidence for the
+`debian-13-amd64` cell on 2026-11-15 (logbook).
 
 ## Logbook
 
@@ -367,3 +369,6 @@ the owner's decision.
 | 2026-11-11 | processkit was removed from the development setup (issue #505, ADR 0001). The decision records moved unchanged from `context/decisions/` to `archive/processkit/decisions/`. Three lookups follow the move: `spec/v1/scripts/validate-v1-05-catalog.py`, and in the AC-TOOLS harness `actools/executor.py` and `unit/test_support.py`. Only the directory changes; no check's expectation changes. The integration owner made the harness edit directly, because it is a path relocation and not a test defect. |
 | 2026-11-13 | amd64 run `20261111T152330Z` (owner, OrbStack, candidate `14b95431` from `integration/v1-05-tool-catalog`) cancelled by the owner after about five hours without progress. 77 of 184 builds finished and 329 checks passed. At 15:54:04–07 UTC four Docker commands on four workers (three `devcontainer up` builds and one `docker exec` probe run) stopped answering within three seconds of each other; each waited out the 7200 s limit, later engine commands hung as well, and the interrupt landed in the registry cleanup, which had no limit. The 11 failures (k9s, podman, librsvg, chafa) are these timeouts, not findings against the Features; the cause of the engine stall is not in the evidence. Not acceptance evidence. Harness change (owner request): every command has a limit and is killed with its process group (builds 1800 s, `--build-timeout`); an engine watchdog aborts the run after three missed `info` answers and records `engine-stall.log` with host facts; results go to `results.jsonl` as they come; `--resume DIR` takes passed builds of an earlier run of the same commit. The next amd64 run uses `--branch main`. |
 | 2026-11-14 | amd64 run `20261114T160656Z` (owner, OrbStack, candidate `651506fa`, `--jobs` 4): the engine stopped answering again, this time after 37 of 184 builds. The watchdog missed `docker info` at 16:31:31, 16:33:01 and 16:34:31 UTC, killed 4 running commands and stopped the run: 192 passed, 402 `not-run`, none failed. `engine-stall.log`: disk 19 % used, 5.9 GB memory available, load average 33 over 5 minutes; `dockerd` still `active (running)` with its last journal line at 16:30:47 UTC. Both stalls happened about 30 minutes into the builds with 4 parallel builds under x86-64 translation; the cause is not proven. The OrbStack script then hung reading the Docker version for `operator.json`; it now reads it before the run. Next run: the same candidate with `--resume` and `--jobs 2`. |
+| 2026-11-14 | amd64 run `20261114T170634Z` (owner, OrbStack, candidate `651506fa`, `--jobs` 2, `--resume` from `20261114T160656Z`, which carried 91 passed results of whole builds): the engine stopped answering after 178 of 184 builds. The watchdog missed `docker info` at 18:15:01, 18:16:31 and 18:18:01 UTC and stopped the run: 586 passed, 8 `not-run` (`SMOKE-MERMAID`, `SMOKE-MDBOOK`, `SMOKE-ZENSICAL` and five `AC-TOOLS/stack` tests), none failed. Load average was 0.75 over one minute and 7.98 over fifteen, so load does not explain the stall; Docker under x86-64 translation stops answering after 30 to 70 minutes of builds. `operator.json` was written, so the fix in `479a5361` works. |
+| 2026-11-15 | amd64 run `20261115T113342Z` (owner, OrbStack, candidate `651506fa`, `--jobs` 2, `--resume` from `20261114T170634Z`): 594 of 594 passed, no cleanup failures, exit status 0. 109 results come from this run, 394 from `20261114T170634Z` and 91 from `20261114T160656Z`; each carried result names its run in `carriedFrom`. All three runs used a clean checkout of `651506fa` on Docker 26.1.5 in a disposable Debian 13 amd64 OrbStack machine (Apple M2, x86-64 translation). `651506fa` changes no file under `features/` relative to `fbd178d6`. Evidence: [`host-run-amd64-sampled-651506fa.json`](../spec/v1/evidence/V1-05-fbd178d6/host-run-amd64-sampled-651506fa.json) and the run chain [`host-run-amd64-chain-651506fa.json`](../spec/v1/evidence/V1-05-fbd178d6/host-run-amd64-chain-651506fa.json). |
+| 2026-11-15 | Owner decision, given to the integration owner (`claude-opus-5-5`, Anthropic) in session: the resumed OrbStack runs count as the `debian-13-amd64` host evidence, including the split over three runs and the x86-64 translation, and the nested Podman runs count as the `debian-13-arm64` host evidence. B1 and R1 are closed and V1-05 is `done`. N2 stays open; N6–N8 and N10 stay deferred, N7 before amd64 is advertised. |
