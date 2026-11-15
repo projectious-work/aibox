@@ -14,13 +14,23 @@ from .wheel import load_yaml_documents
 NOT_JSON = "not json"
 
 
-def without_volatile(doc):
-    """J-OUT-02 compares ignoring requestId and observedAt."""
+def without_volatile(doc, view: bool = False):
+    """J-OUT-02 compares ignoring requestId and observedAt.
+
+    view=True also drops entry(output.format).value: in the View, CFG-061 makes
+    it the winning --format value, json in one run and yaml in the other.
+    Integration-owner decision (test-defect route, dev-notes V1-06): every other
+    member, including the rest of that entry, must still be equal."""
     doc = copy.deepcopy(doc)
     if isinstance(doc, dict):
         doc.pop("requestId", None)
-        if isinstance(doc.get("data"), dict):
-            doc["data"].pop("observedAt", None)
+        data = doc.get("data")
+        if isinstance(data, dict):
+            data.pop("observedAt", None)
+            if view and isinstance(data.get("configuration"), list):
+                for e in data["configuration"]:
+                    if isinstance(e, dict) and e.get("key") == "output.format":
+                        e.pop("value", None)
     return doc
 
 
@@ -63,9 +73,9 @@ def j_out_02(t: T) -> None:
     sb = t.local()
     p = sb.project("P")
     plain = ["inspect", "--project", p, "--log-level", "trace", "--format"]
-    for label, json_args, yaml_args in (
-            ("inspect --format yaml", plain + ["json"], plain + ["yaml"]),
-            ("View --format yaml", sb.view_args(p), sb.view_args(p, fmt="yaml"))):
+    for label, json_args, yaml_args, view in (
+            ("inspect --format yaml", plain + ["json"], plain + ["yaml"], False),
+            ("View --format yaml", sb.view_args(p), sb.view_args(p, fmt="yaml"), True)):
         with t.case(label):
             jres = sb.aibox_run(json_args)
             jdoc = expect_success(t, jres, "JSON form")
@@ -74,8 +84,10 @@ def j_out_02(t: T) -> None:
             ydoc = parse_yaml_doc(t, yres)
             if jdoc is None or ydoc is None:
                 continue
-            t.eq(without_volatile(ydoc), without_volatile(jdoc),
-                 "YAML value equals the JSON form, ignoring requestId and observedAt", result=yres)
+            what = "YAML value equals the JSON form, ignoring requestId and observedAt"
+            if view:
+                what += " and entry(output.format).value"
+            t.eq(without_volatile(ydoc, view), without_volatile(jdoc, view), what, result=yres)
 
 
 @journey("J-OUT-03", ["OUT-004", "OUT-005"])
