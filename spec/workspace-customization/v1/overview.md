@@ -16,7 +16,7 @@ allowed values, and a native-only project can ignore the namespace.
 The schema was generated in V1-01 from the v0 baseline inventory and lived at
 `spec/v1/customization.schema.json`. On issue #504 the owner decided on
 2026-11-15 to give it its own specification instead of placing it in
-`native-starters@v1`, because every later UX phase (V1-10 to V1-18) changes
+`native-starters@v1`, because the later UX phases V1-10 to V1-13 and V1-16 to V1-18 change
 its keys and would otherwise force a new version of the starters
 specification. `native-starters@v1` cites this version.
 
@@ -32,8 +32,9 @@ names the new path. Requirements restate, as provenance only:
 
 ## Roadmap
 
-`SPEC.toml` lists V1-01 (generated the schema), V1-04 (the starters and
-examples that show it) and the planned phases that interpret its sections:
+`SPEC.toml` lists V1-01, which generated the schema, and V1-04, whose
+starters and examples show it. The planned phases that interpret its
+sections are recorded in `interfaces.json` `sections.*.interpretedBy`:
 V1-10 (`harnesses`), V1-11 and V1-12 (`workspace` tmux, status, theme and
 prompt keys), V1-13 (`latex`), V1-16 (`diagnostics`), V1-17
 (`workspace.sidebar`) and V1-18 (`workspace.review`). A phase that changes a
@@ -42,6 +43,7 @@ key creates `workspace-customization@v2`. `settings-and-logging@v1` reads
 
 ## Evidence
 
-The schema's checks are part of the offline gates `scripts/verify-v1-04.sh`
-and `scripts/verify-v1-05.sh`, which passed for V1-04 at `85cc0c9a` and for
-V1-05 at `651506fa`.
+J-WC-01 to J-WC-05 are part of `scripts/verify-v1-04.sh`, and J-WC-02 to
+J-WC-05 also of `scripts/verify-v1-05.sh`. Their recorded passes, for V1-04
+at `85cc0c9a` and for V1-05 at `651506fa`, predate the move; at the new path
+the checks have run locally only, on the #504 branches.
