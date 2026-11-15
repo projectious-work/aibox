@@ -1,0 +1,75 @@
+{
+  "phase": "V1-06",
+  "verification": "offline",
+  "spec": "settings-and-logging@v1",
+  "sourceCommit": "004c7c98d804ed5d50d9ee201728f8954aaa524b",
+  "startedAt": "2026-11-15T20:55:22Z",
+  "finishedAt": "2026-11-15T20:56:13Z",
+  "actor": "claude-opus-5-5",
+  "host": {
+    "platform": "linux",
+    "arch": "arm64",
+    "kernel": "7.2.12-orbstack-00394-gbecdd6130068"
+  },
+  "go": {
+    "nativeTarget": "linux/arm64",
+    "binary": "aibox",
+    "static": true,
+    "binaryDigest": "sha256:579d9ce289887d4d46a225888bdc41bf2ca69d5755f8e0a147aa774112975b29",
+    "darwinArm64Binary": "aibox-darwin-arm64",
+    "darwinArm64Digest": "sha256:f71990a11adb758201b0b5fbe4f71bb00590177b363a989a3e800c255b037b93"
+  },
+  "demo": {
+    "command": "aibox inspect --context local --project examples/customized --effective-config --format json",
+    "userSettings": {
+      "logging": {
+        "level": "debug"
+      }
+    },
+    "result": "inspect-customized-effective.json",
+    "resultDigest": "sha256:e4861e31d2fc2b65cbc14c915057223cdcc81fd477c7dee3176c0a327332b53d",
+    "outcome": "succeeded",
+    "loggingLevel": {
+      "value": "debug",
+      "layer": "user"
+    }
+  },
+  "documentation": {
+    "command": "./scripts/build-docs.sh",
+    "pages": 57,
+    "result": "passed"
+  },
+  "v0": {
+    "current": true,
+    "check": "no change under cli/ or images/ since 70a750f467cc4180224498a57da278ec335ccf12"
+  },
+  "checks": [
+    "FREEZE.sha256 and no change to spec/settings-and-logging/v1",
+    "gofmt -l",
+    "go vet ./...",
+    "go test ./...",
+    "go test -race ./...",
+    "go mod verify",
+    "static Linux build and macOS arm64 cross build",
+    "roadmap demo with --effective-config",
+    "specification and example checks",
+    "Draft 2020-12 fixtures",
+    "v1 Hugo build",
+    "git diff --check",
+    "no v0 source change"
+  ],
+  "containerAcceptance": {
+    "status": "separate",
+    "runner": "tests/acceptance/v1-06/run.sh",
+    "harnessUnitTests": "tests/acceptance/v1-06/unit"
+  },
+  "artifacts": [
+    "aibox",
+    "aibox-darwin-arm64",
+    "hugo-build.txt",
+    "inspect-customized-effective.json",
+    "inspect-customized-effective.stderr"
+  ],
+  "failed": [],
+  "skipped": []
+}

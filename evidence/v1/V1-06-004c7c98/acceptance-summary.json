@@ -1,0 +1,448 @@
+{
+  "spec": "settings-and-logging@v1",
+  "commit": "004c7c98d804ed5d50d9ee201728f8954aaa524b",
+  "aibox": "/tmp/claude-1000/-workspace/87fed03a-fc7c-4e7b-8a03-9f10f87dcb09/scratchpad/gate106/ev/aibox",
+  "aiboxSha256": "579d9ce289887d4d46a225888bdc41bf2ca69d5755f8e0a147aa774112975b29",
+  "started": "2026-11-15T20:56:21Z",
+  "journeys": [
+    {
+      "journey": "J-CFG-01",
+      "covers": [
+        "CFG-001",
+        "CFG-004",
+        "CFG-060",
+        "CFG-061",
+        "CFG-063",
+        "CFG-068",
+        "EXE-003"
+      ],
+      "outcome": "passed",
+      "checksPassed": 124,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-02",
+      "covers": [
+        "CFG-001",
+        "CFG-062"
+      ],
+      "outcome": "passed",
+      "checksPassed": 837,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-03",
+      "covers": [
+        "CFG-001",
+        "CFG-062"
+      ],
+      "outcome": "passed",
+      "checksPassed": 9,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-04",
+      "covers": [
+        "CFG-002",
+        "CFG-003",
+        "LOG-006"
+      ],
+      "outcome": "passed",
+      "checksPassed": 140,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-05",
+      "covers": [
+        "CFG-005",
+        "CFG-012"
+      ],
+      "outcome": "passed",
+      "checksPassed": 7,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-06",
+      "covers": [
+        "CFG-010",
+        "CFG-011"
+      ],
+      "outcome": "passed",
+      "checksPassed": 27,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-07",
+      "covers": [
+        "CFG-006",
+        "CFG-013",
+        "CFG-014",
+        "CFG-015",
+        "CFG-016"
+      ],
+      "outcome": "passed",
+      "checksPassed": 108,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-08",
+      "covers": [
+        "CFG-017",
+        "CFG-018"
+      ],
+      "outcome": "passed",
+      "checksPassed": 24,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-09",
+      "covers": [
+        "CFG-019",
+        "CFG-020",
+        "CFG-022"
+      ],
+      "outcome": "passed",
+      "checksPassed": 6,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-10",
+      "covers": [
+        "CFG-020",
+        "CFG-021"
+      ],
+      "outcome": "passed",
+      "checksPassed": 54,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-11",
+      "covers": [
+        "CFG-030",
+        "CFG-031"
+      ],
+      "outcome": "passed",
+      "checksPassed": 30,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-12",
+      "covers": [
+        "CFG-032",
+        "CFG-033",
+        "CFG-034",
+        "CFG-035",
+        "CFG-036",
+        "CFG-038",
+        "CFG-044"
+      ],
+      "outcome": "passed",
+      "checksPassed": 132,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-13",
+      "covers": [
+        "CFG-033"
+      ],
+      "outcome": "passed",
+      "checksPassed": 24,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-14",
+      "covers": [
+        "CFG-039",
+        "CFG-040",
+        "CFG-041",
+        "CFG-042"
+      ],
+      "outcome": "passed",
+      "checksPassed": 192,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-15",
+      "covers": [
+        "CFG-050",
+        "CFG-051",
+        "CFG-056",
+        "CFG-008"
+      ],
+      "outcome": "passed",
+      "checksPassed": 98,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-16",
+      "covers": [
+        "CFG-052"
+      ],
+      "outcome": "passed",
+      "checksPassed": 4,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-17",
+      "covers": [
+        "CFG-007",
+        "CFG-065"
+      ],
+      "outcome": "passed",
+      "checksPassed": 30,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-18",
+      "covers": [
+        "CFG-054",
+        "CFG-057"
+      ],
+      "outcome": "passed",
+      "checksPassed": 44,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-19",
+      "covers": [
+        "CFG-055"
+      ],
+      "outcome": "passed",
+      "checksPassed": 6,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-20",
+      "covers": [
+        "CFG-066"
+      ],
+      "outcome": "passed",
+      "checksPassed": 4,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-21",
+      "covers": [
+        "CFG-067"
+      ],
+      "outcome": "passed",
+      "checksPassed": 10,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-22",
+      "covers": [
+        "CFG-064",
+        "RED-001",
+        "RED-003"
+      ],
+      "outcome": "passed",
+      "checksPassed": 18,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-23",
+      "covers": [
+        "CFG-009",
+        "CFG-024"
+      ],
+      "outcome": "passed",
+      "checksPassed": 18,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-CFG-24",
+      "covers": [
+        "CFG-060",
+        "CFG-061"
+      ],
+      "outcome": "passed",
+      "checksPassed": 9,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-OUT-01",
+      "covers": [
+        "OUT-001",
+        "OUT-002",
+        "LOG-007",
+        "CFG-068"
+      ],
+      "outcome": "passed",
+      "checksPassed": 4,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-OUT-02",
+      "covers": [
+        "OUT-003"
+      ],
+      "outcome": "passed",
+      "checksPassed": 12,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-OUT-03",
+      "covers": [
+        "OUT-004",
+        "OUT-005"
+      ],
+      "outcome": "passed",
+      "checksPassed": 40,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-OUT-04",
+      "covers": [
+        "OUT-006",
+        "OUT-008"
+      ],
+      "outcome": "passed",
+      "checksPassed": 28,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-OUT-05",
+      "covers": [
+        "OUT-007"
+      ],
+      "outcome": "passed",
+      "checksPassed": 12,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-01",
+      "covers": [
+        "LOG-001",
+        "LOG-002",
+        "LOG-003",
+        "LOG-010"
+      ],
+      "outcome": "passed",
+      "checksPassed": 22,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-02",
+      "covers": [
+        "LOG-001",
+        "LOG-005"
+      ],
+      "outcome": "passed",
+      "checksPassed": 39,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-03",
+      "covers": [
+        "LOG-010"
+      ],
+      "outcome": "passed",
+      "checksPassed": 4,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-04",
+      "covers": [
+        "LOG-004",
+        "LOG-011",
+        "LOG-012"
+      ],
+      "outcome": "passed",
+      "checksPassed": 33,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-05",
+      "covers": [
+        "LOG-012",
+        "LOG-013",
+        "LOG-015"
+      ],
+      "outcome": "passed",
+      "checksPassed": 9,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-06",
+      "covers": [
+        "LOG-014"
+      ],
+      "outcome": "passed",
+      "checksPassed": 52,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-07",
+      "covers": [
+        "LOG-016",
+        "LOG-017"
+      ],
+      "outcome": "passed",
+      "checksPassed": 42,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-08",
+      "covers": [
+        "LOG-018"
+      ],
+      "outcome": "passed",
+      "checksPassed": 140,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-09",
+      "covers": [
+        "LOG-019"
+      ],
+      "outcome": "passed",
+      "checksPassed": 6,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-10",
+      "covers": [
+        "LOG-020",
+        "LOG-030",
+        "LOG-031"
+      ],
+      "outcome": "passed",
+      "checksPassed": 25,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-11",
+      "covers": [
+        "LOG-032"
+      ],
+      "outcome": "passed",
+      "checksPassed": 14,
+      "checksFailed": 0
+    },
+    {
+      "journey": "J-LOG-12",
+      "covers": [
+        "RED-001",
+        "RED-002",
+        "RED-005"
+      ],
+      "outcome": "passed",
+      "checksPassed": 45,
+      "checksFailed": 0
+    }
+  ],
+  "vendoredWheel": "ruamel_yaml-0.19.1-py3-none-any.whl",
+  "rootContainer": {
+    "image": "docker.io/library/debian@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2",
+    "user": "tester",
+    "uid": "1000"
+  },
+  "counts": {
+    "passed": 41,
+    "failed": 0,
+    "not_run": 0,
+    "total": 41
+  },
+  "finished": "2026-11-15T20:57:04Z"
+}
