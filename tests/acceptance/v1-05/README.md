@@ -2,7 +2,7 @@
 
 Acceptance tests for every `AC-TOOLS/*` item in
 [chapter 5](../../../docs/product/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix),
-planned from [the catalog](../../../spec/v1/catalog/v1-05-features.json) and
+planned from [the catalog](../../../spec/tool-catalog/v1/catalog/v1-05-features.json) and
 evaluated as [chapter 8](../../../docs/product/v1/08-native-artifacts.md#tool-feature-interface)
 defines. Acceptance needs one run on each supported target in the default
 sampled scope; `--scope full` builds every Feature for the error items and runs
@@ -49,7 +49,7 @@ Each run does the following:
 
 1. Starts a registry on `localhost:5000`.
 2. Runs `scripts/v1-05-features.sh publish --registry localhost:5000/aibox-features`.
-3. Builds each planned workspace from `spec/v1/fixtures/v1-05-base`, or from
+3. Builds each planned workspace from `spec/tool-catalog/v1/fixtures/v1-05-base`, or from
    an unsupported-target fixture.
 4. Runs the checks as the remote user (`devcontainer exec`) and as root
    (`docker exec --user root`).

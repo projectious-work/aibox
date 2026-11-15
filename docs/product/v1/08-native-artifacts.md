@@ -199,8 +199,8 @@ Every one of the 98 `ADDON:*` tool entries has these migration obligations:
 
 ### Tool Feature interface
 
-[`catalog/v1-05-features.json`](../../../spec/v1/catalog/v1-05-features.json), validated by
-[`feature-catalog.schema.json`](../../../spec/v1/feature-catalog.schema.json), is the frozen
+[`catalog/v1-05-features.json`](../../../spec/tool-catalog/v1/catalog/v1-05-features.json), validated by
+[`feature-catalog.schema.json`](../../../spec/tool-catalog/v1/schemas/feature-catalog.schema.json), is the frozen
 interface catalog for retained and added tools. It lists the reference base,
 supported and unsupported targets, error codes, every group with its shape,
 every Feature with its ID, owner, options, dependencies, environment, tools,

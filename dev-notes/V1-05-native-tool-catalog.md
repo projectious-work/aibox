@@ -38,14 +38,14 @@ continue from that commit.
 
 | Artifact | Role |
 |---|---|
-| [`spec/v1/catalog/v1-05-features.json`](../spec/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 120 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
-| [`spec/v1/feature-catalog.schema.json`](../spec/v1/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
+| [`spec/tool-catalog/v1/catalog/v1-05-features.json`](../spec/tool-catalog/v1/catalog/v1-05-features.json) | Interface catalog: 39 groups, 120 Features, reference base, removals, compatibility notes, error codes, targets, smoke tests |
+| [`spec/tool-catalog/v1/schemas/feature-catalog.schema.json`](../spec/tool-catalog/v1/schemas/feature-catalog.schema.json) | Catalog schema, checked by `validate.mjs` |
 | [Chapter 8, Tool Feature interface](../docs/product/v1/08-native-artifacts.md#tool-feature-interface) | Identity, shapes, options, dependencies, targets, errors, presence, absence, side effects, publishing for tests, inspection |
 | [Chapter 5, AC-TOOLS items](../docs/product/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix) | Acceptance item IDs and known-risk stacks |
 | [Chapter 19](../docs/product/v1/19-configuration-realization.md) | Grouped Feature realization and owner-approval rule |
-| `spec/v1/fixtures/v1-05-base/`, `spec/v1/fixtures/v1-05-targets/` | Reference base (snapshot `20261028T000000Z`) and unsupported-target fixtures |
+| `spec/tool-catalog/v1/fixtures/v1-05-base/`, `spec/tool-catalog/v1/fixtures/v1-05-targets/` | Reference base (snapshot `20261028T000000Z`) and unsupported-target fixtures |
 | [`ledger/v0-parity/v1-05-tool-selection.json`](../ledger/v0-parity/v1-05-tool-selection.json) | Census table: each of the 98 rows retained with its Feature or removed with its decision |
-| `spec/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
+| `spec/tool-catalog/v1/fixtures/v1-05-smoke/` | Smoke-test inputs |
 | `scripts/spec/validate-v1-05-catalog.py` | Cross-reference checks between census, catalog and table |
 
 Census result: 93 rows retained, 5 removed (mistral, starlight, docusaurus,

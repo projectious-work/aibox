@@ -7,9 +7,9 @@ import copy
 import json
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
-from spec_paths import CONTRACTS, EXAMPLES, NATIVE_STARTERS, ROADMAP, ROADMAP_SCHEMA, TEMPLATES
+from spec_paths import CONTRACTS, EXAMPLES, NATIVE_STARTERS, ROADMAP, ROADMAP_SCHEMA, TEMPLATES, TOOL_CATALOG
 
-schemas = {p.name: json.loads(p.read_text()) for p in [*CONTRACTS.glob("*.schema.json"), *NATIVE_STARTERS.glob("schemas/*.schema.json"), ROADMAP_SCHEMA]}
+schemas = {p.name: json.loads(p.read_text()) for p in [*CONTRACTS.glob("*.schema.json"), *TOOL_CATALOG.glob("schemas/*.schema.json"), *NATIVE_STARTERS.glob("schemas/*.schema.json"), ROADMAP_SCHEMA]}
 registry = Registry().with_resources((s["$id"], Resource.from_contents(s)) for s in schemas.values())
 validators = {}
 for name, schema in schemas.items():
@@ -120,7 +120,7 @@ legacy_completion = copy.deepcopy(roadmap)
 legacy_completion["groups"][0]["phases"][2]["implementationStatus"] = "done"
 check("roadmap.schema.json", legacy_completion, False)
 check("customization.schema.json", dict(schemaVersion="1", latex=dict(preview=dict(document="overview"))))
-native_features = json.loads((CONTRACTS / "fixtures/v1-05-native-features.json").read_text())
+native_features = json.loads((TOOL_CATALOG / "fixtures/v1-05-native-features.json").read_text())
 assert native_features["schemaVersion"] == "aibox.v1-05-native-features/v1"
 assert len(native_features["selected"]) == 1
 for example_name in ("minimal", "customized"):

@@ -106,7 +106,7 @@ resolver. Do not introduce an addon resolver or an installer in
 The owner reviewed the complete gap list and decided every row's disposition
 (DEC-20261029_0835-HumbleBridge, DEC-20261029_1034-ActiveJay,
 DEC-20261029_1409-DaringTrail). A new owned Feature outside
-[`catalog/v1-05-features.json`](../../../spec/v1/catalog/v1-05-features.json) still requires an
+[`catalog/v1-05-features.json`](../../../spec/tool-catalog/v1/catalog/v1-05-features.json) still requires an
 owner decision; a missing upstream Feature alone is not permission to add one.
 
 The V1-05 installation manifest accounts for **every** ledger entry with a

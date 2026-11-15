@@ -5,7 +5,7 @@ import path from 'node:path';
 import * as at from './paths.mjs';
 
 const schema = JSON.parse(readFileSync(path.join(at.nativeStarters, 'schemas', 'customization.schema.json'), 'utf8'));
-const nativeFeatureFixture = JSON.parse(readFileSync(path.join(at.contracts, 'fixtures/v1-05-native-features.json'), 'utf8'));
+const nativeFeatureFixture = JSON.parse(readFileSync(path.join(at.toolCatalog, 'fixtures/v1-05-native-features.json'), 'utf8'));
 const check = process.argv.includes('--check');
 
 const native = [

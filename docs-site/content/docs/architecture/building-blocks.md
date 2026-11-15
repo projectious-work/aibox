@@ -22,7 +22,7 @@ C4Container
     Container(exe, "aibox executable", "Go 1.27", "CLI and stdio MCP server; read-only inspect_workspace")
     Container(tpl, "Templates", "Dev Container Templates", "templates/src/minimal, templates/src/curated; render.mjs")
     Container(feat, "Tool Features", "Dev Container Features, POSIX sh", "features/src: 117 aibox-owned Features")
-    ContainerDb(cat, "Interface catalog", "JSON", "spec/v1/catalog/v1-05-features.json")
+    ContainerDb(cat, "Interface catalog", "JSON", "spec/tool-catalog/v1/catalog/v1-05-features.json")
     Container(gen, "Feature tooling", "Bash, Node.js", "scripts/v1-05-features.sh: generate, check, docs, test, publish")
     Container(acc, "AC-TOOLS harness", "Python 3", "tests/acceptance/v1-05")
     Container(docs, "Documentation site", "Hugo", "docs-site")
@@ -116,7 +116,7 @@ schema checks, host runs and the inspection demo.
 ### Tool Features
 
 The frozen interface catalog,
-[`spec/v1/catalog/v1-05-features.json`](https://github.com/projectious-work/aibox/blob/main/spec/v1/catalog/v1-05-features.json),
+[`spec/tool-catalog/v1/catalog/v1-05-features.json`](https://github.com/projectious-work/aibox/blob/main/spec/tool-catalog/v1/catalog/v1-05-features.json),
 defines 39 groups and 120 Features: 117 owned by aibox and 3 upstream
 Features referenced by digest. Groups take one of three shapes:
 
@@ -155,7 +155,7 @@ fronts `scripts/v1-05-features.mjs`:
 |---|---|---|
 | Go unit and black-box tests | `internal/*/*_test.go`, `cmd/aibox/main_test.go` | Path safety, runner limits and cancellation, records, exit codes; CLI/MCP parity on the built binary |
 | Feature component tests | `features/test/*.test.mjs` | Guards, error lines, download and verification failures, metadata and publish staging, with fakes for `apt-get`, `dpkg`, `curl` and the filesystem root |
-| AC-TOOLS acceptance | [`tests/acceptance/v1-05/`](https://github.com/projectious-work/aibox/tree/main/tests/acceptance/v1-05) | Every `AC-TOOLS/*` item on a real engine: publish to a local registry, build disposable workspaces from `spec/v1/fixtures/v1-05-base`, probe as the remote user and as root, then clean up |
+| AC-TOOLS acceptance | [`tests/acceptance/v1-05/`](https://github.com/projectious-work/aibox/tree/main/tests/acceptance/v1-05) | Every `AC-TOOLS/*` item on a real engine: publish to a local registry, build disposable workspaces from `spec/tool-catalog/v1/fixtures/v1-05-base`, probe as the remote user and as root, then clean up |
 | Phase verifiers | `scripts/verify-v1-03.sh`, `scripts/verify-v1-04.sh`, `scripts/verify-v1-04-host.sh` | Reproducible evidence for a candidate commit, stored under `evidence/v1/` |
 | Specification checks | `scripts/spec/validate.mjs`, `scripts/spec/validate-v1-05-catalog.py` | Requirement, roadmap, schema, catalog and link consistency |
 
