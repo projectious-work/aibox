@@ -69,5 +69,4 @@ the contract but that no accepted V1-04 check exercises on its own.
 | NS-044 | An example shall not invent a Feature registry reference; a published reference shall include its tested ID, digest and actual options in the example and in the selection table together. The `customized` example's `features` shall equal `selected` in `tool-catalog@v1` `fixtures/v1-05-native-features.json`. | J-NS-02 (equality with the fixture) |
 | NS-045 | `aibox inspect --context local` and the MCP tool `inspect_workspace` shall inspect each example read-only and give equivalent results. | J-NS-09 |
 
-Retired IDs: NS-043 (the closed customization schema), now WC-011 of
-`workspace-customization@v1`.
+NS-043 is unused; the obligation is WC-011 of `workspace-customization@v1`.
