@@ -11,11 +11,11 @@ SUITE = Path(__file__).resolve().parents[1]
 if str(SUITE) not in sys.path:
     sys.path.insert(0, str(SUITE))
 
-from actools.catalog import SPEC, Catalog  # noqa: E402
+from actools.catalog import LEDGER, Catalog  # noqa: E402
 
 REAL = Catalog.load()
 CENSUS = [f"{recipe['id']}/{tool['name']}"
-          for recipe in json.loads((SPEC / "ledger" / "addons.json").read_text())
+          for recipe in json.loads((LEDGER / "addons.json").read_text())
           for tool in recipe["tools"]]
 
 

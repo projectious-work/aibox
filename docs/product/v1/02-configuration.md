@@ -28,7 +28,7 @@ process (output, logging, timeout and a narrow local UX override subset);
 it is not a project workspace definition or successor to `aibox.toml`.
 
 The all-v0-settings mapping is a working assumption, not verified upstream
-coverage. The [field ledger](ledger/configuration.md) names a disposition for
+coverage. The [field ledger](../../../ledger/v0-parity/configuration.md) names a disposition for
 every reachable field family, including local config and compatibility paths.
 Map each accepted old setting to an effective new outcome in migration tests.
 
@@ -51,7 +51,7 @@ Map each accepted old setting to an effective new outcome in migration tests.
 ### aibox extension schema
 
 The specified `customizations.aibox` has `schemaVersion`, `workspace`, `harnesses`, `latex`
-and `diagnostics` sections. The [closed schema](customization.schema.json)
+and `diagnostics` sections. The [closed schema](../../../spec/v1/customization.schema.json)
 retains the 115 v0 workspace UX leaf paths under `workspace` with their existing
 names and primitive types. This is a narrow preservation of aibox-owned UX
 intent, **not** a transplant of old image, install, security or lifecycle

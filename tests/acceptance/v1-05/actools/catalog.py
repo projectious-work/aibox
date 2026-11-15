@@ -12,7 +12,9 @@ from pathlib import Path
 from typing import Iterable, Mapping
 
 REPO = Path(__file__).resolve().parents[4]
-SPEC = REPO / "spec" / "v1"
+SPEC = REPO / "spec" / "v1"           # contract files: catalog, fixtures, schemas
+LEDGER = REPO / "ledger" / "v0-parity"
+EXAMPLES = REPO / "examples"
 CATALOG_PATH = SPEC / "catalog" / "v1-05-features.json"
 TEST_REGISTRY = "localhost:5000/aibox-features"
 UNSUPPORTED_VERSION = "0.0.0-unsupported"

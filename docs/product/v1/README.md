@@ -1,5 +1,10 @@
 # aibox v1 — Software implementation specification
 
+> **Product documentation.** Moved from `spec/v1/` under issue #504. Where a
+> feature specification under [`spec/<slug>/vN/`](../../../spec/) covers a topic,
+> that specification is the contract and these chapters are non-normative
+> background. Path changes: [specification layout migration](../../engineering/spec-layout-migration.md).
+
 Version: **0.10, 2026-10-26**. Development line: `main`; v0 is maintained on `lts/v0`.
 
 aibox combines native Dev Container artifacts with a Go operation core,
@@ -34,7 +39,7 @@ maps the v0 CLI to v1 operations and delegated workflows.
 20. [Human and AI personas, user stories and solution paths](20-personas-and-user-stories.md)
 21. [Engineering practice for the v1 implementation](21-engineering-practice.md)
 
-The [roadmap](roadmap.yaml) is the canonical phase graph: twenty-three
+The [roadmap](../../../roadmap.yaml) is the canonical phase graph: twenty-three
 content-specific phases in six capability groups. Each phase links the
 chapters governing its implementation;
 [chapter 21](21-engineering-practice.md) applies to every phase from V1-05
@@ -58,34 +63,34 @@ The [phase ID crosswalk](phase-id-crosswalk.md) maps identifiers used before
 this sequential renumbering to their current IDs.
 
 Implementation evidence and remaining gaps belong in the
-[development logbook](../../dev-notes/README.md), not in the target contract.
+[development logbook](../../../dev-notes/README.md), not in the target contract.
 
 ### Detailed v0 evidence
 
 Baseline: v0.35.0 release-line commit
 `9061bf76d2a1f6ac3c7093d8c605bcc4de7eddf6`.
 
-- [Configuration ledger](ledger/configuration.md), [machine-readable rows](ledger/configuration.json),
-  [type/enum/alias declarations](ledger/configuration-types.json),
-  [default-function and Default-implementation evidence](ledger/defaults.json),
-  [closed aibox customization schema](customization.schema.json).
-- [Tool/dependency ledger](ledger/addons.md), [full recipe metadata](ledger/addons.json).
-- [Complete CLI declarations](ledger/commands.json), [atomic action rows](ledger/command-actions.json)
-  and [argument rows](ledger/command-arguments.json),
+- [Configuration ledger](../../../ledger/v0-parity/configuration.md), [machine-readable rows](../../../ledger/v0-parity/configuration.json),
+  [type/enum/alias declarations](../../../ledger/v0-parity/configuration-types.json),
+  [default-function and Default-implementation evidence](../../../ledger/v0-parity/defaults.json),
+  [closed aibox customization schema](../../../spec/v1/customization.schema.json).
+- [Tool/dependency ledger](../../../ledger/v0-parity/addons.md), [full recipe metadata](../../../ledger/v0-parity/addons.json).
+- [Complete CLI declarations](../../../ledger/v0-parity/commands.json), [atomic action rows](../../../ledger/v0-parity/command-actions.json)
+  and [argument rows](../../../ledger/v0-parity/command-arguments.json),
   including argument annotations, aliases and resource enums; pair with the
   command disposition table rather than assuming every flag survives.
-- [Runtime asset census](ledger/runtime-assets.json), [documentation coverage](ledger/documentation.json),
-  [environment identifier census](ledger/environment.json), [counts](ledger/census.json).
-- [Base image build/entrypoint declarations](ledger/base-build.json) retain
+- [Runtime asset census](../../../ledger/v0-parity/runtime-assets.json), [documentation coverage](../../../ledger/v0-parity/documentation.json),
+  [environment identifier census](../../../ledger/v0-parity/environment.json), [counts](../../../ledger/v0-parity/census.json).
+- [Base image build/entrypoint declarations](../../../ledger/v0-parity/base-build.json) retain
   package lists, tool pins and installation behavior outside the addon catalog.
 - [Behavioral feature source map](feature-trace.md) links each F row to primary
   v0 implementation and its v1 implementation component.
-- [Versioned operation result schema](operation-result.schema.json) is the
-  shared CLI/MCP envelope; [request schema](operation-request.schema.json)
+- [Versioned operation result schema](../../../spec/v1/operation-result.schema.json) is the
+  shared CLI/MCP envelope; [request schema](../../../spec/v1/operation-request.schema.json)
   closes common fields and operation-required selectors. Actual client checks
   and generated per-tool SDK conformance remain G04.
-- [Process settings schema](process-settings.schema.json) and
-  [log event schema](log-event.schema.json) define the separate bounded
+- [Process settings schema](../../../spec/v1/process-settings.schema.json) and
+  [log event schema](../../../spec/v1/log-event.schema.json) define the separate bounded
   configuration and diagnostic contracts; chapter 16 fixes precedence,
   authority, sinks and failure handling.
 
@@ -102,11 +107,11 @@ Reproduce the census from repository root (Git history containing the baseline
 is required; no product runtime or credentials are needed):
 
 ```sh
-node spec/v1/scripts/inventory.mjs --check
-node spec/v1/scripts/contracts.mjs --check
-node spec/v1/scripts/render-devcontainer-examples.mjs --check
-node spec/v1/scripts/validate.mjs
-uv run --script spec/v1/scripts/validate-contracts.py
+node scripts/spec/inventory.mjs --check
+node scripts/spec/contracts.mjs --check
+node scripts/spec/render-devcontainer-examples.mjs --check
+node scripts/spec/validate.mjs
+uv run --script scripts/spec/validate-contracts.py
 ```
 
 Omit `--check` only when intentionally regenerating inventory evidence.

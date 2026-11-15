@@ -49,8 +49,9 @@ candidate snapshot while preserving the v0.x root and other archives.
 
 ## Content workflow
 
-1. Confirm the feature contract and its roadmap phase in `spec/v1/` before
-   writing product instructions. The specification is the design source until
+1. Confirm the feature contract in `spec/<slug>/vN/` (or, for phases without
+   their own specification yet, `docs/product/v1/`) and its phase in
+   `roadmap.yaml` before writing product instructions. The specification is the design source until
    an implementation phase proves the behavior.
 2. Add or update audience-specific pages in `docs-site/content/` with the
    implementation. Label planned examples clearly; do not present them as

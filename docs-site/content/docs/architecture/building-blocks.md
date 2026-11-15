@@ -109,7 +109,7 @@ are standard Dev Container Template sources. `templates/render.mjs` applies
 one to a project with the standard option substitution and refuses to
 overwrite existing configuration. The output belongs to the project. The
 rendered examples under
-[`spec/v1/examples/`](https://github.com/projectious-work/aibox/tree/main/spec/v1/examples)
+[`examples/`](https://github.com/projectious-work/aibox/tree/main/examples)
 (`minimal`, `customized`, `custom-user`, `bind-home`) are the fixtures for
 schema checks, host runs and the inspection demo.
 
@@ -156,8 +156,8 @@ fronts `scripts/v1-05-features.mjs`:
 | Go unit and black-box tests | `internal/*/*_test.go`, `cmd/aibox/main_test.go` | Path safety, runner limits and cancellation, records, exit codes; CLI/MCP parity on the built binary |
 | Feature component tests | `features/test/*.test.mjs` | Guards, error lines, download and verification failures, metadata and publish staging, with fakes for `apt-get`, `dpkg`, `curl` and the filesystem root |
 | AC-TOOLS acceptance | [`tests/acceptance/v1-05/`](https://github.com/projectious-work/aibox/tree/main/tests/acceptance/v1-05) | Every `AC-TOOLS/*` item on a real engine: publish to a local registry, build disposable workspaces from `spec/v1/fixtures/v1-05-base`, probe as the remote user and as root, then clean up |
-| Phase verifiers | `scripts/verify-v1-03.sh`, `scripts/verify-v1-04.sh`, `scripts/verify-v1-04-host.sh` | Reproducible evidence for a candidate commit, stored under `spec/v1/evidence/` |
-| Specification checks | `spec/v1/scripts/validate.mjs`, `spec/v1/scripts/validate-v1-05-catalog.py` | Requirement, roadmap, schema, catalog and link consistency |
+| Phase verifiers | `scripts/verify-v1-03.sh`, `scripts/verify-v1-04.sh`, `scripts/verify-v1-04-host.sh` | Reproducible evidence for a candidate commit, stored under `evidence/v1/` |
+| Specification checks | `scripts/spec/validate.mjs`, `scripts/spec/validate-v1-05-catalog.py` | Requirement, roadmap, schema, catalog and link consistency |
 
 The AC-TOOLS runner (`runner.py`, package `actools`) plans tests from the
 catalog, runs builds in parallel on Docker or Podman (by default at most

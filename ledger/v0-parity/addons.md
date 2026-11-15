@@ -1,6 +1,6 @@
 # v0 tool and dependency ledger
 
-Every recipe/tool below retains its enabled/version choices; runtime build dependencies and pins are preserved in each source-linked recipe. These are baseline pins, not selected v1 pins. All rows require AC-TOOLS; see ../04-reuse-targets.md.
+Every recipe/tool below retains its enabled/version choices; runtime build dependencies and pins are preserved in each source-linked recipe. These are baseline pins, not selected v1 pins. All rows require AC-TOOLS; see docs/product/v1/04-reuse-targets.md.
 
 | Recipe | Tool | Baseline declaration |
 |---|---|---|

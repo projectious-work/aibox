@@ -30,14 +30,14 @@ go build -o "$evidence_dir/aibox" ./cmd/aibox
 GOOS=darwin GOARCH=arm64 go build -o "$evidence_dir/aibox-darwin-arm64" ./cmd/aibox
 
 # Roadmap demo: the curated tool selection is visible through inspection.
-"$evidence_dir/aibox" inspect --context local --project spec/v1/examples/customized --format json > "$evidence_dir/inspect-customized.json"
-"$evidence_dir/aibox" inspect --context local --project spec/v1/examples/minimal --format json > "$evidence_dir/inspect-minimal.json"
+"$evidence_dir/aibox" inspect --context local --project examples/customized --format json > "$evidence_dir/inspect-customized.json"
+"$evidence_dir/aibox" inspect --context local --project examples/minimal --format json > "$evidence_dir/inspect-minimal.json"
 
-node spec/v1/scripts/validate.mjs
-node spec/v1/scripts/validate-examples.mjs
-uv run --script spec/v1/scripts/validate-contracts.py
-python3 spec/v1/scripts/validate-v1-05-catalog.py
-node spec/v1/scripts/render-devcontainer-examples.mjs --check
+node scripts/spec/validate.mjs
+node scripts/spec/validate-examples.mjs
+uv run --script scripts/spec/validate-contracts.py
+python3 scripts/spec/validate-v1-05-catalog.py
+node scripts/spec/render-devcontainer-examples.mjs --check
 scripts/v1-05-features.sh check --complete
 node --test 'features/test/*.test.mjs' > "$evidence_dir/feature-component-tests.txt"
 (cd tests/acceptance/v1-05 && python3 -m unittest discover -s unit -t .) 2> "$evidence_dir/acceptance-unit-tests.txt"
@@ -70,7 +70,7 @@ const evidence = {
   host: {platform: process.platform, arch: process.arch, kernel: os.release()},
   go: {nativeTarget: `${process.platform}/${process.arch}`, binary: 'aibox', binaryDigest: digest('aibox'),
     darwinArm64Binary: 'aibox-darwin-arm64', darwinArm64Digest: digest('aibox-darwin-arm64')},
-  demo: {command: 'aibox inspect --context local --project spec/v1/examples/customized --format json',
+  demo: {command: 'aibox inspect --context local --project examples/customized --format json',
     result: 'inspect-customized.json', resultDigest: digest('inspect-customized.json'),
     mcp: {tool: 'inspect_workspace', test: 'TestV104StarterCLIMCPParity', transcript: 'mcp-parity.txt',
       transcriptDigest: digest('mcp-parity.txt')}},

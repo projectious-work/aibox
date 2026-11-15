@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.schema.json",
+  "$id": "https://github.com/projectious-work/aibox/blob/main/roadmap.schema.json",
   "title": "aibox v1 specification roadmap",
   "type": "object",
   "additionalProperties": false,

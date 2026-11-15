@@ -1,9 +1,9 @@
 # V1-05 AC-TOOLS acceptance suite: host run
 
 Acceptance tests for every `AC-TOOLS/*` item in
-[chapter 5](../../../spec/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix),
+[chapter 5](../../../docs/product/v1/05-acceptance.md#ac-tools--complete-optional-tool-matrix),
 planned from [the catalog](../../../spec/v1/catalog/v1-05-features.json) and
-evaluated as [chapter 8](../../../spec/v1/08-native-artifacts.md#tool-feature-interface)
+evaluated as [chapter 8](../../../docs/product/v1/08-native-artifacts.md#tool-feature-interface)
 defines. Acceptance needs one run on each supported target in the default
 sampled scope; `--scope full` builds every Feature for the error items and runs
 on the owner's command.

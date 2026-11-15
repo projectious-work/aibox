@@ -22,8 +22,8 @@ configuration examples in the specification are design contracts, not usable
 interfaces. Each implementation phase must update its user or maintainer
 documentation and build this site before it can be marked released.
 
-Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/main/spec/v1),
-including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/main/spec/v1/roadmap.yaml).
+Read the [product and architecture specification](https://github.com/projectious-work/aibox/tree/main/docs/product/v1),
+including the [canonical phase roadmap](https://github.com/projectious-work/aibox/blob/main/roadmap.yaml).
 
 ## Stable version
 

@@ -55,7 +55,7 @@ This concerns the development setup only. aibox's product support for
 ## Setup
 
 For the v1 Go line, use `go test ./...`, `go test -race ./...`, `go vet ./...`,
-`go build ./cmd/aibox`, the relevant `spec/v1` validators, and the v1 docs
+`go build ./cmd/aibox`, the relevant `scripts/spec` validators, and the v1 docs
 build. `./scripts/verify-v1-03.sh` runs the exact V1-03 candidate gate.
 The Rust and Cargo commands below describe retained v0 work only; they are
 not v1 acceptance, commit, or release requirements.
@@ -133,7 +133,7 @@ architecture, and cross-compile steps.
 ### v1 engineering practice
 
 v1 work on `main` follows
-[`spec/v1/21-engineering-practice.md`](spec/v1/21-engineering-practice.md)
+[`docs/product/v1/21-engineering-practice.md`](docs/product/v1/21-engineering-practice.md)
 from V1-05: development cycle and independent review per phase, a frozen
 test-ready phase contract with separate acceptance-test and implementation
 tracks, *Hexagonal Architecture* with a *Clean Architecture* core, *TDD,

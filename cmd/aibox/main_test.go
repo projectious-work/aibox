@@ -187,7 +187,7 @@ func TestV104StarterCLIMCPParity(t *testing.T) {
 	}
 	repoRoot := filepath.Clean(filepath.Join(working, "..", ".."))
 	for _, name := range []string{"minimal", "customized", "custom-user", "bind-home"} {
-		root := filepath.Join(repoRoot, "spec", "v1", "examples", name)
+		root := filepath.Join(repoRoot, "examples", name)
 		cliOutput, err := exec.Command(binary, "inspect", "--context", "local", "--project", root, "--format", "json").Output()
 		if err != nil {
 			t.Fatalf("%s CLI inspection: %v", name, err)

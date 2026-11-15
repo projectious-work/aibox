@@ -3,8 +3,8 @@
 > **Historical / superseded.** This document preserves an earlier Rust,
 > Compose and Kubernetes architecture proposal and its implementation-status
 > claims. They are obsolete and must not be used as current v1 scope, design or
-> progress evidence. The canonical, current phase graph is [spec/v1/roadmap.yaml](../spec/v1/roadmap.yaml);
-> consult [the v1 specification](../spec/v1/README.md) for the governing
+> progress evidence. The canonical, current phase graph is [roadmap.yaml](../roadmap.yaml);
+> consult [the v1 specification](product/v1/README.md) for the governing
 > architecture and contracts.
 
 Status: implementation in progress — M0 through M4 and M6 through M9 foundations implemented
