@@ -1,0 +1,15 @@
+{
+  "description": "Vendored wheels of the V1-06 acceptance suite. The runner checks each SHA-256 before use; a missing or mismatching wheel is an infrastructure error (exit 2).",
+  "wheels": [
+    {
+      "name": "ruamel.yaml",
+      "version": "0.19.1",
+      "file": "ruamel_yaml-0.19.1-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/b8/0c/51f6841f1d84f404f92463fc2b1ba0da357ca1e3db6b7fbda26956c3b82a/ruamel_yaml-0.19.1-py3-none-any.whl",
+      "sha256": "27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93",
+      "fetchedWith": "python3 -m pip download --no-deps ruamel.yaml==0.19.1",
+      "checkedAgainst": "https://pypi.org/pypi/ruamel.yaml/0.19.1/json (digests.sha256), 2026-11-15",
+      "purpose": "YAML 1.2 parser for J-OUT-02 and J-OUT-04 (OUT-003)"
+    }
+  ]
+}
